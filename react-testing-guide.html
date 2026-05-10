@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>React Testing & Vitest — The Senior Pro Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0d11;
+  --panel: #14171f;
+  --border: #252a36;
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.15);
+  --text: #e2e8f0;
+  --text-dim: #94a3b8;
+  --code-bg: #0f1117;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* ── TOP BAR ── */
+.topbar{background:rgba(20, 23, 31, 0.8);backdrop-filter: blur(12px);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:300}
+.logo{font-size:1.1rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:0.5rem}
+.logo span{color:var(--text-dim);font-weight:400;font-size:.85rem;letter-spacing: 0.05em}
+.topbar-right{display:flex;gap:.75rem;align-items:center}
+.srch{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:.5rem 1rem;color:var(--text);font-family:'Syne',sans-serif;font-size:.85rem;width:240px;outline:none;transition: all 0.2s}
+.srch:focus{border-color:var(--accent);box-shadow: 0 0 0 3px var(--accent-glow)}
+.fbtn{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.4rem .8rem;color:var(--text-dim);font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .2s;font-weight: 500}
+.fbtn:hover,.fbtn.on{background:var(--accent-glow);color:var(--accent);border-color:var(--accent)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:calc(100vh - 60px)}
+.sidebar{width:320px;min-width:320px;background:var(--panel);border-right:1px solid var(--border);overflow-y:auto;height:100%}
+.sb-inner{padding:1rem 0.75rem}
+.main{flex:1;overflow-y:auto;scroll-behavior: smooth}
+.wrap{padding:2.5rem 2rem 4rem;max-width:1000px;margin:0 auto}
+
+/* ── SIDEBAR ITEMS ── */
+.qi{display:flex;align-items:flex-start;gap:.6rem;padding:.75rem .9rem;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .2s;margin-bottom:4px}
+.qi:hover{background:var(--bg);border-color:var(--border)}
+.qi.active{background:var(--accent-glow);border-color:var(--accent);border-left: 4px solid var(--accent)}
+.qi.hidden{display:none}
+.qn{min-width:24px;font-size:.7rem;font-weight:700;color:var(--text-dim);margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:var(--accent)}
+.qt{font-size:.85rem;color:var(--text);line-height:1.4;flex:1;font-weight: 500}
+
+/* ── PROGRESS ── */
+.prog-container{position:fixed;top:60px;left:0;width:100%;height:3px;z-index:299}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#c084fc);width:0%;transition:width 0.3s}
+
+/* ── CONTENT ── */
+.qhead{margin-bottom:2rem}
+.qnum{display:inline-block;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:20px;font-family:'JetBrains Mono',monospace;margin-bottom:1rem}
+.qtitle{font-size:2.2rem;font-weight:700;color:#fff;line-height:1.2;margin-bottom:1rem}
+.badges{display:flex;gap:.5rem;margin-bottom:1.5rem}
+.fbadge{font-size:.7rem;padding:4px 12px;border-radius:20px;font-weight:600;text-transform: uppercase;letter-spacing: 0.05em}
+.badge-basic{background:rgba(16, 185, 129, 0.1);color:#10b981;border:1px solid rgba(16, 185, 129, 0.2)}
+.badge-inter{background:rgba(59, 130, 246, 0.1);color:#3b82f6;border:1px solid rgba(59, 130, 246, 0.2)}
+.badge-advanced{background:rgba(139, 92, 246, 0.1);color:#8b5cf6;border:1px solid rgba(139, 92, 246, 0.2)}
+
+.def-section{background:var(--panel);border-left:4px solid var(--accent);padding:1.5rem;font-size:1rem;line-height:1.8;color:var(--text);margin-bottom:2.5rem;border-radius:0 12px 12px 0;box-shadow: 0 10px 30px rgba(0,0,0,0.2)}
+.def-section strong{color:var(--accent)}
+
+.pro-tip{background:rgba(16, 185, 129, 0.05);border:1px solid rgba(16, 185, 129, 0.2);padding:1.25rem;border-radius:12px;margin:2rem 0;position: relative;overflow: hidden}
+.pro-tip::before{content:'PRO TIP';position:absolute;top:0;right:0;background:var(--success);color:#000;font-size:0.6rem;font-weight:800;padding:2px 8px;border-bottom-left-radius:8px}
+.pro-tip p{font-size:0.9rem;color:var(--success);line-height:1.6}
+
+.code-wrap{margin-bottom:2.5rem}
+.code-header{background:var(--border);padding:0.6rem 1.2rem;border-radius:12px 12px 0 0;font-size:0.75rem;font-weight:600;color:var(--text-dim);display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-bottom:none}
+.code-block{background:var(--code-bg);padding:1.5rem;border-radius:0 0 12px 12px;border:1px solid var(--border);border-top:none;overflow-x:auto;position:relative}
+.code-label{position:absolute;top:0;right:0;background:var(--border);color:var(--text-dim);font-size:0.6rem;padding:2px 8px;border-radius:0 0 0 8px;font-weight:700;text-transform:uppercase}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#e2e8f0;line-height:1.7;display:block;white-space:pre}
+
+/* Syntax Highlighting */
+.kw{color:#c678dd} /* keyword */
+.fn{color:#61afef} /* function */
+.str{color:#98c379} /* string */
+.cm{color:#5c6370;font-style:italic} /* comment */
+.num{color:#d19a66} /* number */
+.tag{color:#e06c75} /* tag */
+.attr{color:#d19a66} /* attr */
+
+.expl-box{margin-top:1.5rem}
+.expl-item{display:flex;gap:1rem;margin-bottom:1rem;padding-left:0.5rem}
+.expl-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:0.6rem;flex-shrink:0}
+.expl-text{font-size:0.9rem;color:var(--text-dim);line-height:1.6}
+.expl-text strong{color:var(--text)}
+
+.nav-btns{display:flex;gap:1rem;margin-top:4rem;border-top:1px solid var(--border);padding-top:2rem}
+.nbtn{flex:1;background:var(--panel);border:1px solid var(--border);padding:1rem;border-radius:12px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:0.25rem}
+.nbtn span{font-size:0.7rem;color:var(--text-dim);font-weight:400;text-transform:uppercase}
+.nbtn:hover:not(.off){border-color:var(--accent);background:var(--accent-glow)}
+.nbtn.off{opacity:0.3;cursor:not-allowed}
+
+@media(max-width:900px){
+  .sidebar{display:none}
+  .wrap{padding:1.5rem 1rem}
+  .qtitle{font-size:1.6rem}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Production-Ready <span>Testing Guide</span></div>
+  <div class="topbar-right">
+    <input type="text" class="srch" id="searchbox" placeholder="Search for a concept...">
+    <button class="fbtn" id="f-all">All</button>
+    <button class="fbtn" id="f-basic">Basic</button>
+    <button class="fbtn" id="f-inter">Inter</button>
+    <button class="fbtn" id="f-adv">Advanced</button>
+  </div>
+</div>
+
+<div class="prog-container"><div class="prog-fill" id="prog-bar"></div></div>
+
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="topic-list"></div></div>
+  <div class="main">
+    <div class="wrap" id="content-root"></div>
+  </div>
+</div>
+
+<script>
+const topics = [
+  {id:1,title:"Testing Philosophy & Strategy",cat:"basic",level:"Fundamentals"},
+  {id:2,title:"Vitest Setup & Configuration",cat:"basic",level:"Ecosystem"},
+  {id:3,title:"RTL Fundamentals: The DOM Tree",cat:"basic",level:"Core API"},
+  {id:4,title:"The Query Hierarchy",cat:"basic",level:"Best Practices"},
+  {id:5,title:"Simulating User Interactions",cat:"inter",level:"Events"},
+  {id:6,title:"Async Testing & waitFor",cat:"inter",level:"Asynchronous"},
+  {id:7,title:"Component State & Props",cat:"inter",level:"Components"},
+  {id:8,title:"Utility & Logic Testing",cat:"basic",level:"Utilities"},
+  {id:9,title:"Mocking Functions & Modules",cat:"inter",level:"Mocking"},
+  {id:10,title:"MSW: API Mocking for Production",cat:"adv",level:"Pro Patterns"},
+  {id:11,title:"Testing Custom Hooks",cat:"adv",level:"Advanced Hooks"},
+  {id:12,title:"Context & Provider Patterns",cat:"adv",level:"Architecture"},
+  {id:13,title:"State Manager Testing (Redux/Zustand)",cat:"adv",level:"Integrations"},
+  {id:14,title:"React Router & Navigation",cat:"inter",level:"Routing"},
+  {id:15,title:"Form Testing & Validation",cat:"inter",level:"Forms"},
+  {id:16,title:"Snapshot Testing (Right Way)",cat:"inter",level:"Techniques"},
+  {id:17,title:"Accessibility Testing (a11y)",cat:"adv",level:"Compliance"},
+  {id:18,title:"Error Boundaries & Fault Tolerance",cat:"adv",level:"Resilience"},
+  {id:19,title:"Performance & Render Profiling",cat:"adv",level:"Optimization"},
+  {id:20,title:"CI/CD & Coverage Thresholds",cat:"adv",level:"DevOps"},
+  {id:21,title:"The Assertions Toolbelt (Matchers)",cat:"basic",level:"Fundamentals"},
+];
+
+const content = {
+  1: {
+    def: "In a production environment, testing isn't just about 'passing' - it's about **confidence**. We prioritize tests that mimic user behavior. The <strong>Testing Trophy</strong> (by Kent C. Dodds) suggests focusing on Integration tests, as they provide the best balance between cost and confidence.",
+    proTip: "Avoid testing implementation details like internal state names or private methods. If you refactor your code and the test fails even though the feature still works, you tested an implementation detail.",
+    examples: [
+      {
+        title: "The Testing Trophy vs. Pyramid",
+        code: `<span class="cm">// PRODUCTION STRATEGY:</span>
+<span class="kw">const</span> <span class="fn">priority</span> = {
+  e2e: <span class="str">'Low Volume (Critical Paths Only)'</span>,
+  integration: <span class="str">'High Volume (Core Logic & RTL)'</span>,
+  unit: <span class="str">'Moderate (Complex Utilities)'</span>,
+  static: <span class="str">'High (TypeScript & ESLint)'</span>
+};`
+      }
+    ],
+    explanations: [
+      "**Static Analysis**: Catch syntax and type errors before runtime.",
+      "**Unit Tests**: Verify isolated pure functions and logic.",
+      "**Integration Tests**: Verify how components work together as a unit.",
+      "**E2E Tests**: Verify the full stack from the user's perspective."
+    ]
+  },
+  2: {
+    def: "<strong>Vitest</strong> is a blazing-fast unit test framework built on top of Vite. For production, we need a robust `vitest.config.ts` and a `setupTests.ts` to extend matchers and handle global cleanups.",
+    proTip: "Set `globals: true` in your config to avoid importing `describe`, `it`, and `expect` in every single file. It keeps your test code clean and focused.",
+    examples: [
+      {
+        title: "Production Vitest Config",
+        code: `<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  test: {
+    globals: <span class="kw">true</span>,
+    environment: <span class="str">'jsdom'</span>,
+    setupFiles: <span class="str">'./src/test/setup.ts'</span>,
+    coverage: {
+      reporter: [<span class="str">'text'</span>, <span class="str">'json'</span>, <span class="str">'html'</span>],
+      thresholds: { lines: <span class="num">80</span> }
+    }
+  }
+});`
+      },
+      {
+        title: "Setup File (setup.ts)",
+        code: `<span class="kw">import</span> <span class="str">'@testing-library/jest-dom/vitest'</span>;
+<span class="kw">import</span> { cleanup } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="kw">import</span> { afterEach } <span class="kw">from</span> <span class="str">'vitest'</span>;
+
+<span class="fn">afterEach</span>(() => {
+  <span class="fn">cleanup</span>(); <span class="cm">// Unmounts React trees after each test</span>
+});`
+      }
+    ],
+    explanations: [
+      "**JSDOM**: Provides a browser-like environment in Node.js.",
+      "**Setup Files**: Centralize logic that needs to run before your tests.",
+      "**Coverage**: Essential for identifying untested 'dark' spots in your codebase.",
+      "**Globals**: Reduces boilerplate and improves developer experience."
+    ]
+  },
+  3: {
+    def: "<strong>React Testing Library (RTL)</strong> works by querying the virtual DOM created by your components. It doesn't care about state or props; it cares about what the **User** sees in the HTML tree.",
+    proTip: "Think like a user. A user doesn't know what a 'div' is; they know what a 'Button' or a 'Heading' is. Use ARIA roles to find elements.",
+    examples: [
+      {
+        title: "The Render & Screen API",
+        comp: `<span class="kw">const</span> <span class="fn">Welcome</span> = ({ name }) => (
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>Welcome {name}<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+);`,
+        test: `<span class="kw">import</span> { render, screen } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>;
+
+<span class="fn">it</span>(<span class="str">'renders the welcome message'</span>, () => {
+  <span class="fn">render</span>(<span class="tag">&lt;Welcome name="Satendra" /&gt;</span>);
+  
+  <span class="kw">const</span> heading = screen.<span class="fn">getByText</span>(<span class="str">/welcome satendra/i</span>);
+  <span class="fn">expect</span>(heading).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**render()**: Injects the component into a virtual document.",
+      "**screen**: The primary object used to query the DOM.",
+      "**getByText**: Finds elements by their visible text content.",
+      "**Regex**: Using `/text/i` makes your tests case-insensitive and more resilient."
+    ]
+  },
+  4: {
+    def: "Not all queries are created equal. RTL provides a **Hierarchy of Queries** based on accessibility. If you can't find an element using a role, your app might have accessibility issues.",
+    proTip: "Never use `container.querySelector` or `class names` in your tests. These are implementation details that break when you change your CSS.",
+    examples: [
+      {
+        title: "The Hierarchy of Queries (Inputs & Buttons)",
+        comp: `<span class="tag">&lt;form&gt;</span>
+  <span class="tag">&lt;label htmlFor="email"&gt;</span>Email Address<span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;input id="email" type="email" /&gt;</span>
+
+  <span class="tag">&lt;label&gt;</span>
+    <span class="tag">&lt;input type="radio" name="plan" value="pro" /&gt;</span> Pro Plan
+  <span class="tag">&lt;/label&gt;</span>
+
+  <span class="tag">&lt;button&gt;</span>Submit<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/form&gt;</span>`,
+        test: `<span class="cm">// 1. ACCESSIBLE ROLE (BEST)</span>
+screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/submit/i</span> });
+
+<span class="cm">// 2. LABEL TEXT (BEST FOR INPUTS)</span>
+screen.<span class="fn">getByLabelText</span>(<span class="str">/email address/i</span>);
+screen.<span class="fn">getByLabelText</span>(<span class="str">/pro plan/i</span>); <span class="cm">// Works for radio/checkbox too!</span>
+
+<span class="cm">// 3. TEST IDS (ESCAPE HATCH)</span>
+screen.<span class="fn">getByTestId</span>(<span class="str">'custom-element'</span>);`
+      }
+    ],
+    explanations: [
+      "**getByRole**: The gold standard. Forces you to think about accessibility.",
+      "**getByLabelText**: Perfect for form fields. Ensures your inputs have labels.",
+      "**getByPlaceholderText**: Only use if you don't have a label (not recommended).",
+      "**getByTestId**: Use sparingly for dynamic content or complex SVG logic."
+    ]
+  },
+  5: {
+    def: "In production, we use `@testing-library/user-event` instead of `fireEvent`. While `fireEvent` just dispatches a DOM event, <strong>user-event</strong> simulates the entire interaction (focus, click, keydown, keyup).",
+    proTip: "Always `await` user events. They are asynchronous in v14+ to better simulate the delay of browser rendering.",
+    examples: [
+      {
+        title: "Simulating a Form Submission",
+        comp: `<span class="kw">const</span> <span class="fn">LoginForm</span> = () => (
+  <span class="tag">&lt;form onSubmit={handleSubmit}&gt;</span>
+    <span class="tag">&lt;label htmlFor="email"&gt;</span>Email<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input id="email" /&gt;</span>
+    <span class="tag">&lt;button type="submit"&gt;</span>Login<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/form&gt;</span>
+);`,
+        test: `<span class="kw">import</span> userEvent <span class="kw">from</span> <span class="str">'@testing-library/user-event'</span>;
+
+<span class="fn">it</span>(<span class="str">'submits the form'</span>, <span class="kw">async</span> () => {
+  <span class="kw">const</span> user = userEvent.<span class="fn">setup</span>();
+  <span class="fn">render</span>(<span class="tag">&lt;LoginForm /&gt;</span>);
+
+  <span class="kw">await</span> user.<span class="fn">type</span>(screen.<span class="fn">getByLabelText</span>(<span class="str">/email/i</span>), <span class="str">'test@pro.com'</span>);
+  <span class="kw">await</span> user.<span class="fn">click</span>(screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>, { name: <span class="str">/login/i</span> }));
+
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">/success/i</span>)).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**userEvent.setup()**: Initializes the session for realistic event tracking.",
+      "**type()**: Simulates typing character by character, triggering all relevant events.",
+      "**click()**: Simulates focus, mousedown, mouseup, and click.",
+      "**await**: Critical for ensuring the test waits for the event to finish."
+    ]
+  },
+  6: {
+    def: "Modern apps are full of async logic (API calls, timers, animations). RTL provides `findBy` queries and the `waitFor` utility to handle these gracefully without resorting to 'magic' sleeps.",
+    proTip: "Never use `setTimeout` or hardcoded delays in your tests. Use `waitFor` with a specific assertion to ensure your test is both fast and reliable.",
+    examples: [
+      {
+        title: "Testing Async Data Loading",
+        comp: `<span class="kw">const</span> <span class="fn">DataLoader</span> = () => {
+  <span class="kw">const</span> [data, setData] = <span class="fn">useState</span>(<span class="kw">null</span>);
+  <span class="fn">useEffect</span>(() => {
+    <span class="fn">setTimeout</span>(() => <span class="fn">setData</span>(<span class="str">'Async Data'</span>), <span class="num">500</span>);
+  }, []);
+  <span class="kw">return</span> <span class="tag">&lt;div&gt;</span>{data ? <span class="tag">&lt;p&gt;</span>{data}<span class="tag">&lt;/p&gt;</span> : <span class="tag">&lt;span&gt;</span>Loading...<span class="tag">&lt;/span&gt;</span>}<span class="tag">&lt;/div&gt;</span>;
+};`,
+        test: `<span class="fn">it</span>(<span class="str">'loads data after a delay'</span>, <span class="kw">async</span> () => {
+  <span class="fn">render</span>(<span class="tag">&lt;DataLoader /&gt;</span>);
+
+  <span class="cm">// findBy queries use waitFor under the hood</span>
+  <span class="kw">const</span> item = <span class="kw">await</span> screen.<span class="fn">findByText</span>(<span class="str">'Async Data'</span>);
+  <span class="fn">expect</span>(item).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**findBy**: Use this when you expect an element to appear soon (default 1000ms).",
+      "**waitFor**: Use this for complex assertions or when waiting for something to disappear.",
+      "**queryBy**: Returns null if not found (unlike getBy which throws). Essential for 'not' assertions.",
+      "**Timeout**: You can customize the timeout in `waitFor` for slow external dependencies."
+    ]
+  },
+  7: {
+    def: "Component testing involves verifying that your UI responds correctly to different **props** and **internal state** changes. We test the 'Output' (DOM) based on the 'Input' (Props/User Action).",
+    proTip: "Test your component like a 'Black Box'. You don't need to know IF `useState` was called; you need to know IF the screen changed correctly.",
+    examples: [
+      {
+        title: "Testing Prop Changes",
+        comp: `<span class="kw">const</span> <span class="fn">Button</span> = ({ isPrimary, children }) => (
+  <span class="tag">&lt;button className={isPrimary ? 'btn-primary' : ''}&gt;</span>
+    {children}
+  <span class="tag">&lt;/button&gt;</span>
+);`,
+        test: `<span class="fn">it</span>(<span class="str">'shows primary style when isPrimary prop is true'</span>, () => {
+  <span class="kw">const</span> { rerender } = <span class="fn">render</span>(<span class="tag">&lt;Button isPrimary={false}&gt;</span>Click<span class="tag">&lt;/Button&gt;</span>);
+  <span class="kw">const</span> btn = screen.<span class="fn">getByRole</span>(<span class="str">'button'</span>);
+  <span class="fn">expect</span>(btn).<span class="fn">not</span>.<span class="fn">toHaveClass</span>(<span class="str">'btn-primary'</span>);
+  
+  <span class="cm">// rerender is used to test dynamic prop updates</span>
+  <span class="fn">rerender</span>(<span class="tag">&lt;Button isPrimary={true}&gt;</span>Click<span class="tag">&lt;/Button&gt;</span>);
+  <span class="fn">expect</span>(btn).<span class="fn">toHaveClass</span>(<span class="str">'btn-primary'</span>);
+});`
+      }
+    ],
+    explanations: [
+      "**rerender()**: Invaluable for testing how a component updates when props change.",
+      "**toHaveClass**: Part of `jest-dom`, allows checking CSS classes without implementation leak.",
+      "**Conditional Rendering**: Ensure both 'If' and 'Else' branches are covered by tests.",
+      "**Edge Case Props**: Test what happens if props are undefined or null if not required."
+    ]
+  },
+  8: {
+    def: "Testing utilities (pure functions) is the easiest and most reliable part of your test suite. These should be tested with <strong>Vitest</strong> directly, without needing React Testing Library, as they don't involve the DOM.",
+    proTip: "For production utilities, always test <strong>edge cases</strong>: empty arrays, null values, extreme numbers, and unexpected types.",
+    examples: [
+      {
+        title: "Testing a Price Formatter Utility",
+        code: `<span class="kw">import</span> { describe, it, expect } <span class="kw">from</span> <span class="str">'vitest'</span>;
+<span class="kw">import</span> { formatCurrency } <span class="kw">from</span> <span class="str">'./utils'</span>;
+
+<span class="fn">describe</span>(<span class="str">'formatCurrency'</span>, () => {
+  <span class="fn">it</span>(<span class="str">'formats USD correctly'</span>, () => {
+    <span class="fn">expect</span>(<span class="fn">formatCurrency</span>(<span class="num">1234.56</span>)).<span class="fn">toBe</span>(<span class="str">'$1,234.56'</span>);
+  });
+
+  <span class="fn">it</span>(<span class="str">'handles zero correctly'</span>, () => {
+    <span class="fn">expect</span>(<span class="fn">formatCurrency</span>(<span class="num">0</span>)).<span class="fn">toBe</span>(<span class="str">'$0.00'</span>);
+  });
+
+  <span class="fn">it</span>(<span class="str">'returns an empty string for invalid inputs'</span>, () => {
+    <span class="fn">expect</span>(<span class="fn">formatCurrency</span>(<span class="str">'invalid'</span>)).<span class="fn">toBe</span>(<span class="str">''</span>);
+  });
+});`
+      }
+    ],
+    explanations: [
+      "**Isolation**: Utilities are tested in isolation from React components.",
+      "**Expectation**: Use `expect(actual).toBe(expected)` for simple values.",
+      "**Edge Cases**: Senior engineers always test the 'happy path' and the 'error path'.",
+      "**Vitest Assertions**: Familiarize yourself with `.toEqual()`, `.toContain()`, and `.toThrow()`."
+    ]
+  },
+  9: {
+    def: "Mocking allows you to replace complex dependencies (like API clients or heavy libraries) with controllable 'fakes'. <strong>Vitest</strong> provides `vi.fn()` for functions and `vi.mock()` for modules.",
+    proTip: "Only mock what you don't own. Mocking your own components makes your integration tests brittle. Mocking external libraries (like `axios` or `firebase`) is necessary for isolation.",
+    examples: [
+      {
+        title: "Mocking a Function & Module",
+        code: `<span class="kw">import</span> { vi } <span class="kw">from</span> <span class="str">'vitest'</span>;
+<span class="kw">import</span> { myApi } <span class="kw">from</span> <span class="str">'./api'</span>;
+
+<span class="cm">// Mock the entire module</span>
+<span class="fn">vi.mock</span>(<span class="str">'./api'</span>, () => ({
+  myApi: <span class="fn">vi.fn</span>()
+}));
+
+<span class="fn">it</span>(<span class="str">'calls the api correctly'</span>, () => {
+  <span class="cm">// Setup the mock return value</span>
+  myApi.<span class="fn">mockResolvedValue</span>({ data: <span class="str">'success'</span> });
+  
+  <span class="cm">// ... trigger action ...</span>
+  
+  <span class="fn">expect</span>(myApi).<span class="fn">toHaveBeenCalledWith</span>(<span class="str">'some-id'</span>);
+});`
+      }
+    ],
+    explanations: [
+      "**vi.fn()**: Creates a spy function that tracks calls, arguments, and returns.",
+      "**vi.mock()**: Hoists the mock to the top of the file, replacing the actual module.",
+      "**mockResolvedValue**: Shorthand for mocking an asynchronous (Promise) return.",
+      "**toHaveBeenCalled**: Verifies that the interaction happened as expected."
+    ]
+  },
+  10: {
+    def: "<strong>Mock Service Worker (MSW)</strong> is the industry standard for API mocking. Unlike mocking `axios` or `fetch` directly, MSW intercepts requests at the network level, allowing your tests to use the actual network stack.",
+    proTip: "MSW is essential for production-grade tests. It allows you to test 'Unmount' scenarios and 'Race Conditions' that manual mocking often misses.",
+    examples: [
+      {
+        title: "Mocking an API with MSW",
+        comp: `<span class="kw">const</span> <span class="fn">UserList</span> = () => {
+  <span class="kw">const</span> [users, setUsers] = <span class="fn">useState</span>([]);
+  <span class="fn">useEffect</span>(() => {
+    <span class="fn">fetch</span>(<span class="str">'/api/users'</span>).<span class="fn">then</span>(res => res.<span class="fn">json</span>()).<span class="fn">then</span>(setUsers);
+  }, []);
+  <span class="kw">return</span> <span class="tag">&lt;ul&gt;</span>{users.<span class="fn">map</span>(u => <span class="tag">&lt;li</span> <span class="attr">key={u.id}</span><span class="tag">&gt;</span>{u.name}<span class="tag">&lt;/li&gt;</span>)}<span class="tag">&lt;/ul&gt;</span>;
+};`,
+        test: `<span class="kw">import</span> { http, HttpResponse } <span class="kw">from</span> <span class="str">'msw'</span>;
+<span class="kw">import</span> { setupServer } <span class="kw">from</span> <span class="str">'msw/node'</span>;
+
+<span class="kw">const</span> server = <span class="fn">setupServer</span>(
+  http.<span class="fn">get</span>(<span class="str">'/api/users'</span>, () => {
+    <span class="kw">return</span> HttpResponse.<span class="fn">json</span>([{ id: <span class="num">1</span>, name: <span class="str">'Satendra'</span> }]);
+  })
+);
+
+<span class="fn">it</span>(<span class="str">'renders users from the API'</span>, <span class="kw">async</span> () => {
+  <span class="fn">render</span>(<span class="tag">&lt;UserList /&gt;</span>);
+  <span class="kw">const</span> user = <span class="kw">await</span> screen.<span class="fn">findByText</span>(<span class="str">'Satendra'</span>);
+  <span class="fn">expect</span>(user).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**setupServer**: Creates a mock server that runs in your test environment.",
+      "**http.get**: Defines a handler for a specific URL and method.",
+      "**HttpResponse**: Returns a mock response with status, headers, and body.",
+      "**Network Interception**: Your code doesn't know it's being mocked. It's 'Real' fetch."
+    ]
+  },
+  11: {
+    def: "Custom hooks contain the complex business logic of your app. Testing them with <strong>renderHook</strong> allows you to verify their behavior without building a 'dummy' component.",
+    proTip: "Whenever a hook performs an action that updates state, you must wrap it in `act()`. However, `user-event` and `renderHook` often handle this for you.",
+    examples: [
+      {
+        title: "Testing a useCounter Hook",
+        code: `<span class="kw">import</span> { renderHook, act } <span class="kw">from</span> <span class="str">'@testing-library/react'</span>;
+<span class="kw">import</span> { useCounter } <span class="kw">from</span> <span class="str">'./hooks'</span>;
+
+<span class="fn">it</span>(<span class="str">'increments the count'</span>, () => {
+  <span class="kw">const</span> { result } = <span class="fn">renderHook</span>(() => <span class="fn">useCounter</span>(<span class="num">0</span>));
+  
+  <span class="fn">act</span>(() => {
+    result.current.<span class="fn">increment</span>();
+  });
+
+  <span class="fn">expect</span>(result.current.count).<span class="fn">toBe</span>(<span class="num">1</span>);
+});`
+      }
+    ],
+    explanations: [
+      "**renderHook**: Simulates the execution of a hook within a React context.",
+      "**result.current**: Always points to the most recent value returned by the hook.",
+      "**act()**: Ensures all state updates and effects are processed before assertions.",
+      "**Initial Props**: You can pass `initialProps` to `renderHook` to test dynamic logic."
+    ]
+  },
+  12: {
+    def: "Components that depend on <strong>Context API</strong> (like Themes, Auth, or I18n) will crash if rendered alone. We solve this by using the `wrapper` option in the `render` function.",
+    proTip: "Create a custom `render` function that automatically wraps all components in your app's standard providers (Theme, QueryClient, Redux). This is a standard senior pattern.",
+    examples: [
+      {
+        title: "Providing Context to a Component",
+        comp: `<span class="kw">const</span> <span class="fn">ThemeStatus</span> = () => {
+  <span class="kw">const</span> theme = <span class="fn">useTheme</span>();
+  <span class="kw">return</span> <span class="tag">&lt;div&gt;</span>Active: {theme}<span class="tag">&lt;/div&gt;</span>;
+};`,
+        test: `<span class="kw">const</span> <span class="fn">AllTheProviders</span> = ({ children }) => (
+  <span class="tag">&lt;ThemeProvider theme="dark"&gt;</span>{children}<span class="tag">&lt;/ThemeProvider&gt;</span>
+);
+
+<span class="fn">it</span>(<span class="str">'renders with dark theme context'</span>, () => {
+  <span class="fn">render</span>(<span class="tag">&lt;ThemeStatus /&gt;</span>, { wrapper: AllTheProviders });
+  
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">/active: dark/i</span>)).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**wrapper**: Injects the component as a child of the specified provider.",
+      "**Isolation**: Allows testing components that rely on global state without manual mocking.",
+      "**Custom Render**: Replaces the standard `render` with one that includes all app-wide contexts.",
+      "**Integration**: Verifies that the component correctly 'consumes' the provided context."
+    ]
+  },
+  13: {
+    def: "Testing <strong>Redux</strong> or <strong>Zustand</strong> shouldn't involve testing the store itself, but rather how the UI reacts to store changes. We initialize a 'Fresh' store for every test to avoid state leakage.",
+    proTip: "Avoid mocking the store. Instead, use a real store with an initial state that fits your test scenario. This ensures your tests verify the actual integration.",
+    examples: [
+      {
+        title: "Testing with Redux Toolkit",
+        comp: `<span class="kw">const</span> <span class="fn">CartBadge</span> = () => {
+  <span class="kw">const</span> items = <span class="fn">useSelector</span>(state => state.cart.items);
+  <span class="kw">return</span> <span class="tag">&lt;span&gt;</span>{items.length}<span class="tag">&lt;/span&gt;</span>;
+};`,
+        test: `<span class="kw">const</span> <span class="fn">renderWithStore</span> = (ui, initialState = {}) => {
+  <span class="kw">const</span> store = <span class="fn">configureStore</span>({ 
+    reducer: { cart: cartReducer },
+    preloadedState: initialState 
+  });
+  <span class="kw">return</span> <span class="fn">render</span>(<span class="tag">&lt;Provider store={store}&gt;</span>{ui}<span class="tag">&lt;/Provider&gt;</span>);
+};
+
+<span class="fn">it</span>(<span class="str">'displays number of items in cart'</span>, () => {
+  <span class="fn">renderWithStore</span>(<span class="tag">&lt;CartBadge /&gt;</span>, { cart: { items: [<span class="str">'A'</span>, <span class="str">'B'</span>] } });
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">'2'</span>)).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**preloadedState**: Sets the starting state of the store for a specific test case.",
+      "**Provider**: Wraps the component tree to provide access to the Redux store.",
+      "**State Leakage**: Creating a new store inside each test ensures total isolation.",
+      "**Actions**: Test that clicking a button dispatches an action that eventually updates the UI."
+    ]
+  },
+  14: {
+    def: "Components using `useNavigate`, `useParams`, or `Link` require a <strong>Router context</strong>. In tests, we use `MemoryRouter` to simulate navigation without a real browser URL bar.",
+    proTip: "Use `MemoryRouter` with `initialEntries` to test components on specific routes (e.g., `/user/42`) or with specific search parameters.",
+    examples: [
+      {
+        title: "Testing with React Router",
+        comp: `<span class="kw">const</span> <span class="fn">UserProfile</span> = () => {
+  <span class="kw">const</span> { id } = <span class="fn">useParams</span>();
+  <span class="kw">return</span> <span class="tag">&lt;h1&gt;</span>User Profile: {id}<span class="tag">&lt;/h1&gt;</span>;
+};`,
+        test: `<span class="kw">import</span> { MemoryRouter, Routes, Route } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="fn">it</span>(<span class="str">'renders the correct user ID from the URL'</span>, () => {
+  <span class="fn">render</span>(
+    <span class="tag">&lt;MemoryRouter initialEntries={['/user/42']}&gt;</span>
+      <span class="tag">&lt;Routes&gt;</span>
+        <span class="tag">&lt;Route path="/user/:id" element={&lt;UserProfile /&gt;} /&gt;</span>
+      <span class="tag">&lt;/Routes&gt;</span>
+    <span class="tag">&lt;/MemoryRouter&gt;</span>
+  );
+
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">/User Profile: 42/i</span>)).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**MemoryRouter**: A router that keeps history in memory, perfect for Node.js environments.",
+      "**initialEntries**: Sets the current location of the router (simulates the URL).",
+      "**Routes/Route**: Replicates your app's routing structure for the test.",
+      "**Navigation**: You can verify navigation by checking if the UI changes after a click."
+    ]
+  },
+  15: {
+    def: "Forms are the most interactive parts of an app. Testing them requires simulating <strong>validation</strong>, <strong>error messages</strong>, and <strong>successful submission</strong>.",
+    proTip: "When testing forms, don't just type 'valid' data. Test what happens when the user types an invalid email, leaves a field blank, or submits twice.",
+    examples: [
+      {
+        title: "Testing Form Validation & Inputs",
+        comp: `<span class="kw">const</span> <span class="fn">ComplexForm</span> = () => (
+  <span class="tag">&lt;form&gt;</span>
+    <span class="tag">&lt;label htmlFor="email"&gt;</span>Email Address<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;input id="email" type="email" /&gt;</span>
+
+    <span class="tag">&lt;fieldset&gt;</span>
+      <span class="tag">&lt;legend&gt;</span>Choose Plan<span class="tag">&lt;/legend&gt;</span>
+      <span class="tag">&lt;label&gt;</span><span class="tag">&lt;input type="radio" name="p" value="f" /&gt;</span> Free<span class="tag">&lt;/label&gt;</span>
+      <span class="tag">&lt;label&gt;</span><span class="tag">&lt;input type="radio" name="p" value="p" /&gt;</span> Pro<span class="tag">&lt;/label&gt;</span>
+    <span class="tag">&lt;/fieldset&gt;</span>
+  <span class="tag">&lt;/form&gt;</span>
+);`,
+        test: `<span class="fn">it</span>(<span class="str">'can select radio buttons and type'</span>, <span class="kw">async</span> () => {
+  <span class="kw">const</span> user = userEvent.<span class="fn">setup</span>();
+  <span class="fn">render</span>(<span class="tag">&lt;ComplexForm /&gt;</span>);
+
+  <span class="cm">// Finding and typing in email</span>
+  <span class="kw">const</span> emailInput = screen.<span class="fn">getByLabelText</span>(<span class="str">/email address/i</span>);
+  <span class="kw">await</span> user.<span class="fn">type</span>(emailInput, <span class="str">'test@pro.com'</span>);
+
+  <span class="cm">// Finding and clicking radio</span>
+  <span class="kw">const</span> proRadio = screen.<span class="fn">getByLabelText</span>(<span class="str">/pro/i</span>);
+  <span class="kw">await</span> user.<span class="fn">click</span>(proRadio);
+
+  <span class="fn">expect</span>(proRadio).<span class="fn">toBeChecked</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**Tab/Blur**: Simulates the user moving to the next field, which often triggers validation.",
+      "**Invalid Input**: Verifies that your error handling logic is actually working.",
+      "**ARIA-Invalid**: Advanced tests should check if `aria-invalid='true'` is set on the input.",
+      "**Submission**: Mock the submit handler and verify it's called with the correct data."
+    ]
+  },
+  16: {
+    def: "<strong>Snapshot Testing</strong> captures the rendered output of a component and compares it against a saved version. It's a quick way to detect unexpected UI changes.",
+    proTip: "Only use snapshots for very small, static components. For complex components, snapshots are noisy and often ignored by developers, leading to 'blind' updates.",
+    examples: [
+      {
+        title: "The Right Way to Snapshot",
+        code: `<span class="fn">it</span>(<span class="str">'matches the static badge snapshot'</span>, () => {
+  <span class="kw">const</span> { asFragment } = <span class="fn">render</span>(<span class="tag">&lt;Badge type="success"&gt;Done&lt;/Badge&gt;</span>);
+  
+  <span class="cm">// asFragment() returns a clean version of the rendered tree</span>
+  <span class="fn">expect</span>(<span class="fn">asFragment</span>()).<span class="fn">toMatchSnapshot</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**asFragment()**: Essential for clean snapshots that don't include wrapper noise.",
+      "**Versioning**: Snapshots must be committed to Git alongside your code.",
+      "**Update**: Run `vitest -u` to update snapshots when a change is intentional.",
+      "**Inline Snapshots**: Better for small outputs as they are saved directly in the test file."
+    ]
+  },
+  17: {
+    def: "Production apps must be accessible. <strong>jest-axe</strong> allows you to run automated accessibility audits directly within your test suite.",
+    proTip: "Automated tests only catch ~30% of accessibility issues. Always complement them with manual testing using a screen reader (VoiceOver/NVDA).",
+    examples: [
+      {
+        title: "Automated Accessibility Audit",
+        code: `<span class="kw">import</span> { axe, toHaveNoViolations } <span class="kw">from</span> <span class="str">'jest-axe'</span>;
+<span class="fn">expect.extend</span>(toHaveNoViolations);
+
+<span class="fn">it</span>(<span class="str">'should not have basic a11y violations'</span>, <span class="kw">async</span> () => {
+  <span class="kw">const</span> { container } = <span class="fn">render</span>(<span class="tag">&lt;ComplexDashboard /&gt;</span>);
+  <span class="kw">const</span> results = <span class="kw">await</span> <span class="fn">axe</span>(container);
+  
+  <span class="fn">expect</span>(results).<span class="fn">toHaveNoViolations</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**jest-axe**: Uses the Axe-core engine to check for color contrast, missing labels, etc.",
+      "**Violations**: Tests fail if any WCAG compliance rules are broken.",
+      "**Roles**: RTL's `getByRole` already enforces a basic level of accessibility check.",
+      "**Alt Text**: Ensure all images have meaningful alt descriptions or `alt='' ` for decorative ones."
+    ]
+  },
+  18: {
+    def: "What happens when a component crashes in production? <strong>Error Boundaries</strong> catch these crashes. We test them by intentionally throwing an error in a child component.",
+    proTip: "In tests, React will still log errors to the console even if they are caught. You might need to temporarily mock `console.error` to keep your test output clean.",
+    examples: [
+      {
+        title: "Testing Error Boundaries",
+        code: `<span class="kw">const</span> <span class="fn">ThrowError</span> = () => { <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'Test Crash'</span>); };
+
+<span class="fn">it</span>(<span class="str">'renders fallback UI when a child crashes'</span>, () => {
+  <span class="cm">// Silence console error for this test</span>
+  <span class="fn">vi.spyOn</span>(console, <span class="str">'error'</span>).<span class="fn">mockImplementation</span>(() => {});
+
+  <span class="fn">render</span>(
+    <span class="tag">&lt;ErrorBoundary fallback={&lt;h1&gt;Something went wrong&lt;/h1&gt;}&gt;</span>
+      <span class="tag">&lt;ThrowError /&gt;</span>
+    <span class="tag">&lt;/ErrorBoundary&gt;</span>
+  );
+
+  <span class="fn">expect</span>(screen.<span class="fn">getByText</span>(<span class="str">/something went wrong/i</span>)).<span class="fn">toBeInTheDocument</span>();
+});`
+      }
+    ],
+    explanations: [
+      "**Fault Tolerance**: Ensures one component crash doesn't take down the entire page.",
+      "**Fallback UI**: The UI shown to the user when an error occurs.",
+      "**Spying on Console**: Prevents noisy stack traces from cluttering your test results.",
+      "**Recovery**: Test if the user can 'Reset' the error boundary and try again."
+    ]
+  },
+  19: {
+    def: "Unnecessary re-renders can slow down a production app. We can use <strong>spies</strong> to verify that certain functions or components are only called the expected number of times.",
+    proTip: "Don't over-optimize. Only test performance for 'heavy' components or components with complex `useEffect` logic.",
+    examples: [
+      {
+        title: "Testing Render Frequency",
+        code: `<span class="fn">it</span>(<span class="str">'does not re-render unnecessarily'</span>, () => {
+  <span class="kw">const</span> renderCount = <span class="fn">vi.fn</span>();
+  <span class="kw">const</span> <span class="fn">HeavyComponent</span> = ({ data }) => {
+    <span class="fn">renderCount</span>();
+    <span class="kw">return</span> <span class="tag">&lt;div&gt;</span>{data}<span class="tag">&lt;/div&gt;</span>;
+  };
+
+  <span class="kw">const</span> { rerender } = <span class="fn">render</span>(<span class="tag">&lt;HeavyComponent data="A" /&gt;</span>);
+  <span class="fn">expect</span>(renderCount).<span class="fn">toHaveBeenCalledTimes</span>(<span class="num">1</span>);
+
+  <span class="cm">// Rerender with same prop</span>
+  <span class="fn">rerender</span>(<span class="tag">&lt;HeavyComponent data="A" /&gt;</span>);
+  <span class="cm">// If memoized, it should still be 1</span>
+  <span class="fn">expect</span>(renderCount).<span class="fn">toHaveBeenCalledTimes</span>(<span class="num">1</span>); 
+});`
+      }
+    ],
+    explanations: [
+      "**toHaveBeenCalledTimes**: Precise control over how many times logic is executed.",
+      "**React.memo**: Verifying that memoization is actually working as intended.",
+      "**Memo Overheads**: Sometimes memoization is slower than a simple render; test both.",
+      "**Effect Counts**: Verify that `useEffect` doesn't run on every single render."
+    ]
+  },
+  20: {
+    def: "Tests are useless if they aren't run. <strong>CI/CD</strong> pipelines ensure every Pull Request is tested. We use **Coverage Thresholds** to prevent 'test decay'.",
+    proTip: "Don't aim for 100% coverage. Aim for 100% coverage of your <strong>Critical Business Logic</strong>. 80% is usually a healthy target for the whole app.",
+    examples: [
+      {
+        title: "GitHub Actions Testing Workflow",
+        code: `<span class="cm"># .github/workflows/test.yml</span>
+name: Run Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: npm install
+      - name: Test
+        run: npm run test:ci <span class="cm"># Runs vitest --run --coverage</span>`
+      }
+    ],
+    explanations: [
+      "**CI Pipeline**: Automated execution on every code change.",
+      "**--run**: Tells Vitest to run once and exit (no watch mode in CI).",
+      "**Coverage Threshold**: Fails the build if coverage drops below a set percentage.",
+      "**Reporters**: Generating JUnit or LCOV reports for tools like SonarQube or Codecov."
+    ]
+  },
+  21: {
+    def: "Assertions are the heart of your tests. <strong>Vitest</strong> provides the core structure (`describe`, `it`), while <strong>jest-dom</strong> extends `expect` with specific matchers for React components.",
+    proTip: "Use the most specific matcher possible. Instead of `expect(el.textContent).toBe('Save')`, use `expect(el).toHaveTextContent('Save')`. Specific matchers provide much better error messages when tests fail.",
+    examples: [
+      {
+        title: "Structure & Core Matchers",
+        comp: `<span class="kw">const</span> <span class="fn">StatusBadge</span> = ({ active }) => (
+  <span class="tag">&lt;div</span> <span class="attr">data-testid="badge"</span> <span class="attr">className="badge"</span> <span class="tag">&gt;</span>
+    {active ? <span class="str">'Online'</span> : <span class="str">'Offline'</span>}
+  <span class="tag">&lt;/div&gt;</span>
+);`,
+        test: `<span class="fn">describe</span>(<span class="str">'StatusBadge'</span>, () => {
+  <span class="fn">it</span>(<span class="str">'renders correctly for active state'</span>, () => {
+    <span class="fn">render</span>(<span class="tag">&lt;StatusBadge active={true} /&gt;</span>);
+    
+    <span class="kw">const</span> badge = screen.<span class="fn">getByTestId</span>(<span class="str">'badge'</span>);
+    
+    <span class="cm">// --- COMMON MATCHERS ---</span>
+    <span class="fn">expect</span>(badge).<span class="fn">toBeInTheDocument</span>(); <span class="cm">// Exists in DOM</span>
+    <span class="fn">expect</span>(badge).<span class="fn">toBeVisible</span>();         <span class="cm">// Not display:none</span>
+    <span class="fn">expect</span>(badge).<span class="fn">toHaveTextContent</span>(<span class="str">'Online'</span>);
+    <span class="fn">expect</span>(badge).<span class="fn">toHaveClass</span>(<span class="str">'badge'</span>);
+    <span class="fn">expect</span>(badge).<span class="fn">not</span>.<span class="fn">toHaveTextContent</span>(<span class="str">'Offline'</span>); <span class="cm">// Negation</span>
+  });
+});`
+      }
+    ],
+    explanations: [
+      "**describe(name, fn)**: Groups related tests together. Perfect for one file per component.",
+      "**it(name, fn)**: (or `test`) Defines a single test case. Should read like a sentence.",
+      "**expect(value)**: Starts an assertion. Takes the element or value you want to check.",
+      "**.not**: Chaining method that flips the assertion (e.g., `.not.toBeVisible()`).",
+      "**toBeDisabled() / toBeEnabled()**: Use for buttons and form inputs.",
+      "**toHaveValue('...')**: Essential for verifying what a user typed into an input.",
+      "**toBeChecked()**: Specifically for radio buttons and checkboxes.",
+      "**toHaveAttribute('name', 'val')**: Check if an element has a specific prop/attribute."
+    ]
+  },
+};
+
+let activeId = 1;
+
+function renderTopicList(filter = 'all') {
+  const list = document.getElementById('topic-list');
+  list.innerHTML = '';
+  topics.forEach((t, i) => {
+    if (filter !== 'all' && t.cat !== filter) return;
+    const div = document.createElement('div');
+    div.className = `qi ${t.id === activeId ? 'active' : ''}`;
+    div.innerHTML = `<div class="qn">${String(i + 1).padStart(2, '0')}</div><div class="qt">${t.title}</div>`;
+    div.onclick = () => loadTopic(t.id);
+    list.appendChild(div);
+  });
+}
+
+function loadTopic(id) {
+  activeId = id;
+  const t = topics.find(x => x.id === id);
+  const c = content[id] || { def: "Content for this topic is being finalized...", examples: [], explanations: [] };
+  
+  const root = document.getElementById('content-root');
+  
+  let html = `
+    <div class="qhead">
+      <div class="qnum">TOPIC ${String(id).padStart(2, '0')}</div>
+      <h1 class="qtitle">${t.title}</h1>
+      <div class="badges">
+        <span class="fbadge badge-${t.cat}">${t.cat.toUpperCase()}</span>
+        <span class="fbadge badge-advanced">${t.level}</span>
+      </div>
+    </div>
+
+    <div class="def-section">${c.def}</div>
+
+    ${c.proTip ? `<div class="pro-tip"><p><strong>SENIOR PRO TIP:</strong> ${c.proTip}</p></div>` : ''}
+
+    ${c.examples.map(ex => `
+      <div class="code-wrap">
+        <div class="code-header">
+          <span>${ex.title}</span>
+          <span>TypeScript / React</span>
+        </div>
+        ${ex.comp ? `
+          <div class="code-block" style="border-radius:0; border-bottom:1px dashed var(--border)">
+            <div class="code-label">Component (JSX)</div>
+            <code>${ex.comp}</code>
+          </div>
+        ` : ''}
+        <div class="code-block">
+          <div class="code-label">Test (Vitest)</div>
+          <code>${ex.test || ex.code}</code>
+        </div>
+      </div>
+    `).join('')}
+
+    <div class="expl-box">
+      ${c.explanations.map(text => `
+        <div class="expl-item">
+          <div class="expl-dot"></div>
+          <div class="expl-text">${text}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="nav-btns">
+      <button class="nbtn ${id === 1 ? 'off' : ''}" onclick="prevTopic()">
+        <span>Previous Topic</span>
+        ${id > 1 ? topics.find(x => x.id === id - 1).title : '---'}
+      </button>
+      <button class="nbtn ${id === topics[topics.length-1].id ? 'off' : ''}" onclick="nextTopic()">
+        <span>Next Topic</span>
+        ${id < topics[topics.length-1].id ? topics.find(x => x.id === id + 1).title : '---'}
+      </button>
+    </div>
+  `;
+  
+  root.innerHTML = html;
+  renderTopicList();
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function nextTopic() {
+  const idx = topics.findIndex(x => x.id === activeId);
+  if (idx < topics.length - 1) loadTopic(topics[idx + 1].id);
+}
+
+function prevTopic() {
+  const idx = topics.findIndex(x => x.id === activeId);
+  if (idx > 0) loadTopic(topics[idx - 1].id);
+}
+
+function updateProgress() {
+  const percent = (activeId / topics.length) * 100;
+  document.getElementById('prog-bar').style.width = percent + '%';
+}
+
+// Initial Load
+renderTopicList();
+loadTopic(1);
+
+// Filters
+document.getElementById('f-all').onclick = () => renderTopicList('all');
+document.getElementById('f-basic').onclick = () => renderTopicList('basic');
+document.getElementById('f-inter').onclick = () => renderTopicList('inter');
+document.getElementById('f-adv').onclick = () => renderTopicList('adv');
+
+</script>
+</body>
+</html>

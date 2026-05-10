@@ -1,0 +1,2992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python Programming — Basic to Advanced</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+
+/* ── TOP BAR ── */
+.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
+.logo{font-size:.95rem;font-weight:700;color:#3b82f6}
+.logo span{color:#9ca3af;font-weight:400;font-size:.78rem}
+.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
+.srch:focus{border-color:#3b82f6;background:#252d40}
+.srch::placeholder{color:#6b7280}
+.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#9ca3af;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#252d40;color:#3b82f6;border-color:#3b82f655}
+.mob-toggle{display:none;background:#3b82f6;border:none;border-radius:8px;padding:.38rem .75rem;color:#000;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;gap:.35rem;align-items:center;white-space:nowrap}
+
+/* ── DESKTOP LAYOUT ── */
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:280px;min-width:280px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
+.sb-inner{padding:.4rem .35rem}
+.main{flex:1;overflow-y:auto}
+.wrap{padding:1.25rem 1.5rem 2rem;max-width:920px}
+
+/* ── MOBILE OVERLAY ── */
+.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.mob-header-title{font-size:.9rem;font-weight:700;color:#ffffff}
+.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
+.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
+.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
+.mob-search input:focus{border-color:#3b82f6}
+.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+.mob-filters{padding:.4rem .75rem .5rem;background:#161b27;display:flex;gap:.4rem;flex-wrap:wrap}
+
+/* ── QUESTION ITEMS ── */
+.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
+.qi:hover{background:#1e2535;border-color:#2a3348}
+.qi.active{background:#1e2535;border-left:3px solid #3b82f6;border-color:#3b82f633}
+.qi.hidden{display:none}
+.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#4b5563;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:#3b82f6}
+.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1}
+.qi.active .qt{color:#ffffff}
+.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+/* ── WELCOME ── */
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome h2{font-size:1.35rem;font-weight:700;color:#9ca3af;margin-bottom:.6rem}
+.welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:1.5rem;text-align:left}
+.wcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
+.wcard h4{font-size:.72rem;font-weight:700;color:#3b82f6;margin-bottom:.3rem}
+.wcard p{font-size:.72rem;color:#ffffff;line-height:1.5}
+
+/* ── QUESTION CONTENT ── */
+.prog-strip{background:#1e2535;border-radius:4px;height:3px;margin-bottom:1rem;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#06b6d4);border-radius:4px;transition:width .4s}
+.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.qnum{background:#3b82f6;color:#fff;font-size:.67rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
+.qtitle{font-size:1.05rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
+.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;align-items:center}
+.fbadge{font-size:.66rem;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:600;color:#ffffff}
+.def-section{background:#1e2535;border-left:3px solid #3b82f6;border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.83rem;line-height:1.8;color:#ffffff;margin-bottom:1.1rem}
+.def-section strong{color:#3b82f6}
+.slabel{font-size:.65rem;font-weight:700;letter-spacing:.12em;color:#6b7280;text-transform:uppercase;margin:1.1rem 0 .5rem;padding-left:2px}
+.dbox{margin-bottom:1.1rem;border:1px solid #2a3348;border-radius:10px;overflow:hidden;background:#161b27}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.1rem}
+.rcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.7rem}
+.rcard h4{font-size:.65rem;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+.rcard li{font-size:.76rem;color:#ffffff;list-style:none;padding:2px 0 2px 13px;position:relative;line-height:1.55}
+.rcard li::before{content:'→';position:absolute;left:0;color:#3b82f6;font-size:.6rem;top:4px}
+.code-block{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.8rem;margin-bottom:1.1rem;overflow-x:auto}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#ffffff;line-height:1.6;display:block;white-space:pre}
+.keyword{color:#ec4899}
+.string{color:#34d399}
+.comment{color:#6b7280}
+.function{color:#60a5fa}
+.number{color:#fbbf24}
+.expl-box{background:#1a1f2e;border:1px solid #2a3348;border-radius:8px;padding:.75rem;margin-bottom:1.1rem;font-size:.78rem;color:#ffffff;line-height:1.7}
+.expl-box strong{color:#3b82f6}
+.navrow{display:flex;gap:.5rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid #2a3348}
+.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.5rem .8rem;color:#9ca3af;font-size:.74rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45;color:#ffffff}
+.nbtn:hover{background:#252d40;color:#ffffff;border-color:#3b82f6}
+.nbtn.off{opacity:.25;pointer-events:none}
+
+/* ── CATEGORY BADGES ── */
+.badge-basic{background:#065f46;border-color:#10b981}
+.badge-intermediate{background:#1e3a8a;border-color:#3b82f6}
+.badge-advanced{background:#5b21b6;border-color:#a78bfa}
+
+/* ── MOBILE OVERRIDES ── */
+@media(max-width:680px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;min-width:unset;height:auto;position:static;border-right:none;border-bottom:1px solid #2a3348}
+  .sb-inner{padding:.2rem .2rem}
+  .mob-toggle{display:flex}
+  .mob-overlay{display:flex}
+  .rgrid{grid-template-columns:1fr}
+  .wgrid{grid-template-columns:1fr}
+  .wrap{padding:1rem .75rem 1.5rem}
+  .qtitle{font-size:.95rem}
+  .srch{width:140px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Python <span>Basic → Advanced</span></div>
+  <div class="topbar-right">
+    <input type="text" class="srch" id="searchbox" placeholder="Search topics...">
+    <button class="fbtn" onclick="toggleFilter('all')" id="filter-all">All</button>
+    <button class="fbtn" onclick="toggleFilter('basic')" id="filter-basic">Basic</button>
+    <button class="fbtn" onclick="toggleFilter('intermediate')" id="filter-inter">Intermediate</button>
+    <button class="fbtn" onclick="toggleFilter('advanced')" id="filter-adv">Advanced</button>
+    <button class="mob-toggle" onclick="toggleMobOverlay()">☰ Menu</button>
+  </div>
+</div>
+
+<!-- MOBILE OVERLAY -->
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-header-title">Python Topics</div>
+    <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
+  </div>
+  <div class="mob-search">
+    <input type="text" id="searchbox-mob" placeholder="Search topics..." onkeyup="filterQuestions()">
+  </div>
+  <div class="mob-list" id="moblist"></div>
+</div>
+
+<!-- DESKTOP LAYOUT -->
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="deskqlist"></div></div>
+  <div class="main">
+    <div class="wrap" id="content"></div>
+  </div>
+</div>
+
+<script>
+const topics = [
+  {id:1,title:"Variables & Data Types",cat:"basic",level:"Fundamentals"},
+  {id:2,title:"Strings & String Methods",cat:"basic",level:"Fundamentals"},
+  {id:3,title:"Lists, Tuples & Sets",cat:"basic",level:"Fundamentals"},
+  {id:4,title:"Dictionaries",cat:"basic",level:"Collections"},
+  {id:5,title:"Control Flow (if/else)",cat:"basic",level:"Fundamentals"},
+  {id:6,title:"Loops (for/while)",cat:"basic",level:"Fundamentals"},
+  {id:7,title:"Functions & Parameters",cat:"basic",level:"Fundamentals"},
+  {id:8,title:"List Comprehensions",cat:"intermediate",level:"Advanced Syntax"},
+  {id:9,title:"Lambda Functions",cat:"intermediate",level:"Functional"},
+  {id:10,title:"Exception Handling (try/except)",cat:"basic",level:"Error Handling"},
+  {id:11,title:"Classes & Objects (OOP)",cat:"intermediate",level:"OOP Basics"},
+  {id:12,title:"Inheritance & Polymorphism",cat:"intermediate",level:"OOP"},
+  {id:13,title:"Decorators",cat:"intermediate",level:"Advanced"},
+  {id:14,title:"Generators & yield",cat:"intermediate",level:"Advanced"},
+  {id:15,title:"Context Managers (with statement)",cat:"intermediate",level:"Resource Management"},
+  {id:16,title:"Module & Packages",cat:"basic",level:"Organization"},
+  {id:17,title:"File I/O & Working with Files",cat:"intermediate",level:"I/O"},
+  {id:18,title:"Regular Expressions (regex)",cat:"intermediate",level:"Text Processing"},
+  {id:19,title:"Higher-Order Functions",cat:"intermediate",level:"Functional"},
+  {id:20,title:"map, filter, reduce",cat:"intermediate",level:"Functional"},
+  {id:21,title:"Iterators",cat:"intermediate",level:"Advanced"},
+  {id:22,title:"Metaclasses",cat:"advanced",level:"Advanced OOP"},
+  {id:23,title:"Descriptors & Properties",cat:"advanced",level:"Advanced OOP"},
+  {id:24,title:"Abstract Base Classes (ABC)",cat:"advanced",level:"Design Patterns"},
+  {id:25,title:"Async/Await & asyncio",cat:"advanced",level:"Concurrency"},
+  {id:26,title:"Threading & Multiprocessing",cat:"advanced",level:"Concurrency"},
+  {id:27,title:"Type Hints & Type Checking",cat:"intermediate",level:"Code Quality"},
+  {id:28,title:"Closures & Nonlocal",cat:"intermediate",level:"Advanced Scoping"},
+  {id:29,title:"Slots & Memory Optimization",cat:"advanced",level:"Optimization"},
+  {id:30,title:"Monkey Patching",cat:"advanced",level:"Advanced Techniques"},
+];
+
+const content = {
+  1:{
+    def:"Variables are containers for storing data values. Python is dynamically typed, meaning you don't need to declare the type - it's inferred from the value.",
+    examples:[
+      {title:"Creating Variables",code:`name = "Alice"
+age = 25
+price = 19.99
+is_active = True
+empty = None
+
+# Variables can be reassigned
+age = 26
+print(name, age, price, is_active, empty)
+# Output: Alice 26 19.99 True None`},
+      {title:"Data Types",code:`# int - integers
+count = 42
+negative = -10
+
+# float - decimal numbers
+temperature = 98.6
+
+# str - text
+message = "Hello Python"
+
+# bool - True or False
+flag = True
+
+# NoneType - absence of value
+result = None
+
+print(type(count))      # <class 'int'>
+print(type(temperature)) # <class 'float'>
+print(type(message))    # <class 'str'>
+print(type(flag))       # <class 'bool'>`},
+      {title:"Type Conversion",code:`# Convert between types
+num_str = "123"
+num_int = int(num_str)  # 123
+num_float = float(num_str)  # 123.0
+
+text = str(100)  # "100"
+binary = bin(10)  # "0b1010"
+hexadecimal = hex(255)  # "0xff"
+
+print(num_int + 5)  # 128
+print(text + " apples")  # 100 apples`}
+    ],
+    explanations:[
+      "Variables store references to objects, not the actual data.",
+      "Python uses dynamic typing - types can change at runtime.",
+      "The type() function shows the data type of any variable.",
+      "Converting between types allows flexible data manipulation.",
+      "None is used to represent absence of a value (like null in other languages)."
+    ]
+  },
+  2:{
+    def:"Strings are sequences of characters enclosed in quotes. Python provides powerful string methods for manipulation, formatting, and processing text.",
+    examples:[
+      {title:"String Basics",code:`# String creation
+single = 'Hello'
+double = "World"
+triple = '''Multi-line
+string'''
+
+# String concatenation
+greeting = single + " " + double
+print(greeting)  # Hello World
+
+# String repetition
+repeated = "Ha" * 3  # "HaHaHa"
+
+# String length
+print(len("Python"))  # 6`},
+      {title:"String Methods",code:`text = "Python Programming"
+
+# Case conversion
+print(text.upper())      # PYTHON PROGRAMMING
+print(text.lower())      # python programming
+print(text.capitalize()) # Python programming
+
+# Search methods
+print(text.find("Pro"))     # 7
+print(text.count("o"))      # 2
+print("Python" in text)     # True
+
+# Replace
+new_text = text.replace("Python", "Java")
+print(new_text)  # Java Programming`},
+      {title:"String Formatting",code:`# f-strings (Python 3.6+)
+name = "Alice"
+age = 25
+print(f"{name} is {age} years old")
+
+# format() method
+print("Hello, {}!".format("Bob"))
+
+# Multiple values
+x, y = 10, 20
+print(f"x={x}, y={y}, sum={x+y}")
+
+# Format specifiers
+pi = 3.14159
+print(f"Pi: {pi:.2f}")  # Pi: 3.14
+print(f"Percent: {0.85:.1%}")  # Percent: 85.0%`}
+    ],
+    explanations:[
+      "Strings are immutable - operations return new strings.",
+      "String slicing: text[start:end:step] extracts substrings.",
+      "Methods like strip(), split(), join() are commonly used.",
+      "F-strings provide clean, readable string interpolation.",
+      "Raw strings (r'...') preserve backslashes (useful for regex, paths)."
+    ]
+  },
+  3:{
+    def:"Lists are ordered, mutable collections. Tuples are ordered, immutable collections. Sets are unordered collections of unique items. Each has different use cases.",
+    examples:[
+      {title:"Lists",code:`# Creating lists
+fruits = ["apple", "banana", "cherry"]
+numbers = [1, 2, 3, 4, 5]
+mixed = [1, "hello", 3.14, True]
+
+# Accessing elements (0-indexed)
+print(fruits[0])    # apple
+print(fruits[-1])   # cherry (last item)
+
+# Slicing
+print(numbers[1:4])  # [2, 3, 4]
+print(numbers[::2])  # [1, 3, 5] (every 2nd)
+
+# List operations
+fruits.append("date")
+fruits.insert(1, "blueberry")
+fruits.extend(["elderberry", "fig"])
+fruits.remove("apple")
+popped = fruits.pop()  # removes last item
+
+print(fruits)`},
+      {title:"Tuples",code:`# Tuples are immutable
+coordinates = (10, 20)
+rgb = (255, 0, 0)
+
+# Accessing elements
+print(coordinates[0])  # 10
+
+# Unpacking
+x, y = coordinates
+r, g, b = rgb
+
+# Immutable - can't modify
+# coordinates[0] = 15  # Error!
+
+# Tuple operations
+combined = coordinates + (30,)
+print(combined)  # (10, 20, 30)
+print(coordinates * 2)  # (10, 20, 10, 20)
+
+# Named tuples
+from collections import namedtuple
+Point = namedtuple('Point', ['x', 'y'])
+p = Point(3, 4)
+print(p.x, p.y)  # 3 4`},
+      {title:"Sets",code:`# Sets contain unique items, unordered
+colors = {"red", "green", "blue"}
+numbers = {1, 2, 3, 2, 1}  # {1, 2, 3}
+
+# Adding items
+colors.add("yellow")
+
+# Set operations
+set_a = {1, 2, 3}
+set_b = {2, 3, 4}
+
+union = set_a | set_b        # {1, 2, 3, 4}
+intersection = set_a & set_b # {2, 3}
+difference = set_a - set_b   # {1}
+
+print(f"Union: {union}")
+print(f"Intersection: {intersection}")
+
+# Check membership
+print(2 in set_a)  # True`}
+    ],
+    explanations:[
+      "Lists are mutable - elements can be changed after creation.",
+      "Tuples are immutable - often used for fixed collections of data.",
+      "Sets are automatically deduplicated - useful for uniqueness checks.",
+      "Negative indexing: -1 refers to last element, -2 to second-last, etc.",
+      "List methods like append(), extend(), remove() modify in-place."
+    ]
+  },
+  4:{
+    def:"Dictionaries are unordered collections of key-value pairs. Keys must be unique and immutable (strings, numbers, tuples). Dictionaries are mutable and provide O(1) lookup.",
+    examples:[
+      {title:"Dictionary Basics",code:`# Creating dictionaries
+person = {
+    "name": "Alice",
+    "age": 25,
+    "city": "New York",
+    "skills": ["Python", "JavaScript"]
+}
+
+# Accessing values
+print(person["name"])      # Alice
+print(person.get("age"))   # 25
+print(person.get("email", "N/A"))  # N/A (default)
+
+# Adding/updating items
+person["email"] = "alice@example.com"
+person["age"] = 26
+
+# Deleting items
+del person["city"]
+removed = person.pop("email")`},
+      {title:"Dictionary Methods",code:`data = {"a": 1, "b": 2, "c": 3}
+
+# Get keys, values, items
+print(data.keys())      # dict_keys(['a', 'b', 'c'])
+print(data.values())    # dict_values([1, 2, 3])
+print(data.items())     # dict_items([('a', 1), ('b', 2)])
+
+# Iteration
+for key in data:
+    print(f"{key}: {data[key]}")
+
+for key, value in data.items():
+    print(f"{key} = {value}")
+
+# Update dictionary
+data.update({"d": 4, "e": 5})
+print(data)  # {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}`},
+      {title:"Nested Dictionaries",code:`student = {
+    "name": "Bob",
+    "grades": {
+        "math": 95,
+        "english": 88,
+        "science": 92
+    },
+    "courses": ["Math", "English", "Science"]
+}
+
+# Accessing nested data
+print(student["grades"]["math"])  # 95
+print(student["courses"][0])      # Math
+
+# Dict comprehension
+squares = {x: x**2 for x in range(5)}
+# {0: 0, 1: 1, 2: 4, 3: 9, 4: 16}`}
+    ],
+    explanations:[
+      "Dictionaries use hash tables for fast key lookup - O(1) average case.",
+      "Keys must be hashable (immutable): strings, numbers, tuples, etc.",
+      "Use get() with a default value to safely access potentially missing keys.",
+      "Dictionary comprehensions create dictionaries from expressions.",
+      "Items can be any type: lists, dicts, functions, etc."
+    ]
+  },
+  5:{
+    def:"Control flow statements (if, elif, else) allow you to execute different code blocks based on conditions. They're fundamental to conditional logic.",
+    examples:[
+      {title:"If/Else Statements",code:`age = 18
+name = "Alice"
+
+# Simple if
+if age >= 18:
+    print("You are an adult")
+
+# if/else
+if age >= 18:
+    print("Adult")
+else:
+    print("Minor")
+
+# if/elif/else
+if age < 13:
+    print("Child")
+elif age < 18:
+    print("Teenager")
+else:
+    print("Adult")`},
+      {title:"Comparison Operators",code:`x = 10
+y = 20
+
+# Equality
+print(x == y)   # False
+print(x != y)   # True
+
+# Comparison
+print(x < y)    # True
+print(x <= y)   # True
+print(x > y)    # False
+print(x >= y)   # False
+
+# Identity
+a = [1, 2, 3]
+b = [1, 2, 3]
+c = a
+print(a == b)   # True (same value)
+print(a is b)   # False (different objects)
+print(a is c)   # True (same object)`},
+      {title:"Logical Operators",code:`age = 25
+income = 50000
+
+# and - both conditions must be True
+if age >= 18 and income > 30000:
+    print("Eligible for loan")
+
+# or - at least one must be True
+if age < 18 or income < 20000:
+    print("Need co-signer")
+
+# not - negation
+active = False
+if not active:
+    print("Account inactive")
+
+# Complex conditions
+if (age >= 21 and income > 40000) or age < 18:
+    print("Special category")`}
+    ],
+    explanations:[
+      "Conditions evaluate to boolean: True or False.",
+      "Python uses indentation to define code blocks.",
+      "Truth values: 0, None, empty collections are falsy; others are truthy.",
+      "Use is for object identity, == for value equality.",
+      "Logical operators short-circuit: 'and' stops at first False, 'or' at first True."
+    ]
+  },
+  6:{
+    def:"Loops (for, while) repeat code blocks multiple times. for loops iterate over sequences; while loops repeat until a condition is false.",
+    examples:[
+      {title:"For Loops",code:`# Iterating over a list
+fruits = ["apple", "banana", "cherry"]
+for fruit in fruits:
+    print(fruit)
+
+# Iterating with index
+for i, fruit in enumerate(fruits):
+    print(f"{i}: {fruit}")
+
+# Range
+for i in range(5):
+    print(i)  # 0, 1, 2, 3, 4
+
+# Range with start, stop, step
+for i in range(1, 10, 2):
+    print(i)  # 1, 3, 5, 7, 9
+
+# Nested loops
+for i in range(3):
+    for j in range(2):
+        print(f"({i}, {j})")`},
+      {title:"While Loops",code:`# Simple while loop
+count = 0
+while count < 5:
+    print(count)
+    count += 1
+
+# While with break
+while True:
+    user_input = input("Enter 'quit' to exit: ")
+    if user_input == "quit":
+        break
+    print(f"You entered: {user_input}")
+
+# While with continue
+n = 0
+while n < 10:
+    n += 1
+    if n % 2 == 0:
+        continue  # skip even numbers
+    print(n)  # 1, 3, 5, 7, 9`},
+      {title:"Loop Control",code:`# break - exit loop
+for i in range(10):
+    if i == 5:
+        break
+    print(i)  # 0, 1, 2, 3, 4
+
+# continue - skip iteration
+for i in range(5):
+    if i == 2:
+        continue
+    print(i)  # 0, 1, 3, 4
+
+# else clause (runs if loop completes)
+for i in range(3):
+    print(i)
+else:
+    print("Loop completed")  # This runs
+
+# else with break (doesn't run if break occurs)
+for i in range(3):
+    if i == 1:
+        break
+else:
+    print("This won't print")`}
+    ],
+    explanations:[
+      "for loops iterate over any iterable: lists, tuples, strings, dictionaries, etc.",
+      "enumerate() provides both index and value in a for loop.",
+      "break exits the loop completely; continue skips to next iteration.",
+      "range(n) creates numbers 0 to n-1; range(a,b,c) for start, stop, step.",
+      "The else clause executes if loop finishes normally (not via break)."
+    ]
+  },
+  7:{
+    def:"Functions are reusable blocks of code that accept parameters and return values. They promote code reuse, organization, and maintainability.",
+    examples:[
+      {title:"Function Basics",code:`# Simple function
+def greet():
+    print("Hello!")
+
+greet()  # Hello!
+
+# Function with parameters
+def add(a, b):
+    return a + b
+
+result = add(5, 3)
+print(result)  # 8
+
+# Multiple parameters
+def describe(name, age, city="Unknown"):
+    return f"{name}, {age} years old, from {city}"
+
+print(describe("Alice", 25, "NYC"))
+print(describe("Bob", 30))  # Uses default`},
+      {title:"Parameter Types",code:`# Positional arguments
+def power(base, exponent):
+    return base ** exponent
+
+print(power(2, 3))  # 8
+
+# Keyword arguments
+print(power(exponent=3, base=2))  # 8
+
+# Default arguments
+def greet(name="Guest"):
+    return f"Hello, {name}!"
+
+print(greet())         # Hello, Guest!
+print(greet("Alice"))  # Hello, Alice!
+
+# *args (variable positional arguments)
+def sum_all(*args):
+    return sum(args)
+
+print(sum_all(1, 2, 3, 4, 5))  # 15
+
+# **kwargs (variable keyword arguments)
+def print_info(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key}: {value}")
+
+print_info(name="Alice", age=25, city="NYC")`},
+      {title:"Return Values & Documentation",code:`# Multiple return values
+def min_max(numbers):
+    return min(numbers), max(numbers)
+
+minimum, maximum = min_max([3, 1, 4, 1, 5, 9])
+print(f"Min: {minimum}, Max: {maximum}")
+
+# Docstrings
+def calculate_area(radius):
+    """
+    Calculate the area of a circle.
+    
+    Args:
+        radius: The radius of the circle
+        
+    Returns:
+        The area of the circle
+    """
+    import math
+    return math.pi * radius ** 2
+
+print(calculate_area(5))
+print(calculate_area.__doc__)  # Access docstring`}
+    ],
+    explanations:[
+      "Parameters are placeholders; arguments are actual values passed.",
+      "*args collects extra positional arguments into a tuple.",
+      "**kwargs collects keyword arguments into a dictionary.",
+      "Functions can return multiple values as a tuple.",
+      "Docstrings document functions - use triple quotes and follow PEP 257."
+    ]
+  },
+  8:{
+    def:"List comprehensions provide a concise way to create new lists by applying an operation to each item in an existing list. They're faster and more readable than loops.",
+    examples:[
+      {title:"Basic List Comprehension",code:`# Traditional approach
+squares_old = []
+for x in range(5):
+    squares_old.append(x ** 2)
+
+# List comprehension
+squares = [x ** 2 for x in range(5)]
+print(squares)  # [0, 1, 4, 9, 16]
+
+# More complex example
+words = ["hello", "world", "python"]
+lengths = [len(word) for word in words]
+print(lengths)  # [5, 5, 6]
+
+# String transformation
+sentence = "hello world"
+uppercase = [char.upper() for char in sentence]
+print(''.join(uppercase))  # HELLO WORLD`},
+      {title:"Comprehension with Conditions",code:`# Filter even numbers
+numbers = range(10)
+evens = [x for x in numbers if x % 2 == 0]
+print(evens)  # [0, 2, 4, 6, 8]
+
+# Multiple conditions
+results = [x for x in range(10) if x > 3 if x < 8]
+print(results)  # [4, 5, 6, 7]
+
+# Nested comprehension (cartesian product)
+pairs = [(x, y) for x in range(3) for y in range(2)]
+print(pairs)
+# [(0, 0), (0, 1), (1, 0), (1, 1), (2, 0), (2, 1)]
+
+# With transformation
+sentences = ["hello world", "python rocks"]
+words = [word for sentence in sentences for word in sentence.split()]
+print(words)  # ['hello', 'world', 'python', 'rocks']`},
+      {title:"Dictionary & Set Comprehensions",code:`# Dictionary comprehension
+numbers = [1, 2, 3, 4, 5]
+squares_dict = {x: x**2 for x in numbers}
+print(squares_dict)  # {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
+
+# From existing dict
+dict_lower = {'a': 1, 'b': 2, 'c': 3}
+dict_upper = {k.upper(): v for k, v in dict_lower.items()}
+print(dict_upper)  # {'A': 1, 'B': 2, 'C': 3}
+
+# Set comprehension
+numbers = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
+unique_squares = {x**2 for x in numbers}
+print(unique_squares)  # {1, 4, 9, 16}`}
+    ],
+    explanations:[
+      "List comprehensions are 2-3 times faster than equivalent for loops.",
+      "Syntax: [expression for item in iterable if condition].",
+      "Can include multiple for clauses and multiple if clauses.",
+      "Dictionary and set comprehensions follow similar patterns.",
+      "Nested comprehensions are powerful but can reduce readability if overused."
+    ]
+  },
+  9:{
+    def:"Lambda functions are anonymous, inline functions defined with the lambda keyword. They're useful for short, simple operations passed to higher-order functions.",
+    examples:[
+      {title:"Lambda Basics",code:`# Simple lambda
+square = lambda x: x ** 2
+print(square(5))  # 25
+
+# Lambda with multiple parameters
+add = lambda x, y: x + y
+print(add(3, 4))  # 7
+
+# Lambda with default arguments
+greet = lambda name="Guest": f"Hello, {name}!"
+print(greet())        # Hello, Guest!
+print(greet("Alice")) # Hello, Alice!
+
+# Lambda in list
+operations = [
+    lambda x: x + 1,
+    lambda x: x * 2,
+    lambda x: x ** 2
+]
+
+for op in operations:
+    print(op(5))  # 6, 10, 25`},
+      {title:"Lambda with map()",code:`numbers = [1, 2, 3, 4, 5]
+
+# Multiply each by 2
+doubled = list(map(lambda x: x * 2, numbers))
+print(doubled)  # [2, 4, 6, 8, 10]
+
+# Convert to strings
+strings = list(map(lambda x: str(x), numbers))
+print(strings)  # ['1', '2', '3', '4', '5']
+
+# Nested structures
+pairs = [(1, 2), (3, 4), (5, 6)]
+sums = list(map(lambda p: p[0] + p[1], pairs))
+print(sums)  # [3, 7, 11]`},
+      {title:"Lambda with sort()",code:`# Sort list of tuples by second element
+students = [
+    ("Alice", 85),
+    ("Bob", 92),
+    ("Charlie", 78),
+    ("David", 88)
+]
+
+sorted_by_score = sorted(students, key=lambda s: s[1])
+print(sorted_by_score)
+# [('Charlie', 78), ('Alice', 85), ('David', 88), ('Bob', 92)]
+
+# Reverse sort
+sorted_reverse = sorted(students, key=lambda s: s[1], reverse=True)
+
+# Sort by name length
+sorted_by_name_len = sorted(students, key=lambda s: len(s[0]))`}
+    ],
+    explanations:[
+      "Lambda syntax: lambda arguments: expression (returns expression value).",
+      "Lambdas are best for simple, single-expression functions.",
+      "Can't include statements (if, for, try) in lambdas - use def instead.",
+      "Lambdas are often used with map(), filter(), sorted(), and custom functions.",
+      "Avoid overuse - readability matters more than brevity."
+    ]
+  },
+  10:{
+    def:"Exception handling allows you to gracefully handle errors without crashing your program. Use try/except/finally blocks to catch and handle exceptions.",
+    examples:[
+      {title:"Try/Except Basics",code:`# Catching a specific exception
+try:
+    x = int("hello")  # ValueError
+except ValueError:
+    print("Invalid number format!")
+
+# Catching multiple exceptions
+try:
+    result = 10 / 0  # ZeroDivisionError
+except (ValueError, ZeroDivisionError) as e:
+    print(f"An error occurred: {e}")
+
+# Catching all exceptions (use cautiously!)
+try:
+    risky_operation()
+except Exception as e:
+    print(f"Error: {e}")
+
+# Exception object
+try:
+    x = [1, 2, 3][5]
+except IndexError as e:
+    print(f"Index error: {e}")
+    print(f"Error type: {type(e).__name__}")`},
+      {title:"Multiple Except Blocks",code:`try:
+    user_input = input("Enter age: ")
+    age = int(user_input)
+    year_born = 2024 - age
+    
+except ValueError:
+    print("Age must be a number!")
+except KeyboardInterrupt:
+    print("Input cancelled by user")
+except Exception as e:
+    print(f"Unexpected error: {e}")
+else:
+    # Runs if no exception occurred
+    print(f"You were born around {year_born}")
+finally:
+    # Always runs, even if exception occurred
+    print("Thank you for using this program!")`},
+      {title:"Custom Exceptions & Raising",code:`# Define custom exception
+class InsufficientFundsError(Exception):
+    pass
+
+# Raising exceptions
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientFundsError("Not enough funds!")
+    return balance - amount
+
+try:
+    balance = 100
+    new_balance = withdraw(balance, 150)
+except InsufficientFundsError as e:
+    print(f"Transaction failed: {e}")
+
+# Re-raising exceptions
+try:
+    try:
+        x = 1 / 0
+    except ZeroDivisionError:
+        print("Caught, now re-raising...")
+        raise  # re-raises the same exception
+except ZeroDivisionError:
+    print("Caught again!")`}
+    ],
+    explanations:[
+      "Common exceptions: ValueError, TypeError, IndexError, KeyError, ZeroDivisionError.",
+      "Use specific exceptions, not bare except clauses, for better error handling.",
+      "The else block executes only if no exception occurred.",
+      "The finally block always executes - useful for cleanup (closing files, etc).",
+      "Create custom exceptions by inheriting from Exception class."
+    ]
+  },
+  11:{
+    def:"Classes are blueprints for creating objects. Object-oriented programming (OOP) uses classes to structure data and behavior together into organized units.",
+    examples:[
+      {title:"Class Basics",code:`# Define a class
+class Dog:
+    # Class variable (shared by all instances)
+    species = "Canis familiaris"
+    
+    # Constructor
+    def __init__(self, name, age):
+        # Instance variables
+        self.name = name
+        self.age = age
+    
+    # Method
+    def bark(self):
+        return f"{self.name} says Woof!"
+    
+    def get_age(self):
+        return f"{self.name} is {self.age} years old"
+
+# Create instances
+dog1 = Dog("Buddy", 3)
+dog2 = Dog("Max", 5)
+
+print(dog1.name)      # Buddy
+print(dog1.bark())    # Buddy says Woof!
+print(dog1.get_age()) # Buddy is 3 years old`},
+      {title:"Special Methods (Dunder Methods)",code:`class Person:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    # String representation (for debugging)
+    def __repr__(self):
+        return f"Person({self.name}, {self.age})"
+    
+    # String representation (for users)
+    def __str__(self):
+        return f"{self.name}, age {self.age}"
+    
+    # Equality comparison
+    def __eq__(self, other):
+        return self.age == other.age
+    
+    # Less than comparison
+    def __lt__(self, other):
+        return self.age < other.age
+    
+    # Addition operator
+    def __add__(self, years):
+        return Person(self.name, self.age + years)
+
+p1 = Person("Alice", 25)
+print(str(p1))       # Alice, age 25
+print(repr(p1))      # Person(Alice, 25)
+
+p2 = Person("Bob", 25)
+print(p1 == p2)      # True (same age)
+
+p3 = p1 + 5  # Creates new Person with age 30`},
+      {title:"Properties & Getters/Setters",code:`class Temperature:
+    def __init__(self, celsius):
+        self._celsius = celsius  # private variable
+    
+    # Property (acts like an attribute)
+    @property
+    def celsius(self):
+        return self._celsius
+    
+    @property
+    def fahrenheit(self):
+        return (self._celsius * 9/5) + 32
+    
+    # Setter
+    @celsius.setter
+    def celsius(self, value):
+        if value < -273.15:
+            raise ValueError("Temperature too low!")
+        self._celsius = value
+
+temp = Temperature(0)
+print(temp.celsius)      # 0
+print(temp.fahrenheit)   # 32.0
+
+temp.celsius = 100
+print(temp.fahrenheit)   # 212.0`}
+    ],
+    explanations:[
+      "__init__ is the constructor - called when creating a new instance.",
+      "self refers to the instance; always the first parameter in methods.",
+      "Instance variables (self.x) are unique to each instance.",
+      "Class variables are shared across all instances.",
+      "Special methods (__method__) override built-in behavior and operators."
+    ]
+  },
+  12:{
+    def:"Inheritance allows classes to inherit properties and methods from parent classes. Polymorphism allows objects to be treated as instances of their parent class.",
+    examples:[
+      {title:"Inheritance",code:`# Parent class
+class Animal:
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        return f"{self.name} makes a sound"
+    
+    def move(self):
+        return "Moving..."
+
+# Child class inherits from Animal
+class Dog(Animal):
+    # Override method
+    def speak(self):
+        return f"{self.name} barks: Woof!"
+    
+    # New method
+    def fetch(self):
+        return f"{self.name} fetches the ball"
+
+class Cat(Animal):
+    def speak(self):
+        return f"{self.name} meows: Meow!"
+
+# Usage
+dog = Dog("Buddy")
+print(dog.speak())    # Buddy barks: Woof!
+print(dog.move())     # Moving... (inherited)
+print(dog.fetch())    # Buddy fetches the ball
+
+cat = Cat("Whiskers")
+print(cat.speak())    # Whiskers meows: Meow!`},
+      {title:"super() and Method Resolution",code:`class Vehicle:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+    
+    def info(self):
+        return f"{self.brand} {self.model}"
+
+class Car(Vehicle):
+    def __init__(self, brand, model, doors):
+        # Call parent constructor
+        super().__init__(brand, model)
+        self.doors = doors
+    
+    # Extend parent method
+    def info(self):
+        parent_info = super().info()
+        return f"{parent_info} with {self.doors} doors"
+
+class ElectricCar(Car):
+    def __init__(self, brand, model, doors, battery):
+        super().__init__(brand, model, doors)
+        self.battery = battery
+    
+    def info(self):
+        return super().info() + f", Battery: {self.battery}kWh"
+
+tesla = ElectricCar("Tesla", "Model 3", 4, 75)
+print(tesla.info())
+# Tesla Model 3 with 4 doors, Battery: 75kWh`},
+      {title:"Multiple Inheritance & Abstract Classes",code:`from abc import ABC, abstractmethod
+
+# Abstract base class
+class Shape(ABC):
+    @abstractmethod
+    def area(self):
+        pass
+    
+    @abstractmethod
+    def perimeter(self):
+        pass
+
+# Concrete implementation
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+    
+    def area(self):
+        import math
+        return math.pi * self.radius ** 2
+    
+    def perimeter(self):
+        import math
+        return 2 * math.pi * self.radius
+
+class Rectangle(Shape):
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+    
+    def area(self):
+        return self.width * self.height
+    
+    def perimeter(self):
+        return 2 * (self.width + self.height)
+
+# Can't instantiate abstract class
+# shape = Shape()  # Error!
+
+circle = Circle(5)
+print(f"Circle area: {circle.area():.2f}")
+
+rect = Rectangle(4, 6)
+print(f"Rectangle area: {rect.area()}")`}
+    ],
+    explanations:[
+      "Child classes inherit all methods and attributes from parent class.",
+      "Override methods in child class to customize behavior.",
+      "super() calls the parent class method - useful for extending functionality.",
+      "Abstract base classes (ABC) define interfaces that subclasses must implement.",
+      "Multiple inheritance allows a class to inherit from multiple parents."
+    ]
+  },
+  13:{
+    def:"Decorators are functions that wrap other functions or methods, modifying their behavior without changing the original code. They use the @ syntax and higher-order functions.",
+    examples:[
+      {title:"Basic Decorators",code:`# Simple decorator
+def decorator(func):
+    def wrapper(*args, **kwargs):
+        print("Before function call")
+        result = func(*args, **kwargs)
+        print("After function call")
+        return result
+    return wrapper
+
+# Apply decorator
+@decorator
+def greet(name):
+    return f"Hello, {name}!"
+
+# Equivalent to: greet = decorator(greet)
+print(greet("Alice"))
+
+# Output:
+# Before function call
+# Hello, Alice!
+# After function call`},
+      {title:"Decorators with Arguments",code:`def repeat(times):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            results = []
+            for _ in range(times):
+                result = func(*args, **kwargs)
+                results.append(result)
+            return results
+        return wrapper
+    return decorator
+
+@repeat(times=3)
+def say_hello(name):
+    return f"Hello, {name}!"
+
+print(say_hello("Bob"))
+# ['Hello, Bob!', 'Hello, Bob!', 'Hello, Bob!']
+
+# Timing decorator
+import time
+
+def timer(func):
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        elapsed = time.time() - start
+        print(f"Took {elapsed:.4f} seconds")
+        return result
+    return wrapper
+
+@timer
+def slow_function():
+    time.sleep(1)
+    return "Done!"
+
+slow_function()`},
+      {title:"Class Methods & Static Methods with Decorators",code:`class Calculator:
+    pi = 3.14159
+    
+    @staticmethod
+    def add(a, b):
+        """Static method - doesn't need self"""
+        return a + b
+    
+    @classmethod
+    def from_string(cls, equation):
+        """Class method - receives class as argument"""
+        parts = equation.split('+')
+        a, b = float(parts[0]), float(parts[1])
+        return cls.add(a, b)
+    
+    @property
+    def circle_area(self):
+        """Property - access like attribute"""
+        return self.pi * 5 ** 2
+
+# Using static method
+result = Calculator.add(5, 3)
+print(result)  # 8
+
+# Using class method
+result = Calculator.from_string("10+20")
+print(result)  # 30.0
+
+# Using property
+calc = Calculator()
+print(calc.circle_area)  # 78.53975`}
+    ],
+    explanations:[
+      "Decorators are functions that take a function and return a modified version.",
+      "Syntax: @decorator (syntactic sugar for function = decorator(function)).",
+      "*args captures positional arguments; **kwargs captures keyword arguments.",
+      "@staticmethod doesn't have access to instance or class data.",
+      "@classmethod receives the class (cls) instead of instance (self)."
+    ]
+  },
+  14:{
+    def:"Generators are functions that use yield to produce a sequence of values one at a time. They're memory-efficient for large datasets.",
+    examples:[
+      {title:"Generator Basics",code:`# Generator function
+def count_up(max):
+    current = 0
+    while current < max:
+        yield current
+        current += 1
+
+# Create generator
+counter = count_up(5)
+print(next(counter))  # 0
+print(next(counter))  # 1
+print(next(counter))  # 2
+
+# Iterate with for loop
+for num in count_up(3):
+    print(num)  # 0, 1, 2
+
+# Generator expression (like list comprehension)
+squares_gen = (x**2 for x in range(5))
+print(next(squares_gen))  # 0
+print(next(squares_gen))  # 1
+
+# Convert to list
+squares_list = list((x**2 for x in range(5)))
+print(squares_list)  # [0, 1, 4, 9, 16]`},
+      {title:"Generator vs List Performance",code:`import sys
+
+# List (stores all items in memory)
+list_comp = [x**2 for x in range(1000000)]
+print(f"List size: {sys.getsizeof(list_comp)} bytes")
+
+# Generator (lazy evaluation)
+gen_exp = (x**2 for x in range(1000000))
+print(f"Generator size: {sys.getsizeof(gen_exp)} bytes")
+
+# Generators don't compute until needed
+def expensive_operation():
+    for i in range(5):
+        print(f"Computing {i}...")
+        yield i ** 2
+
+gen = expensive_operation()
+print("Generator created (nothing computed yet)")
+
+# Computation happens on demand
+for value in gen:
+    if value > 10:
+        break
+    print(f"Value: {value}")`},
+      {title:"Advanced Generator Usage",code:`# Generator with send()
+def echo():
+    while True:
+        value = yield  # receives value via send()
+        print(f"Received: {value}")
+
+gen = echo()
+next(gen)  # Prime the generator
+gen.send("Hello")  # Hello
+gen.send("World")  # World
+
+# Generator pipeline
+def read_data():
+    for i in range(1, 6):
+        yield i
+
+def filter_even(data):
+    for num in data:
+        if num % 2 == 0:
+            yield num
+
+def multiply_by_two(data):
+    for num in data:
+        yield num * 2
+
+# Chain generators
+pipeline = multiply_by_two(filter_even(read_data()))
+print(list(pipeline))  # [4, 8] (2*2, 4*2)`}
+    ],
+    explanations:[
+      "yield pauses function execution and returns a value.",
+      "Generators are iterators - use next() or in for loops.",
+      "Generators are memory-efficient for large sequences.",
+      "Generator expressions use parentheses like list comprehensions.",
+      "Generators can be chained to create efficient pipelines."
+    ]
+  },
+  15:{
+    def:"Context managers handle setup and teardown of resources using the with statement. They ensure cleanup even if exceptions occur.",
+    examples:[
+      {title:"Using Context Managers",code:`# File handling with context manager
+with open('example.txt', 'w') as f:
+    f.write("Hello, World!")
+    # File automatically closed here, even if error occurs
+
+# Without context manager (error-prone)
+f = open('example.txt', 'r')
+content = f.read()
+f.close()  # Easy to forget or skip on error!
+
+# Multiple context managers
+with open('input.txt') as input_file, open('output.txt', 'w') as output_file:
+    data = input_file.read()
+    output_file.write(data.upper())`},
+      {title:"Creating Custom Context Managers",code:`# Using class
+class DatabaseConnection:
+    def __init__(self, db_name):
+        self.db_name = db_name
+        self.connection = None
+    
+    def __enter__(self):
+        print(f"Connecting to {self.db_name}...")
+        self.connection = f"Connection to {self.db_name}"
+        return self.connection
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        print(f"Closing {self.db_name}...")
+        self.connection = None
+        return False  # Don't suppress exceptions
+
+# Using the context manager
+with DatabaseConnection("mydb") as conn:
+    print(f"Using: {conn}")
+    # Connection closes automatically
+
+# Connecting to mydb...
+# Using: Connection to mydb
+# Closing mydb...`},
+      {title:"Using contextlib",code:`from contextlib import contextmanager
+
+# Using contextmanager decorator
+@contextmanager
+def timer_context(name):
+    import time
+    print(f"Starting {name}...")
+    start = time.time()
+    try:
+        yield  # Code inside with block runs here
+    finally:
+        elapsed = time.time() - start
+        print(f"Finished {name} in {elapsed:.2f}s")
+
+# Using the context manager
+with timer_context("Operation"):
+    import time
+    time.sleep(1)
+    print("Doing work...")
+
+# Starting Operation...
+# Doing work...
+# Finished Operation in 1.00s
+
+# Suppress exceptions
+from contextlib import suppress
+
+with suppress(ValueError):
+    int("not a number")  # Exception is silently ignored
+    print("This still prints")  # This won't print if error`}
+    ],
+    explanations:[
+      "__enter__ is called when entering the with block.",
+      "__exit__ is called when exiting, even if an exception occurs.",
+      "Context managers ensure resources are cleaned up properly.",
+      "@contextmanager decorator simplifies creating context managers.",
+      "Common uses: file handling, database connections, locks, temporary changes."
+    ]
+  },
+  16:{
+    def:"Modules are Python files containing code (functions, classes, variables). Packages are directories containing modules. They organize code into reusable units.",
+    examples:[
+      {title:"Creating and Importing Modules",code:`# File: math_utils.py
+def add(a, b):
+    return a + b
+
+def multiply(a, b):
+    return a * b
+
+PI = 3.14159
+
+class Calculator:
+    def __init__(self):
+        self.result = 0
+
+# Using the module
+import math_utils
+
+result = math_utils.add(5, 3)
+print(result)  # 8
+
+# Import specific items
+from math_utils import multiply, PI
+result = multiply(4, 5)
+print(result)  # 20
+print(PI)      # 3.14159
+
+# Import with alias
+import math_utils as mu
+calc = mu.Calculator()
+
+# Import all (use cautiously)
+from math_utils import *`},
+      {title:"Package Structure",code:`# Directory structure:
+# mypackage/
+#   __init__.py
+#   module1.py
+#   module2.py
+#   subpackage/
+#     __init__.py
+#     module3.py
+
+# mypackage/__init__.py
+print("mypackage initialized")
+
+# mypackage/module1.py
+def func1():
+    return "Function 1"
+
+# mypackage/subpackage/module3.py
+def func3():
+    return "Function 3"
+
+# Using the package
+import mypackage
+from mypackage import module1
+from mypackage.subpackage import module3
+
+print(module1.func1())
+print(module3.func3())`},
+      {title:"Common Modules",code:`# sys - System operations
+import sys
+print(sys.version)
+print(sys.path)
+sys.exit()
+
+# os - Operating system interface
+import os
+print(os.getcwd())
+print(os.listdir('.'))
+
+# pathlib - Modern path handling
+from pathlib import Path
+p = Path('myfile.txt')
+if p.exists():
+    print(f"File size: {p.stat().st_size}")
+
+# json - JSON data format
+import json
+data = {"name": "Alice", "age": 25}
+json_str = json.dumps(data)
+parsed = json.loads(json_str)
+
+# datetime - Date and time
+from datetime import datetime, timedelta
+now = datetime.now()
+tomorrow = now + timedelta(days=1)`}
+    ],
+    explanations:[
+      "Module = .py file; Package = directory with __init__.py.",
+      "from X import Y imports Y directly; use for specific items.",
+      "import X imports entire module; use for large modules.",
+      "from X import * imports all, polluting namespace - avoid.",
+      "__name__ == '__main__' is True when file is run directly (not imported)."
+    ]
+  },
+  22:{
+    def:"Metaclasses are classes whose instances are classes. They allow you to customize class creation, providing deep control over object model.",
+    examples:[
+      {title:"Metaclass Basics",code:`# Simple metaclass
+class MyMeta(type):
+    def __new__(mcs, name, bases, namespace):
+        print(f"Creating class {name}")
+        namespace['custom_attr'] = "Added by metaclass"
+        return super().__new__(mcs, name, bases, namespace)
+
+# Using metaclass
+class MyClass(metaclass=MyMeta):
+    pass
+
+print(MyClass.custom_attr)  # Added by metaclass
+
+# Metaclass with __init__
+class AnotherMeta(type):
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._instance = None
+    
+    def __call__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__call__(*args, **kwargs)
+        return cls._instance
+
+class Singleton(metaclass=AnotherMeta):
+    pass
+
+s1 = Singleton()
+s2 = Singleton()
+print(s1 is s2)  # True (same instance)`},
+      {title:"Metaclass Applications",code:`# Enforce attribute type checking
+class TypeCheckMeta(type):
+    def __new__(mcs, name, bases, namespace):
+        # Get type hints
+        annotations = namespace.get('__annotations__', {})
+        
+        def __setattr__(self, key, value):
+            if key in annotations:
+                expected_type = annotations[key]
+                if not isinstance(value, expected_type):
+                    raise TypeError(
+                        f"{key} must be {expected_type}, not {type(value)}"
+                    )
+            super(self.__class__, self).__setattr__(key, value)
+        
+        namespace['__setattr__'] = __setattr__
+        return super().__new__(mcs, name, bases, namespace)
+
+class TypedClass(metaclass=TypeCheckMeta):
+    __annotations__ = {'name': str, 'age': int}
+    
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+obj = TypedClass("Alice", 25)
+# obj.age = "thirty"  # TypeError!`},
+      {title:"Register Subclasses",code:`class PluginMeta(type):
+    plugins = {}
+    
+    def __new__(mcs, name, bases, namespace):
+        cls = super().__new__(mcs, name, bases, namespace)
+        
+        # Register plugin if not base class
+        if name != 'PluginBase':
+            plugin_name = namespace.get('name', name)
+            mcs.plugins[plugin_name] = cls
+        
+        return cls
+    
+    @classmethod
+    def get_plugin(mcs, name):
+        return mcs.plugins.get(name)
+
+class PluginBase(metaclass=PluginMeta):
+    pass
+
+class EmailPlugin(PluginBase):
+    name = "email"
+    
+    def execute(self):
+        return "Sending email..."
+
+class SMSPlugin(PluginBase):
+    name = "sms"
+    
+    def execute(self):
+        return "Sending SMS..."
+
+email = PluginMeta.get_plugin("email")()
+print(email.execute())`}
+    ],
+    explanations:[
+      "Metaclasses are 'classes of classes' - define type behavior.",
+      "__new__ is called during class creation; __init__ after creation.",
+      "Use metaclasses sparingly - they're powerful but can be confusing.",
+      "Common use: enforce constraints, auto-registration, customizing class behavior.",
+      "99% of the time, decorators or descriptors are better than metaclasses."
+    ]
+  },
+  25:{
+    def:"async/await enables asynchronous programming - running multiple operations concurrently without threads. asyncio is Python's async library.",
+    examples:[
+      {title:"Async Basics",code:`import asyncio
+
+# Async function (coroutine)
+async def fetch_data(url):
+    print(f"Fetching {url}")
+    await asyncio.sleep(2)  # Simulate delay
+    print(f"Received from {url}")
+    return f"Data from {url}"
+
+# Run a coroutine
+async def main():
+    result = await fetch_data("example.com")
+    print(result)
+
+# Execute
+asyncio.run(main())
+
+# Async functions return coroutines (not executed immediately)
+coro = fetch_data("test.com")
+# Use await or asyncio.run() to execute`},
+      {title:"Concurrent Async Operations",code:`import asyncio
+
+async def task(name, delay):
+    print(f"Task {name} starting")
+    await asyncio.sleep(delay)
+    print(f"Task {name} finished")
+    return f"Result from {name}"
+
+async def main():
+    # Run tasks concurrently
+    results = await asyncio.gather(
+        task("A", 2),
+        task("B", 1),
+        task("C", 3)
+    )
+    print(f"Results: {results}")
+    # All three run "at the same time"
+    # Total time: 3 seconds (not 6)
+
+asyncio.run(main())
+
+# Create tasks
+async def alternative_main():
+    # Create tasks without waiting
+    task_a = asyncio.create_task(task("X", 1))
+    task_b = asyncio.create_task(task("Y", 2))
+    
+    # Wait for both
+    result_a = await task_a
+    result_b = await task_b`},
+      {title:"Async Context Managers & For Loops",code:`import asyncio
+
+class AsyncFile:
+    def __init__(self, filename):
+        self.filename = filename
+    
+    async def __aenter__(self):
+        print(f"Opening {self.filename}")
+        await asyncio.sleep(0.5)
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        print(f"Closing {self.filename}")
+        await asyncio.sleep(0.5)
+    
+    async def read(self):
+        await asyncio.sleep(0.5)
+        return "File contents"
+
+# Async context manager
+async def main():
+    async with AsyncFile("data.txt") as f:
+        data = await f.read()
+        print(data)
+
+asyncio.run(main())
+
+# Async iterator
+async def async_generator():
+    for i in range(3):
+        await asyncio.sleep(1)
+        yield i
+
+async def consume():
+    async for value in async_generator():
+        print(f"Got {value}")`}
+    ],
+    explanations:[
+      "async def defines a coroutine function.",
+      "await pauses execution until coroutine completes.",
+      "asyncio.gather() runs multiple coroutines concurrently.",
+      "async for iterates over async iterators.",
+      "async with handles async context managers (resource cleanup)."
+    ]
+  },
+  17:{
+    def:"File I/O allows reading and writing data to files. Python provides built-in functions and methods for working with different file types and modes.",
+    examples:[
+      {title:"Reading Files",code:`# Read entire file
+with open('example.txt', 'r') as f:
+    content = f.read()
+    print(content)
+
+# Read line by line
+with open('example.txt', 'r') as f:
+    for line in f:
+        print(line.strip())
+
+# Read all lines into list
+with open('example.txt', 'r') as f:
+    lines = f.readlines()
+    print(lines[0])  # First line
+
+# Read specific number of characters
+with open('example.txt', 'r') as f:
+    chunk = f.read(50)
+    print(chunk)`},
+      {title:"Writing Files",code:`# Write to file (overwrites)
+with open('output.txt', 'w') as f:
+    f.write("Hello, World!\\n")
+    f.write("Second line\\n")
+
+# Append to file
+with open('output.txt', 'a') as f:
+    f.write("Appended line\\n")
+
+# Write multiple lines
+lines = ["Line 1", "Line 2", "Line 3"]
+with open('output.txt', 'w') as f:
+    f.writelines([line + "\\n" for line in lines])
+
+# Binary mode
+with open('binary.bin', 'wb') as f:
+    f.write(b"Binary data")`},
+      {title:"Working with JSON & CSV",code:`import json
+import csv
+
+# Writing JSON
+data = {"name": "Alice", "age": 25, "skills": ["Python", "JavaScript"]}
+with open('data.json', 'w') as f:
+    json.dump(data, f, indent=2)
+
+# Reading JSON
+with open('data.json', 'r') as f:
+    loaded_data = json.load(f)
+    print(loaded_data)
+
+# Writing CSV
+with open('people.csv', 'w', newline='') as f:
+    writer = csv.writer(f)
+    writer.writerow(["Name", "Age", "City"])
+    writer.writerow(["Alice", 25, "NYC"])
+    writer.writerow(["Bob", 30, "LA"])
+
+# Reading CSV
+with open('people.csv', 'r') as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        print(row)`}
+    ],
+    explanations:[
+      "'r' = read, 'w' = write (overwrites), 'a' = append, 'b' = binary mode",
+      "Always use 'with' statement - ensures file closes automatically",
+      "read() returns entire file as string; readline() gets one line",
+      "readlines() returns list of lines; readlines() includes newlines",
+      "json.dump/load for JSON files; csv.writer/reader for CSV files"
+    ]
+  },
+  18:{
+    def:"Regular Expressions (regex) are patterns for matching and manipulating text. Python's re module provides regex functions.",
+    examples:[
+      {title:"Regex Basics",code:`import re
+
+# Search - finds first match
+text = "Hello World"
+result = re.search(r"World", text)
+print(result.group())  # World
+
+# Match - finds at beginning
+if re.match(r"Hello", text):
+    print("Starts with Hello")
+
+# Findall - finds all matches
+text = "apple123banana456cherry"
+numbers = re.findall(r"\\d+", text)
+print(numbers)  # ['123', '456']
+
+# Basic patterns
+pattern = r"\\d+"  # One or more digits
+pattern = r"[a-z]+"  # One or more lowercase
+pattern = r"[A-Z]"  # One uppercase letter`},
+      {title:"Pattern Matching & Groups",code:`import re
+
+text = "Contact: alice@example.com or bob@test.org"
+
+# Findall with groups
+emails = re.findall(r"([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)", text)
+print(emails)
+# [('alice', 'example.com'), ('bob', 'test.org')]
+
+# Named groups
+pattern = r"(?P<name>\\w+)@(?P<domain>[\\w.]+)"
+match = re.search(pattern, text)
+print(match.group('name'))    # alice
+print(match.group('domain'))  # example.com
+
+# String replacement
+text = "Call me at 555-1234"
+new_text = re.sub(r"\\d+", "XXX", text)
+print(new_text)  # Call me at XXX-XXXX
+
+# Case-insensitive
+pattern = r"hello"
+result = re.search(pattern, "HELLO world", re.IGNORECASE)
+print(result.group())  # HELLO`},
+      {title:"Common Regex Patterns",code:`import re
+
+# Email validation
+email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+
+# Phone number
+phone_pattern = r"^\\(?\\d{3}\\)?[-. ]?\\d{3}[-. ]?\\d{4}$"
+
+# URL
+url_pattern = r"https?://[^\\s]+"
+
+# Extracting data
+log = "2024-05-09 ERROR: Database connection failed"
+pattern = r"(\\d{4}-\\d{2}-\\d{2})\\s+(\\w+):\\s+(.*)"
+match = re.match(pattern, log)
+if match:
+    date, level, message = match.groups()
+    print(f"Date: {date}, Level: {level}, Message: {message}")
+
+# Split by pattern
+text = "apple,banana;orange:grape"
+fruits = re.split(r"[,;:]", text)
+print(fruits)  # ['apple', 'banana', 'orange', 'grape']`}
+    ],
+    explanations:[
+      "re.search() finds first match; re.findall() finds all matches",
+      "\\d = digit, \\w = word char, \\s = whitespace, . = any char",
+      "[] = character class, () = group, * = 0+, + = 1+, ? = 0-1",
+      "^ = start, $ = end, [^] = negation",
+      "re.IGNORECASE flag makes matching case-insensitive"
+    ]
+  },
+  19:{
+    def:"Higher-order functions are functions that take other functions as arguments or return functions. They enable functional programming patterns.",
+    examples:[
+      {title:"Functions as Arguments",code:`# Higher-order function
+def apply_operation(func, a, b):
+    return func(a, b)
+
+def add(x, y):
+    return x + y
+
+def multiply(x, y):
+    return x * y
+
+print(apply_operation(add, 5, 3))          # 8
+print(apply_operation(multiply, 5, 3))     # 15
+
+# With lambda
+print(apply_operation(lambda x, y: x - y, 10, 3))  # 7
+
+# Applying function to list
+def apply_to_list(func, items):
+    return [func(item) for item in items]
+
+numbers = [1, 2, 3, 4, 5]
+squared = apply_to_list(lambda x: x**2, numbers)
+print(squared)  # [1, 4, 9, 16, 25]`},
+      {title:"Functions Returning Functions",code:`# Factory pattern
+def make_multiplier(factor):
+    def multiplier(x):
+        return x * factor
+    return multiplier
+
+times_three = make_multiplier(3)
+times_five = make_multiplier(5)
+
+print(times_three(10))  # 30
+print(times_five(10))   # 50
+
+# Decorator pattern
+def repeat_decorator(times):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for _ in range(times):
+                func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@repeat_decorator(times=3)
+def say_hello():
+    print("Hello!")
+
+say_hello()  # Prints "Hello!" 3 times`},
+      {title:"Function Composition",code:`# Compose functions
+def compose(*functions):
+    def composed(x):
+        for func in reversed(functions):
+            x = func(x)
+        return x
+    return composed
+
+def add_five(x):
+    return x + 5
+
+def multiply_by_two(x):
+    return x * 2
+
+def square(x):
+    return x ** 2
+
+# Compose: square -> multiply_by_two -> add_five
+pipeline = compose(add_five, multiply_by_two, square)
+print(pipeline(3))  # (3^2) * 2 + 5 = 23
+
+# Pipe (left to right)
+from functools import reduce
+
+def pipe(*functions):
+    return compose(*reversed(functions))
+
+pipeline2 = pipe(square, multiply_by_two, add_five)
+print(pipeline2(3))  # 3^2=9, 9*2=18, 18+5=23`}
+    ],
+    explanations:[
+      "Higher-order functions promote code reuse and abstraction",
+      "Callbacks and event handlers are common use cases",
+      "Closures enable higher-order functions to maintain state",
+      "Function composition creates powerful data transformation pipelines",
+      "map(), filter(), sorted() are built-in higher-order functions"
+    ]
+  },
+  20:{
+    def:"map(), filter(), and reduce() are functional programming tools. map() transforms each item, filter() selects items based on condition, reduce() combines items.",
+    examples:[
+      {title:"map() Function",code:`# map applies function to each item
+numbers = [1, 2, 3, 4, 5]
+
+# Traditional
+squared = [x**2 for x in numbers]
+
+# Using map
+squared = list(map(lambda x: x**2, numbers))
+print(squared)  # [1, 4, 9, 16, 25]
+
+# With named function
+def double(x):
+    return x * 2
+
+doubled = list(map(double, numbers))
+print(doubled)  # [2, 4, 6, 8, 10]
+
+# Map over multiple sequences
+list1 = [1, 2, 3]
+list2 = [10, 20, 30]
+sums = list(map(lambda x, y: x + y, list1, list2))
+print(sums)  # [11, 22, 33]`},
+      {title:"filter() Function",code:`# filter selects items that match condition
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Traditional
+evens = [x for x in numbers if x % 2 == 0]
+
+# Using filter
+evens = list(filter(lambda x: x % 2 == 0, numbers))
+print(evens)  # [2, 4, 6, 8, 10]
+
+# Filter objects
+students = [
+    {"name": "Alice", "grade": 85},
+    {"name": "Bob", "grade": 75},
+    {"name": "Charlie", "grade": 92}
+]
+
+passed = list(filter(lambda s: s["grade"] >= 80, students))
+print(passed)
+# [{'name': 'Alice', 'grade': 85}, {'name': 'Charlie', 'grade': 92}]`},
+      {title:"reduce() Function",code:`from functools import reduce
+
+numbers = [1, 2, 3, 4, 5]
+
+# Sum all numbers
+total = reduce(lambda x, y: x + y, numbers)
+print(total)  # 15
+
+# Product
+product = reduce(lambda x, y: x * y, numbers)
+print(product)  # 120
+
+# Find maximum
+maximum = reduce(lambda x, y: x if x > y else y, numbers)
+print(maximum)  # 5
+
+# Complex example - word frequency
+words = ["apple", "banana", "apple", "cherry", "banana", "apple"]
+frequency = reduce(
+    lambda acc, word: {**acc, word: acc.get(word, 0) + 1},
+    words,
+    {}
+)
+print(frequency)
+# {'apple': 3, 'banana': 2, 'cherry': 1}`}
+    ],
+    explanations:[
+      "map(function, iterable) returns iterator; convert to list if needed",
+      "filter(function, iterable) returns items where function is True",
+      "reduce(function, iterable) combines items into single result",
+      "All three return iterators (lazy evaluation) - use list() to materialize",
+      "List comprehensions often more readable than map()/filter()"
+    ]
+  },
+  21:{
+    def:"Iterators are objects that implement __iter__() and __next__() methods. They enable lazy iteration through sequences without loading everything into memory.",
+    examples:[
+      {title:"Iterator Basics",code:`# Create iterator
+numbers = [1, 2, 3]
+iterator = iter(numbers)
+
+# Get next item
+print(next(iterator))  # 1
+print(next(iterator))  # 2
+print(next(iterator))  # 3
+# next(iterator)  # StopIteration error
+
+# Iteration protocol
+class CountUp:
+    def __init__(self, max):
+        self.max = max
+        self.current = 0
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self.current < self.max:
+            self.current += 1
+            return self.current
+        else:
+            raise StopIteration
+
+for num in CountUp(3):
+    print(num)  # 1, 2, 3`},
+      {title:"Iterator Examples",code:`# Infinite iterator
+class Fibonacci:
+    def __init__(self):
+        self.a, self.b = 0, 1
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        value = self.a
+        self.a, self.b = self.b, self.a + self.b
+        return value
+
+fib = Fibonacci()
+# Get first 5 fibonacci numbers
+for i in range(5):
+    print(next(fib))  # 0, 1, 1, 2, 3
+
+# Iterator with conditions
+class EvenNumbers:
+    def __init__(self, max):
+        self.max = max
+        self.current = 0
+    
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        if self.current >= self.max:
+            raise StopIteration
+        self.current += 2
+        return self.current - 2
+
+for num in EvenNumbers(10):
+    print(num)  # 0, 2, 4, 6, 8`},
+      {title:"Itertools Module",code:`import itertools
+
+# count() - infinite counter
+counter = itertools.count(10, 2)  # start at 10, step by 2
+print(next(counter))  # 10
+print(next(counter))  # 12
+
+# cycle() - repeat sequence
+colors = ['red', 'green', 'blue']
+cycle_iter = itertools.cycle(colors)
+for i in range(7):
+    print(next(cycle_iter))  # red, green, blue, red, green, blue, red
+
+# chain() - combine iterables
+list1 = [1, 2, 3]
+list2 = [4, 5, 6]
+combined = itertools.chain(list1, list2)
+print(list(combined))  # [1, 2, 3, 4, 5, 6]
+
+# combinations & permutations
+from itertools import combinations, permutations
+items = [1, 2, 3]
+print(list(combinations(items, 2)))  # (1,2), (1,3), (2,3)
+print(list(permutations(items, 2)))   # (1,2), (1,3), (2,1), (2,3), (3,1), (3,2)`}
+    ],
+    explanations:[
+      "Iterators implement __iter__() (returns self) and __next__() (returns next value)",
+      "Raise StopIteration when iteration is complete",
+      "Generators are iterators created with yield - simpler than classes",
+      "itertools module provides useful iterator tools (count, cycle, chain, etc)",
+      "zip(), enumerate(), reversed() also return iterators"
+    ]
+  },
+  23:{
+    def:"Descriptors are objects that implement __get__(), __set__(), and __delete__() methods. They customize attribute access on classes.",
+    examples:[
+      {title:"Descriptor Basics",code:`# Simple descriptor
+class Positive:
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj._value
+    
+    def __set__(self, obj, value):
+        if value <= 0:
+            raise ValueError("Must be positive")
+        obj._value = value
+    
+    def __delete__(self, obj):
+        del obj._value
+
+class Account:
+    balance = Positive()
+    
+    def __init__(self, initial_balance):
+        self.balance = initial_balance
+
+acc = Account(100)
+print(acc.balance)  # 100
+
+acc.balance = 50  # Works
+# acc.balance = -10  # Error!`},
+      {title:"Descriptor with Validation",code:`class ValidatedString:
+    def __init__(self, min_length=0, max_length=None):
+        self.min_length = min_length
+        self.max_length = max_length
+    
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return obj.__dict__.get(self.name, None)
+    
+    def __set__(self, obj, value):
+        if len(value) < self.min_length:
+            raise ValueError(f"Min length is {self.min_length}")
+        if self.max_length and len(value) > self.max_length:
+            raise ValueError(f"Max length is {self.max_length}")
+        obj.__dict__[self.name] = value
+    
+    def __set_name__(self, owner, name):
+        self.name = name
+
+class Person:
+    name = ValidatedString(min_length=1, max_length=50)
+    email = ValidatedString(min_length=5)
+
+p = Person()
+p.name = "Alice"      # OK
+p.email = "alice@example.com"  # OK
+# p.name = ""  # Error!`},
+      {title:"Property vs Descriptor",code:`# Property (simplest descriptor)
+class Circle:
+    def __init__(self, radius):
+        self._radius = radius
+    
+    @property
+    def radius(self):
+        return self._radius
+    
+    @radius.setter
+    def radius(self, value):
+        if value <= 0:
+            raise ValueError("Radius must be positive")
+        self._radius = value
+    
+    @property
+    def area(self):
+        import math
+        return math.pi * self._radius ** 2
+
+c = Circle(5)
+print(c.area)  # 78.5...
+c.radius = 10
+print(c.area)  # 314.1...
+
+# classmethod & staticmethod are also descriptors
+class MyClass:
+    @staticmethod
+    def static_method():
+        return "Static"
+    
+    @classmethod
+    def class_method(cls):
+        return f"Called on {cls.__name__}"`}
+    ],
+    explanations:[
+      "__get__() called when accessing attribute",
+      "__set__() called when assigning to attribute",
+      "__delete__() called when deleting attribute",
+      "Properties are descriptors with @property decorator",
+      "@property, @staticmethod, @classmethod are built-in descriptors"
+    ]
+  },
+  24:{
+    def:"Abstract Base Classes (ABC) define interfaces that subclasses must implement. They prevent instantiation of incomplete classes.",
+    examples:[
+      {title:"ABC Basics",code:`from abc import ABC, abstractmethod
+
+class Animal(ABC):
+    @abstractmethod
+    def speak(self):
+        pass
+    
+    @abstractmethod
+    def move(self):
+        pass
+    
+    def breathe(self):
+        return "Breathing..."
+
+# Can't instantiate abstract class
+# animal = Animal()  # Error!
+
+class Dog(Animal):
+    def speak(self):
+        return "Woof!"
+    
+    def move(self):
+        return "Running on four legs"
+
+class Bird(Animal):
+    def speak(self):
+        return "Tweet!"
+    
+    def move(self):
+        return "Flying"
+
+dog = Dog()
+print(dog.speak())  # Woof!
+print(dog.breathe())  # Breathing...`},
+      {title:"Abstract Properties & Methods",code:`from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @property
+    @abstractmethod
+    def area(self):
+        pass
+    
+    @property
+    @abstractmethod
+    def perimeter(self):
+        pass
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+    
+    @property
+    def area(self):
+        return self.side ** 2
+    
+    @property
+    def perimeter(self):
+        return 4 * self.side
+
+class Circle(Shape):
+    def __init__(self, radius):
+        self.radius = radius
+    
+    @property
+    def area(self):
+        import math
+        return math.pi * self.radius ** 2
+    
+    @property
+    def perimeter(self):
+        import math
+        return 2 * math.pi * self.radius
+
+square = Square(5)
+print(f"Square area: {square.area}")  # 25
+
+circle = Circle(3)
+print(f"Circle area: {circle.area:.2f}")  # 28.27`},
+      {title:"Abstract Class Methods",code:`from abc import ABC, abstractmethod
+
+class Database(ABC):
+    @abstractmethod
+    def connect(self):
+        pass
+    
+    @abstractmethod
+    def query(self, sql):
+        pass
+    
+    @classmethod
+    @abstractmethod
+    def from_config(cls, config):
+        pass
+
+class MySQLDatabase(Database):
+    def __init__(self, connection):
+        self.connection = connection
+    
+    def connect(self):
+        return "Connected to MySQL"
+    
+    def query(self, sql):
+        return f"Executing on MySQL: {sql}"
+    
+    @classmethod
+    def from_config(cls, config):
+        connection = f"mysql://{config['host']}"
+        return cls(connection)
+
+db = MySQLDatabase.from_config({'host': 'localhost'})
+print(db.connect())`}
+    ],
+    explanations:[
+      "ABC prevents instantiation of abstract classes",
+      "@abstractmethod forces subclasses to implement method",
+      "@abstractproperty ensures subclasses define property",
+      "Mix abstract and concrete methods in same class",
+      "Useful for defining interfaces and enforcing contracts"
+    ]
+  },
+  26:{
+    def:"Threading allows multiple tasks to run concurrently within a single process. Multiprocessing uses multiple processes for true parallelism.",
+    examples:[
+      {title:"Threading Basics",code:`import threading
+import time
+
+def worker(name, delay):
+    print(f"{name} started")
+    time.sleep(delay)
+    print(f"{name} finished")
+
+# Create threads
+thread1 = threading.Thread(target=worker, args=("Thread-1", 2))
+thread2 = threading.Thread(target=worker, args=("Thread-2", 1))
+
+# Start threads
+thread1.start()
+thread2.start()
+
+# Wait for completion
+thread1.join()
+thread2.join()
+
+print("All threads done")
+
+# Using class
+class Worker(threading.Thread):
+    def __init__(self, name):
+        super().__init__()
+        self.name = name
+    
+    def run(self):
+        print(f"{self.name} running")`},
+      {title:"Thread Synchronization",code:`import threading
+import time
+
+counter = 0
+lock = threading.Lock()
+
+def increment():
+    global counter
+    for _ in range(100000):
+        # Without lock - race condition!
+        # counter += 1
+        
+        # With lock - thread-safe
+        with lock:
+            counter += 1
+
+# Create threads
+threads = [threading.Thread(target=increment) for _ in range(5)]
+
+for t in threads:
+    t.start()
+
+for t in threads:
+    t.join()
+
+print(f"Counter: {counter}")  # 500000 (correct)
+
+# Semaphore - limit concurrent access
+semaphore = threading.Semaphore(3)
+
+def limited_resource():
+    with semaphore:
+        print("Using resource")
+        time.sleep(1)`},
+      {title:"Multiprocessing",code:`import multiprocessing
+import time
+
+def cpu_intensive(n):
+    print(f"Starting calculation {n}")
+    total = sum(i*i for i in range(100000000))
+    print(f"Finished {n}")
+    return total
+
+if __name__ == "__main__":
+    # Single process
+    start = time.time()
+    cpu_intensive(1)
+    cpu_intensive(2)
+    print(f"Sequential: {time.time() - start:.2f}s")
+    
+    # Multiple processes
+    start = time.time()
+    with multiprocessing.Pool(2) as pool:
+        results = pool.map(cpu_intensive, [1, 2])
+    print(f"Parallel: {time.time() - start:.2f}s")
+    
+    # Queue for communication
+    queue = multiprocessing.Queue()
+    
+    def worker(q):
+        q.put("Result from process")
+    
+    p = multiprocessing.Process(target=worker, args=(queue,))
+    p.start()
+    print(queue.get())`}
+    ],
+    explanations:[
+      "Threads share memory but GIL limits true concurrency",
+      "Use threading for I/O-bound tasks (network, file operations)",
+      "Use multiprocessing for CPU-bound tasks",
+      "Lock (mutex) prevents race conditions on shared data",
+      "Queue enables safe communication between processes"
+    ]
+  },
+  27:{
+    def:"Type hints annotate function arguments and return types. They improve code clarity and enable static type checking with tools like mypy.",
+    examples:[
+      {title:"Basic Type Hints",code:`# Function type hints
+def add(a: int, b: int) -> int:
+    return a + b
+
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+# Variable type hints
+age: int = 25
+name: str = "Alice"
+scores: list = [85, 90, 92]
+
+# Function call
+result = add(5, 3)  # Type checker knows result is int
+
+# Multiple return types
+def get_value(key: str) -> int | None:
+    data = {"count": 42}
+    return data.get(key)
+
+# Or using Union
+from typing import Union
+def process(value: Union[int, str]) -> Union[int, str]:
+    if isinstance(value, int):
+        return value * 2
+    return value.upper()`},
+      {title:"Collections Type Hints",code:`from typing import List, Dict, Tuple, Set, Optional
+
+# Collection types
+def process_numbers(nums: List[int]) -> int:
+    return sum(nums)
+
+def create_mapping(keys: List[str]) -> Dict[str, int]:
+    return {k: len(k) for k in keys}
+
+def get_coordinates() -> Tuple[int, int]:
+    return (10, 20)
+
+def get_unique(items: List[int]) -> Set[int]:
+    return set(items)
+
+# Optional - can be None
+def find_user(user_id: int) -> Optional[Dict[str, str]]:
+    if user_id > 0:
+        return {"id": str(user_id), "name": "User"}
+    return None
+
+# Generic types
+from typing import TypeVar, Generic
+
+T = TypeVar('T')
+
+class Container(Generic[T]):
+    def __init__(self, value: T):
+        self.value = value
+    
+    def get(self) -> T:
+        return self.value`},
+      {title:"Type Checking with mypy",code:`# Save as: example.py
+from typing import List
+
+def add(a: int, b: int) -> int:
+    return a + b
+
+def process_list(items: List[str]) -> int:
+    return len(items)
+
+# Correct usage
+result1 = add(5, 3)  # OK
+result2 = process_list(["a", "b"])  # OK
+
+# Type errors (caught by mypy)
+# result3 = add("5", 3)  # Error: str not int
+# result4 = process_list([1, 2, 3])  # Error: List[int] not List[str]
+
+# Run type checking:
+# mypy example.py
+
+# Strict mode catches more issues:
+# mypy --strict example.py
+
+# Type: ignore comment (use sparingly)
+value = "string"
+number: int = value  # type: ignore`}
+    ],
+    explanations:[
+      "Type hints are optional in Python - runtime doesn't enforce them",
+      "Use mypy for static type checking - catch bugs before runtime",
+      "-> indicates return type; : indicates parameter type",
+      "Optional[T] means T or None; Union[A, B] means A or B",
+      "Type hints improve IDE autocomplete and code documentation"
+    ]
+  },
+  28:{
+    def:"Closures are functions that capture variables from their enclosing scope. The nonlocal keyword allows modifying captured variables.",
+    examples:[
+      {title:"Closure Basics",code:`def outer(x):
+    # Inner function captures 'x' from outer
+    def inner(y):
+        return x + y
+    return inner
+
+add_five = outer(5)
+print(add_five(3))   # 8
+print(add_five(10))  # 15
+
+# Closure with multiple captures
+def multiplier(factor):
+    def multiply(number):
+        return number * factor
+    return multiply
+
+times_three = multiplier(3)
+times_five = multiplier(5)
+
+print(times_three(10))  # 30
+print(times_five(10))   # 50
+
+# Accessing closure variables
+print(add_five.__closure__)  # Shows captured variables
+print(add_five.__closure__[0].cell_contents)  # 5`},
+      {title:"Modifying Closure Variables",code:`def counter():
+    count = 0
+    
+    def increment():
+        nonlocal count
+        count += 1
+        return count
+    
+    def decrement():
+        nonlocal count
+        count -= 1
+        return count
+    
+    return increment, decrement
+
+inc, dec = counter()
+
+print(inc())  # 1
+print(inc())  # 2
+print(inc())  # 3
+print(dec())  # 2
+
+# Without nonlocal - error!
+def broken_counter():
+    count = 0
+    
+    def increment():
+        # count += 1  # Error: UnboundLocalError
+        # Need nonlocal count
+        pass
+    
+    return increment`},
+      {title:"Closure Patterns",code:`# Decorator pattern (closure)
+def timer(func):
+    import time
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        elapsed = time.time() - start
+        print(f"Took {elapsed:.4f}s")
+        return result
+    return wrapper
+
+@timer
+def slow_function():
+    import time
+    time.sleep(1)
+
+# Factory pattern (closure)
+def make_adder(n):
+    def adder(x):
+        return x + n
+    return adder
+
+add10 = make_adder(10)
+print(add10(5))  # 15
+
+# Callback with state
+def create_callback():
+    state = {"count": 0}
+    
+    def callback():
+        state["count"] += 1
+        return state["count"]
+    
+    return callback
+
+cb = create_callback()
+print(cb())  # 1
+print(cb())  # 2`}
+    ],
+    explanations:[
+      "Closure captures variables from enclosing scope",
+      "nonlocal allows modifying variables in enclosing scope",
+      "Global scope requires global keyword; local scope is default",
+      "Each function call creates new closure instance",
+      "Closures are used in decorators, callbacks, and factory patterns"
+    ]
+  },
+  29:{
+    def:"__slots__ restricts which attributes instances can have, reducing memory usage. It optimizes performance for classes with many instances.",
+    examples:[
+      {title:"Using Slots",code:`# Without slots (flexible but more memory)
+class PersonNormal:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+# With slots (restricted but less memory)
+class PersonSlots:
+    __slots__ = ['name', 'age']
+    
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+# PersonSlots().email = "test@example.com"  # Error!
+
+import sys
+
+p1 = PersonNormal("Alice", 25)
+p2 = PersonSlots("Alice", 25)
+
+print(f"Normal: {sys.getsizeof(p1.__dict__)} bytes")
+print(f"Slots:  {sys.getsizeof(p2)} bytes")
+
+# Compare with many instances
+import time
+start = time.time()
+normal_list = [PersonNormal(f"Person{i}", i) for i in range(100000)]
+print(f"Normal creation: {time.time() - start:.3f}s")
+
+start = time.time()
+slots_list = [PersonSlots(f"Person{i}", i) for i in range(100000)]
+print(f"Slots creation: {time.time() - start:.3f}s")`},
+      {title:"Slots with Properties",code:`class Temperature:
+    __slots__ = ['_celsius']
+    
+    def __init__(self, celsius):
+        self._celsius = celsius
+    
+    @property
+    def celsius(self):
+        return self._celsius
+    
+    @celsius.setter
+    def celsius(self, value):
+        if value < -273.15:
+            raise ValueError("Too cold!")
+        self._celsius = value
+    
+    @property
+    def fahrenheit(self):
+        return self._celsius * 9/5 + 32
+
+temp = Temperature(0)
+print(temp.fahrenheit)  # 32.0
+
+# Slots with methods (still works)
+class Counter:
+    __slots__ = ['_count']
+    
+    def __init__(self):
+        self._count = 0
+    
+    def increment(self):
+        self._count += 1
+    
+    def get(self):
+        return self._count`},
+      {title:"Slots Inheritance",code:`# Parent with slots
+class Base:
+    __slots__ = ['x', 'y']
+
+# Child inherits slots
+class Derived(Base):
+    __slots__ = ['z']  # Additional slots
+
+d = Derived()
+d.x = 1
+d.y = 2
+d.z = 3
+# d.w = 4  # Error!
+
+# Alternative: no slots in parent
+class FlexibleBase:
+    pass
+
+class RestrictedChild(FlexibleBase):
+    __slots__ = ['x']  # Can still use dict from parent
+    
+    def __init__(self):
+        self.x = 10
+
+rc = RestrictedChild()
+# Still has __dict__ from parent
+rc.__dict__['extra'] = "This works"`}
+    ],
+    explanations:[
+      "__slots__ prevents dynamic attribute addition",
+      "Significantly reduces memory for objects with many instances",
+      "Slightly faster attribute access due to direct storage",
+      "Incompatible with __dict__ and weak references (by default)",
+      "Good for performance-critical classes; avoid for development"
+    ]
+  },
+  30:{
+    def:"Monkey patching dynamically modifies classes or modules at runtime. It enables runtime customization but should be used cautiously.",
+    examples:[
+      {title:"Monkey Patching Basics",code:`# Original class
+class Calculator:
+    def add(self, a, b):
+        return a + b
+
+# Monkey patch - add new method
+def subtract(self, a, b):
+    return a - b
+
+Calculator.subtract = subtract
+
+calc = Calculator()
+print(calc.add(10, 5))      # 15
+print(calc.subtract(10, 5))  # 5
+
+# Monkey patch - modify existing method
+original_add = Calculator.add
+
+def new_add(self, a, b):
+    print(f"Adding {a} + {b}")
+    return original_add(self, a, b)
+
+Calculator.add = new_add
+print(calc.add(10, 5))
+# Output: Adding 10 + 5
+# 15
+
+# Instance-level monkey patching
+calc2 = Calculator()
+def custom_add(a, b):
+    return (a + b) * 2
+
+calc2.add = custom_add
+print(calc2.add(5, 3))  # 16 (only for this instance)`},
+      {title:"Monkey Patching Modules",code:`# Original module: mymodule.py
+# def greet(name):
+#     return f"Hello, {name}!"
+
+import mymodule
+
+# Monkey patch at module level
+def new_greet(name):
+    return f"Hi there, {name}!"
+
+mymodule.greet = new_greet
+
+# All code using mymodule now gets new version
+print(mymodule.greet("Alice"))  # Hi there, Alice!
+
+# Replace entire module
+import sys
+class MockModule:
+    value = 42
+
+sys.modules['mymodule'] = MockModule()
+
+# Using decorator for patching
+def patch_method(cls, method_name):
+    def decorator(func):
+        setattr(cls, method_name, func)
+        return func
+    return decorator
+
+@patch_method(Calculator, 'multiply')
+def multiply(self, a, b):
+    return a * b`},
+      {title:"Testing with Monkey Patches",code:`# Production code
+import requests
+
+def fetch_data(url):
+    response = requests.get(url)
+    return response.json()
+
+# Testing with monkey patch
+def test_fetch_data():
+    # Mock response
+    class MockResponse:
+        def json(self):
+            return {"data": "mocked"}
+    
+    # Monkey patch requests.get
+    original_get = requests.get
+    requests.get = lambda url: MockResponse()
+    
+    result = fetch_data("http://example.com")
+    assert result == {"data": "mocked"}
+    
+    # Restore original
+    requests.get = original_get
+
+# Better: use unittest.mock
+from unittest.mock import patch
+
+def test_with_mock():
+    with patch('requests.get') as mock_get:
+        mock_get.return_value.json.return_value = {"data": "mocked"}
+        result = fetch_data("http://example.com")
+        assert result == {"data": "mocked"}
+        mock_get.assert_called_once()`}
+    ],
+    explanations:[
+      "Monkey patching modifies classes/modules at runtime",
+      "Can add, remove, or replace methods and attributes",
+      "Useful for testing (mocking) and runtime customization",
+      "Avoid in production - creates hard-to-track dependencies",
+      "Use unittest.mock for testing instead of manual patching"
+    ]
+  }
+};
+
+// Initialize
+let currentFilter = 'all';
+let currentTopic = null;
+
+function initializeTopics() {
+  const desklist = document.getElementById('deskqlist');
+  const moblist = document.getElementById('moblist');
+  
+  topics.forEach(topic => {
+    const item = createTopicItem(topic.id, topic.title, topic.cat);
+    desklist.appendChild(item);
+    moblist.appendChild(item.cloneNode(true));
+  });
+  
+  showTopic(1);
+}
+
+function createTopicItem(id, title, category) {
+  const div = document.createElement('div');
+  div.className = 'qi';
+  div.id = `si-${id}`;
+  div.onclick = () => showTopic(id);
+  
+  const numSpan = document.createElement('span');
+  numSpan.className = 'qn';
+  numSpan.textContent = String(id).padStart(2, '0');
+  
+  const titleSpan = document.createElement('span');
+  titleSpan.className = 'qt';
+  titleSpan.textContent = title;
+  
+  const dot = document.createElement('span');
+  dot.className = 'fdot';
+  dot.style.background = category === 'basic' ? '#10b981' : 
+                         category === 'intermediate' ? '#3b82f6' : '#a78bfa';
+  
+  div.appendChild(numSpan);
+  div.appendChild(titleSpan);
+  div.appendChild(dot);
+  
+  return div;
+}
+
+function showTopic(id) {
+  currentTopic = id;
+  const topic = topics.find(t => t.id === id);
+  const info = content[id];
+  
+  // Update active item
+  document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+  document.getElementById(`si-${id}`).classList.add('active');
+  
+  if (currentFilter !== 'all' && topic.cat !== currentFilter) {
+    return;
+  }
+  
+  let categoryColor = topic.cat === 'basic' ? '#10b981' : 
+                      topic.cat === 'intermediate' ? '#3b82f6' : '#a78bfa';
+  let categoryLabel = topic.cat.charAt(0).toUpperCase() + topic.cat.slice(1);
+  
+  let html = `
+    <div class="prog-strip">
+      <div class="prog-fill" style="width:${(id/topics.length)*100}%"></div>
+    </div>
+    
+    <div class="qhead">
+      <span class="qnum">${String(id).padStart(2, '0')}</span>
+      <div style="flex:1">
+        <h2 class="qtitle">${topic.title}</h2>
+        <div class="badges">
+          <span class="fbadge" style="border-color:${categoryColor};color:${categoryColor};background:${categoryColor}33">● ${categoryLabel}</span>
+          <span class="fbadge" style="border-color:#6b7280;color:#9ca3af">${topic.level}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="def-section">
+      <strong>Definition:</strong><br>${info.def}
+    </div>
+  `;
+  
+  // Code examples
+  if (info.examples && info.examples.length > 0) {
+    html += '<div class="slabel">Code Examples</div>';
+    info.examples.forEach(example => {
+      html += `
+        <div class="dbox">
+          <div class="rcard" style="background:#1a1f2e;border:none;border-radius:8px 8px 0 0">
+            <h4 style="color:#ffffff">${example.title}</h4>
+          </div>
+          <div class="code-block">
+            <code>${escapeHtml(example.code)}</code>
+          </div>
+        </div>
+      `;
+    });
+  }
+  
+  // Explanations
+  if (info.explanations && info.explanations.length > 0) {
+    html += '<div class="slabel">Key Concepts</div>';
+    info.explanations.forEach(exp => {
+      html += `<div class="expl-box"><strong>→</strong> ${exp}</div>`;
+    });
+  }
+  
+  // Navigation
+  html += `
+    <div class="navrow">
+      <button class="nbtn ${id === 1 ? 'off' : ''}" onclick="showTopic(${id-1})">← Previous</button>
+      <button class="nbtn ${id === topics.length ? 'off' : ''}" onclick="showTopic(${id+1})">Next →</button>
+    </div>
+  `;
+  
+  document.getElementById('content').innerHTML = html;
+}
+
+function toggleFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.fbtn').forEach(btn => btn.classList.remove('on'));
+  document.getElementById(`filter-${filter === 'inter' ? 'inter' : filter}`).classList.add('on');
+  
+  filterQuestions();
+  if (currentTopic) showTopic(currentTopic);
+}
+
+function filterQuestions() {
+  const search = (document.getElementById('searchbox')?.value || '').toLowerCase();
+  
+  document.querySelectorAll('.qi').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    const topicId = parseInt(item.id.split('-')[1]);
+    const topic = topics.find(t => t.id === topicId);
+    
+    let matches = text.includes(search);
+    if (currentFilter !== 'all') matches = matches && topic.cat === currentFilter;
+    
+    item.classList.toggle('hidden', !matches);
+  });
+}
+
+function toggleMobOverlay() {
+  document.getElementById('moboverlay').classList.toggle('open');
+}
+
+// Event listeners
+document.getElementById('searchbox')?.addEventListener('keyup', filterQuestions);
+document.getElementById('searchbox-mob')?.addEventListener('keyup', filterQuestions);
+
+// Initialize on load
+window.addEventListener('load', initializeTopics);
+
+function escapeHtml(text) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+</script>
+
+</body>
+</html>

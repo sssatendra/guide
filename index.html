@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Mastery Hub — Curated Learning Tracks</title>
+  <meta name="description" content="A premium repository of senior-level engineering guides covering React, Python, Testing, and System Design.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --card-bg: #0f0f12;
+      --border: #1f1f23;
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.15);
+      --text: #ffffff;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ── BACKGROUND GRADIENT ── */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 4rem 0 6rem;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── TRACKS GRID ── */
+    .tracks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+      padding-bottom: 8rem;
+    }
+
+    .track-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .track-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.03), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .track-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+
+    .track-card:hover::before {
+      opacity: 1;
+    }
+
+    .track-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .track-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .track-level {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .track-duration {
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .track-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .track-desc {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      flex: 1;
+    }
+
+    .track-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .start-btn {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .start-btn svg {
+      transition: transform 0.2s;
+    }
+
+    .track-card:hover .start-btn svg {
+      transform: translateX(4px);
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .dot.fill {
+      background: var(--success);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 4rem 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .container { padding: 0 1.5rem; }
+      header { padding: 3rem 0; }
+      .tracks-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="container">
+    <header>
+      <div class="badge">Mastery Hub v1.0</div>
+      <h1>Choose Your <br>Learning Track</h1>
+      <p class="subtitle">Premium, senior-level curriculum designed for the modern engineer. Pick a path to start your journey today.</p>
+    </header>
+
+    <div class="tracks-grid">
+      <!-- PYTHON MASTERY -->
+      <a href="python-mastery-guide.html" class="track-card">
+        <div class="track-icon">🐍</div>
+        <div class="track-meta">
+          <span class="track-level">Fundamentals</span>
+          <span class="track-duration">20 Modules</span>
+        </div>
+        <h3 class="track-title">Python Core <br>Mastery</h3>
+        <p class="track-desc">From basic syntax to advanced decorators, generators, and memory management. The complete roadmap for Python engineers.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <!-- PYTHON TESTING -->
+      <a href="python-testing-guide.html" class="track-card">
+        <div class="track-icon">🧪</div>
+        <div class="track-meta">
+          <span class="track-level">Expert</span>
+          <span class="track-duration">20 Topics</span>
+        </div>
+        <h3 class="track-title">Python Production Testing</h3>
+        <p class="track-desc">Master Pytest, Fixtures, Mocking, and Async testing. Learn to build robust, bug-free production systems with a 100% confidence rate.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <!-- REACT NEXTJS -->
+      <a href="react-nextjs-guide.html" class="track-card">
+        <div class="track-icon">⚛️</div>
+        <div class="track-meta">
+          <span class="track-level">Advanced</span>
+          <span class="track-duration">35 Modules</span>
+        </div>
+        <h3 class="track-title">React & Next.js <br>Mastery</h3>
+        <p class="track-desc">Deep dive into App Router, Server Components, SSR, and complex state management patterns used in modern high-performance web apps.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <!-- REACT TESTING -->
+      <a href="react-testing-guide.html" class="track-card">
+        <div class="track-icon">🛠️</div>
+        <div class="track-meta">
+          <span class="track-level">Expert</span>
+          <span class="track-duration">21 Topics</span>
+        </div>
+        <h3 class="track-title">React Production Testing</h3>
+        <p class="track-desc">Master Vitest, RTL, MSW, and end-to-end strategies. Learn to test behavior over implementation to ensure long-term maintainability.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+
+      <!-- SYSTEM DESIGN -->
+      <a href="system-design-45.html" class="track-card">
+        <div class="track-icon">🏗️</div>
+        <div class="track-meta">
+          <span class="track-level">Senior+</span>
+          <span class="track-duration">45 Topics</span>
+        </div>
+        <h3 class="track-title">System Design <br>Architecture</h3>
+        <p class="track-desc">Scalability, Availability, Consistency. Master the patterns used to build world-class distributed systems at scale.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <footer>
+      <p>&copy; 2026 Engineering Mastery Hub. Curated for senior developers.</p>
+    </footer>
+  </div>
+</body>
+</html>

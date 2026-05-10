@@ -1,0 +1,3097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>React & Next.js — Complete Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d40;
+  --border:#2a3348;--text:#f0f0f0;--text2:#c8d0dc;--muted:#8892a4;
+  --amber:#f59e0b;--blue:#3b82f6;--green:#10b981;--red:#ef4444;
+  --purple:#a78bfa;--cyan:#22d3ee;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.logo{font-size:1rem;font-weight:700;color:var(--amber)}
+.logo span{color:var(--text2);font-weight:400;font-size:.82rem}
+.search-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.38rem .8rem;color:var(--text);font-family:'Syne',sans-serif;font-size:.82rem;width:220px;outline:none}
+.search-box:focus{border-color:var(--amber)}
+.search-box::placeholder{color:var(--muted)}
+
+/* TAB NAV */
+.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:50px;z-index:199;overflow-x:auto;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-nav-inner{display:flex;max-width:1100px;margin:0 auto;padding:0 1rem;min-width:max-content}
+.tab-btn{padding:.65rem 1rem;font-size:.78rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;letter-spacing:.02em}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* SECTION LABEL */
+.sec-label{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:1.5rem 0 .65rem;padding-left:2px}
+.sec-label:first-child{margin-top:0}
+
+/* BADGE */
+.badge{display:inline-block;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.04em;vertical-align:middle;margin-left:7px}
+.badge-critical{background:rgba(239,68,68,.15);color:#f87171}
+.badge-important{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-advanced{background:rgba(167,139,250,.15);color:#c4b5fd}
+.badge-new{background:rgba(16,185,129,.15);color:#34d399}
+
+/* ACCORDION */
+.acc{border:1px solid var(--border);border-radius:10px;margin-bottom:.6rem;overflow:hidden}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;background:var(--bg2);user-select:none;transition:background .15s}
+.acc-header:hover{background:var(--bg3)}
+.acc-title{font-size:.88rem;font-weight:600;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.acc-arrow{color:var(--muted);font-size:.75rem;transition:transform .22s;flex-shrink:0}
+.acc.open .acc-arrow{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--bg);border-top:1px solid var(--border)}
+.acc.open .acc-body{display:block}
+.acc-content{padding:1.2rem 1.1rem}
+
+/* CONTENT BLOCKS */
+.def-box{background:var(--bg3);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:.85rem 1rem;margin-bottom:1rem;font-size:.85rem;line-height:1.75;color:var(--text)}
+.def-box strong{color:var(--amber)}
+.theory{font-size:.85rem;line-height:1.85;color:var(--text2);margin-bottom:.85rem}
+.theory strong{color:var(--text)}
+.theory ul{margin:.4rem 0 .4rem 1.2rem}
+.theory li{margin-bottom:.3rem}
+.code-label{font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:.9rem 0 .3rem}
+pre{border-radius:8px;overflow:auto;margin-bottom:.85rem;font-size:.8rem !important}
+code.hljs{font-family:'JetBrains Mono',monospace !important;font-size:.79rem !important;line-height:1.65 !important;padding:1rem !important;background:#161b27 !important;border-radius:8px}
+.explanation{background:var(--bg3);border-radius:8px;padding:.8rem 1rem;margin-top:.6rem}
+.explanation h4{font-size:.68rem;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.explanation ul{list-style:none;padding:0}
+.explanation li{font-size:.8rem;color:var(--text2);padding:3px 0 3px 14px;position:relative;line-height:1.6}
+.explanation li::before{content:'→';position:absolute;left:0;color:var(--muted);font-size:.65rem;top:5px}
+.tip{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:.7rem .9rem;font-size:.8rem;color:#93c5fd;margin-top:.75rem;line-height:1.65}
+.tip::before{content:'💡 '}
+.warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.7rem .9rem;font-size:.8rem;color:#fbbf24;margin-top:.75rem;line-height:1.65}
+.warn::before{content:'⚠️ '}
+.divider{border:none;border-top:1px solid var(--border);margin:.9rem 0}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.prog-info{flex:1;min-width:180px}
+.prog-title{font-size:.75rem;color:var(--muted);margin-bottom:.35rem}
+.prog-track{background:var(--bg4);border-radius:3px;height:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:3px;transition:width .35s}
+.prog-count{font-size:.72rem;color:var(--muted);white-space:nowrap}
+
+/* SEARCH HIGHLIGHT */
+mark{background:rgba(245,158,11,.25);color:var(--amber);border-radius:2px;padding:0 2px}
+.search-hidden{display:none !important}
+
+@media(max-width:600px){
+  .search-box{width:100%}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .acc-title .badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">React &amp; Next.js<span> · Complete Interview Guide</span></div>
+  <input class="search-box" type="text" placeholder="Search topics…" id="searchInput" oninput="handleSearch(this.value)">
+</div>
+
+<div class="tab-nav">
+  <div class="tab-nav-inner" id="tabNav"><button class="tab-btn active" onclick="switchTab('core', this)">React Core</button><button class="tab-btn " onclick="switchTab('hooks', this)">React Hooks</button><button class="tab-btn " onclick="switchTab('patterns', this)">React Patterns</button><button class="tab-btn " onclick="switchTab('perf', this)">Performance</button><button class="tab-btn " onclick="switchTab('next-basics', this)">Next.js Basics</button><button class="tab-btn " onclick="switchTab('next-app-router', this)">App Router</button><button class="tab-btn " onclick="switchTab('next-advanced', this)">Next.js Advanced</button></div>
+</div>
+
+<div class="main" id="mainContent">
+<div id="tab-core" class="tab-content active">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">React Core — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-core" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-core">0 / 7 read</div>
+</div>
+<div class="sec-label">Fundamentals</div>
+<div class="acc" id="acc-core-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">What is React &amp; How it Works<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>React is a <strong>JavaScript library for building user interfaces</strong> using a component-based architecture. It maintains a <strong>Virtual DOM</strong> — a lightweight in-memory copy of the real DOM — and uses a diffing algorithm (Reconciliation) to calculate the minimal set of changes needed, then applies only those to the real DOM.</div>
+<div class="theory">React's core philosophy: UI is a <strong>pure function of state</strong> — <code>UI = f(state)</code>. When state changes, React re-runs the function and efficiently updates the DOM.
+
+<strong>Key concepts:</strong>
+<ul>
+<li><strong>Virtual DOM</strong> — React creates a VDOM tree, diffs it with the previous tree, and patches only changed nodes in the real DOM</li>
+<li><strong>Reconciliation</strong> — The diffing algorithm. React assumes components of different types produce different trees (tears down + rebuilds), and uses the <code>key</code> prop to identify list items</li>
+<li><strong>Fiber</strong> — React 16+ internal architecture. Breaks rendering into small units of work, enabling pausing, prioritising, and resuming work (concurrent rendering)</li>
+<li><strong>Unidirectional data flow</strong> — Data flows down (parent → child via props), events flow up (child → parent via callbacks)</li>
+</ul></div>
+<div class="code-label">How JSX Compiles</div>
+<pre><code class="language-javascript">// JSX you write:
+const element = &lt;h1 className=&quot;title&quot;&gt;Hello, {name}&lt;/h1&gt;;
+
+// Babel compiles it to:
+const element = React.createElement(
+  &#x27;h1&#x27;,
+  { className: &#x27;title&#x27; },
+  &#x27;Hello, &#x27;,
+  name
+);
+
+// React.createElement returns a plain JS object (VDOM node):
+// {
+//   type: &#x27;h1&#x27;,
+//   props: { className: &#x27;title&#x27;, children: [&#x27;Hello, &#x27;, name] }
+// }</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>JSX is syntactic sugar — it&#x27;s not HTML, it compiles to React.createElement() calls</li><li>React.createElement returns a plain JavaScript object describing the desired UI</li><li>React uses these objects to build the Virtual DOM tree</li><li>On re-render, React diffs the new VDOM tree against the old one and updates only what changed</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-core-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">JSX Rules &amp; Expressions<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>JSX (JavaScript XML) is a syntax extension that lets you write HTML-like markup inside JavaScript. It must follow specific rules because it compiles to function calls, not real HTML.</div>
+<div class="theory"><strong>JSX Rules:</strong>
+<ul>
+<li>Return a <strong>single root element</strong> — wrap multiple elements in a <code>&lt;div&gt;</code> or <code>&lt;&gt;&lt;/&gt;</code> (Fragment)</li>
+<li>All tags must be <strong>closed</strong> — self-closing or explicit closing tag (<code>&lt;img /&gt;</code>)</li>
+<li>Use <strong>camelCase</strong> for attributes — <code>className</code> not <code>class</code>, <code>onClick</code> not <code>onclick</code>, <code>htmlFor</code> not <code>for</code></li>
+<li>JavaScript expressions go inside <strong>curly braces</strong> <code>{}</code></li>
+<li><strong>Comments</strong> in JSX: <code>{/* comment */}</code></li>
+<li><code>null</code>, <code>undefined</code>, <code>false</code> render nothing — useful for conditional rendering</li>
+</ul></div>
+<div class="code-label">JSX Patterns</div>
+<pre><code class="language-javascript">function UserCard({ user, isAdmin }) {
+  const fullName = `${user.firstName} ${user.lastName}`;
+
+  return (
+    &lt;&gt;  {/* Fragment — no extra DOM node */}
+      &lt;h2 className=&quot;card-title&quot;&gt;{fullName.toUpperCase()}&lt;/h2&gt;
+
+      {/* Conditional rendering */}
+      {isAdmin &amp;&amp; &lt;span className=&quot;badge&quot;&gt;Admin&lt;/span&gt;}
+
+      {/* Ternary */}
+      &lt;p&gt;{user.active ? &quot;Active&quot; : &quot;Inactive&quot;}&lt;/p&gt;
+
+      {/* Dynamic styles */}
+      &lt;div style={{ color: user.active ? &quot;green&quot; : &quot;red&quot; }}&gt;
+        Status
+      &lt;/div&gt;
+
+      {/* Lists */}
+      &lt;ul&gt;
+        {user.roles.map(role =&gt; (
+          &lt;li key={role.id}&gt;{role.name}&lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+
+      {/* Self-closing */}
+      &lt;img src={user.avatar} alt={fullName} /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>&lt;&gt; &lt;/&gt; is shorthand for React.Fragment — avoids an unnecessary DOM wrapper div</li><li>&amp;&amp; renders the right side only if the left side is truthy — careful: 0 &amp;&amp; x renders &#x27;0&#x27;, not nothing</li><li>Inline styles take a JavaScript object with camelCase properties</li><li>Always use key prop on list items — use stable IDs, not array index when items can reorder</li><li>Self-closing tags like &lt;img /&gt; and &lt;input /&gt; are required in JSX</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-core-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">Components — Function vs Class<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>A React component is a <strong>reusable, self-contained piece of UI</strong>. Function components are plain JavaScript functions that accept props and return JSX. Class components extend React.Component and use lifecycle methods. <strong>Function components with hooks are the modern standard</strong>.</div>
+<div class="theory"><strong>Function components (preferred):</strong>
+<ul>
+<li>Plain JS function, receives props, returns JSX</li>
+<li>Use hooks for state and side effects</li>
+<li>Simpler, less boilerplate, easier to test</li>
+<li>Compiler optimizations (React Compiler / Forget)</li>
+</ul>
+<strong>Class components (legacy, still valid):</strong>
+<ul>
+<li>Extend React.Component</li>
+<li>State in <code>this.state</code>, updates via <code>this.setState()</code></li>
+<li>Lifecycle: <code>componentDidMount</code>, <code>componentDidUpdate</code>, <code>componentWillUnmount</code></li>
+<li>Required for Error Boundaries (still no hook equivalent)</li>
+</ul></div>
+<div class="code-label">Function Component (Modern)</div>
+<pre><code class="language-javascript">// Modern function component
+function UserProfile({ userId, onFollow }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    fetchUser(userId).then(data =&gt; {
+      setUser(data);
+      setLoading(false);
+    });
+  }, [userId]);
+
+  if (loading) return &lt;Spinner /&gt;;
+
+  return (
+    &lt;div className=&quot;profile&quot;&gt;
+      &lt;h1&gt;{user.name}&lt;/h1&gt;
+      &lt;button onClick={() =&gt; onFollow(user.id)}&gt;Follow&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="code-label">Class Component (Legacy)</div>
+<pre><code class="language-javascript">// Legacy class component — same functionality
+class UserProfile extends React.Component {
+  state = { user: null, loading: true };
+
+  componentDidMount() {
+    fetchUser(this.props.userId).then(data =&gt; {
+      this.setState({ user: data, loading: false });
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.userId !== this.props.userId) {
+      fetchUser(this.props.userId).then(data =&gt; {
+        this.setState({ user: data, loading: false });
+      });
+    }
+  }
+
+  render() {
+    const { user, loading } = this.state;
+    if (loading) return &lt;Spinner /&gt;;
+    return (
+      &lt;div className=&quot;profile&quot;&gt;
+        &lt;h1&gt;{user.name}&lt;/h1&gt;
+        &lt;button onClick={() =&gt; this.props.onFollow(user.id)}&gt;Follow&lt;/button&gt;
+      &lt;/div&gt;
+    );
+  }
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Function components use hooks (useState, useEffect) instead of lifecycle methods</li><li>Class components require this.setState() — never mutate this.state directly</li><li>componentDidUpdate needs manual comparison of previous vs current props to avoid infinite loops</li><li>For new code, always write function components — they&#x27;re shorter and easier to reason about</li></ul></div>
+<div class="tip">Error Boundaries are the only remaining use case for class components — there&#x27;s no hook equivalent for componentDidCatch yet.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-core-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">Props — Passing &amp; Receiving Data<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Props (properties) are the mechanism for passing data from a parent component to a child. Props are <strong>read-only</strong> — a child must never modify its props. They flow in one direction: parent → child.</div>
+<div class="theory"><strong>Props can be anything:</strong> strings, numbers, booleans, objects, arrays, functions, even other React components.
+
+<strong>Key patterns:</strong>
+<ul>
+<li><strong>Destructuring</strong> — extract props in the function signature for cleaner code</li>
+<li><strong>Default props</strong> — set defaults with default parameter values</li>
+<li><strong>Spread props</strong> — pass all props to a child with <code>{...props}</code></li>
+<li><strong>children prop</strong> — everything between opening and closing tags</li>
+<li><strong>Render props</strong> — passing a function as a prop to control rendering</li>
+</ul></div>
+<div class="code-label">Props Patterns</div>
+<pre><code class="language-javascript">// 1. Destructuring with defaults
+function Button({ label, variant = &#x27;primary&#x27;, onClick, disabled = false }) {
+  return (
+    &lt;button
+      className={`btn btn-${variant}`}
+      onClick={onClick}
+      disabled={disabled}
+    &gt;
+      {label}
+    &lt;/button&gt;
+  );
+}
+
+// 2. children prop
+function Card({ title, children, className = &#x27;&#x27; }) {
+  return (
+    &lt;div className={`card ${className}`}&gt;
+      &lt;h2 className=&quot;card-title&quot;&gt;{title}&lt;/h2&gt;
+      &lt;div className=&quot;card-body&quot;&gt;{children}&lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Usage:
+&lt;Card title=&quot;Welcome&quot;&gt;
+  &lt;p&gt;This is the children content&lt;/p&gt;
+  &lt;Button label=&quot;Click me&quot; onClick={handleClick} /&gt;
+&lt;/Card&gt;
+
+// 3. Spread props (forwarding to DOM element)
+function Input({ label, error, ...inputProps }) {
+  return (
+    &lt;div&gt;
+      &lt;label&gt;{label}&lt;/label&gt;
+      &lt;input {...inputProps} /&gt;  {/* spreads all remaining props */}
+      {error &amp;&amp; &lt;span className=&quot;error&quot;&gt;{error}&lt;/span&gt;}
+    &lt;/div&gt;
+  );
+}
+
+// 4. Function as prop (callback)
+function List({ items, renderItem }) {
+  return &lt;ul&gt;{items.map(renderItem)}&lt;/ul&gt;;
+}
+// Usage:
+&lt;List
+  items={users}
+  renderItem={user =&gt; &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;}
+/&gt;</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Destructuring in the parameter list is cleaner than accessing props.x everywhere</li><li>Default parameter values replace the old defaultProps pattern</li><li>The ...rest spread collects all unspecified props — useful for wrapping native elements</li><li>children is a special prop — anything between JSX opening and closing tags</li><li>Never modify props — they belong to the parent. Use local state for derived values</li></ul></div>
+</div></div>
+</div>
+<div class="sec-label">State &amp; Events</div>
+<div class="acc" id="acc-core-4">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">State — Understanding Immutability<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>State is <strong>private data owned by a component</strong> that can change over time, triggering re-renders. Unlike props, state is managed inside the component. The critical rule: <strong>never mutate state directly</strong> — always create a new value.</div>
+<div class="theory"><strong>Why immutability matters:</strong>
+<ul>
+<li>React detects changes by reference comparison (<code>Object.is()</code>). Mutating the existing object doesn't change its reference — React won't re-render</li>
+<li>Immutable updates make it easy to implement undo/redo, debugging, time-travel</li>
+<li>Pure function components are easier to test and predict</li>
+</ul>
+<strong>Immutable update patterns:</strong>
+<ul>
+<li><strong>Objects</strong> — spread: <code>{ ...obj, key: newValue }</code></li>
+<li><strong>Arrays add</strong> — spread: <code>[...arr, newItem]</code></li>
+<li><strong>Arrays remove</strong> — filter: <code>arr.filter(x => x.id !== id)</code></li>
+<li><strong>Arrays update</strong> — map: <code>arr.map(x => x.id === id ? {...x, ...changes} : x)</code></li>
+<li><strong>Nested objects</strong> — deep spread or use Immer library</li>
+</ul></div>
+<div class="code-label">Immutable State Updates</div>
+<pre><code class="language-javascript">function TodoApp() {
+  const [todos, setTodos] = useState([
+    { id: 1, text: &#x27;Learn React&#x27;, done: false },
+    { id: 2, text: &#x27;Build something&#x27;, done: false },
+  ]);
+
+  // ❌ WRONG — mutating state, React won&#x27;t re-render
+  const toggleWrong = (id) =&gt; {
+    const todo = todos.find(t =&gt; t.id === id);
+    todo.done = !todo.done; // mutation!
+    setTodos(todos); // same reference, React ignores it
+  };
+
+  // ✅ CORRECT — new array, new objects
+  const toggleTodo = (id) =&gt; {
+    setTodos(prev =&gt;
+      prev.map(todo =&gt;
+        todo.id === id ? { ...todo, done: !todo.done } : todo
+      )
+    );
+  };
+
+  const addTodo = (text) =&gt; {
+    setTodos(prev =&gt; [...prev, { id: Date.now(), text, done: false }]);
+  };
+
+  const deleteTodo = (id) =&gt; {
+    setTodos(prev =&gt; prev.filter(todo =&gt; todo.id !== id));
+  };
+
+  // Nested object update
+  const [user, setUser] = useState({ name: &#x27;Alice&#x27;, address: { city: &#x27;NYC&#x27; } });
+
+  const updateCity = (city) =&gt; {
+    setUser(prev =&gt; ({
+      ...prev,
+      address: { ...prev.address, city } // spread nested object too
+    }));
+  };
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Always use the functional form prev =&gt; newValue when new state depends on previous state — avoids stale closure bugs</li><li>arr.map() returns a new array with updated items — the original array is untouched</li><li>arr.filter() returns a new array with items removed</li><li>Deep cloning every level of nesting with spread can get verbose — consider Immer for complex nested state</li><li>Date.now() or crypto.randomUUID() for IDs — never use array index as a key</li></ul></div>
+<div class="warn">If you have deeply nested state that&#x27;s complex to update immutably, consider splitting it into multiple useState calls or using useReducer with Immer.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-core-5">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">Event Handling<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>React uses <strong>Synthetic Events</strong> — cross-browser wrappers around native browser events that normalize inconsistencies. Event handlers are camelCase props that take functions, not strings.</div>
+<div class="theory"><strong>Key differences from HTML events:</strong>
+<ul>
+<li>camelCase: <code>onClick</code> not <code>onclick</code>, <code>onChange</code> not <code>onchange</code></li>
+<li>Pass a function reference, not a string: <code>onClick={handleClick}</code> not <code>onClick="handleClick()"</code></li>
+<li><code>e.preventDefault()</code> works the same as native</li>
+<li>Events are delegated to the root — React attaches one listener at the top</li>
+</ul>
+<strong>Common events:</strong> onClick, onChange, onSubmit, onKeyDown, onKeyUp, onFocus, onBlur, onMouseEnter, onMouseLeave, onScroll, onDragStart</div>
+<div class="code-label">Event Handling Patterns</div>
+<pre><code class="language-javascript">function EventExamples() {
+  const [value, setValue] = useState(&#x27;&#x27;);
+
+  // 1. Basic click handler
+  const handleClick = () =&gt; console.log(&#x27;clicked&#x27;);
+
+  // 2. Click with event object
+  const handleRightClick = (e) =&gt; {
+    e.preventDefault(); // prevent context menu
+    console.log(&#x27;right clicked at&#x27;, e.clientX, e.clientY);
+  };
+
+  // 3. Input onChange — always use e.target.value
+  const handleChange = (e) =&gt; setValue(e.target.value);
+
+  // 4. Pass extra data to handler
+  const handleItemClick = (id) =&gt; (e) =&gt; {
+    e.stopPropagation(); // stop event bubbling
+    console.log(&#x27;item clicked:&#x27;, id);
+  };
+
+  // 5. Form submit
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault(); // prevent page reload
+    console.log(&#x27;submitted:&#x27;, value);
+  };
+
+  // 6. Keyboard events
+  const handleKeyDown = (e) =&gt; {
+    if (e.key === &#x27;Enter&#x27;) handleSubmit(e);
+    if (e.key === &#x27;Escape&#x27;) setValue(&#x27;&#x27;);
+    if (e.ctrlKey &amp;&amp; e.key === &#x27;s&#x27;) { e.preventDefault(); save(); }
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        value={value}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+      /&gt;
+      &lt;button type=&quot;button&quot; onClick={handleClick}&gt;Click&lt;/button&gt;
+      &lt;button onContextMenu={handleRightClick}&gt;Right Click Me&lt;/button&gt;
+      {items.map(item =&gt; (
+        &lt;div key={item.id} onClick={handleItemClick(item.id)}&gt;
+          {item.name}
+        &lt;/div&gt;
+      ))}
+    &lt;/form&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>onClick={handleClick} — pass the function itself, not onClick={handleClick()} which calls it on render</li><li>handleItemClick(id) returns a new function — this is the currying pattern for passing data</li><li>e.stopPropagation() stops the event from bubbling up to parent elements</li><li>e.preventDefault() prevents default browser behaviour (form submit, link navigation, context menu)</li><li>For keyboard events, always check e.key (modern) not e.keyCode (deprecated)</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-core-6">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+  <div class="acc-title">Controlled vs Uncontrolled Forms<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>In a <strong>controlled component</strong>, form data is driven by React state — the input's value is always the state value. In an <strong>uncontrolled component</strong>, the DOM itself manages the data, accessed via a ref. Controlled is the React-recommended approach for most cases.</div>
+<div class="theory"><strong>Controlled inputs:</strong>
+<ul>
+<li>value prop + onChange handler — React is the single source of truth</li>
+<li>Enables instant validation, conditional disabling, formatting on type</li>
+<li>Slightly more code but full control</li>
+</ul>
+<strong>Uncontrolled inputs:</strong>
+<ul>
+<li>Use <code>useRef</code> + <code>ref.current.value</code> to read value on submit</li>
+<li>Less re-renders — DOM manages state internally</li>
+<li>Good for: file inputs (always uncontrolled), simple one-off forms, integrating with non-React libraries</li>
+</ul></div>
+<div class="code-label">Controlled Form</div>
+<pre><code class="language-javascript">function LoginForm() {
+  const [form, setForm] = useState({ email: &#x27;&#x27;, password: &#x27;&#x27; });
+  const [errors, setErrors] = useState({});
+
+  const handleChange = (e) =&gt; {
+    const { name, value } = e.target;
+    setForm(prev =&gt; ({ ...prev, [name]: value }));
+    // Clear error on change
+    if (errors[name]) setErrors(prev =&gt; ({ ...prev, [name]: &#x27;&#x27; }));
+  };
+
+  const validate = () =&gt; {
+    const errs = {};
+    if (!form.email.includes(&#x27;@&#x27;)) errs.email = &#x27;Invalid email&#x27;;
+    if (form.password.length &lt; 6) errs.password = &#x27;Too short&#x27;;
+    return errs;
+  };
+
+  const handleSubmit = (e) =&gt; {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length &gt; 0) { setErrors(errs); return; }
+    submitLogin(form);
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        name=&quot;email&quot;
+        type=&quot;email&quot;
+        value={form.email}          // controlled
+        onChange={handleChange}
+        placeholder=&quot;Email&quot;
+      /&gt;
+      {errors.email &amp;&amp; &lt;span&gt;{errors.email}&lt;/span&gt;}
+
+      &lt;input
+        name=&quot;password&quot;
+        type=&quot;password&quot;
+        value={form.password}       // controlled
+        onChange={handleChange}
+      /&gt;
+      {errors.password &amp;&amp; &lt;span&gt;{errors.password}&lt;/span&gt;}
+
+      &lt;button type=&quot;submit&quot;&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>[name]: value uses computed property name — one handler for all fields</li><li>value={form.email} makes it controlled — React owns the value, DOM reflects it</li><li>Validation can run on every keystroke (onChange) or only on submit</li><li>For complex forms consider react-hook-form — minimal re-renders, schema validation with Zod</li></ul></div>
+</div></div>
+</div>
+</div>
+<div id="tab-hooks" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">React Hooks — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-hooks" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-hooks">0 / 7 read</div>
+</div>
+<div class="sec-label">Core Hooks</div>
+<div class="acc" id="acc-hooks-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useState — Complete Guide<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useState</code> returns a state variable and a setter function. React re-renders the component whenever the state changes. State is <strong>preserved between renders</strong> and is <strong>isolated per component instance</strong>.</div>
+<div class="theory"><strong>Key rules:</strong>
+<ul>
+<li>The setter always triggers a re-render (even if value is the same — React 18 may batch and skip)</li>
+<li>Use the <strong>functional form</strong> <code>setState(prev => newVal)</code> when new state depends on previous — avoids stale closure bugs</li>
+<li>State updates are <strong>batched in React 18</strong> — multiple setStates in one event handler = one re-render</li>
+<li>For complex/related state, <code>useReducer</code> is often cleaner</li>
+<li>Initial state can be a <strong>lazy initializer function</strong> to avoid expensive computation on every render</li>
+</ul></div>
+<div class="code-label">useState Patterns</div>
+<pre><code class="language-javascript">// 1. Primitive state
+const [count, setCount] = useState(0);
+const [name, setName] = useState(&#x27;&#x27;);
+const [isOpen, setIsOpen] = useState(false);
+
+// 2. Functional update — safe when depending on previous state
+const increment = () =&gt; setCount(prev =&gt; prev + 1);
+
+// PROBLEM with non-functional:
+const badDouble = () =&gt; {
+  setCount(count + 1); // reads stale &#x27;count&#x27; from closure
+  setCount(count + 1); // same stale value — only increments by 1!
+};
+
+// SOLUTION with functional form:
+const goodDouble = () =&gt; {
+  setCount(prev =&gt; prev + 1); // queues: count + 1
+  setCount(prev =&gt; prev + 1); // queues: (count + 1) + 1 = +2 ✓
+};
+
+// 3. Object state — spread to update
+const [user, setUser] = useState({ name: &#x27;&#x27;, age: 0, email: &#x27;&#x27; });
+const updateName = (name) =&gt; setUser(prev =&gt; ({ ...prev, name }));
+
+// 4. Lazy initialization — function only runs on first render
+const [data, setData] = useState(() =&gt; {
+  const saved = localStorage.getItem(&#x27;data&#x27;); // expensive on every render
+  return saved ? JSON.parse(saved) : [];
+});
+
+// 5. Toggling booleans
+const toggle = () =&gt; setIsOpen(prev =&gt; !prev);
+
+// 6. Reset to initial
+const INITIAL = { name: &#x27;&#x27;, email: &#x27;&#x27; };
+const [form, setForm] = useState(INITIAL);
+const reset = () =&gt; setForm(INITIAL);</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Functional form prev =&gt; newVal is always safe for derived updates — avoids race conditions in async code</li><li>Stale closure: if count=0 and you call setCount(count+1) twice, both closures capture count=0 — result is 1 not 2</li><li>Lazy initializer is called once on mount — use it for reading localStorage, complex initial computation</li><li>React 18 automatic batching: even async setState calls (in setTimeout, fetch callbacks) are batched into one render</li><li>Resetting: keeping INITIAL outside the component means the reference never changes — safe to use as a default</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-hooks-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useEffect — Mastering Side Effects<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useEffect</code> runs <strong>after the render is painted to screen</strong>. It's for synchronising React with external systems: APIs, subscriptions, timers, DOM manipulation, third-party libraries. It runs after every render by default.</div>
+<div class="theory"><strong>Dependency array controls when the effect runs:</strong>
+<ul>
+<li>No array — runs after <em>every</em> render</li>
+<li>Empty array <code>[]</code> — runs once after mount</li>
+<li><code>[dep1, dep2]</code> — runs when any dep changes</li>
+</ul>
+<strong>Cleanup function:</strong> The function returned from useEffect runs before the next effect and on unmount. Essential for: clearing timers, cancelling requests, unsubscribing events.
+
+<strong>React 18 StrictMode</strong> deliberately double-invokes effects in development to expose missing cleanups.
+
+<strong>Common mistakes:</strong>
+<ul>
+<li>Missing dependencies in the array (stale closure)</li>
+<li>Async function directly inside useEffect (return must be cleanup, not a Promise)</li>
+<li>Object/function in deps causing infinite loops</li>
+</ul></div>
+<div class="code-label">useEffect Patterns</div>
+<pre><code class="language-javascript">// 1. Data fetching with cleanup
+useEffect(() =&gt; {
+  let cancelled = false;
+
+  async function loadUser() {
+    setLoading(true);
+    try {
+      const data = await fetchUser(userId);
+      if (!cancelled) setUser(data);       // guard against stale response
+    } catch (err) {
+      if (!cancelled) setError(err.message);
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  }
+
+  loadUser();
+  return () =&gt; { cancelled = true; };      // cleanup cancels stale responses
+}, [userId]); // re-runs when userId changes
+
+// 2. Event listener with cleanup
+useEffect(() =&gt; {
+  const handleResize = () =&gt; setWidth(window.innerWidth);
+  window.addEventListener(&#x27;resize&#x27;, handleResize);
+  return () =&gt; window.removeEventListener(&#x27;resize&#x27;, handleResize); // cleanup
+}, []); // only attach once
+
+// 3. Timer
+useEffect(() =&gt; {
+  const id = setInterval(() =&gt; setTick(t =&gt; t + 1), 1000);
+  return () =&gt; clearInterval(id); // cleanup on unmount
+}, []);
+
+// 4. Syncing with external library
+useEffect(() =&gt; {
+  const chart = new Chart(canvasRef.current, options);
+  return () =&gt; chart.destroy(); // cleanup
+}, [options]);
+
+// 5. WRONG — async directly in useEffect
+useEffect(async () =&gt; { // ❌ the cleanup return would be a Promise
+  const data = await fetch(&#x27;/api&#x27;);
+  setData(data);
+}, []);
+
+// CORRECT — define async function inside
+useEffect(() =&gt; {
+  (async () =&gt; {
+    const data = await fetch(&#x27;/api&#x27;).then(r =&gt; r.json());
+    setData(data);
+  })();
+}, []);</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>The cancelled flag prevents setting state after the component unmounts or after deps changed — prevents memory leaks</li><li>Always return a cleanup function for subscriptions, timers, and event listeners</li><li>Async/await in useEffect: define an async function inside and call it — never make the effect callback itself async</li><li>If an object or function is in deps and created inline, it&#x27;s a new reference every render — causes infinite loop. Use useMemo/useCallback or move it outside</li><li>useLayoutEffect runs synchronously after DOM mutations but before paint — use for measuring DOM elements</li></ul></div>
+<div class="warn">The ESLint rule react-hooks/exhaustive-deps will catch missing dependencies. Don&#x27;t disable it — fix the code instead.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-hooks-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useContext — Shared State Without Prop Drilling<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useContext</code> reads and subscribes to a React Context. Context lets you pass data through the component tree without manually passing props at every level. <strong>Any component that calls useContext re-renders when the context value changes</strong>.</div>
+<div class="theory"><strong>When to use Context:</strong>
+<ul>
+<li>Theme (dark/light mode)</li>
+<li>Current authenticated user</li>
+<li>Locale / language</li>
+<li>Feature flags</li>
+</ul>
+<strong>Performance caveat:</strong> All consumers re-render when the context value changes. For frequently-changing data, either split into multiple contexts or use a state management library (Zustand, Jotai).
+
+<strong>Pattern: split value and dispatch</strong> into separate contexts so components that only call actions don't re-render on data changes.</div>
+<div class="code-label">Context — Provider Pattern</div>
+<pre><code class="language-javascript">// 1. Create context with type safety
+const ThemeContext = createContext(null);
+
+// 2. Provider component
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState(&#x27;dark&#x27;);
+
+  const toggle = useCallback(() =&gt; {
+    setTheme(prev =&gt; prev === &#x27;dark&#x27; ? &#x27;light&#x27; : &#x27;dark&#x27;);
+  }, []);
+
+  // Memoize value to prevent unnecessary re-renders
+  const value = useMemo(() =&gt; ({ theme, toggle }), [theme, toggle]);
+
+  return (
+    &lt;ThemeContext.Provider value={value}&gt;
+      {children}
+    &lt;/ThemeContext.Provider&gt;
+  );
+}
+
+// 3. Custom hook — encapsulates usage, validates context is available
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error(&#x27;useTheme must be used within ThemeProvider&#x27;);
+  return ctx;
+}
+
+// 4. Consumer component
+function Header() {
+  const { theme, toggle } = useTheme();
+
+  return (
+    &lt;header data-theme={theme}&gt;
+      &lt;button onClick={toggle}&gt;
+        {theme === &#x27;dark&#x27; ? &#x27;☀️ Light&#x27; : &#x27;🌙 Dark&#x27;}
+      &lt;/button&gt;
+    &lt;/header&gt;
+  );
+}
+
+// 5. Optimized: split contexts for independent re-renders
+const UserDataContext = createContext(null);   // re-renders on user change
+const UserActionsContext = createContext(null); // stable — never re-renders
+
+function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const actions = useMemo(() =&gt; ({
+    login: (u) =&gt; setUser(u),
+    logout: () =&gt; setUser(null),
+  }), []);
+
+  return (
+    &lt;UserActionsContext.Provider value={actions}&gt;
+      &lt;UserDataContext.Provider value={user}&gt;
+        {children}
+      &lt;/UserDataContext.Provider&gt;
+    &lt;/UserActionsContext.Provider&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>createContext(null) — null as default means the provider is required, and the custom hook can throw a helpful error</li><li>Wrapping the context value in useMemo prevents a new object reference every render — without it, all consumers re-render on every parent re-render</li><li>Custom hook pattern (useTheme) is cleaner than calling useContext directly everywhere — single place to add validation</li><li>Split contexts: components that only dispatch actions get a stable context reference and never re-render when data changes</li><li>Don&#x27;t put rapidly-changing data (mouse position, scroll) in Context — it&#x27;ll cause widespread re-renders</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-hooks-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useReducer — Complex State Logic<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useReducer</code> is an alternative to useState for <strong>complex state logic involving multiple sub-values or when next state depends on previous in non-trivial ways</strong>. It extracts state logic from the component into a pure reducer function.</div>
+<div class="theory"><strong>When useReducer beats useState:</strong>
+<ul>
+<li>Multiple related state values that update together</li>
+<li>Next state depends on previous in complex ways</li>
+<li>State transitions have explicit names (actions) — self-documenting</li>
+<li>Testing: reducer is a pure function — easy to unit test</li>
+<li>Can share dispatch via context (Redux-like pattern)</li>
+</ul>
+<strong>Reducer signature:</strong> <code>(state, action) => newState</code> — must be pure (no side effects, no mutations)</div>
+<div class="code-label">useReducer — Shopping Cart</div>
+<pre><code class="language-javascript">// 1. Define action types (TypeScript-style discriminated union)
+const initialState = {
+  items: [],
+  total: 0,
+  loading: false,
+  error: null,
+};
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case &#x27;ADD_ITEM&#x27;: {
+      const existing = state.items.find(i =&gt; i.id === action.payload.id);
+      const items = existing
+        ? state.items.map(i =&gt;
+            i.id === action.payload.id
+              ? { ...i, qty: i.qty + 1 }
+              : i
+          )
+        : [...state.items, { ...action.payload, qty: 1 }];
+      return {
+        ...state,
+        items,
+        total: items.reduce((sum, i) =&gt; sum + i.price * i.qty, 0),
+      };
+    }
+    case &#x27;REMOVE_ITEM&#x27;:
+      const items = state.items.filter(i =&gt; i.id !== action.payload);
+      return { ...state, items, total: items.reduce((s,i) =&gt; s+i.price*i.qty, 0) };
+    case &#x27;SET_LOADING&#x27;:
+      return { ...state, loading: action.payload };
+    case &#x27;SET_ERROR&#x27;:
+      return { ...state, error: action.payload, loading: false };
+    case &#x27;CLEAR&#x27;:
+      return initialState;
+    default:
+      throw new Error(`Unknown action: ${action.type}`);
+  }
+}
+
+function Cart() {
+  const [state, dispatch] = useReducer(cartReducer, initialState);
+
+  const addItem = (item) =&gt; dispatch({ type: &#x27;ADD_ITEM&#x27;, payload: item });
+  const removeItem = (id) =&gt; dispatch({ type: &#x27;REMOVE_ITEM&#x27;, payload: id });
+
+  return (
+    &lt;div&gt;
+      {state.items.map(item =&gt; (
+        &lt;CartItem key={item.id} item={item} onRemove={removeItem} /&gt;
+      ))}
+      &lt;p&gt;Total: ${state.total.toFixed(2)}&lt;/p&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: &#x27;CLEAR&#x27; })}&gt;Clear Cart&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Reducer is a pure function — same inputs always produce same output. No API calls, no mutations inside</li><li>dispatch({ type, payload }) is the standardised action format — type is required, payload is convention</li><li>throw new Error in default case catches typos in action types early</li><li>The reducer can be tested completely independently of any component — just call cartReducer(state, action)</li><li>For even cleaner code with complex nested updates, use Immer&#x27;s produce() inside the reducer</li></ul></div>
+<div class="tip">Use useReducer over useState when: 3+ related state values, complex update logic, or when you want to test state transitions independently.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-hooks-4">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useRef — DOM Access &amp; Mutable Values<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useRef</code> returns a mutable ref object whose <code>.current</code> property is initialised with the passed argument. The key difference from state: <strong>updating a ref does NOT trigger a re-render</strong>. Used for: DOM element access, storing mutable values that shouldn't trigger re-renders.</div>
+<div class="theory"><strong>Two distinct use cases:</strong>
+<ul>
+<li><strong>DOM refs</strong> — pass as the <code>ref</code> attribute to access the DOM node directly (focus, scroll, measure, integrate with non-React libraries)</li>
+<li><strong>Instance variables</strong> — store mutable values that should persist across renders but shouldn't trigger re-renders (timer IDs, previous values, flags)</li>
+</ul>
+<strong>useRef vs useState:</strong>
+<ul>
+<li>useState: changing value re-renders the component, value is reflected in JSX</li>
+<li>useRef: changing .current does NOT re-render, value is NOT reflected in JSX automatically</li>
+</ul></div>
+<div class="code-label">useRef Patterns</div>
+<pre><code class="language-javascript">// 1. DOM ref — focus an input
+function SearchInput({ autoFocus }) {
+  const inputRef = useRef(null);
+
+  useEffect(() =&gt; {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
+
+  const handleClear = () =&gt; {
+    inputRef.current.value = &#x27;&#x27;;  // for uncontrolled inputs
+    inputRef.current.focus();
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;input ref={inputRef} type=&quot;search&quot; placeholder=&quot;Search...&quot; /&gt;
+      &lt;button onClick={handleClear}&gt;Clear&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 2. Store previous value
+function usePrevoius(value) {
+  const prevRef = useRef(value);
+  useEffect(() =&gt; {
+    prevRef.current = value; // update after render
+  });
+  return prevRef.current; // returns value from previous render
+}
+
+// 3. Store timer ID (doesn&#x27;t need to trigger re-render)
+function AutoSave({ content }) {
+  const timerRef = useRef(null);
+
+  useEffect(() =&gt; {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() =&gt; save(content), 1000);
+    return () =&gt; clearTimeout(timerRef.current);
+  }, [content]);
+}
+
+// 4. Track mounted state (prevent setState after unmount)
+function DataFetcher({ url }) {
+  const isMountedRef = useRef(true);
+  const [data, setData] = useState(null);
+
+  useEffect(() =&gt; {
+    isMountedRef.current = true;
+    fetch(url).then(r =&gt; r.json()).then(d =&gt; {
+      if (isMountedRef.current) setData(d);
+    });
+    return () =&gt; { isMountedRef.current = false; };
+  }, [url]);
+}
+
+// 5. Scroll to bottom (chat UI)
+function Chat({ messages }) {
+  const bottomRef = useRef(null);
+  useEffect(() =&gt; {
+    bottomRef.current?.scrollIntoView({ behavior: &#x27;smooth&#x27; });
+  }, [messages]);
+  return (
+    &lt;div&gt;
+      {messages.map(m =&gt; &lt;Message key={m.id} message={m} /&gt;)}
+      &lt;div ref={bottomRef} /&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>ref.current?.focus() — optional chaining because current might be null before mount</li><li>Storing timerRef prevents a stale closure — if stored in state, it would trigger re-renders unnecessarily</li><li>The isMounted pattern is an older approach — in React 18 with useEffect cleanup, the cancelled flag in a closure is cleaner</li><li>scrollIntoView on the bottom ref is the simplest way to auto-scroll a chat window</li><li>TypeScript: useRef&lt;HTMLInputElement&gt;(null) — type the expected DOM element</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-hooks-5">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">useMemo &amp; useCallback — Memoization<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>useMemo</code> memoizes a <strong>computed value</strong>, recomputing only when dependencies change. <code>useCallback</code> memoizes a <strong>function reference</strong>, returning the same function instance between renders. Both exist purely for performance optimization.</div>
+<div class="theory"><strong>When to use them:</strong>
+<ul>
+<li><code>useMemo</code> — expensive computation (sorting/filtering large arrays, complex derivations), value used in useEffect deps, referential equality for child component props</li>
+<li><code>useCallback</code> — function passed as prop to a <code>React.memo</code> child, function in useEffect dependency array</li>
+</ul>
+<strong>When NOT to use them (overuse is common):</strong>
+<ul>
+<li>Cheap operations — multiplication, simple concatenation — memoization overhead outweighs benefit</li>
+<li>When the component doesn't re-render frequently anyway</li>
+<li>When deps change on every render anyway (making memo useless)</li>
+</ul>
+<strong>React Compiler (future)</strong> will auto-memoize most cases, making explicit useMemo/useCallback largely unnecessary.</div>
+<div class="code-label">useMemo &amp; useCallback</div>
+<pre><code class="language-javascript">// useMemo — expensive computation
+function UserList({ users, searchTerm, sortBy }) {
+  // Recomputes only when users, searchTerm, or sortBy change
+  const processedUsers = useMemo(() =&gt; {
+    console.log(&#x27;Filtering and sorting...&#x27;); // won&#x27;t spam on every render
+    return users
+      .filter(u =&gt; u.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      .sort((a, b) =&gt; a[sortBy].localeCompare(b[sortBy]));
+  }, [users, searchTerm, sortBy]);
+
+  return &lt;ul&gt;{processedUsers.map(u =&gt; &lt;UserRow key={u.id} user={u} /&gt;)}&lt;/ul&gt;;
+}
+
+// useCallback — stable function reference for React.memo child
+function Parent() {
+  const [count, setCount] = useState(0);
+  const [text, setText] = useState(&#x27;&#x27;);
+
+  // Without useCallback: new function on every Parent re-render
+  // → ExpensiveChild re-renders even when count changes but text doesn&#x27;t
+  const handleTextChange = useCallback((newText) =&gt; {
+    setText(newText);
+  }, []); // empty deps — function never changes
+
+  const handleSave = useCallback(() =&gt; {
+    saveToAPI(text); // text in closure
+  }, [text]); // re-created only when text changes
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Count: {count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;+&lt;/button&gt;
+      {/* Only re-renders when handleTextChange or handleSave changes */}
+      &lt;ExpensiveChild
+        onTextChange={handleTextChange}
+        onSave={handleSave}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+
+const ExpensiveChild = React.memo(function ExpensiveChild({ onTextChange, onSave }) {
+  console.log(&#x27;ExpensiveChild rendered&#x27;); // only when props change
+  return (
+    &lt;div&gt;
+      &lt;input onChange={e =&gt; onTextChange(e.target.value)} /&gt;
+      &lt;button onClick={onSave}&gt;Save&lt;/button&gt;
+    &lt;/div&gt;
+  );
+});</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>useMemo(() =&gt; compute(), [deps]) — the function runs once and its result is cached until deps change</li><li>useCallback(fn, [deps]) is equivalent to useMemo(() =&gt; fn, [deps]) but semantically clearer for functions</li><li>React.memo + useCallback work together — memo does shallow prop comparison, useCallback provides stable references</li><li>Profiler first! Add memoization only after identifying a real performance problem</li><li>In React 19 with the React Compiler, explicit useMemo/useCallback will be mostly unnecessary — compiler handles it</li></ul></div>
+<div class="tip">Rule of thumb: useMemo for values, useCallback for functions. Only add when you can measure a performance improvement with the React Profiler.</div>
+</div></div>
+</div>
+<div class="sec-label">Advanced Hooks</div>
+<div class="acc" id="acc-hooks-6">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'hooks')">
+  <div class="acc-title">Custom Hooks — Reusable Logic<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Custom hooks are <strong>JavaScript functions starting with 'use'</strong> that can call other hooks. They let you extract stateful logic from a component into a reusable function. They don't share state between components — each call creates independent state.</div>
+<div class="theory"><strong>Rules of Hooks (apply to custom hooks too):</strong>
+<ul>
+<li>Only call hooks at the <strong>top level</strong> — never inside loops, conditions, or nested functions</li>
+<li>Only call hooks from <strong>React function components</strong> or other custom hooks</li>
+</ul>
+<strong>Good candidates for custom hooks:</strong> data fetching, form state, local storage, media queries, geolocation, WebSocket subscriptions, debounced values, intersection observer, keyboard shortcuts.</div>
+<div class="code-label">Essential Custom Hooks</div>
+<pre><code class="language-javascript">// 1. useFetch — generic data fetching
+function useFetch(url) {
+  const [state, setState] = useState({ data: null, loading: true, error: null });
+
+  useEffect(() =&gt; {
+    let cancelled = false;
+    setState({ data: null, loading: true, error: null });
+
+    fetch(url)
+      .then(res =&gt; {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data =&gt; { if (!cancelled) setState({ data, loading: false, error: null }); })
+      .catch(error =&gt; { if (!cancelled) setState({ data: null, loading: false, error }); });
+
+    return () =&gt; { cancelled = true; };
+  }, [url]);
+
+  return state;
+}
+
+// Usage:
+const { data: user, loading, error } = useFetch(`/api/users/${id}`);
+
+// 2. useDebounce — delay value update
+function useDebounce(value, delay) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() =&gt; {
+    const timer = setTimeout(() =&gt; setDebounced(value), delay);
+    return () =&gt; clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
+}
+
+// Usage:
+const debouncedSearch = useDebounce(searchInput, 300);
+useEffect(() =&gt; { fetchResults(debouncedSearch); }, [debouncedSearch]);
+
+// 3. useLocalStorage — persist state to localStorage
+function useLocalStorage(key, initialValue) {
+  const [value, setValue] = useState(() =&gt; {
+    try {
+      const item = localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch { return initialValue; }
+  });
+
+  const setStoredValue = useCallback((val) =&gt; {
+    try {
+      const toStore = val instanceof Function ? val(value) : val;
+      setValue(toStore);
+      localStorage.setItem(key, JSON.stringify(toStore));
+    } catch (e) { console.error(e); }
+  }, [key, value]);
+
+  return [value, setStoredValue];
+}
+
+// 4. useMediaQuery
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(
+    () =&gt; window.matchMedia(query).matches
+  );
+  useEffect(() =&gt; {
+    const mq = window.matchMedia(query);
+    const handler = (e) =&gt; setMatches(e.matches);
+    mq.addEventListener(&#x27;change&#x27;, handler);
+    return () =&gt; mq.removeEventListener(&#x27;change&#x27;, handler);
+  }, [query]);
+  return matches;
+}
+
+// Usage:
+const isMobile = useMediaQuery(&#x27;(max-width: 768px)&#x27;);</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Each call to a custom hook creates completely independent state — two components using useFetch(&#x27;/api/data&#x27;) each get their own fetch and state</li><li>The cancelled flag pattern prevents state updates on unmounted components</li><li>useLocalStorage lazy initializer only reads localStorage on first render — avoids SSR issues if wrapped in try/catch</li><li>Custom hooks composed from other custom hooks are fine — hooks can call hooks</li><li>Name must start with &#x27;use&#x27; — this is what React&#x27;s linter uses to enforce the rules of hooks</li></ul></div>
+</div></div>
+</div>
+</div>
+<div id="tab-patterns" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">React Patterns — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-patterns" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-patterns">0 / 6 read</div>
+</div>
+<div class="sec-label">Component Patterns</div>
+<div class="acc" id="acc-patterns-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">React.memo — Prevent Unnecessary Re-renders<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>React.memo</code> is a Higher Order Component that <strong>memoizes a component's rendered output</strong>. It skips re-rendering if the component's props haven't changed (shallow comparison). It's the component-level equivalent of PureComponent.</div>
+<div class="theory"><strong>How it works:</strong> Before re-rendering, React shallowly compares previous and next props. If they're the same, the previous render output is reused.
+
+<strong>When it helps:</strong>
+<ul>
+<li>Component renders frequently due to parent re-renders</li>
+<li>Component renders are expensive (large lists, complex calculations)</li>
+<li>Props are primitive values or stable references (via useCallback/useMemo)</li>
+</ul>
+<strong>When it doesn't help:</strong>
+<ul>
+<li>Props include inline objects/arrays/functions — new reference every render, comparison always fails</li>
+<li>Component always receives different props anyway</li>
+<li>The component is cheap to render</li>
+</ul></div>
+<div class="code-label">React.memo Usage</div>
+<pre><code class="language-javascript">// Basic React.memo
+const UserCard = React.memo(function UserCard({ user, onDelete }) {
+  console.log(&#x27;UserCard rendered:&#x27;, user.name);
+  return (
+    &lt;div className=&quot;card&quot;&gt;
+      &lt;h3&gt;{user.name}&lt;/h3&gt;
+      &lt;button onClick={() =&gt; onDelete(user.id)}&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  );
+});
+
+function UserList({ users }) {
+  const [count, setCount] = useState(0);
+
+  // ❌ New function on every render — memo is useless
+  const handleDelete = (id) =&gt; deleteUser(id);
+
+  // ✅ Stable reference — memo works correctly
+  const handleDelete = useCallback((id) =&gt; deleteUser(id), []);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCount(c =&gt; c + 1)}&gt;Count: {count}&lt;/button&gt;
+      {users.map(user =&gt; (
+        // When count changes, UserCard WON&#x27;T re-render ✓
+        &lt;UserCard key={user.id} user={user} onDelete={handleDelete} /&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}
+
+// Custom comparison function (use sparingly)
+const Chart = React.memo(
+  function Chart({ data, width }) {
+    return &lt;canvas&gt;{/* expensive chart render */}&lt;/canvas&gt;;
+  },
+  (prevProps, nextProps) =&gt; {
+    // Return true to SKIP re-render (props considered equal)
+    return prevProps.width === nextProps.width &amp;&amp;
+           prevProps.data.length === nextProps.data.length;
+    // Warning: this skips render even if data items changed!
+  }
+);</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>React.memo wraps the component definition, not the JSX — memo(Component), not memo(&lt;Component /&gt;)</li><li>Shallow comparison: checks if prop.value === prevProp.value for each prop. Objects/arrays always fail unless same reference</li><li>The custom comparator is dangerous — easy to create bugs where UI doesn&#x27;t update. Only use when profiling shows memo is the bottleneck</li><li>React DevTools Profiler shows grey bars for skipped renders (thanks to memo) and coloured bars for actual renders</li><li>In React 19, the compiler handles this automatically — you won&#x27;t need React.memo explicitly</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-patterns-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">Compound Components Pattern<span class="badge badge-purple">Advanced</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>The Compound Components pattern allows components to <strong>share implicit state through React Context</strong> rather than explicit props. It creates an expressive, flexible API where the parent manages state and child components access it transparently.</div>
+<div class="theory"><strong>When to use it:</strong> Building flexible UI primitives like Select, Tabs, Accordion, Modal — where the consumer wants control over the structure but not the state management.
+
+<strong>Benefits:</strong>
+<ul>
+<li>Flexible — consumer can add any markup between components</li>
+<li>Inversion of control — consumer decides the rendering structure</li>
+<li>Clean API — no complex prop drilling or render props</li>
+</ul></div>
+<div class="code-label">Compound Tabs Component</div>
+<pre><code class="language-javascript">// 1. Create the context
+const TabsContext = createContext(null);
+
+// 2. Parent component manages state
+function Tabs({ children, defaultTab }) {
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  return (
+    &lt;TabsContext.Provider value={{ activeTab, setActiveTab }}&gt;
+      &lt;div className=&quot;tabs&quot;&gt;{children}&lt;/div&gt;
+    &lt;/TabsContext.Provider&gt;
+  );
+}
+
+// 3. Child components consume context
+Tabs.List = function TabsList({ children }) {
+  return &lt;div className=&quot;tabs-list&quot; role=&quot;tablist&quot;&gt;{children}&lt;/div&gt;;
+};
+
+Tabs.Tab = function Tab({ value, children }) {
+  const { activeTab, setActiveTab } = useContext(TabsContext);
+  return (
+    &lt;button
+      role=&quot;tab&quot;
+      aria-selected={activeTab === value}
+      className={activeTab === value ? &#x27;tab active&#x27; : &#x27;tab&#x27;}
+      onClick={() =&gt; setActiveTab(value)}
+    &gt;
+      {children}
+    &lt;/button&gt;
+  );
+};
+
+Tabs.Panel = function TabsPanel({ value, children }) {
+  const { activeTab } = useContext(TabsContext);
+  if (activeTab !== value) return null;
+  return &lt;div role=&quot;tabpanel&quot;&gt;{children}&lt;/div&gt;;
+};
+
+// 4. Usage — expressive, flexible API
+&lt;Tabs defaultTab=&quot;profile&quot;&gt;
+  &lt;Tabs.List&gt;
+    &lt;Tabs.Tab value=&quot;profile&quot;&gt;Profile&lt;/Tabs.Tab&gt;
+    &lt;Tabs.Tab value=&quot;settings&quot;&gt;Settings&lt;/Tabs.Tab&gt;
+    &lt;Tabs.Tab value=&quot;billing&quot;&gt;Billing&lt;/Tabs.Tab&gt;
+  &lt;/Tabs.List&gt;
+
+  &lt;Tabs.Panel value=&quot;profile&quot;&gt;&lt;ProfileForm /&gt;&lt;/Tabs.Panel&gt;
+  &lt;Tabs.Panel value=&quot;settings&quot;&gt;&lt;SettingsForm /&gt;&lt;/Tabs.Panel&gt;
+  &lt;Tabs.Panel value=&quot;billing&quot;&gt;&lt;BillingInfo /&gt;&lt;/Tabs.Panel&gt;
+&lt;/Tabs&gt;</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>The state lives in the parent Tabs component — child components don&#x27;t need state of their own</li><li>Context is used implicitly — consumers of Tabs don&#x27;t need to pass activeTab anywhere</li><li>Attaching sub-components as properties (Tabs.Tab) keeps the API grouped and discoverable</li><li>This pattern is used by Headless UI, Radix UI, Reach UI — all popular accessible component libraries</li><li>The consumer can insert arbitrary elements between Tabs.Tab components — the layout is fully flexible</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-patterns-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">Error Boundaries<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Error Boundaries are <strong>class components that catch JavaScript errors anywhere in their child component tree</strong>, log them, and display a fallback UI instead of a crashed component tree. They use the <code>componentDidCatch</code> and <code>getDerivedStateFromError</code> lifecycle methods.</div>
+<div class="theory"><strong>What they catch:</strong> Errors during rendering, in lifecycle methods, and in constructors of child components.
+
+<strong>What they don't catch:</strong> Event handlers (use try/catch), async code (setTimeout, fetch), server-side rendering, errors thrown in the error boundary itself.
+
+<strong>Placement strategy:</strong>
+<ul>
+<li>Top-level: one boundary around the whole app (prevents total crashes)</li>
+<li>Feature-level: boundaries around independent features (one broken widget doesn't kill the page)</li>
+<li>Component-level: around individual expensive components</li>
+</ul></div>
+<div class="code-label">Error Boundary Implementation</div>
+<pre><code class="language-javascript">// Error boundaries must be class components
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  // Called during render when a child throws
+  // Returns new state to display fallback UI
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  // Called after render — good for logging
+  componentDidCatch(error, info) {
+    console.error(&#x27;Caught error:&#x27;, error);
+    console.error(&#x27;Component stack:&#x27;, info.componentStack);
+    // Send to error monitoring service
+    Sentry.captureException(error, { extra: info });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback || (
+        &lt;div className=&quot;error-ui&quot;&gt;
+          &lt;h2&gt;Something went wrong.&lt;/h2&gt;
+          &lt;button onClick={() =&gt; this.setState({ hasError: false, error: null })}&gt;
+            Try again
+          &lt;/button&gt;
+        &lt;/div&gt;
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Usage — wrap feature sections
+function App() {
+  return (
+    &lt;ErrorBoundary fallback={&lt;AppCrashed /&gt;}&gt;
+      &lt;Header /&gt;
+      &lt;ErrorBoundary fallback={&lt;WidgetError /&gt;}&gt;
+        &lt;Dashboard /&gt;
+      &lt;/ErrorBoundary&gt;
+      &lt;ErrorBoundary fallback={&lt;SidebarError /&gt;}&gt;
+        &lt;Sidebar /&gt;
+      &lt;/ErrorBoundary&gt;
+    &lt;/ErrorBoundary&gt;
+  );
+}
+
+// react-error-boundary library (recommended)
+import { ErrorBoundary } from &#x27;react-error-boundary&#x27;;
+
+function ErrorFallback({ error, resetErrorBoundary }) {
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Error: {error.message}&lt;/p&gt;
+      &lt;button onClick={resetErrorBoundary}&gt;Retry&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+&lt;ErrorBoundary FallbackComponent={ErrorFallback} onReset={() =&gt; refetch()}&gt;
+  &lt;DataComponent /&gt;
+&lt;/ErrorBoundary&gt;</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>getDerivedStateFromError is a static method — it runs during the render phase to update state for the fallback UI</li><li>componentDidCatch runs in the commit phase — safe to perform side effects like logging here</li><li>The &#x27;Try again&#x27; button resets the error state — effective for transient errors</li><li>react-error-boundary is a popular library that adds hooks (useErrorBoundary) and an onReset callback</li><li>For async errors in event handlers: use try/catch and setState({ error: err })</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-patterns-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">Portals — Render Outside Parent DOM<span class="badge badge-purple">Advanced</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>ReactDOM.createPortal(children, container)</code> renders children into a <strong>different DOM node than the parent</strong>. The component is still in the React tree (events bubble normally, context works), but escapes CSS constraints like overflow:hidden or z-index stacking contexts.</div>
+<div class="theory"><strong>Classic use cases:</strong>
+<ul>
+<li>Modals and dialogs — need to appear above everything</li>
+<li>Tooltips — need to escape overflow:hidden containers</li>
+<li>Dropdown menus — need to render at the body level</li>
+<li>Toast notifications — fixed to viewport</li>
+</ul></div>
+<div class="code-label">Modal with Portal</div>
+<pre><code class="language-javascript">import { createPortal } from &#x27;react-dom&#x27;;
+
+function Modal({ isOpen, onClose, title, children }) {
+  // Scroll lock
+  useEffect(() =&gt; {
+    if (isOpen) document.body.style.overflow = &#x27;hidden&#x27;;
+    return () =&gt; { document.body.style.overflow = &#x27;&#x27;; };
+  }, [isOpen]);
+
+  // Close on Escape key
+  useEffect(() =&gt; {
+    const handler = (e) =&gt; { if (e.key === &#x27;Escape&#x27;) onClose(); };
+    if (isOpen) document.addEventListener(&#x27;keydown&#x27;, handler);
+    return () =&gt; document.removeEventListener(&#x27;keydown&#x27;, handler);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  // Renders to document.body — escapes any overflow:hidden parent
+  return createPortal(
+    &lt;div
+      className=&quot;modal-overlay&quot;
+      onClick={onClose}               // click backdrop to close
+    &gt;
+      &lt;div
+        className=&quot;modal-content&quot;
+        onClick={e =&gt; e.stopPropagation()}  // don&#x27;t close on content click
+        role=&quot;dialog&quot;
+        aria-modal=&quot;true&quot;
+        aria-labelledby=&quot;modal-title&quot;
+      &gt;
+        &lt;h2 id=&quot;modal-title&quot;&gt;{title}&lt;/h2&gt;
+        &lt;button onClick={onClose} aria-label=&quot;Close&quot;&gt;✕&lt;/button&gt;
+        {children}
+      &lt;/div&gt;
+    &lt;/div&gt;,
+    document.body   // target DOM node
+  );
+}
+
+// Usage
+function App() {
+  const [showModal, setShowModal] = useState(false);
+  return (
+    &lt;div style={{ overflow: &#x27;hidden&#x27; }}&gt; {/* Portal escapes this */}
+      &lt;button onClick={() =&gt; setShowModal(true)}&gt;Open Modal&lt;/button&gt;
+      &lt;Modal isOpen={showModal} onClose={() =&gt; setShowModal(false)} title=&quot;Confirm&quot;&gt;
+        &lt;p&gt;Are you sure?&lt;/p&gt;
+        &lt;button onClick={() =&gt; setShowModal(false)}&gt;Confirm&lt;/button&gt;
+      &lt;/Modal&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>createPortal(jsx, domNode) — renders jsx into domNode, which can be document.body or a dedicated #modal-root element</li><li>React events still bubble through the React component tree, not the DOM tree — onClick on the modal still reaches App&#x27;s event handlers</li><li>Context providers above the portal still work — Context.Provider wraps in React tree, not DOM tree</li><li>Focus management: when modal opens, focus the first interactive element. When it closes, restore focus to the trigger button</li><li>The #modal-root div in index.html is a common pattern: &lt;div id=&#x27;modal-root&#x27;&gt;&lt;/div&gt; as a sibling of #root</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-patterns-4">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">forwardRef &amp; useImperativeHandle<span class="badge badge-purple">Advanced</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>forwardRef</code> lets a parent component pass a <code>ref</code> into a child component's DOM node. <code>useImperativeHandle</code> lets you <strong>customise what the parent sees through the ref</strong> — exposing a controlled API instead of the raw DOM node.</div>
+<div class="theory"><strong>When you need forwardRef:</strong>
+<ul>
+<li>Building reusable input/form components that need to be focused from parent</li>
+<li>Design system components that wrap native elements</li>
+<li>Animation libraries that need to imperatively trigger animations</li>
+</ul>
+<strong>useImperativeHandle:</strong> Instead of exposing the raw DOM node, expose only specific methods — better encapsulation, prevents parent from accessing unintended DOM APIs.</div>
+<div class="code-label">forwardRef + useImperativeHandle</div>
+<pre><code class="language-javascript">import { forwardRef, useImperativeHandle, useRef } from &#x27;react&#x27;;
+
+// 1. forwardRef — expose the inner input&#x27;s DOM node
+const Input = forwardRef(function Input({ label, ...props }, ref) {
+  return (
+    &lt;div className=&quot;input-wrapper&quot;&gt;
+      &lt;label&gt;{label}&lt;/label&gt;
+      &lt;input ref={ref} {...props} /&gt;  {/* ref forwarded to native input */}
+    &lt;/div&gt;
+  );
+});
+
+// Parent can now focus the input
+function Form() {
+  const inputRef = useRef(null);
+
+  return (
+    &lt;&gt;
+      &lt;Input ref={inputRef} label=&quot;Email&quot; type=&quot;email&quot; /&gt;
+      &lt;button onClick={() =&gt; inputRef.current.focus()}&gt;Focus Email&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+// 2. useImperativeHandle — expose a controlled API
+const VideoPlayer = forwardRef(function VideoPlayer({ src }, ref) {
+  const videoRef = useRef(null);
+
+  // Only expose play, pause, seek — not the entire HTMLVideoElement
+  useImperativeHandle(ref, () =&gt; ({
+    play: () =&gt; videoRef.current?.play(),
+    pause: () =&gt; videoRef.current?.pause(),
+    seek: (time) =&gt; {
+      if (videoRef.current) videoRef.current.currentTime = time;
+    },
+    getDuration: () =&gt; videoRef.current?.duration ?? 0,
+  }), []); // stable — no deps
+
+  return &lt;video ref={videoRef} src={src} /&gt;;
+});
+
+// Parent only gets play/pause/seek — DOM node is encapsulated
+function VideoPage() {
+  const playerRef = useRef(null);
+
+  return (
+    &lt;&gt;
+      &lt;VideoPlayer ref={playerRef} src=&quot;/movie.mp4&quot; /&gt;
+      &lt;button onClick={() =&gt; playerRef.current.play()}&gt;▶ Play&lt;/button&gt;
+      &lt;button onClick={() =&gt; playerRef.current.pause()}&gt;⏸ Pause&lt;/button&gt;
+      &lt;button onClick={() =&gt; playerRef.current.seek(30)}&gt;Skip 30s&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>forwardRef wraps the component definition: forwardRef((props, ref) =&gt; JSX) — ref is the second parameter</li><li>The parent passes ref={videoRef} as if it were a prop — React handles forwarding it</li><li>useImperativeHandle replaces what ref.current points to — instead of the video DOM element, it points to your custom object</li><li>The second argument to useImperativeHandle is a factory function — return the object you want to expose</li><li>TypeScript: useImperativeHandle&lt;RefType&gt;(ref, factory) — define an interface for the exposed methods</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-patterns-5">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'patterns')">
+  <div class="acc-title">Lazy Loading &amp; Suspense<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><code>React.lazy()</code> enables <strong>code splitting</strong> — dynamically importing a component so its code is only loaded when first needed. <code>Suspense</code> shows a fallback while the lazy component's code is loading.</div>
+<div class="theory"><strong>Code splitting benefits:</strong>
+<ul>
+<li>Reduces initial bundle size — users download only what they need</li>
+<li>Critical for large apps — dashboard chunks load only on /dashboard</li>
+<li>Works with bundlers (Webpack/Vite) that split at dynamic import() boundaries</li>
+</ul>
+<strong>Suspense in React 18</strong> goes beyond lazy loading — it integrates with data fetching libraries (React Query, Relay, Next.js) to show loading states declaratively.</div>
+<div class="code-label">Lazy + Suspense Patterns</div>
+<pre><code class="language-javascript">import { lazy, Suspense, startTransition } from &#x27;react&#x27;;
+
+// 1. Route-based code splitting
+const Dashboard = lazy(() =&gt; import(&#x27;./Dashboard&#x27;));
+const Reports    = lazy(() =&gt; import(&#x27;./Reports&#x27;));
+const Settings   = lazy(() =&gt; import(&#x27;./Settings&#x27;));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;PageSpinner /&gt;}&gt;
+      &lt;Routes&gt;
+        &lt;Route path=&quot;/dashboard&quot; element={&lt;Dashboard /&gt;} /&gt;
+        &lt;Route path=&quot;/reports&quot;   element={&lt;Reports /&gt;} /&gt;
+        &lt;Route path=&quot;/settings&quot;  element={&lt;Settings /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+// 2. Component-level splitting (heavy widgets)
+const HeavyChart = lazy(() =&gt; import(&#x27;./HeavyChart&#x27;));
+
+function DataPage({ showChart }) {
+  return (
+    &lt;div&gt;
+      &lt;DataTable /&gt;
+      {showChart &amp;&amp; (
+        &lt;Suspense fallback={&lt;div className=&quot;chart-skeleton&quot; /&gt;}&gt;
+          &lt;HeavyChart /&gt;
+        &lt;/Suspense&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+// 3. Named exports with lazy (lazy requires default export)
+const LazyModal = lazy(() =&gt;
+  import(&#x27;./components&#x27;).then(module =&gt; ({ default: module.Modal }))
+);
+
+// 4. Preloading — trigger load before user navigates
+function NavLink({ to, children }) {
+  const handleMouseEnter = () =&gt; {
+    // Start loading on hover, before click
+    import(&#x27;./Dashboard&#x27;);
+  };
+  return &lt;Link to={to} onMouseEnter={handleMouseEnter}&gt;{children}&lt;/Link&gt;;
+}
+
+// 5. Suspense with data (React 18 + library support)
+function UserProfile({ userId }) {
+  return (
+    &lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+      &lt;UserDetails userId={userId} /&gt;  {/* throws a Promise while loading */}
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>React.lazy() wraps a dynamic import() — the module must have a default export</li><li>Suspense fallback renders while any lazy child is loading — nest Suspense for granular control</li><li>Route-based splitting is the highest-impact code split — each page gets its own chunk</li><li>Preloading on hover/focus gives faster perceived navigation — user already waited before clicking</li><li>In React 18, Suspense works with any data that throws a Promise — libraries like SWR and React Query use this</li></ul></div>
+</div></div>
+</div>
+</div>
+<div id="tab-perf" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">Performance — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-perf" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-perf">0 / 3 read</div>
+</div>
+<div class="sec-label">Optimisation Techniques</div>
+<div class="acc" id="acc-perf-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'perf')">
+  <div class="acc-title">React 18 — Concurrent Features<span class="badge badge-new">React 18+</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>React 18 introduced <strong>Concurrent Rendering</strong> — React can prepare multiple versions of the UI simultaneously, pause rendering work, and prioritise updates. This unlocks non-blocking rendering: the UI stays responsive even during heavy state updates.</div>
+<div class="theory"><strong>Key React 18 changes:</strong>
+<ul>
+<li><strong>Automatic Batching</strong> — setState calls are batched in async callbacks (setTimeout, fetch) — not just event handlers. Fewer re-renders.</li>
+<li><strong>useTransition</strong> — mark state updates as non-urgent. UI stays responsive during the transition.</li>
+<li><strong>useDeferredValue</strong> — defer re-rendering a value, keeping the current UI interactive</li>
+<li><strong>Suspense improvements</strong> — streaming SSR, selective hydration</li>
+<li><strong>New root API</strong> — <code>createRoot</code> instead of <code>ReactDOM.render</code></li>
+</ul></div>
+<div class="code-label">React 18 Features</div>
+<pre><code class="language-javascript">// 1. Automatic batching (React 18)
+function App() {
+  const [count, setCount] = useState(0);
+  const [flag, setFlag] = useState(false);
+
+  // React 17: two renders in setTimeout
+  // React 18: ONE render (automatic batching) ✓
+  setTimeout(() =&gt; {
+    setCount(c =&gt; c + 1);
+    setFlag(f =&gt; !f);
+  }, 1000);
+}
+
+// 2. useTransition — mark update as non-urgent
+function Search() {
+  const [query, setQuery] = useState(&#x27;&#x27;);
+  const [results, setResults] = useState([]);
+  const [isPending, startTransition] = useTransition();
+
+  const handleInput = (e) =&gt; {
+    const val = e.target.value;
+    setQuery(val);  // urgent — input updates immediately
+
+    startTransition(() =&gt; {
+      // non-urgent — React can pause this to handle user input
+      const filtered = hugeList.filter(item =&gt;
+        item.name.toLowerCase().includes(val.toLowerCase())
+      );
+      setResults(filtered);
+    });
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;input value={query} onChange={handleInput} /&gt;
+      {isPending ? (
+        &lt;Spinner /&gt;
+      ) : (
+        &lt;ResultsList results={results} /&gt;
+      )}
+    &lt;/div&gt;
+  );
+}
+
+// 3. useDeferredValue — defer rendering of a value
+function FilteredList({ items }) {
+  const [filter, setFilter] = useState(&#x27;&#x27;);
+  const deferredFilter = useDeferredValue(filter);
+
+  const isStale = filter !== deferredFilter;
+
+  // This expensive computation uses the deferred value
+  const filtered = useMemo(() =&gt; {
+    return items.filter(item =&gt; item.includes(deferredFilter));
+  }, [items, deferredFilter]);
+
+  return (
+    &lt;div style={{ opacity: isStale ? 0.7 : 1 }}&gt;
+      &lt;input value={filter} onChange={e =&gt; setFilter(e.target.value)} /&gt;
+      &lt;List items={filtered} /&gt;
+    &lt;/div&gt;
+  );
+}
+
+// 4. New root API (React 18)
+import { createRoot } from &#x27;react-dom/client&#x27;;
+const root = createRoot(document.getElementById(&#x27;root&#x27;));
+root.render(&lt;App /&gt;);</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Automatic batching: React 18 batches all setState calls regardless of where they happen — reduces render count</li><li>useTransition: the startTransition callback marks updates as interruptible — React can stop and prioritise urgent work (typing)</li><li>isPending is true while the transition is in progress — use it to show a subtle loading indicator</li><li>useDeferredValue is similar to useTransition but for values rather than the update site — useful when you can&#x27;t modify where the state is set</li><li>isStale check: when filter !== deferredFilter, show dimmed UI to indicate results are outdated</li></ul></div>
+<div class="tip">useTransition is for when you own the state setter. useDeferredValue is for when you receive a value from props you can&#x27;t control.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-perf-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'perf')">
+  <div class="acc-title">Virtual DOM, Reconciliation &amp; Keys<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>The <strong>Virtual DOM</strong> is a JavaScript representation of the DOM tree. React's <strong>Reconciliation</strong> algorithm (Fiber) diffs the new VDOM against the previous one and computes the minimum set of DOM operations needed. <strong>Keys</strong> help React identify which list items changed.</div>
+<div class="theory"><strong>Reconciliation heuristics (how React diffs):</strong>
+<ul>
+<li>Elements of <strong>different types</strong> → tear down the entire subtree and rebuild</li>
+<li>Same element type → update only changed attributes, recurse into children</li>
+<li>Lists without keys → diff by position (fragile — React may get it wrong)</li>
+<li>Lists with keys → diff by identity (correct and efficient)</li>
+</ul>
+<strong>Key rules:</strong>
+<ul>
+<li>Keys must be <strong>unique among siblings</strong> (not globally)</li>
+<li>Keys must be <strong>stable</strong> — don't use Math.random() or array index for dynamic lists</li>
+<li>Using index as key is only safe for: static lists, append-only lists (never reorder/delete middle)</li>
+</ul></div>
+<div class="code-label">Keys &amp; Reconciliation</div>
+<pre><code class="language-javascript">// ❌ Index as key — breaks with reordering/deletion
+function BadList({ items }) {
+  return items.map((item, index) =&gt; (
+    // React uses position to match old/new items
+    // Deleting item[0] shifts all subsequent items → wrong state/animation
+    &lt;TodoItem key={index} item={item} /&gt;
+  ));
+}
+
+// ✅ Stable unique ID
+function GoodList({ items }) {
+  return items.map(item =&gt; (
+    &lt;TodoItem key={item.id} item={item} /&gt;
+  ));
+}
+
+// ❌ Random key — new key every render = remount every render
+&lt;Item key={Math.random()} /&gt;  // destroys and recreates on every render
+
+// ✅ Using key to FORCE remount (intentional reset)
+// Changing the key destroys the old component and creates a new one
+// Useful for resetting a component&#x27;s state when a prop changes
+function ProfilePage({ userId }) {
+  return (
+    // When userId changes, ProfileEditor completely remounts
+    // All its internal state (form fields, etc.) resets
+    &lt;ProfileEditor key={userId} userId={userId} /&gt;
+  );
+}
+
+// Reconciliation examples:
+// CASE 1: Type change → full remount
+&lt;div&gt;  →  &lt;span&gt;  // div unmounts, span mounts
+
+// CASE 2: Same type → just update props
+&lt;div className=&quot;old&quot;&gt;  →  &lt;div className=&quot;new&quot;&gt;  // only className changed
+
+// CASE 3: Component type change → remount
+&lt;Button /&gt;  →  &lt;IconButton /&gt;  // Button unmounts, IconButton mounts</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Keys are hints to the reconciler — &#x27;this is the same logical item even if it moved position&#x27;</li><li>Index keys cause subtle bugs: deleting item 0 causes item 1&#x27;s key to become 0 — React thinks it&#x27;s the same item, preserving wrong state</li><li>Intentional key reset: changing a component&#x27;s key is the correct way to force a full remount and reset all state</li><li>Type change remounts: wrapping a component in different parents conditionally (div vs section) causes remount even if inner component is the same</li><li>React Fiber splits reconciliation into small units — it can pause, resume, prioritise — this is the basis of Concurrent Mode</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-perf-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'perf')">
+  <div class="acc-title">Code Splitting &amp; Bundle Optimization<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Code splitting divides your JavaScript bundle into smaller chunks that are <strong>loaded on demand</strong> rather than all at once. Combined with tree-shaking (removing unused exports) and lazy loading, it dramatically reduces initial load time.</div>
+<div class="theory"><strong>Strategies (highest to lowest impact):</strong>
+<ul>
+<li><strong>Route-based splitting</strong> — each page gets its own chunk (biggest win)</li>
+<li><strong>Component-based splitting</strong> — heavy widgets (rich text editors, charts, date pickers)</li>
+<li><strong>Vendor splitting</strong> — separate chunks for large dependencies (React, lodash)</li>
+<li><strong>Dynamic imports</strong> — load modules only when a feature is used</li>
+</ul>
+<strong>Bundle analysis</strong> — always measure with webpack-bundle-analyzer or Vite's visualizer before optimizing.</div>
+<div class="code-label">Code Splitting Patterns</div>
+<pre><code class="language-javascript">// 1. Dynamic import — load library only when needed
+async function handleExport() {
+  // xlsx library (500KB) only loads when user clicks Export
+  const { utils, writeFile } = await import(&#x27;xlsx&#x27;);
+  const ws = utils.json_to_sheet(data);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, &#x27;Data&#x27;);
+  writeFile(wb, &#x27;export.xlsx&#x27;);
+}
+
+// 2. Conditional heavy component loading
+const RichEditor = lazy(() =&gt; import(&#x27;./RichTextEditor&#x27;)); // 200KB
+
+function PostEditor({ useRich }) {
+  if (!useRich) return &lt;textarea /&gt;;  // simple case loads nothing
+  return (
+    &lt;Suspense fallback={&lt;div&gt;Loading editor...&lt;/div&gt;}&gt;
+      &lt;RichEditor /&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+// 3. Prefetch on interaction
+function DashboardNav() {
+  const prefetchDashboard = () =&gt; import(&#x27;./Dashboard&#x27;);  // start load
+  return (
+    &lt;Link
+      to=&quot;/dashboard&quot;
+      onMouseEnter={prefetchDashboard}  // preload on hover
+      onFocus={prefetchDashboard}        // preload on focus (keyboard nav)
+    &gt;
+      Dashboard
+    &lt;/Link&gt;
+  );
+}
+
+// 4. Vite config — manual chunk splitting
+// vite.config.js
+export default {
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          &#x27;vendor-react&#x27;: [&#x27;react&#x27;, &#x27;react-dom&#x27;],
+          &#x27;vendor-utils&#x27;: [&#x27;lodash&#x27;, &#x27;date-fns&#x27;],
+          &#x27;vendor-charts&#x27;: [&#x27;recharts&#x27;],
+        }
+      }
+    }
+  }
+};
+
+// 5. Check bundle size before/after
+import { defineConfig } from &#x27;vite&#x27;;
+import { visualizer } from &#x27;rollup-plugin-visualizer&#x27;;
+
+export default defineConfig({
+  plugins: [visualizer({ open: true })], // opens treemap on build
+});</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Dynamic import() returns a Promise — the browser fetches the chunk asynchronously when first called</li><li>Route-based splitting in React Router: each &lt;Route&gt; can lazy-load its component — users download only pages they visit</li><li>Prefetching on mouseEnter: gives ~100-200ms head start on loading before the click, making navigation feel instant</li><li>ManualChunks: group libraries that change infrequently into vendor chunks — they get cached separately from your app code</li><li>Always check your bundle: npx vite build &amp;&amp; npx vite preview — open the visualizer to find large dependencies</li></ul></div>
+<div class="tip">Start with route-based splitting. That alone usually reduces initial bundle by 40-60%. Then profile before adding more.</div>
+</div></div>
+</div>
+</div>
+<div id="tab-next-basics" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">Next.js Basics — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-next-basics" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-next-basics">0 / 4 read</div>
+</div>
+<div class="sec-label">Core Concepts</div>
+<div class="acc" id="acc-next-basics-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-basics')">
+  <div class="acc-title">What is Next.js &amp; Why Use It<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js is a <strong>React framework</strong> that adds server-side rendering, file-based routing, API routes, image optimisation, and build tooling on top of React. It solves React's biggest production challenges out of the box.</div>
+<div class="theory"><strong>Problems Next.js solves:</strong>
+<ul>
+<li><strong>SEO</strong> — Plain React (CSR) ships an empty HTML shell. Crawlers see nothing. Next.js pre-renders HTML on the server</li>
+<li><strong>Performance</strong> — Static pages served from CDN, automatic code splitting, image optimisation</li>
+<li><strong>Routing</strong> — No need for react-router — file structure defines routes</li>
+<li><strong>API</strong> — Backend API routes in the same project</li>
+<li><strong>DX</strong> — Zero-config TypeScript, fast refresh, built-in CSS modules</li>
+</ul>
+<strong>Rendering Strategies:</strong>
+<ul>
+<li><strong>SSR</strong> — HTML generated per request on the server (fresh data, good SEO)</li>
+<li><strong>SSG</strong> — HTML generated at build time (fastest, served from CDN)</li>
+<li><strong>ISR</strong> — SSG with background revalidation (best of both)</li>
+<li><strong>CSR</strong> — Traditional React SPA (client fetches data after load)</li>
+<li><strong>RSC</strong> — React Server Components (App Router) — render on server, zero JS shipped</li>
+</ul></div>
+<div class="code-label">Rendering Strategy Comparison</div>
+<pre><code class="language-javascript">// SSG — generated at build time, cached on CDN
+// Best for: blog posts, marketing pages, docs
+export default async function BlogPost({ params }) {
+  const post = await getPost(params.slug); // called at BUILD TIME
+  return &lt;article&gt;{post.content}&lt;/article&gt;;
+}
+
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map(post =&gt; ({ slug: post.slug }));
+}
+
+// SSR — generated per request
+// Best for: personalised pages, real-time data
+export default async function Dashboard() {
+  const user = await getUser(); // called on EVERY REQUEST
+  return &lt;div&gt;Hello {user.name}&lt;/div&gt;;
+}
+
+// ISR — static but refreshes in background
+// Best for: product pages, news (data changes but not per-second)
+async function getProduct(id) {
+  const res = await fetch(`/api/products/${id}`, {
+    next: { revalidate: 60 } // regenerate after 60 seconds
+  });
+  return res.json();
+}
+
+// CSR — client fetches after load
+// Best for: user-specific data behind auth, dashboards
+&#x27;use client&#x27;;
+function ProfilePage() {
+  const { data } = useSWR(&#x27;/api/me&#x27;, fetcher);
+  return &lt;div&gt;{data?.name}&lt;/div&gt;;
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>SSG: data is fetched once at build time — pages are pre-built HTML files served instantly from CDN</li><li>ISR: first visitor gets cached page, background job regenerates page after revalidate seconds</li><li>SSR: every request hits your server — more expensive but always fresh</li><li>RSC (App Router): components run on the server, fetch data directly, ship zero JavaScript to the client</li><li>Choose the least dynamic option: SSG &gt; ISR &gt; SSR &gt; CSR in terms of performance</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-basics-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-basics')">
+  <div class="acc-title">App Router vs Pages Router<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js has two routing systems: the original <strong>Pages Router</strong> (stable, widely used) and the newer <strong>App Router</strong> (Next.js 13+, recommended for new projects). They have different file conventions, data fetching patterns, and component models.</div>
+<div class="theory"><strong>Key differences:</strong>
+<ul>
+<li><strong>App Router</strong> uses React Server Components by default — components run on the server unless marked 'use client'</li>
+<li><strong>Pages Router</strong> all components are client-side React with server-side data fetching via getServerSideProps/getStaticProps</li>
+<li><strong>Layouts</strong> — App Router has nested layouts that persist across navigation; Pages Router requires manual _app.js setup</li>
+<li><strong>Data fetching</strong> — App Router: fetch() directly in async components; Pages Router: special export functions</li>
+<li><strong>Streaming</strong> — App Router supports React 18 streaming with Suspense; Pages Router does not</li>
+</ul></div>
+<div class="code-label">Side-by-Side Comparison</div>
+<pre><code class="language-javascript">// ─── PAGES ROUTER ───────────────────────────────────────
+// pages/blog/[slug].js
+export default function BlogPost({ post }) {
+  // Component always runs on CLIENT
+  return &lt;article&gt;{post.title}&lt;/article&gt;;
+}
+
+// Data fetching via exported function
+export async function getStaticProps({ params }) {
+  const post = await getPost(params.slug);
+  return { props: { post }, revalidate: 60 };
+}
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+  return {
+    paths: posts.map(p =&gt; ({ params: { slug: p.slug } })),
+    fallback: &#x27;blocking&#x27;,
+  };
+}
+
+// Layout in _app.js
+function MyApp({ Component, pageProps }) {
+  return (
+    &lt;Layout&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Layout&gt;
+  );
+}
+
+
+// ─── APP ROUTER ──────────────────────────────────────────
+// app/blog/[slug]/page.tsx
+
+// Server Component by default — runs on server, no JS shipped
+export default async function BlogPost({ params }) {
+  const post = await getPost(params.slug); // direct DB/API call
+  return &lt;article&gt;{post.title}&lt;/article&gt;;
+}
+
+// Static params for SSG
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  return posts.map(p =&gt; ({ slug: p.slug }));
+}
+
+// Metadata
+export async function generateMetadata({ params }) {
+  const post = await getPost(params.slug);
+  return { title: post.title, description: post.excerpt };
+}
+
+// Layout: app/layout.tsx — persistent across routes
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang=&quot;en&quot;&gt;
+      &lt;body&gt;
+        &lt;Nav /&gt;
+        {children}
+        &lt;Footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Pages Router: getStaticProps/getServerSideProps run on server, pass data as props to the client component</li><li>App Router: the component itself is async and runs on the server — much simpler and more natural</li><li>generateStaticParams replaces getStaticPaths in App Router — same concept, cleaner API</li><li>Layouts in App Router persist between route changes — Nav/Footer don&#x27;t unmount and remount on navigation</li><li>For new projects: use App Router. For existing Pages Router: no need to migrate unless you need streaming/RSC</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-basics-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-basics')">
+  <div class="acc-title">File-Based Routing (App Router)<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>In Next.js App Router, the <strong>file system is the router</strong>. The <code>app/</code> directory structure maps directly to URL paths. Special filenames (<code>page.tsx</code>, <code>layout.tsx</code>, <code>loading.tsx</code>, <code>error.tsx</code>) have reserved meanings.</div>
+<div class="theory"><strong>Special files:</strong>
+<ul>
+<li><code>page.tsx</code> — the UI for a route, makes the segment publicly accessible</li>
+<li><code>layout.tsx</code> — shared UI wrapping a segment and its children, persists on navigation</li>
+<li><code>loading.tsx</code> — automatic Suspense boundary, shows while page is loading</li>
+<li><code>error.tsx</code> — error boundary for a segment (must be 'use client')</li>
+<li><code>not-found.tsx</code> — renders when notFound() is called</li>
+<li><code>route.ts</code> — API route handler (GET, POST, etc.)</li>
+<li><code>middleware.ts</code> — runs before every request</li>
+</ul>
+<strong>Dynamic segments:</strong> <code>[slug]</code>, <code>[...rest]</code> (catch-all), <code>[[...rest]]</code> (optional catch-all)
+<strong>Route groups:</strong> <code>(group)</code> — organise routes without affecting URL</div>
+<div class="code-label">App Directory Structure</div>
+<pre><code class="language-javascript">app/
+├── layout.tsx              → wraps everything (html, body)
+├── page.tsx                → / (home page)
+├── loading.tsx             → / loading state
+├── error.tsx               → / error boundary
+├── not-found.tsx           → 404 page
+│
+├── blog/
+│   ├── layout.tsx          → /blog/* shared layout (sidebar, nav)
+│   ├── page.tsx            → /blog
+│   └── [slug]/
+│       ├── page.tsx        → /blog/my-post
+│       └── opengraph-image.tsx → OG image
+│
+├── (auth)/                 → Route group — no URL segment
+│   ├── login/page.tsx      → /login
+│   └── register/page.tsx   → /register
+│
+├── dashboard/
+│   ├── layout.tsx          → /dashboard/* shared layout
+│   ├── page.tsx            → /dashboard
+│   ├── @analytics/         → Parallel route slot
+│   │   └── page.tsx
+│   └── settings/
+│       └── page.tsx        → /dashboard/settings
+│
+└── api/
+    └── users/
+        └── route.ts        → /api/users (GET, POST handlers)
+
+// ─── Dynamic route with params ───────────────────────────
+// app/blog/[slug]/page.tsx
+interface Props {
+  params: { slug: string };
+  searchParams: { [key: string]: string };
+}
+
+export default async function Post({ params, searchParams }: Props) {
+  const { slug } = params;
+  const { sort } = searchParams; // URL: /blog/hello?sort=date
+  const post = await getPost(slug);
+  if (!post) notFound(); // triggers not-found.tsx
+  return &lt;article&gt;{post.content}&lt;/article&gt;;
+}
+
+// Catch-all: app/docs/[...path]/page.tsx
+// Matches /docs/a, /docs/a/b, /docs/a/b/c
+// params.path = [&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>layout.tsx wraps all child routes — Nav and Footer in root layout render on every page</li><li>Route groups (auth) let you apply a different layout to login/register without those segments appearing in the URL</li><li>loading.tsx is automatically wrapped in Suspense — it shows while the async page.tsx is fetching data</li><li>error.tsx must be a Client Component — it receives error and reset props</li><li>Parallel routes (@slot) let you render multiple pages in the same layout simultaneously — useful for modals, split views</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-basics-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-basics')">
+  <div class="acc-title">Image, Font &amp; Script Optimization<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js provides built-in components for optimising the three most common causes of poor Core Web Vitals: <strong>unoptimised images</strong> (LCP), <strong>layout-shifting fonts</strong> (CLS), and <strong>render-blocking scripts</strong>.</div>
+<div class="theory"><strong>next/image:</strong>
+<ul>
+<li>Automatic WebP/AVIF conversion</li>
+<li>Resizes to exact display size (no oversized images)</li>
+<li>Lazy loads by default (only loads when in viewport)</li>
+<li>Prevents layout shift with required width/height</li>
+<li>Blur-up placeholder option</li>
+</ul>
+<strong>next/font:</strong> Downloads fonts at build time, self-hosts them — zero FOUT (Flash of Unstyled Text), no external network requests, zero CLS.
+
+<strong>next/script:</strong> Controls when third-party scripts load — afterInteractive, beforeInteractive, lazyOnload, worker.</div>
+<div class="code-label">Image, Font &amp; Script Components</div>
+<pre><code class="language-javascript">// ─── next/image ──────────────────────────────────────────
+import Image from &#x27;next/image&#x27;;
+
+// Static image — size automatically known
+import profilePic from &#x27;./profile.jpg&#x27;;
+&lt;Image src={profilePic} alt=&quot;Profile&quot; placeholder=&quot;blur&quot; /&gt;
+
+// Dynamic image — must specify size
+&lt;Image
+  src={user.avatarUrl}
+  alt={user.name}
+  width={64}
+  height={64}
+  className=&quot;rounded-full&quot;
+/&gt;
+
+// Hero image — priority loads eagerly (above the fold)
+&lt;Image
+  src=&quot;/hero.jpg&quot;
+  alt=&quot;Hero&quot;
+  fill                     // fills parent container
+  priority                 // disable lazy loading for LCP image
+  sizes=&quot;(max-width: 768px) 100vw, 50vw&quot;
+  style={{ objectFit: &#x27;cover&#x27; }}
+/&gt;
+
+// ─── next/font (App Router) ───────────────────────────────
+import { Inter, JetBrains_Mono } from &#x27;next/font/google&#x27;;
+import localFont from &#x27;next/font/local&#x27;;
+
+const inter = Inter({
+  subsets: [&#x27;latin&#x27;],
+  variable: &#x27;--font-inter&#x27;,  // expose as CSS variable
+});
+
+const mono = JetBrains_Mono({
+  subsets: [&#x27;latin&#x27;],
+  variable: &#x27;--font-mono&#x27;,
+});
+
+// app/layout.tsx
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang=&quot;en&quot; className={`${inter.variable} ${mono.variable}`}&gt;
+      &lt;body className={inter.className}&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
+
+// ─── next/script ─────────────────────────────────────────
+import Script from &#x27;next/script&#x27;;
+
+// afterInteractive (default) — loads after page hydration
+&lt;Script src=&quot;https://analytics.example.com/script.js&quot; /&gt;
+
+// lazyOnload — loads during browser idle time
+&lt;Script src=&quot;https://chat-widget.example.com&quot; strategy=&quot;lazyOnload&quot; /&gt;
+
+// Worker — loads in Web Worker (off main thread)
+&lt;Script src=&quot;/third-party.js&quot; strategy=&quot;worker&quot; /&gt;
+
+// beforeInteractive — loads before hydration (rare, blocking)
+&lt;Script src=&quot;/critical-polyfill.js&quot; strategy=&quot;beforeInteractive&quot; /&gt;</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>fill prop + parent position:relative makes image fill its container — great for responsive hero images</li><li>priority on above-the-fold images marks them as high-priority fetches — critical for LCP score</li><li>next/font downloads fonts at build time and self-hosts them — Google Fonts requests never leave your CDN</li><li>CSS variable approach (variable=&#x27;--font-inter&#x27;) lets you use the font in Tailwind or CSS: font-family: var(--font-inter)</li><li>Script strategy: afterInteractive is right for analytics; lazyOnload for chat widgets; never put GA in beforeInteractive</li></ul></div>
+</div></div>
+</div>
+</div>
+<div id="tab-next-app-router" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">App Router — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-next-app-router" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-next-app-router">0 / 6 read</div>
+</div>
+<div class="sec-label">Server &amp; Client Components</div>
+<div class="acc" id="acc-next-app-router-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Server Components vs Client Components<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>In the App Router, components are <strong>Server Components by default</strong> — they run on the server, can access databases/APIs directly, and <strong>ship zero JavaScript to the browser</strong>. Client Components are marked with <code>'use client'</code> and run in both server (SSR) and browser.</div>
+<div class="theory"><strong>Server Components CAN:</strong>
+<ul>
+<li>Use async/await directly — <code>async function Page()</code></li>
+<li>Access databases, filesystems, environment variables directly</li>
+<li>Import server-only packages (no bundle size impact)</li>
+<li>Pass data to Client Components as props</li>
+</ul>
+<strong>Server Components CANNOT:</strong>
+<ul>
+<li>Use hooks (useState, useEffect, etc.)</li>
+<li>Use browser APIs (window, document)</li>
+<li>Use event handlers (onClick, onChange)</li>
+<li>Use Context (as providers)</li>
+</ul>
+<strong>Client Components ('use client'):</strong>
+<ul>
+<li>Run on server for initial SSR HTML, then hydrate in browser</li>
+<li>Can use hooks, event handlers, browser APIs</li>
+<li>Increase JavaScript bundle size</li>
+</ul>
+<strong>Composition rule:</strong> Server Components CAN render Client Components. Client Components CANNOT render Server Components (except via children prop).</div>
+<div class="code-label">Server vs Client Components</div>
+<pre><code class="language-javascript">// ─── SERVER COMPONENT (default) ──────────────────────────
+// app/dashboard/page.tsx — no &#x27;use client&#x27;, async allowed
+import { db } from &#x27;@/lib/db&#x27;;
+
+export default async function DashboardPage() {
+  // Direct DB query — runs on server, never exposed to client
+  const user = await db.user.findUnique({ where: { id: getUserId() } });
+  const stats = await db.analytics.aggregate({ _sum: { views: true } });
+
+  // Pass serialisable data to Client Component
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Welcome, {user.name}&lt;/h1&gt;
+      &lt;Stats data={stats} /&gt;           {/* Server Component */}
+      &lt;InteractiveChart data={stats} /&gt; {/* Client Component */}
+    &lt;/main&gt;
+  );
+}
+
+// ─── CLIENT COMPONENT ────────────────────────────────────
+&#x27;use client&#x27;; // This directive propagates to all imports
+import { useState, useEffect } from &#x27;react&#x27;;
+
+interface ChartProps {
+  data: { views: number }; // must be serialisable (no Functions, Dates as-is)
+}
+
+export function InteractiveChart({ data }: ChartProps) {
+  const [period, setPeriod] = useState(&#x27;7d&#x27;);
+
+  return (
+    &lt;div&gt;
+      &lt;select value={period} onChange={e =&gt; setPeriod(e.target.value)}&gt;
+        &lt;option value=&quot;7d&quot;&gt;Last 7 days&lt;/option&gt;
+        &lt;option value=&quot;30d&quot;&gt;Last 30 days&lt;/option&gt;
+      &lt;/select&gt;
+      {/* chart rendering */}
+    &lt;/div&gt;
+  );
+}
+
+// ─── PASSING SERVER COMPONENT AS CHILDREN ────────────────
+// ✅ This works — Server Component passed via children prop
+function Layout({ children }) {  // Client Component
+  return &lt;div className=&quot;layout&quot;&gt;{children}&lt;/div&gt;;
+}
+
+// In a Server Component:
+&lt;Layout&gt;
+  &lt;ServerSidebar /&gt;  {/* Server Component passed as prop */}
+&lt;/Layout&gt;
+
+// ─── server-only package — prevents accidental client import ──
+import &#x27;server-only&#x27;; // throws if imported in client bundle
+export async function getSecretData() {
+  return process.env.SECRET_KEY; // safe
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>&#x27;use client&#x27; is a boundary — it marks the component and all its imports as client-side</li><li>Server Components can import server-only packages (like database drivers) — they won&#x27;t bloat the client bundle</li><li>Data passed from Server to Client Component must be serialisable — no functions, no class instances, use plain objects/arrays</li><li>The children pattern: Server Components can pass Server Component output to Client Components — allows composition without losing RSC benefits</li><li>server-only package: import it at the top of server-only modules to get a build error if accidentally imported client-side</li></ul></div>
+<div class="warn">&#x27;use client&#x27; propagates down the import tree — every module imported by a Client Component also becomes client-side. Keep your client boundary as deep in the tree as possible.</div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-app-router-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Data Fetching in App Router<span class="badge badge-critical">Critical</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>In the App Router, data fetching is done by making async Server Components that call <code>fetch()</code> or database clients directly. Next.js extends the native fetch API with <strong>caching and revalidation options</strong>.</div>
+<div class="theory"><strong>Fetch caching behaviour:</strong>
+<ul>
+<li><code>fetch(url)</code> — cached indefinitely (static, SSG behaviour)</li>
+<li><code>fetch(url, { cache: 'no-store' })</code> — never cached (dynamic, SSR behaviour)</li>
+<li><code>fetch(url, { next: { revalidate: 60 } })</code> — cached, revalidates after 60s (ISR behaviour)</li>
+<li><code>fetch(url, { next: { tags: ['posts'] } })</code> — cached, revalidates when tag is invalidated</li>
+</ul>
+<strong>Dynamic rendering triggers:</strong> Using cookies(), headers(), searchParams, or cache: 'no-store' makes the route dynamic (SSR).
+
+<strong>React cache():</strong> Deduplicates fetch calls across the same request — if two components fetch the same URL, only one network request is made.</div>
+<div class="code-label">Data Fetching Patterns</div>
+<pre><code class="language-javascript">// 1. Basic server component data fetching
+export default async function PostsPage() {
+  const posts = await fetch(&#x27;https://api.example.com/posts&#x27;, {
+    next: { revalidate: 3600 } // ISR: revalidate every hour
+  }).then(r =&gt; r.json());
+
+  return &lt;PostList posts={posts} /&gt;;
+}
+
+// 2. Parallel fetching — don&#x27;t await sequentially (waterfall)
+export default async function Dashboard() {
+  // ❌ Sequential — total wait = 200ms + 150ms = 350ms
+  // const user = await getUser();
+  // const posts = await getPosts();
+
+  // ✅ Parallel — total wait = max(200ms, 150ms) = 200ms
+  const [user, posts, analytics] = await Promise.all([
+    getUser(),
+    getPosts(),
+    getAnalytics(),
+  ]);
+
+  return &lt;DashboardUI user={user} posts={posts} analytics={analytics} /&gt;;
+}
+
+// 3. Streaming with Suspense — show page while slow parts load
+import { Suspense } from &#x27;react&#x27;;
+
+export default function Page() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;  {/* renders immediately */}
+      &lt;Suspense fallback={&lt;StatsSkeleton /&gt;}&gt;
+        &lt;SlowStats /&gt;      {/* streams in when ready */}
+      &lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;TableSkeleton /&gt;}&gt;
+        &lt;DataTable /&gt;
+      &lt;/Suspense&gt;
+    &lt;/main&gt;
+  );
+}
+
+async function SlowStats() {
+  const stats = await getSlowAnalytics(); // takes 2s
+  return &lt;StatsDisplay stats={stats} /&gt;;
+}
+
+// 4. Cache deduplication with React cache()
+import { cache } from &#x27;react&#x27;;
+
+export const getUser = cache(async (id: string) =&gt; {
+  console.log(&#x27;DB query for user&#x27;, id); // only logged once per request
+  return db.user.findUnique({ where: { id } });
+});
+
+// Both components call getUser — only ONE DB query happens
+async function Header() { const user = await getUser(&#x27;123&#x27;); ... }
+async function Sidebar() { const user = await getUser(&#x27;123&#x27;); ... }
+
+// 5. On-demand revalidation (after mutation)
+import { revalidatePath, revalidateTag } from &#x27;next/cache&#x27;;
+
+async function createPost(formData: FormData) {
+  &#x27;use server&#x27;;
+  await db.post.create({ data: parseForm(formData) });
+  revalidatePath(&#x27;/blog&#x27;);           // invalidate /blog page
+  revalidateTag(&#x27;posts&#x27;);            // invalidate all &#x27;posts&#x27; tagged fetches
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Promise.all for parallel fetching is critical — sequential awaits create a waterfall that multiplies latency</li><li>Streaming with Suspense: the HTML for the page shell is sent immediately, slow sections stream in as they resolve</li><li>React cache() is per-request memoization — the same DB query in multiple components only hits the database once</li><li>revalidatePath/revalidateTag: call after mutations (form submissions, API calls) to clear cached data</li><li>Dynamic rendering: if any part of the route uses cookies(), headers(), or searchParams, the entire route is dynamic (SSR)</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-app-router-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Server Actions<span class="badge badge-new">React 18+</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Server Actions are <strong>async functions that run on the server</strong> and can be called from Client Components. They replace the need for API routes for mutations — form submissions, creating/updating/deleting data. Marked with <code>'use server'</code>.</div>
+<div class="theory"><strong>Benefits:</strong>
+<ul>
+<li>No need to create API routes for mutations</li>
+<li>Type-safe — same TypeScript types server and client</li>
+<li>Works with native <code>&lt;form&gt;</code> action attribute — progressively enhanced (works without JS)</li>
+<li>Integrated with Next.js caching — call revalidatePath/revalidateTag after mutation</li>
+</ul>
+<strong>Use cases:</strong> Form submissions, database mutations, authentication, file uploads, cookie setting.</div>
+<div class="code-label">Server Actions Patterns</div>
+<pre><code class="language-javascript">// ─── Server Action in a separate file ────────────────────
+&#x27;use server&#x27;;
+import { db } from &#x27;@/lib/db&#x27;;
+import { revalidatePath } from &#x27;next/cache&#x27;;
+import { redirect } from &#x27;next/navigation&#x27;;
+import { z } from &#x27;zod&#x27;;
+
+const CreatePostSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(10),
+});
+
+export async function createPost(formData: FormData) {
+  // Runs on the server
+  const raw = {
+    title: formData.get(&#x27;title&#x27;),
+    content: formData.get(&#x27;content&#x27;),
+  };
+
+  const validated = CreatePostSchema.safeParse(raw);
+  if (!validated.success) {
+    return { error: validated.error.flatten().fieldErrors };
+  }
+
+  const post = await db.post.create({ data: validated.data });
+  revalidatePath(&#x27;/blog&#x27;);           // clear cached blog page
+  redirect(`/blog/${post.slug}`);    // navigate to new post
+}
+
+// ─── Using in a Client Component form ────────────────────
+&#x27;use client&#x27;;
+import { createPost } from &#x27;./actions&#x27;;
+import { useFormState, useFormStatus } from &#x27;react-dom&#x27;;
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    &lt;button type=&quot;submit&quot; disabled={pending}&gt;
+      {pending ? &#x27;Creating...&#x27; : &#x27;Create Post&#x27;}
+    &lt;/button&gt;
+  );
+}
+
+const initialState = { error: null };
+
+export function CreatePostForm() {
+  const [state, formAction] = useFormState(createPost, initialState);
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name=&quot;title&quot; required /&gt;
+      {state.error?.title &amp;&amp; &lt;span&gt;{state.error.title}&lt;/span&gt;}
+
+      &lt;textarea name=&quot;content&quot; required /&gt;
+      {state.error?.content &amp;&amp; &lt;span&gt;{state.error.content}&lt;/span&gt;}
+
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}
+
+// ─── Server Action called programmatically ────────────────
+&#x27;use client&#x27;;
+import { deletePost } from &#x27;./actions&#x27;;
+
+function PostCard({ post }) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{post.title}&lt;/h2&gt;
+      {/* Call directly — no form needed */}
+      &lt;button onClick={() =&gt; deletePost(post.id)}&gt;Delete&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>&#x27;use server&#x27; at the top of a file makes all exported functions Server Actions — or put it inside a function for inline actions</li><li>formData.get() extracts form fields by name attribute — matches HTML input name attributes</li><li>Always validate input on the server — never trust client data. Zod is the go-to schema validation library</li><li>useFormState tracks the return value of the action, useFormStatus tracks pending state of the form</li><li>redirect() must be called outside try/catch — it throws an internal Next.js error that needs to propagate</li><li>revalidatePath/revalidateTag after mutations ensures users see fresh data immediately</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-app-router-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Layouts, Loading &amp; Error UI<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js App Router has built-in conventions for <strong>persistent layouts</strong>, <strong>loading states</strong>, and <strong>error boundaries</strong> — each mapped to special filenames in the app directory. They enable instant navigation, streaming, and granular error handling.</div>
+<div class="theory"><strong>Layout behaviour:</strong>
+<ul>
+<li>Layouts are <strong>not re-rendered on navigation</strong> — Nav, Sidebar, state all persist</li>
+<li>Root layout (<code>app/layout.tsx</code>) must include <code>&lt;html&gt;</code> and <code>&lt;body&gt;</code></li>
+<li>Nested layouts wrap their segment — <code>app/dashboard/layout.tsx</code> wraps all dashboard pages</li>
+</ul>
+<strong>loading.tsx</strong> is automatically wrapped in a Suspense boundary — shows while the page's async data loads.
+
+<strong>error.tsx</strong> is a Client Component that receives the error and a reset function.</div>
+<div class="code-label">Layout, Loading, Error Files</div>
+<pre><code class="language-javascript">// app/layout.tsx — root layout (required)
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    &lt;html lang=&quot;en&quot;&gt;
+      &lt;body&gt;
+        &lt;Header /&gt;
+        {children}  {/* page renders here */}
+        &lt;Footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
+
+// app/dashboard/layout.tsx — dashboard-specific layout
+export default function DashboardLayout({ children }) {
+  return (
+    &lt;div className=&quot;dashboard&quot;&gt;
+      &lt;Sidebar /&gt;          {/* persists across /dashboard/* */}
+      &lt;main&gt;{children}&lt;/main&gt;
+    &lt;/div&gt;
+  );
+}
+
+// app/dashboard/loading.tsx — automatic Suspense fallback
+// Shows while app/dashboard/page.tsx is fetching data
+export default function DashboardLoading() {
+  return (
+    &lt;div className=&quot;dashboard-skeleton&quot;&gt;
+      &lt;SkeletonCard /&gt;
+      &lt;SkeletonCard /&gt;
+      &lt;SkeletonTable /&gt;
+    &lt;/div&gt;
+  );
+}
+
+// app/dashboard/error.tsx — error boundary for /dashboard/*
+&#x27;use client&#x27;;
+export default function DashboardError({
+  error,
+  reset,
+}: {
+  error: Error &amp; { digest?: string };
+  reset: () =&gt; void;
+}) {
+  useEffect(() =&gt; {
+    console.error(error); // or Sentry.captureException(error)
+  }, [error]);
+
+  return (
+    &lt;div className=&quot;error-page&quot;&gt;
+      &lt;h2&gt;Something went wrong in Dashboard&lt;/h2&gt;
+      &lt;p&gt;{error.message}&lt;/p&gt;
+      &lt;button onClick={reset}&gt;Try again&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+// app/not-found.tsx — shown when notFound() is called
+export default function NotFound() {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;404 — Page Not Found&lt;/h2&gt;
+      &lt;Link href=&quot;/&quot;&gt;Go Home&lt;/Link&gt;
+    &lt;/div&gt;
+  );
+}
+
+// In a page — trigger not-found
+import { notFound } from &#x27;next/navigation&#x27;;
+export default async function PostPage({ params }) {
+  const post = await getPost(params.slug);
+  if (!post) notFound();
+  return &lt;Post post={post} /&gt;;
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>The root layout is the only required layout — it must have html and body tags (Next.js doesn&#x27;t add them automatically)</li><li>Nested layouts compose: root layout wraps dashboard layout wraps page — each layer can add its own UI</li><li>loading.tsx is automatically a Suspense boundary — you don&#x27;t need to wrap your page in Suspense manually</li><li>error.tsx receives reset — calling it retries rendering the segment (great for transient errors)</li><li>error.tsx does NOT catch errors in the layout — create a global-error.tsx for root layout errors</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-app-router-4">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Route Handlers (API Routes)<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Route Handlers (<code>app/api/*/route.ts</code>) are the App Router equivalent of API routes. They're standard Web API Request/Response functions that can handle any HTTP method: GET, POST, PUT, DELETE, PATCH.</div>
+<div class="theory"><strong>When to use Route Handlers:</strong>
+<ul>
+<li>Third-party webhooks (Stripe, GitHub)</li>
+<li>Serving data to external clients / mobile apps</li>
+<li>When you need fine-grained control over headers, status codes, streaming</li>
+<li>OAuth callbacks</li>
+</ul>
+<strong>When NOT to use them:</strong> For mutations from your own Next.js app — use Server Actions instead (simpler, type-safe, no HTTP overhead).</div>
+<div class="code-label">Route Handler Patterns</div>
+<pre><code class="language-javascript">// app/api/posts/route.ts
+
+import { NextRequest, NextResponse } from &#x27;next/server&#x27;;
+import { db } from &#x27;@/lib/db&#x27;;
+
+// GET /api/posts or GET /api/posts?limit=10
+export async function GET(request: NextRequest) {
+  const limit = request.nextUrl.searchParams.get(&#x27;limit&#x27;) ?? &#x27;10&#x27;;
+
+  const posts = await db.post.findMany({
+    take: parseInt(limit),
+    orderBy: { createdAt: &#x27;desc&#x27; },
+  });
+
+  return NextResponse.json(posts);
+}
+
+// POST /api/posts
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+
+  // Validate auth
+  const session = await getSession(request);
+  if (!session) {
+    return NextResponse.json({ error: &#x27;Unauthorized&#x27; }, { status: 401 });
+  }
+
+  const post = await db.post.create({ data: { ...body, userId: session.userId } });
+  return NextResponse.json(post, { status: 201 });
+}
+
+// app/api/posts/[id]/route.ts — dynamic segment
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const post = await db.post.findUnique({ where: { id: params.id } });
+  if (!post) return NextResponse.json({ error: &#x27;Not found&#x27; }, { status: 404 });
+  return NextResponse.json(post);
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  await db.post.delete({ where: { id: params.id } });
+  return new NextResponse(null, { status: 204 });
+}
+
+// Setting headers, CORS
+export async function GET(request: NextRequest) {
+  const data = await fetchData();
+  return NextResponse.json(data, {
+    headers: {
+      &#x27;Cache-Control&#x27;: &#x27;public, max-age=60&#x27;,
+      &#x27;Access-Control-Allow-Origin&#x27;: &#x27;*&#x27;,
+    },
+  });
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Route Handlers use standard Web API Request/Response — works with fetch(), no framework-specific syntax</li><li>Export named functions matching HTTP methods: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS</li><li>NextRequest extends Request with helpers like nextUrl.searchParams for easy query param parsing</li><li>NextResponse extends Response with helpers like NextResponse.json() and NextResponse.redirect()</li><li>For Stripe webhooks: use request.text() to get raw body for signature verification — don&#x27;t parse as JSON first</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-app-router-5">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-app-router')">
+  <div class="acc-title">Middleware<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Middleware runs <strong>before a request is processed</strong>, on every request that matches the matcher config. It runs at the Edge (globally distributed, fast) and can redirect, rewrite, modify headers, or block requests.</div>
+<div class="theory"><strong>Common use cases:</strong>
+<ul>
+<li><strong>Authentication</strong> — redirect to /login if no session</li>
+<li><strong>Internationalisation</strong> — redirect to /en or /fr based on Accept-Language</li>
+<li><strong>A/B testing</strong> — rewrite to variant URL based on cookie</li>
+<li><strong>Rate limiting</strong> — block IPs with too many requests</li>
+<li><strong>Feature flags</strong> — redirect users based on feature flags</li>
+</ul>
+<strong>Important:</strong> Middleware runs at the Edge — cannot use Node.js APIs directly. Use the Edge Runtime (fetch, Response, etc.).</div>
+<div class="code-label">Middleware Examples</div>
+<pre><code class="language-javascript">// middleware.ts — in project root
+import { NextResponse } from &#x27;next/server&#x27;;
+import type { NextRequest } from &#x27;next/server&#x27;;
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // 1. Authentication check
+  const token = request.cookies.get(&#x27;auth-token&#x27;)?.value;
+  const isProtectedRoute = pathname.startsWith(&#x27;/dashboard&#x27;);
+
+  if (isProtectedRoute &amp;&amp; !token) {
+    const loginUrl = new URL(&#x27;/login&#x27;, request.url);
+    loginUrl.searchParams.set(&#x27;from&#x27;, pathname); // remember where they were
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // 2. Redirect logged-in users away from auth pages
+  const isAuthRoute = pathname.startsWith(&#x27;/login&#x27;) || pathname.startsWith(&#x27;/register&#x27;);
+  if (isAuthRoute &amp;&amp; token) {
+    return NextResponse.redirect(new URL(&#x27;/dashboard&#x27;, request.url));
+  }
+
+  // 3. Rewrite (serve different content, URL unchanged)
+  if (pathname.startsWith(&#x27;/old-blog&#x27;)) {
+    return NextResponse.rewrite(new URL(pathname.replace(&#x27;/old-blog&#x27;, &#x27;/blog&#x27;), request.url));
+  }
+
+  // 4. Add custom headers
+  const response = NextResponse.next();
+  response.headers.set(&#x27;X-Frame-Options&#x27;, &#x27;DENY&#x27;);
+  response.headers.set(&#x27;X-Content-Type-Options&#x27;, &#x27;nosniff&#x27;);
+  return response;
+}
+
+// Config: which routes middleware runs on
+export const config = {
+  matcher: [
+    // Match all except static files and api routes
+    &#x27;/((?!_next/static|_next/image|favicon.ico|api).*)&#x27;,
+    // Or be explicit:
+    &#x27;/dashboard/:path*&#x27;,
+    &#x27;/profile/:path*&#x27;,
+  ],
+};</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>Middleware runs before auth checks in page files — centralize all auth redirects here</li><li>NextResponse.redirect() changes the URL; NextResponse.rewrite() changes the content but keeps the URL</li><li>The matcher is critical for performance — don&#x27;t run middleware on _next/static (would slow every image/CSS request)</li><li>Edge Runtime: no Node.js APIs (no fs, no bcrypt) — use JWT verification with jose (Edge-compatible) not jsonwebtoken</li><li>For complex auth: validate JWT in middleware for speed, but still verify session in server components before accessing sensitive data</li></ul></div>
+</div></div>
+</div>
+</div>
+<div id="tab-next-advanced" class="tab-content ">
+<div class="prog-wrap">
+  <div class="prog-info">
+    <div class="prog-title">Next.js Advanced — Topic Progress</div>
+    <div class="prog-track"><div class="prog-fill" id="prog-next-advanced" style="width:0%"></div></div>
+  </div>
+  <div class="prog-count" id="progc-next-advanced">0 / 5 read</div>
+</div>
+<div class="sec-label">Production Patterns</div>
+<div class="acc" id="acc-next-advanced-0">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-advanced')">
+  <div class="acc-title">Authentication with NextAuth.js / Auth.js<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong><strong>Auth.js (NextAuth v5)</strong> is the most popular authentication library for Next.js. It supports 50+ OAuth providers (Google, GitHub), credentials (email/password), magic links, and integrates seamlessly with the App Router via Server Actions and Middleware.</div>
+<div class="theory"><strong>Core concepts:</strong>
+<ul>
+<li><strong>Session</strong> — JWT or database-backed user session</li>
+<li><strong>Provider</strong> — OAuth provider config (Google, GitHub) or Credentials</li>
+<li><strong>Callbacks</strong> — customise token/session content</li>
+<li><strong>Middleware</strong> — protect routes before rendering</li>
+</ul></div>
+<div class="code-label">NextAuth.js Setup</div>
+<pre><code class="language-javascript">// auth.ts — core config
+import NextAuth from &#x27;next-auth&#x27;;
+import Google from &#x27;next-auth/providers/google&#x27;;
+import Credentials from &#x27;next-auth/providers/credentials&#x27;;
+import { db } from &#x27;@/lib/db&#x27;;
+import bcrypt from &#x27;bcryptjs&#x27;;
+
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    Credentials({
+      async authorize(credentials) {
+        const user = await db.user.findUnique({
+          where: { email: credentials.email as string }
+        });
+        if (!user) return null;
+        const valid = await bcrypt.compare(credentials.password as string, user.password);
+        return valid ? user : null;
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.role = user.role; // add role to JWT
+      return token;
+    },
+    async session({ session, token }) {
+      session.user.role = token.role; // expose in session
+      return session;
+    },
+  },
+  pages: {
+    signIn: &#x27;/login&#x27;,
+    error: &#x27;/auth/error&#x27;,
+  },
+});
+
+// app/api/auth/[...nextauth]/route.ts
+export const { GET, POST } = handlers;
+
+// middleware.ts — protect routes
+export { auth as middleware } from &#x27;@/auth&#x27;;
+export const config = { matcher: [&#x27;/dashboard/:path*&#x27;] };
+
+// In a Server Component
+import { auth } from &#x27;@/auth&#x27;;
+
+export default async function DashboardPage() {
+  const session = await auth();
+  if (!session) redirect(&#x27;/login&#x27;);
+
+  return &lt;div&gt;Hello {session.user.name}&lt;/div&gt;;
+}
+
+// Sign in / out buttons (Server Action)
+import { signIn, signOut } from &#x27;@/auth&#x27;;
+
+export function SignInButton() {
+  return (
+    &lt;form action={async () =&gt; { &#x27;use server&#x27;; await signIn(&#x27;google&#x27;); }}&gt;
+      &lt;button type=&quot;submit&quot;&gt;Sign in with Google&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>The auth() function works in both Server Components and Route Handlers — returns the current session</li><li>JWT callback runs every time a JWT is created/updated — add custom fields (role, id) here</li><li>Session callback shapes the session object available to the client — expose only what&#x27;s needed</li><li>Middleware auth export is the simplest way to protect entire route segments</li><li>Always hash passwords with bcrypt (cost factor 10-12) — never store plain text passwords</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-advanced-1">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-advanced')">
+  <div class="acc-title">Environment Variables<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js loads environment variables from <code>.env</code> files. Variables prefixed with <code>NEXT_PUBLIC_</code> are exposed to the browser. All other variables are <strong>server-only</strong> — never exposed to the client bundle.</div>
+<div class="theory"><strong>File precedence (highest to lowest):</strong>
+<ul>
+<li><code>.env.local</code> — local overrides (gitignored)</li>
+<li><code>.env.development</code> or <code>.env.production</code> — environment-specific</li>
+<li><code>.env</code> — defaults</li>
+</ul>
+<strong>Security rule:</strong> If a variable doesn't start with NEXT_PUBLIC_, it's only available in server-side code. Accidentally using it in a Client Component will result in <code>undefined</code>, not an error.</div>
+<div class="code-label">Environment Variables</div>
+<pre><code class="language-javascript">// .env.local (gitignored — secrets here)
+DATABASE_URL=postgresql://user:pass@localhost/mydb
+NEXTAUTH_SECRET=supersecretkey
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_API_URL=https://api.example.com
+NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+// ─── Server-only (no NEXT_PUBLIC_ prefix) ────────────────
+// app/api/payment/route.ts
+import Stripe from &#x27;stripe&#x27;;
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!); // server only ✓
+
+// ─── Client-accessible (NEXT_PUBLIC_ prefix) ─────────────
+&#x27;use client&#x27;;
+// Available in browser — treat as public
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+// ─── Type safety with T3 env approach ────────────────────
+// env.mjs — validate at startup
+import { createEnv } from &#x27;@t3-oss/env-nextjs&#x27;;
+import { z } from &#x27;zod&#x27;;
+
+export const env = createEnv({
+  server: {
+    DATABASE_URL: z.string().url(),
+    NEXTAUTH_SECRET: z.string().min(32),
+  },
+  client: {
+    NEXT_PUBLIC_API_URL: z.string().url(),
+  },
+  runtimeEnv: {
+    DATABASE_URL: process.env.DATABASE_URL,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+});
+
+// Usage — typed, validated at startup
+import { env } from &#x27;@/env.mjs&#x27;;
+const db = new Client(env.DATABASE_URL); // TypeScript knows this exists</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>NEXT_PUBLIC_ variables are inlined at build time — they&#x27;re hardcoded in the client bundle, not secret</li><li>Server variables (no prefix) are available in Server Components, Route Handlers, middleware, and getServerSideProps</li><li>Never import a server-only module in a Client Component — add import &#x27;server-only&#x27; to enforce this</li><li>@t3-oss/env-nextjs validates env vars at startup — fail fast instead of mysterious undefined errors in production</li><li>In Vercel: add env vars in project settings. They override .env files. Use different values per environment (dev/preview/prod)</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-advanced-2">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-advanced')">
+  <div class="acc-title">TypeScript with Next.js<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Next.js has <strong>zero-config TypeScript support</strong>. The App Router is built TypeScript-first with typed params, searchParams, metadata, and route handlers. TypeScript errors are shown in the browser overlay during development.</div>
+<div class="theory"><strong>Key types to know:</strong>
+<ul>
+<li><code>NextPage</code> — type for Pages Router page components</li>
+<li><code>Metadata</code> — type for the metadata export</li>
+<li><code>NextRequest/NextResponse</code> — typed request/response for middleware and route handlers</li>
+<li><code>PageProps</code> — params and searchParams for App Router pages</li>
+</ul></div>
+<div class="code-label">TypeScript Patterns in Next.js</div>
+<pre><code class="language-javascript">// app/blog/[slug]/page.tsx
+import type { Metadata, ResolvingMetadata } from &#x27;next&#x27;;
+
+interface Props {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
+
+// Typed page component
+export default async function BlogPost({ params, searchParams }: Props) {
+  const { slug } = params;
+  const post = await getPost(slug);
+  return &lt;article&gt;{post.content}&lt;/article&gt;;
+}
+
+// Typed metadata generation
+export async function generateMetadata(
+  { params }: Props,
+  parent: ResolvingMetadata
+): Promise&lt;Metadata&gt; {
+  const post = await getPost(params.slug);
+  const previousImages = (await parent).openGraph?.images || [];
+
+  return {
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      images: [post.coverImage, ...previousImages],
+    },
+  };
+}
+
+// app/api/users/[id]/route.ts — typed route handler
+import { NextRequest, NextResponse } from &#x27;next/server&#x27;;
+
+type RouteContext = {
+  params: { id: string };
+};
+
+export async function GET(req: NextRequest, { params }: RouteContext) {
+  const user = await getUser(params.id);
+  return NextResponse.json(user);
+}
+
+// Typing Server Actions
+&#x27;use server&#x27;;
+type FormState = { success: boolean; error?: string };
+
+export async function createUser(
+  prevState: FormState,
+  formData: FormData
+): Promise&lt;FormState&gt; {
+  try {
+    const email = formData.get(&#x27;email&#x27;) as string;
+    await db.user.create({ data: { email } });
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: &#x27;Failed to create user&#x27; };
+  }
+}
+
+// next.config.ts — typed config
+import type { NextConfig } from &#x27;next&#x27;;
+
+const config: NextConfig = {
+  images: { domains: [&#x27;images.unsplash.com&#x27;] },
+  experimental: { serverActions: { allowedOrigins: [&#x27;localhost:3000&#x27;] } },
+};
+
+export default config;</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>params and searchParams in page.tsx are always strings — parse numbers/booleans explicitly</li><li>generateMetadata can be async — it can fetch data to generate dynamic titles and OG images</li><li>NextRequest extends the standard Request type — use it in middleware and route handlers</li><li>TypeScript strict mode is on by default in new Next.js projects — don&#x27;t disable it</li><li>Use &#x27;as string&#x27; for formData.get() or check for null — it returns string | File | null</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-advanced-3">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-advanced')">
+  <div class="acc-title">Performance &amp; Core Web Vitals<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Core Web Vitals are Google's metrics for user experience: <strong>LCP</strong> (loading), <strong>INP</strong> (interactivity), and <strong>CLS</strong> (visual stability). Next.js provides built-in optimisations but you must use them correctly.</div>
+<div class="theory"><strong>Common optimisation checklist:</strong>
+<ul>
+<li><strong>LCP</strong> — Add <code>priority</code> to hero image, use <code>next/image</code>, reduce TTFB (use edge functions for SSR)</li>
+<li><strong>CLS</strong> — Always specify image dimensions, use <code>next/font</code> to eliminate FOUT, avoid inserting DOM above existing content</li>
+<li><strong>INP</strong> — Break up long tasks (useTransition), reduce JavaScript bundle (code split, remove unused deps), defer non-critical scripts</li>
+</ul></div>
+<div class="code-label">Performance Optimisation Patterns</div>
+<pre><code class="language-javascript">// 1. Bundle analysis — find large dependencies
+// package.json
+&quot;scripts&quot;: {
+  &quot;analyze&quot;: &quot;ANALYZE=true next build&quot;
+}
+// next.config.js
+const withBundleAnalyzer = require(&#x27;@next/bundle-analyzer&#x27;)({
+  enabled: process.env.ANALYZE === &#x27;true&#x27;,
+});
+module.exports = withBundleAnalyzer({});
+
+// 2. Optimised image with proper sizing
+&lt;Image
+  src=&quot;/hero.jpg&quot;
+  alt=&quot;Hero image&quot;
+  width={1200}
+  height={600}
+  priority           // preload — critical for LCP
+  quality={85}       // 85 = good quality + smaller file
+  sizes=&quot;(max-width: 768px) 100vw, 1200px&quot;
+/&gt;
+
+// 3. Preload critical data at the root
+// app/layout.tsx
+export default async function RootLayout({ children }) {
+  const user = await getCurrentUser(); // fetch once at layout level
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        &lt;UserProvider user={user}&gt;
+          {children}
+        &lt;/UserProvider&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}
+
+// 4. Streaming for perceived performance
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;ImportantAboveFold /&gt;  {/* renders immediately */}
+      &lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+        &lt;SlowSection /&gt;        {/* streams in */}
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}
+
+// 5. Route-level performance config
+export const dynamic = &#x27;force-static&#x27;;    // SSG
+export const revalidate = 3600;           // ISR every hour
+export const runtime = &#x27;edge&#x27;;            // Edge Runtime (faster cold start)
+
+// 6. Partial Prerendering (Next.js 14+)
+// Static shell with dynamic holes (best of SSG + SSR)
+import { unstable_noStore as noStore } from &#x27;next/cache&#x27;;
+
+async function DynamicSection() {
+  noStore(); // this component is always dynamic
+  const data = await fetchPersonalizedData();
+  return &lt;div&gt;{data}&lt;/div&gt;;
+}
+
+// Static wrapper — shell is prerendered, dynamic section streams
+export default function Page() {
+  return (
+    &lt;main&gt;
+      &lt;StaticHero /&gt;
+      &lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+        &lt;DynamicSection /&gt;
+      &lt;/Suspense&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>export const dynamic controls rendering strategy at the route level — cleaner than per-fetch cache options</li><li>Streaming: the browser starts rendering the page shell immediately, without waiting for all data to load</li><li>Partial Prerendering (PPR): the static parts are served from CDN instantly, dynamic holes stream in — best of both worlds</li><li>Core Web Vitals measurement: use Next.js Analytics, Google Search Console, or Vercel Speed Insights</li><li>For edge runtime: verify your database adapter supports Edge (Neon, PlanetScale, Upstash all do; pg/mysql2 do not)</li></ul></div>
+</div></div>
+</div>
+<div class="acc" id="acc-next-advanced-4">
+<div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'next-advanced')">
+  <div class="acc-title">Testing Next.js Applications<span class="badge badge-important">Important</span></div>
+  <span class="acc-arrow">▼</span>
+</div>
+<div class="acc-body"><div class="acc-content"><div class="def-box"><strong>Definition: </strong>Testing a Next.js app requires different tools for different layers: <strong>Jest + React Testing Library</strong> for unit and component tests, <strong>Playwright or Cypress</strong> for end-to-end tests. Server Components and Server Actions need specific testing approaches.</div>
+<div class="theory"><strong>Testing pyramid for Next.js:</strong>
+<ul>
+<li><strong>Unit tests</strong> — utility functions, server actions, pure components (Jest)</li>
+<li><strong>Component tests</strong> — React components with RTL (React Testing Library)</li>
+<li><strong>Integration tests</strong> — page behaviour with MSW for API mocking</li>
+<li><strong>E2E tests</strong> — full user flows in a real browser (Playwright)</li>
+</ul></div>
+<div class="code-label">Testing Patterns</div>
+<pre><code class="language-javascript">// jest.config.ts
+import type { Config } from &#x27;jest&#x27;;
+import nextJest from &#x27;next/jest.js&#x27;;
+
+const createJestConfig = nextJest({ dir: &#x27;./&#x27; });
+
+const config: Config = {
+  setupFilesAfterFramework: [&#x27;&lt;rootDir&gt;/jest.setup.ts&#x27;],
+  testEnvironment: &#x27;jsdom&#x27;,
+  moduleNameMapper: {
+    &#x27;^@/(.*)$&#x27;: &#x27;&lt;rootDir&gt;/$1&#x27;,
+  },
+};
+
+export default createJestConfig(config);
+
+// jest.setup.ts
+import &#x27;@testing-library/jest-dom&#x27;;
+
+// ─── Testing a Client Component ──────────────────────────
+import { render, screen, fireEvent } from &#x27;@testing-library/react&#x27;;
+import userEvent from &#x27;@testing-library/user-event&#x27;;
+import { Counter } from &#x27;./Counter&#x27;;
+
+describe(&#x27;Counter&#x27;, () =&gt; {
+  it(&#x27;increments on click&#x27;, async () =&gt; {
+    const user = userEvent.setup();
+    render(&lt;Counter initialCount={0} /&gt;);
+
+    expect(screen.getByText(&#x27;Count: 0&#x27;)).toBeInTheDocument();
+    await user.click(screen.getByRole(&#x27;button&#x27;, { name: /increment/i }));
+    expect(screen.getByText(&#x27;Count: 1&#x27;)).toBeInTheDocument();
+  });
+});
+
+// ─── Testing a Server Action ──────────────────────────────
+import { createPost } from &#x27;./actions&#x27;;
+import { db } from &#x27;@/lib/db&#x27;;
+
+jest.mock(&#x27;@/lib/db&#x27;);
+
+describe(&#x27;createPost action&#x27;, () =&gt; {
+  it(&#x27;creates a post and returns it&#x27;, async () =&gt; {
+    const mockPost = { id: &#x27;1&#x27;, title: &#x27;Test&#x27;, content: &#x27;Hello&#x27; };
+    (db.post.create as jest.Mock).mockResolvedValue(mockPost);
+
+    const formData = new FormData();
+    formData.set(&#x27;title&#x27;, &#x27;Test&#x27;);
+    formData.set(&#x27;content&#x27;, &#x27;Hello&#x27;);
+
+    const result = await createPost({}, formData);
+    expect(result.success).toBe(true);
+    expect(db.post.create).toHaveBeenCalledWith({ data: expect.objectContaining({ title: &#x27;Test&#x27; }) });
+  });
+});
+
+// ─── Playwright E2E test ──────────────────────────────────
+import { test, expect } from &#x27;@playwright/test&#x27;;
+
+test(&#x27;user can create a post&#x27;, async ({ page }) =&gt; {
+  await page.goto(&#x27;/login&#x27;);
+  await page.fill(&#x27;[name=email]&#x27;, &#x27;test@example.com&#x27;);
+  await page.fill(&#x27;[name=password]&#x27;, &#x27;password123&#x27;);
+  await page.click(&#x27;button[type=submit]&#x27;);
+
+  await page.goto(&#x27;/posts/new&#x27;);
+  await page.fill(&#x27;[name=title]&#x27;, &#x27;My Test Post&#x27;);
+  await page.fill(&#x27;[name=content]&#x27;, &#x27;Hello world content&#x27;);
+  await page.click(&#x27;button[type=submit]&#x27;);
+
+  await expect(page).toHaveURL(/\/posts\//);
+  await expect(page.getByText(&#x27;My Test Post&#x27;)).toBeVisible();
+});</code></pre>
+<div class="explanation"><h4>Code Walkthrough</h4><ul><li>nextJest automatically sets up Next.js-specific transforms, mocks (next/router, next/navigation) and jest-dom</li><li>userEvent.setup() is preferred over fireEvent — it simulates real user interactions (focus, keyboard, pointer)</li><li>Server Actions are plain async functions — test them directly without rendering any UI</li><li>Mock the database layer, not the action itself — you want to test the action logic, not the DB driver</li><li>Playwright tests run against your actual running app — start with npx playwright test and use the --ui flag for debugging</li></ul></div>
+</div></div>
+</div>
+</div>
+
+</div>
+
+<script>
+const readCounts={};
+const totalCounts={};
+const readItems=new Set();
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(()=>hljs.highlightAll(),40);
+}
+
+function toggleAcc(el,tab){
+  const isOpen=el.classList.contains('open');
+  el.classList.toggle('open');
+  if(!isOpen&&!readItems.has(el.id)){
+    readItems.add(el.id);
+    readCounts[tab]=(readCounts[tab]||0)+1;
+    const total=totalCounts[tab]||1;
+    const pct=Math.round((readCounts[tab]/total)*100);
+    const pb=document.getElementById('prog-'+tab);
+    const pc=document.getElementById('progc-'+tab);
+    if(pb)pb.style.width=pct+'%';
+    if(pc)pc.textContent=readCounts[tab]+' / '+total+' read';
+  }
+  setTimeout(()=>hljs.highlightAll(),20);
+}
+
+function handleSearch(val){
+  const q=val.toLowerCase().trim();
+  const accs=document.querySelectorAll('.acc');
+  const labels=document.querySelectorAll('.sec-label');
+  if(!q){
+    accs.forEach(a=>a.classList.remove('search-hidden'));
+    labels.forEach(l=>l.classList.remove('search-hidden'));
+    return;
+  }
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.add('active'));
+  accs.forEach(a=>{
+    const text=a.textContent.toLowerCase();
+    a.classList.toggle('search-hidden',!text.includes(q));
+  });
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  totalCounts["core"] = 7;
+totalCounts["hooks"] = 7;
+totalCounts["patterns"] = 6;
+totalCounts["perf"] = 3;
+totalCounts["next-basics"] = 4;
+totalCounts["next-app-router"] = 6;
+totalCounts["next-advanced"] = 5;
+  hljs.highlightAll();
+  Object.keys(totalCounts).forEach(tab=>{
+    const pc=document.getElementById('progc-'+tab);
+    if(pc)pc.textContent='0 / '+totalCounts[tab]+' read';
+  });
+});
+</script>
+</body>
+</html>

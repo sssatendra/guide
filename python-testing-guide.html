@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Python Testing Mastery: Zero to Hero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --panel: #141417;
+      --accent: #ffd43b; /* Python Yellow */
+      --accent-soft: #3776ab; /* Python Blue */
+      --text: #e0e0e6;
+      --text-dim: #a0a0ab;
+      --border: #27272a;
+      --code-bg: #1e1e22;
+      --success: #4ade80;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 380px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+    }
+
+    .brand {
+      padding: 30px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: -1px;
+    }
+
+    .brand p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .search-box {
+      padding: 20px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box input:focus { border-color: var(--accent-soft); }
+
+    .topic-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .qi {
+      padding: 16px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .qi:hover {
+      background: rgba(255,255,255,0.03);
+      transform: translateX(5px);
+    }
+
+    .qi.active {
+      background: rgba(255, 212, 59, 0.1);
+      border-color: rgba(255, 212, 59, 0.3);
+    }
+
+    .qn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0.6;
+    }
+
+    .qt {
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg);
+      position: relative;
+    }
+
+    .hero {
+      padding: 80px 60px 40px;
+      max-width: 1100px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(55, 118, 171, 0.2);
+      color: var(--accent-soft);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .hero h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 48px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .desc {
+      font-size: 18px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 800px;
+    }
+
+    .section-card {
+      background: var(--panel);
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      margin: 40px 60px;
+      padding: 40px;
+      max-width: 1100px;
+    }
+
+    .tip-box {
+      background: rgba(74, 222, 128, 0.05);
+      border-left: 4px solid var(--success);
+      padding: 20px;
+      border-radius: 0 12px 12px 0;
+      margin-top: 30px;
+    }
+
+    .tip-box strong { color: var(--success); }
+
+    /* Dual Code Blocks */
+    .code-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .code-container {
+      background: var(--code-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      padding: 12px 20px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .code-header span {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+    }
+
+    pre {
+      padding: 25px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+
+    /* Syntax Highlighting */
+    .kw { color: #c678dd; } /* keyword */
+    .fn { color: #61afef; } /* function */
+    .str { color: #98c379; } /* string */
+    .tag { color: #e06c75; } /* decorator/class */
+    .attr { color: #d19a66; } /* argument */
+    .cm { color: #5c6370; font-style: italic; } /* comment */
+
+    .bullet-list {
+      margin-top: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .bullet {
+      background: rgba(255,255,255,0.02);
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      border: 1px solid var(--border);
+    }
+
+    .bullet strong { color: var(--accent); }
+
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--accent);
+      transition: width 0.3s;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+    @media (max-width: 1200px) {
+      .bullet-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="brand">
+    <h1>Python Testing</h1>
+    <p>Zero to Hero • Mastery Guide</p>
+  </div>
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Search topics (e.g. mock, fixtures)..." oninput="renderTopicList()">
+  </div>
+  <div class="topic-list" id="topic-list"></div>
+</div>
+
+<div class="main">
+  <div class="progress-bar" id="progress"></div>
+  <div id="content-root"></div>
+</div>
+
+<script>
+const topics = [
+  {id:1, title:"The Pytest Philosophy", cat:"basic", level:"Entry"},
+  {id:2, title:"Assertions & Exceptions", cat:"basic", level:"Fundamentals"},
+  {id:3, title:"Fixtures: Dependency Injection", cat:"basic", level:"Core"},
+  {id:4, title:"Fixture Scopes & Autouse", cat:"basic", level:"Core"},
+  {id:5, title:"Parametrization: Data-Driven", cat:"basic", level:"Core"},
+  {id:6, title:"Markers & Custom Decorators", cat:"basic", level:"Intermediate"},
+  {id:7, title:"Mocking Basics: unittest.mock", cat:"inter", level:"Senior"},
+  {id:8, title:"Patching: MagicMock & Context", cat:"inter", level:"Senior"},
+  {id:9, title:"Mocking External APIs (HTTMock)", cat:"inter", level:"Integrations"},
+  {id:10, title:"Asyncio Testing Patterns", cat:"adv", level:"Expert"},
+  {id:11, title:"Database Testing & Transactions", cat:"adv", level:"Expert"},
+  {id:12, title:"Property-Based Testing (Hypothesis)", cat:"adv", level:"Expert"},
+  {id:13, title:"Testing FastAPI & Flask Apps", cat:"inter", level:"Web"},
+  {id:14, title:"Configuration: pytest.ini & conftest", cat:"inter", level:"Architecture"},
+  {id:15, title:"Monkeypatching Utilities", cat:"inter", level:"Internal"},
+  {id:16, title:"Integration vs Unit Strategies", cat:"basic", level:"Strategy"},
+  {id:17, title:"Snapshots & Visual Regression", cat:"adv", level:"UI"},
+  {id:18, title:"Profiling & Slow Test Analysis", cat:"adv", level:"Perf"},
+  {id:19, title:"Plugin Ecosystem & Custom Plugins", cat:"adv", level:"Platform"},
+  {id:20, title:"CI/CD, Coverage & Quality Gates", cat:"adv", level:"DevOps"},
+];const content = {
+  1: {
+    def: "Python testing has evolved from the verbose `unittest` (inspired by Java's JUnit) to the elegant **Pytest**. Pytest allows you to write tests as simple functions using the standard `assert` keyword, making tests more readable and maintainable.",
+    proTip: "Never use `unittest.TestCase` in modern projects. Pytest is the industry standard for senior engineers because it reduces boilerplate and provides far superior error reporting when assertions fail.",
+    examples: [{
+      title: "Standard Test Structure",
+      comp: `<span class="kw">def</span> <span class="fn">add</span>(a, b):
+    <span class="kw">return</span> a + b`,
+      test: `<span class="kw">import</span> pytest
+
+<span class="kw">def</span> <span class="fn">test_add_success</span>():
+    <span class="cm"># Simple, readable assertions using native 'assert'</span>
+    <span class="kw">assert</span> <span class="fn">add</span>(<span class="num">1</span>, <span class="num">2</span>) == <span class="num">3</span>
+    <span class="kw">assert</span> <span class="fn">add</span>(-<span class="num">1</span>, <span class="num">1</span>) == <span class="num">0</span>`
+    }],
+    explanations: [
+      "**test_ prefix**: Pytest automatically discovers files and functions starting with `test_`.",
+      "**Native assert**: Unlike other frameworks, Pytest uses Python's built-in `assert` keyword, which it intercepts to provide rich diffs.",
+      "**Zero Boilerplate**: No need for class inheritance or special assertion methods like `self.assertEqual`.",
+      "**Auto-discovery**: Pytest scans your project recursively, saving you from manual test suite registration."
+    ]
+  },
+  2: {
+    def: "Verifying that your code **fails correctly** is as critical as success paths. Pytest provides the `pytest.raises` context manager to capture and verify expected exceptions.",
+    proTip: "Always use the `match` argument with `pytest.raises`. This prevents 'false positives' where a test passes because an error was thrown, but it wasn't the *specific* error you intended to test.",
+    examples: [{
+      title: "Handling Expected Exceptions",
+      comp: `<span class="kw">def</span> <span class="fn">divide</span>(a, b):
+    <span class="kw">if</span> b == <span class="num">0</span>:
+        <span class="kw">raise</span> ValueError(<span class="str">'Cannot divide by zero'</span>)
+    <span class="kw">return</span> a / b`,
+      test: `<span class="kw">import</span> pytest
+
+<span class="kw">def</span> <span class="fn">test_divide_by_zero</span>():
+    <span class="cm"># The 'match' argument ensures the correct error message is caught</span>
+    <span class="kw">with</span> pytest.<span class="fn">raises</span>(ValueError, match=<span class="str">'divide by zero'</span>):
+        <span class="fn">divide</span>(<span class="num">10</span>, <span class="num">0</span>)`
+    }],
+    explanations: [
+      "**pytest.raises**: A context manager that catches the specified exception type.",
+      "**match**: A regular expression or string that must appear in the exception message.",
+      "**Negative Testing**: Ensures your validation logic is actually preventing invalid states.",
+      "**Specific Matchers**: Capturing the exception object allows for deeper inspection of error attributes."
+    ]
+  },
+  3: {
+    def: "Fixtures are the heart of Pytest. They provide a standardized way to **inject dependencies** into your tests. Think of them as 'Setup' logic that is modular, reusable, and lazily loaded.",
+    proTip: "Avoid 'god-fixtures'. Keep your fixtures focused on one single responsibility (e.g., one for DB connection, one for User creation) to make them easier to compose.",
+    examples: [{
+      title: "Dependency Injection via Fixtures",
+      comp: `<span class="tag">@dataclass</span>
+<span class="kw">class</span> <span class="tag">User</span>:
+    name: str
+    is_active: bool = True`,
+      test: `<span class="kw">import</span> pytest
+
+<span class="tag">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">active_user</span>():
+    <span class="cm"># This logic runs before the test</span>
+    <span class="kw">return</span> <span class="fn">User</span>(name=<span class="str">'Bob'</span>)
+
+<span class="kw">def</span> <span class="fn">test_user_is_active</span>(active_user):
+    <span class="cm"># 'active_user' is automatically injected here</span>
+    <span class="kw">assert</span> active_user.is_active <span class="kw">is</span> True`
+    }],
+    explanations: [
+      "**Implicit Injection**: Fixtures are provided as arguments to test functions by name.",
+      "**Modular Setup**: Decouples the setup logic from the test assertions.",
+      "**Lazy Loading**: Fixtures are only executed when a test actually requests them.",
+      "**Return Values**: Fixtures can return any object, data, or even a factory function."
+    ]
+  },
+  4: {
+    def: "Fixture **Scopes** control the lifecycle of your setup. By default, fixtures are recreated for every test (`function` scope), but can be cached for the entire `session` or `module`.",
+    proTip: "Use `session` scope for expensive operations like spinning up a Docker container or initializing a large ML model. Use `autouse=True` sparingly for global hooks.",
+    examples: [{
+      title: "Advanced Scoping & Cleanup",
+      comp: `<span class="kw">class</span> <span class="tag">Database</span>:
+    <span class="kw">def</span> <span class="fn">connect</span>(self): <span class="kw">pass</span>
+    <span class="kw">def</span> <span class="fn">close</span>(self): <span class="kw">pass</span>`,
+      test: `<span class="tag">@pytest.fixture</span>(scope=<span class="str">'module'</span>)
+<span class="kw">def</span> <span class="fn">db_conn</span>():
+    db = <span class="fn">Database</span>()
+    db.<span class="fn">connect</span>()
+    <span class="kw">yield</span> db  <span class="cm"># Test runs here</span>
+    db.<span class="fn">close</span>() <span class="cm"># Cleanup runs after module</span>`
+    }],
+    explanations: [
+      "**yield keyword**: Everything before `yield` is setup; everything after is teardown.",
+      "**scope='module'**: The fixture runs once per file, sharing the state across all tests in it.",
+      "**autouse=True**: Forces a fixture to run even if not explicitly requested by a test.",
+      "**Resource Management**: Ensures critical resources (like DBs) are always closed properly."
+    ]
+  },
+  5: {
+    def: "Parametrization is the key to **Data-Driven Testing**. It allows you to execute the same test function multiple times with different input/output pairs.",
+    proTip: "Combine parametrization with fixtures to test complex workflows against multiple configurations (e.g., testing different database engines).",
+    examples: [{
+      title: "Exhaustive Edge Case Testing",
+      comp: `<span class="kw">def</span> <span class="fn">calculate_tax</span>(amount):
+    <span class="kw">if</span> amount &lt; <span class="num">0</span>: <span class="kw">return</span> <span class="num">0</span>
+    <span class="kw">return</span> amount * <span class="num">0.1</span>`,
+      test: `<span class="tag">@pytest.mark.parametrize</span>(<span class="str">'amt, expected'</span>, [
+    (<span class="num">100</span>, <span class="num">10</span>),
+    (<span class="num">0</span>, <span class="num">0</span>),
+    (-<span class="num">50</span>, <span class="num">0</span>),
+    (<span class="num">10.5</span>, <span class="num">1.05</span>)
+])
+<span class="kw">def</span> <span class="fn">test_tax_logic</span>(amt, expected):
+    <span class="kw">assert</span> <span class="fn">calculate_tax</span>(amt) == expected`
+    }],
+    explanations: [
+      "**Combinatorial Power**: Easily test the 'Happy Path', 'Edge Cases', and 'Error States' in one block.",
+      "**Test Identification**: Pytest generates a unique ID for each parameter set in the report.",
+      "**Maintainability**: Adding a new test case is as simple as adding one tuple to a list.",
+      "**DRY Principles**: Eliminates the need for multiple near-identical test functions."
+    ]
+  },
+  6: {
+    def: "Markers are metadata for your tests. They allow you to **categorize** tests (e.g., `slow`, `integration`) and control how they are executed via the command line.",
+    proTip: "Use custom markers to separate your 'smoke tests' from your full suite. This allows you to run critical tests in seconds on every push.",
+    examples: [{
+      title: "Conditional Skips & Custom Tags",
+      comp: `<span class="kw">import</span> sys`,
+      test: `<span class="tag">@pytest.mark.skipif</span>(sys.platform == <span class="str">'win32'</span>, reason=<span class="str">'Unix only'</span>)
+<span class="kw">def</span> <span class="fn">test_unix_feature</span>():
+    <span class="kw">pass</span>
+
+<span class="tag">@pytest.mark.slow</span>
+<span class="kw">def</span> <span class="fn">test_heavy_calculation</span>():
+    <span class="cm"># Run with: pytest -m "not slow"</span>
+    <span class="kw">pass</span>`
+    }],
+    explanations: [
+      "**Built-in Markers**: Includes `@skip`, `@skipif`, `@xfail` (expected failure).",
+      "**Custom Markers**: Define your own tags like `@pytest.mark.database` to group tests.",
+      "**Filtering**: Use the `-m` flag to run specific groups (e.g., `pytest -m smoke`).",
+      "**XFail**: Use for known bugs that aren't fixed yet, preventing them from breaking the build."
+    ]
+  },
+  7: {
+    def: "Mocking replaces real objects with **Simulated Objects**. It is essential for isolating your code from external dependencies like APIs, third-party libraries, or complex hardware.",
+    proTip: "Mock at the **boundaries** of your system. If you mock internal helper functions, your tests become brittle and stop you from refactoring safely.",
+    examples: [{
+      title: "Mocking Return Values & Side Effects",
+      comp: `<span class="kw">import</span> requests
+<span class="kw">def</span> <span class="fn">get_user_status</span>(uid):
+    resp = requests.<span class="fn">get</span>(f<span class="str">'/users/{uid}'</span>)
+    <span class="kw">return</span> resp.<span class="fn">json</span>()[<span class="str">'status'</span>]`,
+      test: `<span class="kw">from</span> unittest.mock <span class="kw">import</span> MagicMock
+
+<span class="kw">def</span> <span class="fn">test_status</span>(monkeypatch):
+    mock_resp = <span class="fn">MagicMock</span>()
+    mock_resp.<span class="fn">json</span>.<span class="fn">return_value</span> = {<span class="str">'status'</span>: <span class="str">'active'</span>}
+    
+    <span class="cm"># Patching 'requests.get' to return our mock</span>
+    monkeypatch.<span class="fn">setattr</span>(<span class="str">'requests.get'</span>, <span class="kw">lambda</span> url: mock_resp)
+    
+    <span class="kw">assert</span> <span class="fn">get_user_status</span>(<span class="num">1</span>) == <span class="str">'active'</span>`
+    }],
+    explanations: [
+      "**MagicMock**: An object that creates attributes on the fly and tracks interactions.",
+      "**return_value**: Sets what a mock returns when it is called like a function.",
+      "**side_effect**: Allows a mock to raise an exception or return different values per call.",
+      "**Call Inspection**: Verify *how* the mock was called (e.g., `mock.assert_called_with(...)`)."
+    ]
+  },
+  8: {
+    def: "The `patch` utility is a powerful way to temporarily replace a target with a Mock. It handles the 'Setup' and 'Cleanup' of the mock automatically.",
+    proTip: "The most common senior mistake is patching the **wrong location**. Patch where the object is **imported**, not where it's defined.",
+    examples: [{
+      title: "Context Manager Patching",
+      comp: `<span class="kw">import</span> os
+<span class="kw">def</span> <span class="fn">is_config_present</span>():
+    <span class="kw">return</span> os.path.<span class="fn">exists</span>(<span class="str">'/etc/app.cfg'</span>)`,
+      test: `<span class="kw">from</span> unittest.mock <span class="kw">import</span> patch
+
+<span class="kw">def</span> <span class="fn">test_config</span>():
+    <span class="cm"># 'os.path.exists' is replaced ONLY during this 'with' block</span>
+    <span class="kw">with</span> <span class="fn">patch</span>(<span class="str">'os.path.exists'</span>) <span class="kw">as</span> mock_exists:
+        mock_exists.return_value = True
+        <span class="kw">assert</span> <span class="fn">is_config_present</span>() <span class="kw">is</span> True`
+    }],
+    explanations: [
+      "**Scoping**: Patching can be used as a decorator, a context manager, or manually.",
+      "**Automatic Cleanup**: When the test finishes, the original object is restored.",
+      "**Mock Injection**: The mock object is passed as an argument to your test function.",
+      "**Patching Objects**: Use `patch.object(my_instance, 'method')` for instance-level mocks."
+    ]
+  },
+  9: {
+    def: "Testing code that makes HTTP requests is slow and unreliable. **HTTMock** intercepts real network calls and returns deterministic JSON responses.",
+    proTip: "In a senior-level CI/CD pipeline, tests should **never** touch the real internet. Use HTTMock to simulate 500 errors, timeouts, and malformed JSON.",
+    examples: [{
+      title: "Intercepting External APIs",
+      comp: `<span class="kw">import</span> requests
+<span class="kw">def</span> <span class="fn">fetch_api</span>():
+    <span class="kw">return</span> requests.<span class="fn">get</span>(<span class="str">'http://api.com/v1'</span>).<span class="fn">json</span>()`,
+      test: `<span class="kw">from</span> httmock <span class="kw">import</span> urlmatch, HTTMock
+
+<span class="tag">@urlmatch</span>(netloc=r<span class="str">'api.com'</span>)
+<span class="kw">def</span> <span class="fn">api_mock</span>(url, request):
+    <span class="kw">return</span> {<span class="str">'status_code'</span>: <span class="num">200</span>, <span class="str">'content'</span>: {<span class="str">'data'</span>: <span class="str">'ok'</span>}}
+
+<span class="kw">def</span> <span class="fn">test_api</span>():
+    <span class="kw">with</span> <span class="fn">HTTMock</span>(api_mock):
+        <span class="kw">assert</span> <span class="fn">fetch_api</span>() == {<span class="str">'data'</span>: <span class="str">'ok'</span>}`
+    }],
+    explanations: [
+      "**urlmatch**: A decorator that matches outgoing requests by host or URL regex.",
+      "**Deterministic Responses**: Ensures your tests don't fail due to external server downtime.",
+      "**Speed**: Tests run in milliseconds because no real network I/O occurs.",
+      "**Security**: Prevents leaking API keys or hitting production endpoints during testing."
+    ]
+  },
+  10: {
+    def: "Async testing requires the `pytest-asyncio` plugin. It allows Pytest to handle the event loop, coroutines, and `await` keywords just like production code.",
+    proTip: "Use `AsyncMock` to mock asynchronous functions. A regular `MagicMock` will fail because it isn't an awaitable object.",
+    examples: [{
+      title: "Testing Coroutines & Async Mocks",
+      comp: `<span class="kw">async def</span> <span class="fn">async_fetch</span>(client):
+    <span class="kw">return await</span> client.<span class="fn">get_data</span>()`,
+      test: `<span class="kw">import</span> pytest
+<span class="kw">from</span> unittest.mock <span class="kw">import</span> AsyncMock
+
+<span class="tag">@pytest.mark.asyncio</span>
+<span class="kw">async def</span> <span class="fn">test_async_logic</span>():
+    mock_client = <span class="fn">AsyncMock</span>()
+    mock_client.get_data.return_value = <span class="str">'success'</span>
+    
+    result = <span class="kw">await</span> <span class="fn">async_fetch</span>(mock_client)
+    <span class="kw">assert</span> result == <span class="str">'success'</span>`
+    }],
+    explanations: [
+      "**@pytest.mark.asyncio**: Tells Pytest to run this test inside an event loop.",
+      "**AsyncMock**: Specifically designed to be used with `await` syntax.",
+      "**Event Loop Scoping**: You can share a single event loop across multiple tests.",
+      "**Timeouts**: Critical for async tests to prevent hanging indefinitely if a coro blocks."
+    ]
+  },
+  11: {
+    def: "Database tests are tricky because they maintain state. The senior approach is to use **Transactions** that are rolled back after every test, ensuring a clean slate.",
+    proTip: "Never use your 'local' or 'dev' database for tests. Use an in-memory SQLite or a dedicated 'test' container to avoid accidental data loss.",
+    examples: [{
+      title: "Transactional DB Testing",
+      comp: `<span class="kw">def</span> <span class="fn">save_user</span>(db, user):
+    db.<span class="fn">add</span>(user)
+    db.<span class="fn">commit</span>()`,
+      test: `<span class="tag">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">db_session</span>():
+    session = <span class="fn">Session</span>()
+    <span class="kw">yield</span> session
+    <span class="cm"># Cleanup: undo all changes made during the test</span>
+    session.<span class="fn">rollback</span>()
+    session.<span class="fn">close</span>()`
+    }],
+    explanations: [
+      "**Rollback Pattern**: Faster than deleting/recreating tables between every test.",
+      "**Isolation**: Test A cannot see the records created by Test B.",
+      "**Reliability**: Ensures that a failing test doesn't 'pollute' the DB for subsequent tests.",
+      "**Parallelism**: Allows running multiple DB tests at once if using separate schemas."
+    ]
+  },
+  12: {
+    def: "Property-Based Testing (via **Hypothesis**) finds bugs by generating hundreds of random input scenarios that a human developer would never think of.",
+    proTip: "Use Hypothesis for critical 'pure' logic: financial calculators, parsers, or encryption code. It is the ultimate tool for finding 'unreachable' bugs.",
+    examples: [{
+      title: "Generating Random Edge Cases",
+      comp: `<span class="kw">def</span> <span class="fn">encode</span>(s): <span class="kw">return</span> s.encode(<span class="str">'utf-8'</span>)
+<span class="kw">def</span> <span class="fn">decode</span>(b): <span class="kw">return</span> b.decode(<span class="str">'utf-8'</span>)`,
+      test: `<span class="kw">from</span> hypothesis <span class="kw">import</span> given, strategies <span class="kw">as</span> st
+
+<span class="tag">@given</span>(st.<span class="fn">text</span>())
+<span class="kw">def</span> <span class="fn">test_encoding_roundtrip</span>(s):
+    <span class="cm"># Hypothesis will try empty strings, emojis, null bytes, etc.</span>
+    <span class="kw">assert</span> <span class="fn">decode</span>(<span class="fn">encode</span>(s)) == s`
+    }],
+    explanations: [
+      "**Fuzzing**: Automatically creates extreme inputs (NaN, infinite strings, special chars).",
+      "**Shrinking**: When a failure is found, Hypothesis finds the *simplest* input that causes it.",
+      "**Invariants**: Focuses on properties that should *always* be true, regardless of input.",
+      "**Reproducibility**: Provides a seed value so you can replay the exact failing case."
+    ]
+  },
+  13: {
+    def: "FastAPI and Flask provide a **TestClient** that allows you to test your entire API stack—routing, middleware, and auth—without running a real server process.",
+    proTip: "Use `TestClient` to verify that your API returns the correct HTTP status codes (401 for unauthorized, 404 for missing) and structured JSON errors.",
+    examples: [{
+      title: "Integration Testing Endpoints",
+      comp: `<span class="tag">@app.post</span>(<span class="str">'/login'</span>)
+<span class="kw">async def</span> <span class="fn">login</span>(data: User):
+    <span class="kw">return</span> {<span class="str">'token'</span>: <span class="str">'jwt-secret'</span>}`,
+      test: `<span class="kw">from</span> fastapi.testclient <span class="kw">import</span> TestClient
+
+client = <span class="fn">TestClient</span>(app)
+
+<span class="kw">def</span> <span class="fn">test_login_api</span>():
+    resp = client.<span class="fn">post</span>(<span class="str">'/login'</span>, json={<span class="str">'user'</span>: <span class="str">'admin'</span>})
+    <span class="kw">assert</span> resp.status_code == <span class="num">200</span>
+    <span class="kw">assert</span> <span class="str">'token'</span> <span class="kw">in</span> resp.<span class="fn">json</span>()`
+    }],
+    explanations: [
+      "**Simulated HTTP**: No sockets are opened, making tests significantly faster.",
+      "**Context Management**: Handles the startup and shutdown events of your app.",
+      "**Payload Validation**: Verifies that your Pydantic models are correctly validating JSON.",
+      "**Header Testing**: Easily test custom headers, Cookies, and Auth tokens."
+    ]
+  },
+  14: {
+    def: "Configuration in Pytest is handled by `pytest.ini` and `conftest.py`. `conftest.py` is the standard place for **Global Fixtures** that are shared across directories.",
+    proTip: "Keep your `conftest.py` clean. If it grows too large, split it into smaller files and import them using the `pytest_plugins` list.",
+    examples: [{
+      title: "Project-Wide Setup (conftest.py)",
+      comp: `<span class="cm"># Shared logic used everywhere</span>`,
+      test: `<span class="cm"># conftest.py</span>
+<span class="tag">@pytest.fixture</span>(scope=<span class="str">'session'</span>)
+<span class="kw">def</span> <span class="fn">api_token</span>():
+    <span class="kw">return</span> <span class="str">'PRO-777-TEST'</span>
+
+<span class="cm"># All test files can now use 'api_token'</span>`
+    }],
+    explanations: [
+      "**Implicit Loading**: Pytest automatically loads `conftest.py` in the directory it's found.",
+      "**Global Scope**: Perfect for project-wide mocks (e.g., mocking a cloud provider).",
+      "**Custom Hooks**: You can define custom CLI arguments or modify test discovery here.",
+      "**Modularization**: Allows sharing complex setup without importing it in every file."
+    ]
+  },
+  15: {
+    def: "Monkeypatching is a built-in Pytest fixture that allows you to safely modify environment variables, dictionary keys, or class attributes during a test.",
+    proTip: "Always prefer `monkeypatch` over manually editing `os.environ`. Monkeypatch ensures that the changes are **automatically reverted** after the test.",
+    examples: [{
+      title: "Safely Modifying Environment",
+      comp: `<span class="kw">import</span> os
+<span class="kw">def</span> <span class="fn">get_api_key</span>():
+    <span class="kw">return</span> os.getenv(<span class="str">'STRIPE_KEY'</span>)`,
+      test: `<span class="kw">def</span> <span class="fn">test_env_var</span>(monkeypatch):
+    <span class="cm"># Reverts to original value after test</span>
+    monkeypatch.<span class="fn">setenv</span>(<span class="str">'STRIPE_KEY'</span>, <span class="str">'sk_test_123'</span>)
+    <span class="kw">assert</span> <span class="fn">get_api_key</span>() == <span class="str">'sk_test_123'</span>`
+    }],
+    explanations: [
+      "**setenv**: Modifies `os.environ` for the duration of the test.",
+      "**setitem**: Modifies a dictionary (useful for config objects).",
+      "**delattr**: Safely removes a method or attribute from a class.",
+      "**Reliability**: Prevents one test's environment changes from breaking other tests."
+    ]
+  },
+  16: {
+    def: "The **Testing Trophy** philosophy prioritizes Integration tests. It ensures that your code works together as a whole, rather than just in tiny isolated units.",
+    proTip: "A senior dev knows that 100% unit test coverage doesn't mean the app works. Focus on tests that cover the path from the API request down to the Database.",
+    examples: [{
+      title: "Holistic Integration Logic",
+      comp: `<span class="kw">def</span> <span class="fn">create_order</span>(user, item):
+    <span class="fn">validate</span>(item)
+    <span class="kw">return</span> db.<span class="fn">insert</span>(user, item)`,
+      test: `<span class="kw">def</span> <span class="fn">test_full_order_flow</span>(db_session, mock_payment):
+    <span class="cm"># Tests validation + DB + side effects</span>
+    order = <span class="fn">create_order</span>(<span class="str">'Bob'</span>, <span class="str">'Pro-Sub'</span>)
+    <span class="kw">assert</span> db_session.<span class="fn">get_order</span>(order.id).status == <span class="str">'ok'</span>`
+    }],
+    explanations: [
+      "**High Confidence**: Integration tests verify that pieces fit together correctly.",
+      "**Refactor-Friendly**: Since you test behavior, you can change the internals without breaking tests.",
+      "**Business Value**: Focuses on user-facing features rather than internal helper code.",
+      "**Speed vs. Accuracy**: Slower than unit tests, but significantly more valuable."
+    ]
+  },
+  17: {
+    def: "Snapshots (via `pytest-snapshot`) are useful for testing huge data structures or HTML outputs. They verify that the output remains **pixel-perfect** compared to a baseline.",
+    proTip: "Use snapshots for 'Regression Testing'. If you have a complex report generator, a snapshot will immediately tell you if a single character changed in the output.",
+    examples: [{
+      title: "Verifying Large JSON Payloads",
+      comp: `<span class="kw">def</span> <span class="fn">get_big_config</span>():
+    <span class="kw">return</span> {<span class="str">'v'</span>: <span class="num">1</span>, <span class="str">'meta'</span>: {<span class="str">'owner'</span>: <span class="str">'sat'</span>, <span class="str">'id'</span>: <span class="num">100</span>}}`,
+      test: `<span class="kw">def</span> <span class="fn">test_config_snapshot</span>(snapshot):
+    <span class="cm"># Compares against a saved .json file</span>
+    snapshot.<span class="fn">assert_match</span>(<span class="fn">get_big_config</span>(), <span class="str">'config_baseline.json'</span>)`
+    }],
+    explanations: [
+      "**Visual Diffs**: Shows exactly which line in a 500-line JSON changed.",
+      "**Auto-Update**: Use `pytest --snapshot-update` to re-baseline when changes are intentional.",
+      "**Efficiency**: Saves you from writing hundreds of manual `assert` lines for one object.",
+      "**Scrubbing**: Remember to 'scrub' dynamic fields like timestamps before snapshotting."
+    ]
+  },
+  18: {
+    def: "Slow tests destroy developer productivity. Pytest provides the `--durations` flag to find the 'bottlenecks' in your test suite.",
+    proTip: "If a test takes more than 1 second, it's likely hitting a real DB or Network. Investigate and mock those parts to keep your suite blazing fast.",
+    examples: [{
+      title: "Profiling the Test Suite",
+      comp: `<span class="cm"># Run from terminal</span>`,
+      test: `<span class="cm"># Shows the top 10 slowest tests</span>
+pytest --durations=<span class="num">10</span>`
+    }],
+    explanations: [
+      "**Bottleneck Identification**: Pinpoints exactly which fixtures or tests are slow.",
+      "**Setup Costs**: Sometimes it's the *setup* logic (fixtures) that is slow, not the test itself.",
+      "**CI/CD Optimization**: Faster tests mean faster builds and cheaper compute costs.",
+      "**Regression Monitoring**: Track suite speed over time to prevent 'performance creep'."
+    ]
+  },
+  19: {
+    def: "Pytest is built on a powerful plugin architecture. You can modify its behavior by writing custom **Hooks** or installing community plugins like `pytest-xdist`.",
+    proTip: "Don't reinvent the wheel. Before writing a custom test reporter, check if a plugin already exists on PyPI. There are over 900 Pytest plugins.",
+    examples: [{
+      title: "Custom CLI Arguments",
+      comp: `<span class="cm"># conftest.py</span>`,
+      test: `<span class="kw">def</span> <span class="fn">pytest_addoption</span>(parser):
+    <span class="cm"># Add a --env flag to the 'pytest' command</span>
+    parser.<span class="fn">addoption</span>(<span class="str">'--env'</span>, action=<span class="str">'store'</span>, default=<span class="str">'dev'</span>)`
+    }],
+    explanations: [
+      "**Hooks**: Functions like `pytest_runtest_setup` allow you to inject logic at any stage.",
+      "**Dynamic Skipping**: You can skip tests based on custom CLI flags (e.g., skip integration in dev).",
+      "**Reporters**: Customize how the console output looks for your specific project.",
+      "**Community**: Plugins like `pytest-html` can generate beautiful visual test reports."
+    ]
+  },
+  20: {
+    def: "Coverage (via `pytest-cov`) measures how much of your production code is actually exercised by your tests. It is a critical **Quality Gate** in professional pipelines.",
+    proTip: "Aim for 80% coverage. 100% is often overkill and leads to testing 'low-value' code. Focus on core business logic, not simple getters/setters.",
+    examples: [{
+      title: "Enforcing Quality in CI",
+      comp: `<span class="cm"># CLI Command</span>`,
+      test: `<span class="cm"># Fails if coverage is below 90%</span>
+pytest --cov=src --cov-fail-under=<span class="num">90</span>`
+    }],
+    explanations: [
+      "**Line Coverage**: Checks if every line of code was executed.",
+      "**Branch Coverage**: Checks if both 'True' and 'False' paths of an `if` statement were tested.",
+      "**HTML Reports**: Generates an interactive map of your code showing exactly what is untested.",
+      "**CI Blocking**: Prevents merging PRs that would lower the overall project quality."
+    ]
+  }
+};
+
+function renderTopicList() {
+  const query = document.getElementById('search').value.toLowerCase();
+  const list = document.getElementById('topic-list');
+  list.innerHTML = '';
+  
+  topics.forEach((t, i) => {
+    if (query && !t.title.toLowerCase().includes(query)) return;
+    
+    const div = document.createElement('div');
+    div.className = `qi ${t.id === activeId ? 'active' : ''}`;
+    div.innerHTML = `
+      <div class="qn">${String(i + 1).padStart(2, '0')}</div>
+      <div class="qt">${t.title}</div>
+    `;
+    div.onclick = () => loadTopic(t.id);
+    list.appendChild(div);
+  });
+}
+
+let activeId = 1;
+
+function loadTopic(id) {
+  activeId = id;
+  const t = topics.find(x => x.id === id);
+  const c = content[id] || { 
+    def: "This advanced topic is being prepared for the masterclass...", 
+    proTip: "Stay tuned for the full masterclass content.",
+    examples: [{title: "Work in Progress", comp: "# Logic goes here", test: "# Test goes here"}], 
+    explanations: ["Stay tuned for the full masterclass content."] 
+  };
+  
+  const progress = (topics.findIndex(x => x.id === id) + 1) / topics.length * 100;
+  document.getElementById('progress').style.width = `${progress}%`;
+
+  const root = document.getElementById('content-root');
+  root.innerHTML = `
+    <div class="hero">
+      <div class="badge">${t.level} • ${t.cat.toUpperCase()}</div>
+      <h2>${t.title}</h2>
+      <p class="desc">${c.def}</p>
+      
+      <div class="tip-box">
+        <strong>PRO TIP:</strong> ${c.proTip || "Master this pattern for high-quality production code."}
+      </div>
+
+      <div class="code-grid">
+        ${c.examples.map(ex => `
+          <div class="code-container">
+            <div class="code-header">
+              <span>Source (Logic)</span>
+              <span style="color: var(--accent)">Python 3.12+</span>
+            </div>
+            <pre><code>${ex.comp}</code></pre>
+          </div>
+          <div class="code-container">
+            <div class="code-header">
+              <span>Verification (Pytest)</span>
+              <span style="color: var(--success)">Passes ✅</span>
+            </div>
+            <pre><code>${ex.test}</code></pre>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="bullet-list">
+        ${c.explanations.map(e => {
+          const splitIdx = e.indexOf(': ');
+          if (splitIdx === -1) return `<div class="bullet">${e}</div>`;
+          const title = e.substring(0, splitIdx);
+          const rest = e.substring(splitIdx + 2);
+          return `
+            <div class="bullet">
+              <strong>${title}</strong>: ${rest}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  
+  renderTopicList();
+}
+
+// Init
+loadTopic(1);
+</script>
+
+</body>
+</html>
