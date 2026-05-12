@@ -53,7 +53,7 @@ body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:1
 
 /* ── WELCOME ── */
 .welcome{text-align:center;padding:3.5rem 1rem}
-.welcome h2{font-size:1.35rem;font-weight:700;color:#9ca3af;margin-bottom:.6rem}
+.welcome h2{font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
 .welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
 .wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:1.5rem;text-align:left}
 .wcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
@@ -139,7 +139,13 @@ body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:1
     <div class="mob-header-title">Python Topics</div>
     <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
   </div>
+  <div style="padding: .5rem .75rem; background: #161b27; border-bottom: 1px solid #2a3348;">
+    <a href="index.html" style="color: #9ca3af; text-decoration: none; font-size: .75rem; display: flex; align-items: center; gap: .4rem;">
+      <span>←</span> Back to Mastery Hub
+    </a>
+  </div>
   <div class="mob-search">
+
     <input type="text" id="searchbox-mob" placeholder="Search topics..." onkeyup="filterQuestions()">
   </div>
   <div class="mob-list" id="moblist"></div>
@@ -2846,9 +2852,8 @@ function initializeTopics() {
     desklist.appendChild(item);
     
     // Mobile Item (cloned and modified)
-    const mobItem = item.cloneNode(true);
-    mobItem.id = `mi-${topic.id}`; // Unique ID for mobile
-    mobItem.onclick = () => showTopic(topic.id); // Re-bind click
+    const mobItem = createTopicItem(topic.id, topic.title, topic.cat);
+    mobItem.id = `mi-${topic.id}`;
     moblist.appendChild(mobItem);
   });
   

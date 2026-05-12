@@ -298,10 +298,16 @@
 
 <div class="sidebar" id="sidebar">
   <div class="brand">
+    <div style="padding-bottom: 1rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem;">
+      <a href="index.html" style="color: var(--text-dim); text-decoration: none; font-size: 11px; display: flex; align-items: center; gap: 5px;">
+        <span>←</span> Back to Mastery Hub
+      </a>
+    </div>
     <h1>Python Testing</h1>
     <p>Zero to Hero • Mastery Guide</p>
     <button class="mob-close-btn" onclick="toggleSidebar()">✕ Close</button>
   </div>
+
   <div class="search-box">
     <input type="text" id="search" placeholder="Search topics..." oninput="renderTopicList()">
   </div>

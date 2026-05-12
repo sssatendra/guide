@@ -15,15 +15,15 @@
       --border: #1f1f23;
       --accent: #8b5cf6;
       --accent-glow: rgba(139, 92, 246, 0.15);
-      --text: #ffffff;
-      --text-dim: #94a3b8;
+      --text-main: #ffffff;
+      --text-dim: #e2e8f0;
       --success: #10b981;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: var(--bg);
-      color: var(--text);
+      color: var(--text-main);
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
       line-height: 1.5;
@@ -162,6 +162,7 @@
       font-family: 'Syne', sans-serif;
       font-size: 1.75rem;
       font-weight: 700;
+      color: #fff;
       margin-bottom: 1rem;
       line-height: 1.2;
     }
@@ -242,8 +243,31 @@
     </header>
 
     <div class="tracks-grid">
+      <!-- JAVASCRIPT MASTERY -->
+      <a href="javascript-mastery-guide.html" class="track-card">
+        <div class="track-icon">JS</div>
+        <div class="track-meta">
+          <span class="track-level">A to Z</span>
+          <span class="track-duration">40 Topics</span>
+        </div>
+        <h3 class="track-title">JavaScript Core <br>Mastery</h3>
+        <p class="track-desc">Master the world's most popular language. From primitive types and closures to the event loop, prototypes, and advanced web APIs.</p>
+        <div class="track-footer">
+          <div class="start-btn">
+            Start Learning
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="progress-dots">
+            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div>
+          </div>
+        </div>
+      </a>
+
       <!-- PYTHON MASTERY -->
       <a href="python-mastery-guide.html" class="track-card">
+
         <div class="track-icon">🐍</div>
         <div class="track-meta">
           <span class="track-level">Fundamentals</span>
