@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GraphQL Mastery — Complete Full-Stack Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+:root{
+  --bg:#0d1117;--bg2:#161b27;--bg3:#1e2535;--bg4:#252d40;
+  --border:#2a3348;--text:#f0f0f0;--text2:#c8d0dc;--muted:#8892a4;
+  --amber:#f59e0b;--blue:#3b82f6;--green:#10b981;--red:#ef4444;
+  --purple:#a78bfa;--cyan:#22d3ee;
+  --graphql:#e10098;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:.7rem 1.25rem;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.logo{font-size:1rem;font-weight:700;color:var(--graphql)}
+.logo span{color:var(--text2);font-weight:400;font-size:.82rem}
+.search-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:.38rem .8rem;color:var(--text);font-family:'Syne',sans-serif;font-size:.82rem;width:220px;outline:none}
+.search-box:focus{border-color:var(--graphql)}
+.search-box::placeholder{color:var(--muted)}
+
+/* TAB NAV */
+.tab-nav{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:50px;z-index:199;overflow-x:auto;scrollbar-width:none}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-nav-inner{display:flex;max-width:1100px;margin:0 auto;padding:0 1rem;min-width:max-content}
+.tab-btn{padding:.65rem 1rem;font-size:.78rem;font-weight:600;font-family:'Syne',sans-serif;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;letter-spacing:.02em}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--graphql);border-bottom-color:var(--graphql)}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* SECTION LABEL */
+.sec-label{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin:1.5rem 0 .65rem;padding-left:2px}
+.sec-label:first-child{margin-top:0}
+
+/* BADGE */
+.badge{display:inline-block;font-size:.62rem;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:.04em;vertical-align:middle;margin-left:7px}
+.badge-critical{background:rgba(239,68,68,.15);color:#f87171}
+.badge-important{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-advanced{background:rgba(167,139,250,.15);color:#c4b5fd}
+.badge-new{background:rgba(16,185,129,.15);color:#34d399}
+
+/* ACCORDION */
+.acc{border:1px solid var(--border);border-radius:10px;margin-bottom:.6rem;overflow:hidden}
+.acc-header{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.1rem;cursor:pointer;background:var(--bg2);user-select:none;transition:background .15s}
+.acc-header:hover{background:var(--bg3)}
+.acc-title{font-size:.88rem;font-weight:600;color:var(--text);display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.acc-arrow{color:var(--muted);font-size:.75rem;transition:transform .22s;flex-shrink:0}
+.acc.open .acc-arrow{transform:rotate(180deg)}
+.acc-body{display:none;background:var(--bg);border-top:1px solid var(--border)}
+.acc.open .acc-body{display:block}
+.acc-content{padding:1.2rem 1.1rem}
+
+/* CONTENT BLOCKS */
+.def-box{background:var(--bg3);border-left:3px solid var(--graphql);border-radius:0 8px 8px 0;padding:.85rem 1rem;margin-bottom:1rem;font-size:.85rem;line-height:1.75;color:var(--text)}
+.def-box strong{color:var(--graphql)}
+.theory{font-size:.85rem;line-height:1.85;color:var(--text2);margin-bottom:.85rem}
+.theory strong{color:var(--text)}
+.theory ul{margin:.4rem 0 .4rem 1.2rem}
+.theory li{margin-bottom:.3rem}
+.code-label{font-size:.66rem;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin:.9rem 0 .3rem}
+pre{border-radius:8px;overflow:auto;margin-bottom:.85rem;font-size:.8rem !important}
+code.hljs{font-family:'JetBrains Mono',monospace !important;font-size:.79rem !important;line-height:1.65 !important;padding:1rem !important;background:#161b27 !important;border-radius:8px}
+.explanation{background:var(--bg3);border-radius:8px;padding:.8rem 1rem;margin-top:.6rem}
+.explanation h4{font-size:.68rem;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+.explanation ul{list-style:none;padding:0}
+.explanation li{font-size:.8rem;color:var(--text2);padding:3px 0 3px 14px;position:relative;line-height:1.6}
+.explanation li::before{content:'→';position:absolute;left:0;color:var(--muted);font-size:.65rem;top:5px}
+.tip{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:.7rem .9rem;font-size:.8rem;color:#93c5fd;margin-top:.75rem;line-height:1.65}
+.tip::before{content:'💡 '}
+.warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.7rem .9rem;font-size:.8rem;color:#fbbf24;margin-top:.75rem;line-height:1.65}
+.warn::before{content:'⚠️ '}
+.divider{border:none;border-top:1px solid var(--border);margin:.9rem 0}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;margin-bottom:1.2rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.prog-info{flex:1;min-width:180px}
+.prog-title{font-size:.75rem;color:var(--muted);margin-bottom:.35rem}
+.prog-track{background:var(--bg4);border-radius:3px;height:5px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--graphql),var(--cyan));border-radius:3px;transition:width .35s}
+.prog-count{font-size:.72rem;color:var(--muted);white-space:nowrap}
+
+@media(max-width:600px){
+  .search-box{width:100%}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .acc-title .badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">GraphQL Mastery<span> · Full-Stack Guide</span></div>
+  <input class="search-box" type="text" placeholder="Search topics…" id="searchInput" oninput="handleSearch(this.value)">
+</div>
+
+<div class="tab-nav">
+  <div class="tab-nav-inner" id="tabNav">
+    <button class="tab-btn active" onclick="switchTab('foundations', this)">Foundations</button>
+    <button class="tab-btn" onclick="switchTab('backend', this)">Backend Setup</button>
+    <button class="tab-btn" onclick="switchTab('core', this)">Core Concepts</button>
+    <button class="tab-btn" onclick="switchTab('advanced', this)">Advanced Schema</button>
+    <button class="tab-btn" onclick="switchTab('frontend', this)">Frontend (Next.js)</button>
+    <button class="tab-btn" onclick="switchTab('production', this)">Production Ready</button>
+  </div>
+</div>
+
+<div class="main" id="mainContent">
+  <!-- Foundations Tab -->
+  <div id="tab-foundations" class="tab-content active">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Foundations — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-foundations" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-foundations">0 / 4 read</div>
+    </div>
+
+    <div class="sec-label">The Basics</div>
+    
+    <div class="acc" id="acc-foundations-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'foundations')">
+        <div class="acc-title">What is GraphQL? <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Definition: </strong>GraphQL is a <strong>query language for APIs</strong> and a runtime for fulfilling those queries with your existing data. It provides a complete and understandable description of the data in your API, gives clients the power to <strong>ask for exactly what they need</strong> and nothing more.</div>
+        <div class="theory">Developed by Facebook in 2012 and open-sourced in 2015, GraphQL addresses the limitations of REST APIs by allowing precise data fetching.
+        <ul>
+          <li><strong>Ask for what you need:</strong> Send a GraphQL query to your API and get exactly what you interpret, nothing more and nothing less.</li>
+          <li><strong>Get many resources in a single request:</strong> GraphQL queries access not just the properties of one resource but also smoothly follow references between them.</li>
+          <li><strong>Describe what’s possible with a type system:</strong> GraphQL APIs are organized in terms of types and fields, not endpoints.</li>
+        </ul></div>
+        <div class="code-label">The Anatomy of a Request</div>
+        <pre><code class="language-graphql"># Client Query
+query GetUser {
+  user(id: "1") {
+    name
+    email
+    friends {
+      name
+    }
+  }
+}
+
+# Server Response (JSON)
+{
+  "data": {
+    "user": {
+      "name": "Satendra",
+      "email": "sssat@example.com",
+      "friends": [
+        { "name": "DeepMind" }
+      ]
+    }
+  }
+}</code></pre>
+        <div class="explanation"><h4>Key Takeaways</h4><ul>
+          <li>GraphQL is not a database; it is a communication protocol.</li>
+          <li>It works over HTTP, usually on a single <code>/graphql</code> endpoint.</li>
+          <li>Response structure mirrors the request structure.</li>
+        </ul></div>
+        <div class="tip"><strong>Why "Graph"?</strong> In GraphQL, your data is viewed as a collection of nodes (objects like Users, Posts, Comments) connected by edges (relationships like "User wrote Post"). This guide will show you how to traverse this graph!</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-foundations-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'foundations')">
+        <div class="acc-title">GraphQL vs REST <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Comparison: </strong>While REST is architectural-style based on resources (endpoints), GraphQL is a query-based system that uses a single endpoint to fetch graph-like data.</div>
+        <div class="theory">
+          <strong>REST Limitations:</strong>
+          <ul>
+            <li><strong>Over-fetching:</strong> Getting more data than you need (e.g., getting full user object just for a name).</li>
+            <li><strong>Under-fetching:</strong> One endpoint isn't enough; you need multiple requests (e.g., <code>/user/1</code> then <code>/user/1/posts</code>).</li>
+            <li><strong>Versioning:</strong> REST often requires <code>v1/</code>, <code>v2/</code> endpoints. GraphQL evolves without versioning by adding new fields.</li>
+          </ul>
+          <strong>GraphQL Advantages:</strong>
+          <ul>
+            <li><strong>No over/under fetching:</strong> Client defines the response.</li>
+            <li><strong>Strongly Typed:</strong> Schema acts as a contract between frontend and backend.</li>
+            <li><strong>Introspection:</strong> Clients can query the server for its schema (enables tools like GraphiQL).</li>
+          </ul>
+        </div>
+        <div class="tip">GraphQL is great for complex systems with many relations, but REST might still be simpler for basic CRUD or binary file handling.</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-foundations-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'foundations')">
+        <div class="acc-title">Schema & Type System <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Schema: </strong>The core of any GraphQL server implementation. It describes the functionality available to the clients.</div>
+        <div class="theory">Every GraphQL service defines a set of types which completely describe the set of possible data you can query on that service. When queries come in, they are validated and executed against that schema.</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-foundations-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'foundations')">
+        <div class="acc-title">Operations Overview <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">
+          <ul>
+            <li><strong>Query:</strong> Read-only fetch.</li>
+            <li><strong>Mutation:</strong> Write followed by a fetch.</li>
+            <li><strong>Subscription:</strong> Long-lived request that fetches data in response to source events.</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+  </div>
+  <!-- Backend Setup Tab -->
+  <div id="tab-backend" class="tab-content">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Backend Setup — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-backend" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-backend">0 / 5 read</div>
+    </div>
+
+    <div class="sec-label">Getting Started</div>
+    
+    <div class="acc" id="acc-backend-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'backend')">
+        <div class="acc-title">1. Installation & Initialization <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Setup: </strong>To build a GraphQL server with Node.js and Express, you need to initialize a project and install the Apollo Server core along with Express integration.</div>
+        <div class="code-label">Terminal Commands</div>
+        <pre><code class="language-bash"># Initialize project
+mkdir graphql-server && cd graphql-server
+npm init -y
+
+# Install dependencies
+npm install @apollo/server express graphql cors body-parser</code></pre>
+        <div class="explanation"><h4>Package Breakdown</h4><ul>
+          <li><code>@apollo/server</code>: The modern Apollo Server (v4+).</li>
+          <li><code>express</code>: The web framework to host our endpoint.</li>
+          <li><code>graphql</code>: The core GraphQL implementation for JS.</li>
+          <li><code>cors</code>: Middleware for cross-origin requests.</li>
+        </ul></div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-backend-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'backend')">
+        <div class="acc-title">2. Creating the Schema (TypeDefs) <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">The Schema is the blueprint of your data. It defines the types and fields available for clients to query.</div>
+        <pre><code class="language-javascript">// schema.js
+export const typeDefs = `#graphql
+  type Book {
+    title: String
+    author: String
+  }
+
+  type Query {
+    books: [Book]
+  }
+`;</code></pre>
+        <div class="explanation">
+          <h4>Deep Dive: Understanding the Syntax</h4>
+          <ul>
+            <li><strong>#graphql:</strong> This is a comment tag that tells your editor (VS Code, etc.) that the string following it is GraphQL code. This enables <strong>Syntax Highlighting</strong> and <strong>Autocomplete</strong> inside a JavaScript file.</li>
+            <li><strong>type Book:</strong> This defines a new "Object Type". Think of it like a Class or an Interface in other languages. It describes what a "Book" looks like (it has a title and an author).</li>
+            <li><strong>String:</strong> This is a built-in "Scalar" type. Other basics include <code>Int</code>, <code>Float</code>, <code>Boolean</code>, and <code>ID</code>.</li>
+            <li><strong>type Query:</strong> This is a <strong>Special Type</strong>. It is the mandatory entry point for all "read" operations. Every field inside <code>type Query</code> becomes an endpoint that a client can request.</li>
+            <li><strong>books: [Book]:</strong> This says the <code>books</code> query will return an <strong>Array (List)</strong> of Book objects.</li>
+          </ul>
+        </div>
+        <div class="tip">Think of the Schema as a "Contract". If it's not in the schema, the client can't ask for it!</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-backend-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'backend')">
+        <div class="acc-title">3. Writing Resolvers <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Resolvers: </strong>Functions that fulfill the queries defined in the schema. They fetch the actual data from databases, REST APIs, or static files.</div>
+        <pre><code class="language-javascript">// resolvers.js
+const books = [
+  { title: 'The Awakening', author: 'Kate Chopin' },
+  { title: 'City of Glass', author: 'Paul Auster' },
+];
+
+export const resolvers = {
+  Query: {
+    books: () => books,
+  },
+};</code></pre>
+        <div class="explanation">
+          <h4>How it works: The Data Bridge</h4>
+          <ul>
+            <li><strong>Mapping:</strong> The structure of the <code>resolvers</code> object must mirror the structure of your <code>typeDefs</code>. Since we have a <code>books</code> field inside <code>type Query</code>, we must have a <code>books</code> function inside <code>Query</code> in our resolvers.</li>
+            <li><strong>The Function:</strong> When a client queries <code>books</code>, GraphQL executes this function. It can return a hardcoded array (like our example), or perform a <code>db.find()</code> or an <code>fetch()</code> request.</li>
+            <li><strong>Parent/Args:</strong> Although empty here, these functions receive arguments (like <code>id</code>) to filter data.</li>
+          </ul>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-backend-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'backend')">
+        <div class="acc-title">4. Initializing the Server <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Now, we combine everything and start the Express server with Apollo Middleware.</div>
+        <pre><code class="language-javascript">// index.js
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import { typeDefs } from './schema.js';
+import { resolvers } from './resolvers.js';
+
+const app = express();
+const httpServer = http.createServer(app);
+
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+});
+
+await server.start();
+
+app.use(
+  '/graphql',
+  cors(),
+  express.json(),
+  expressMiddleware(server),
+);
+
+await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+console.log(`🚀 Server ready at http://localhost:4000/graphql`);</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-backend-4">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'backend')">
+        <div class="acc-title">5. Testing with Sandbox <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">By default, Apollo Server includes **Apollo Sandbox**, a powerful UI for testing your queries. Just visit <code>http://localhost:4000/graphql</code> in your browser.</div>
+        <div class="tip">You can browse your schema, see documentation, and use explorer to click-and-build queries without typing.</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Core Concepts Tab -->
+  <div id="tab-core" class="tab-content">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Core Concepts — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-core" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-core">0 / 8 read</div>
+    </div>
+
+    <div class="sec-label">The Building Blocks</div>
+
+    <div class="acc" id="acc-core-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Object Types & Fields <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Object Types: </strong>Represent a kind of object you can fetch from your service, and what fields it has.</div>
+        <pre><code class="language-graphql">type Character {
+  id: ID!
+  name: String!
+  appearsIn: [Episode!]!
+}</code></pre>
+        <div class="explanation"><h4>Explanation</h4><ul>
+          <li><code>String</code>, <code>ID</code>: Built-in Scalar types.</li>
+          <li><code>!</code>: Non-nullable. Server promises to always return a value.</li>
+          <li><code>[Type]</code>: A list (array) of that type.</li>
+        </ul></div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Queries & Arguments <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Every field on a GraphQL object type can have zero or more arguments.</div>
+        <div class="code-label">Schema</div>
+        <pre><code class="language-graphql">type Query {
+  user(id: ID!): User
+}</code></pre>
+        <div class="code-label">Resolver</div>
+        <pre><code class="language-javascript">user: (parent, args, context, info) => {
+  return users.find(u => u.id === args.id);
+}</code></pre>
+        <div class="explanation"><h4>Resolver Arguments</h4><ul>
+          <li><code>parent</code>: The result of the previous resolver.</li>
+          <li><code>args</code>: The arguments passed in the query.</li>
+          <li><code>context</code>: Shared object (Auth, Database connections).</li>
+          <li><code>info</code>: Execution state and field details.</li>
+        </ul></div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Mutations (Creating/Updating Data) <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Mutations: </strong>Used to modify server-side data. While queries are for reads, mutations are for writes, updates, and deletes.</div>
+        <div class="code-label">Schema</div>
+        <pre><code class="language-graphql">type Mutation {
+  createUser(name: String!, email: String!): User
+}</code></pre>
+        <div class="code-label">Resolver</div>
+        <pre><code class="language-javascript">Mutation: {
+  createUser: (_, { name, email }) => {
+    const newUser = { id: Date.now().toString(), name, email };
+    users.push(newUser);
+    return newUser;
+  }
+}</code></pre>
+        <div class="tip">Always return the modified object from a mutation so the client can update its cache instantly.</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Input Types <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">When you have many arguments for a mutation, use an <code>input</code> type for better organization.</div>
+        <pre><code class="language-graphql">input UserInput {
+  name: String!
+  email: String!
+  age: Int
+}
+
+type Mutation {
+  createUser(input: UserInput!): User
+}</code></pre>
+      </div></div>
+    </div>
+  </div>
+
+    <div class="acc" id="acc-core-4">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Subscriptions (Real-time) <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Subscriptions: </strong>Allow you to push data from the server to the clients that choose to listen to real-time messages from the server.</div>
+        <div class="theory">Usually implemented over WebSockets rather than HTTP. Used for chat apps, stock tickers, or live notifications.</div>
+        <pre><code class="language-graphql">type Subscription {
+  postAdded: Post
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-5">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Variables <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Avoid hardcoding values in queries. Use variables for dynamic values.</div>
+        <pre><code class="language-graphql">query GetUser($id: ID!) {
+  user(id: $id) {
+    name
+  }
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-6">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Fragments <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Fragments let you build sets of fields, and then include them in queries where you need them.</div>
+        <pre><code class="language-graphql">fragment UserDetails on User {
+  id
+  name
+  email
+}
+
+query GetUser {
+  user(id: "1") {
+    ...UserDetails
+  }
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-core-7">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'core')">
+        <div class="acc-title">Directives (@include/@skip) <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Directives provide a way to dynamically change the structure and shape of our queries using variables.</div>
+        <pre><code class="language-graphql">query GetUser($showEmail: Boolean!) {
+  user(id: "1") {
+    name
+    email @include(if: $showEmail)
+  }
+}</code></pre>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Advanced Schema Tab -->
+  <div id="tab-advanced" class="tab-content">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Advanced Schema — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-advanced" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-advanced">0 / 5 read</div>
+    </div>
+
+    <div class="sec-label">Polymorphism & Extensions</div>
+
+    <div class="acc" id="acc-advanced-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'advanced')">
+        <div class="acc-title">Interfaces <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Interfaces: </strong>An abstract type that includes a certain set of fields that a type must include to implement the interface.</div>
+        <pre><code class="language-graphql">interface Character {
+  id: ID!
+  name: String!
+}
+
+type Human implements Character {
+  id: ID!
+  name: String!
+  totalCredits: Int
+}
+
+type Droid implements Character {
+  id: ID!
+  name: String!
+  primaryFunction: String
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-advanced-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'advanced')">
+        <div class="acc-title">Unions <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Unions represent an object that could be one of several types, but those types don't necessarily share any fields.</div>
+        <pre><code class="language-graphql">union SearchResult = Human | Droid | Starship
+
+query Search($text: String!) {
+  search(text: $text) {
+    ... on Human { name }
+    ... on Starship { name, length }
+  }
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-advanced-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'advanced')">
+        <div class="acc-title">Custom Scalars <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">By default, GraphQL includes <code>Int</code>, <code>Float</code>, <code>String</code>, <code>Boolean</code>, and <code>ID</code>. You can define your own, like <code>Date</code>.</div>
+        <pre><code class="language-graphql">scalar Date</code></pre>
+        <div class="tip">You'll need a library like <code>graphql-scalars</code> to handle the parsing and serialization logic for common custom types.</div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-advanced-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'advanced')">
+        <div class="acc-title">Schema Stitching vs Federation <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">When scaling to multiple teams, you might split your schema into microservices.
+        <ul>
+          <li><strong>Stitching:</strong> An older method where a gateway manually merges schemas.</li>
+          <li><strong>Federation:</strong> The modern Apollo standard where subgraphs define their own entities and the gateway handles execution.</li>
+        </ul></div>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-advanced-4">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'advanced')">
+        <div class="acc-title">Apollo Link (Middleware) <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Apollo Link is a system of modular components that you can chain together to customize the flow of data between your client and server.</div>
+        <pre><code class="language-javascript">const authLink = setContext((_, { headers }) => {
+  return {
+    headers: { ...headers, authorization: token }
+  }
+});</code></pre>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Frontend Tab -->
+  <div id="tab-frontend" class="tab-content">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Frontend (Next.js) — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-frontend" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-frontend">0 / 5 read</div>
+    </div>
+
+    <div class="sec-label">Apollo Client Integration</div>
+
+    <div class="acc" id="acc-frontend-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'frontend')">
+        <div class="acc-title">1. Setup Apollo Client <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <pre><code class="language-bash">npm install @apollo/client graphql</code></pre>
+        <pre><code class="language-javascript">// lib/apollo-client.js
+import { ApolloClient, InMemoryCache } from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'http://localhost:4000/graphql',
+  cache: new InMemoryCache(),
+});
+
+export default client;</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-frontend-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'frontend')">
+        <div class="acc-title">2. ApolloProvider in Next.js <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">In Next.js App Router, you wrap your client-side components with the provider.</div>
+        <pre><code class="language-javascript">// app/providers.js
+'use client';
+import { ApolloProvider } from '@apollo/client';
+import client from '@/lib/apollo-client';
+
+export function Providers({ children }) {
+  return <ApolloProvider client={client}>{children}</ApolloProvider>;
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-frontend-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'frontend')">
+        <div class="acc-title">3. The useQuery Hook <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <pre><code class="language-javascript">import { useQuery, gql } from '@apollo/client';
+
+const GET_BOOKS = gql`
+  query GetBooks {
+    books {
+      title
+      author
+    }
+  }
+`;
+
+function BookList() {
+  const { loading, error, data } = useQuery(GET_BOOKS);
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error.message}</p>;
+
+  return data.books.map(({ title, author }) => (
+    <div key={title}>
+      <h3>{title}</h3>
+      <p>{author}</p>
+    </div>
+  ));
+}</code></pre>
+      </div></div>
+    </div>
+    <div class="acc" id="acc-frontend-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'frontend')">
+        <div class="acc-title">4. The useMutation Hook <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <pre><code class="language-javascript">const ADD_BOOK = gql`
+  mutation AddBook($title: String!, $author: String!) {
+    addBook(title: $title, author: $author) {
+      title
+      author
+    }
+  }
+`;
+
+function AddBookForm() {
+  let inputTitle, inputAuthor;
+  const [addBook, { data, loading, error }] = useMutation(ADD_BOOK);
+
+  return (
+    <form onSubmit={e => {
+      e.preventDefault();
+      addBook({ variables: { title: inputTitle.value, author: inputAuthor.value } });
+    }}>
+      <input ref={node => inputTitle = node} />
+      <input ref={node => inputAuthor = node} />
+      <button type="submit">Add Book</button>
+    </form>
+  );
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-frontend-4">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'frontend')">
+        <div class="acc-title">5. Client-side Fragments <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Use fragments in your frontend components to ensure they only request the data they actually need.</div>
+        <pre><code class="language-javascript">BookList.fragments = {
+  book: gql`
+    fragment BookDetails on Book {
+      title
+      author
+    }
+  `,
+};</code></pre>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- Production Ready Tab -->
+  <div id="tab-production" class="tab-content">
+    <div class="prog-wrap">
+      <div class="prog-info">
+        <div class="prog-title">Production Ready — Topic Progress</div>
+        <div class="prog-track"><div class="prog-fill" id="prog-production" style="width:0%"></div></div>
+      </div>
+      <div class="prog-count" id="progc-production">0 / 4 read</div>
+    </div>
+
+    <div class="sec-label">Best Practices</div>
+
+    <div class="acc" id="acc-production-0">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'production')">
+        <div class="acc-title">1. Authentication & Context <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="def-box"><strong>Context: </strong>A shared object that is passed to every resolver. It's the perfect place to put authentication info.</div>
+        <pre><code class="language-javascript">// In server setup
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+});
+
+app.use(
+  '/graphql',
+  expressMiddleware(server, {
+    context: async ({ req }) => ({
+      user: await getUserFromToken(req.headers.authorization),
+    }),
+  }),
+);</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-production-1">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'production')">
+        <div class="acc-title">2. N+1 Problem & Dataloader <span class="badge badge-advanced">Advanced</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="warn">The N+1 problem occurs when you fetch a list of items (1 query) and then fetch a related item for each of those items (N queries).</div>
+        <div class="theory"><strong>Dataloader</strong> is a utility that batches and caches requests to a back-end, reducing the number of database hits.</div>
+        <pre><code class="language-javascript">const authorLoader = new DataLoader(async (ids) => {
+  const authors = await getAuthorsByIds(ids);
+  return ids.map(id => authors.find(a => a.id === id));
+});</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-production-2">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'production')">
+        <div class="acc-title">3. Error Handling <span class="badge badge-important">Important</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Apollo Server provides built-in error types like <code>GraphQLError</code>.</div>
+        <pre><code class="language-javascript">import { GraphQLError } from 'graphql';
+
+if (!user) {
+  throw new GraphQLError('Not authenticated', {
+    extensions: { code: 'UNAUTHENTICATED' },
+  });
+}</code></pre>
+      </div></div>
+    </div>
+
+    <div class="acc" id="acc-production-3">
+      <div class="acc-header" onclick="toggleAcc(this.closest('.acc'),'production')">
+        <div class="acc-title">4. Security: Depth & Complexity <span class="badge badge-critical">Critical</span></div>
+        <span class="acc-arrow">▼</span>
+      </div>
+      <div class="acc-body"><div class="acc-content">
+        <div class="theory">Malicious queries can try to crash your server by nesting calls infinitely.
+        <ul>
+          <li><strong>Depth Limiting:</strong> Limit how deep a query can go.</li>
+          <li><strong>Complexity Analysis:</strong> Assign costs to fields and reject queries above a certain threshold.</li>
+        </ul></div>
+        <div class="tip">Use libraries like <code>graphql-depth-limit</code> to easily protect your server.</div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const progress = { foundations: 0, backend: 0, core: 0, advanced: 0, frontend: 0, production: 0 };
+const totalPerTab = { foundations: 4, backend: 5, core: 8, advanced: 5, frontend: 5, production: 4 };
+
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tabId).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function toggleAcc(acc, tab) {
+  const isOpen = acc.classList.contains('open');
+  acc.classList.toggle('open');
+  if (!isOpen) {
+    // Logic to mark as read if desired
+    updateProgress(tab);
+  }
+}
+
+function updateProgress(tab) {
+  const openCount = document.querySelectorAll('#tab-' + tab + ' .acc.open').length;
+  const percent = (openCount / totalPerTab[tab]) * 100;
+  document.getElementById('prog-' + tab).style.width = percent + '%';
+  document.getElementById('progc-' + tab).innerText = `${openCount} / ${totalPerTab[tab]} read`;
+}
+
+function handleSearch(query) {
+  query = query.toLowerCase();
+  document.querySelectorAll('.acc').forEach(acc => {
+    const text = acc.innerText.toLowerCase();
+    if (text.includes(query)) {
+      acc.classList.remove('search-hidden');
+    } else {
+      acc.classList.add('search-hidden');
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  hljs.highlightAll();
+});
+</script>
+
+</body>
+</html>

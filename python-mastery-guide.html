@@ -97,17 +97,25 @@ body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:1
 .badge-advanced{background:#5b21b6;border-color:#a78bfa}
 
 /* ── MOBILE OVERRIDES ── */
-@media(max-width:680px){
-  .layout{flex-direction:column}
-  .sidebar{width:100%;min-width:unset;height:auto;position:static;border-right:none;border-bottom:1px solid #2a3348}
-  .sb-inner{padding:.2rem .2rem}
+@media(max-width:768px){
+  .topbar{padding:.5rem .75rem}
+  .logo{font-size:.85rem}
+  .srch{display:none} /* Hide desktop search */
+  .fbtn:not(.mob-toggle){display:none} /* Hide desktop filters */
+  
+  .layout{display:block;height:auto}
+  .sidebar{display:none} /* Hide desktop sidebar */
+  .main{width:100%}
+  .wrap{padding:1rem .75rem 2rem}
+  
   .mob-toggle{display:flex}
-  .mob-overlay{display:flex}
+  .mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+  .mob-overlay.open{display:flex}
+  
+  .qtitle{font-size:.95rem}
   .rgrid{grid-template-columns:1fr}
   .wgrid{grid-template-columns:1fr}
-  .wrap{padding:1rem .75rem 1.5rem}
-  .qtitle{font-size:.95rem}
-  .srch{width:140px}
+  .code-block code{font-size:.7rem}
 }
 </style>
 </head>
@@ -2833,9 +2841,15 @@ function initializeTopics() {
   const moblist = document.getElementById('moblist');
   
   topics.forEach(topic => {
+    // Desktop Item
     const item = createTopicItem(topic.id, topic.title, topic.cat);
     desklist.appendChild(item);
-    moblist.appendChild(item.cloneNode(true));
+    
+    // Mobile Item (cloned and modified)
+    const mobItem = item.cloneNode(true);
+    mobItem.id = `mi-${topic.id}`; // Unique ID for mobile
+    mobItem.onclick = () => showTopic(topic.id); // Re-bind click
+    moblist.appendChild(mobItem);
   });
   
   showTopic(1);
@@ -2872,9 +2886,18 @@ function showTopic(id) {
   const topic = topics.find(t => t.id === id);
   const info = content[id];
   
-  // Update active item
+  // Close mobile overlay if open
+  document.getElementById('moboverlay').classList.remove('open');
+  
+  // Update active item for both desktop and mobile
   document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
-  document.getElementById(`si-${id}`).classList.add('active');
+  const dItem = document.getElementById(`si-${id}`);
+  const mItem = document.getElementById(`mi-${id}`);
+  if(dItem) dItem.classList.add('active');
+  if(mItem) mItem.classList.add('active');
+  
+  // Scroll to top of content
+  document.querySelector('.main').scrollTop = 0;
   
   if (currentFilter !== 'all' && topic.cat !== currentFilter) {
     return;

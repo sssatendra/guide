@@ -242,13 +242,44 @@
 
     .bullet strong { color: var(--accent); }
 
-    .progress-bar {
-      position: absolute;
+    /* Mobile Nav */
+    .mob-nav {
+      display: none;
+      background: var(--panel);
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border);
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
       top: 0;
-      left: 0;
-      height: 4px;
-      background: var(--accent);
-      transition: width 0.3s;
+      z-index: 100;
+    }
+    .mob-logo { font-family: 'Syne', sans-serif; color: var(--accent); font-weight: 800; font-size: 18px; }
+    .mob-toggle-btn { background: var(--accent); color: #000; border: none; padding: 6px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 12px; }
+    .mob-close-btn { display: none; margin-top: 15px; width: 100%; background: var(--border); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 600; }
+
+    @media (max-width: 992px) {
+      body { display: block; height: auto; overflow: visible; }
+      .sidebar { 
+        position: fixed; 
+        left: -100%; 
+        top: 0; 
+        height: 100vh; 
+        width: 300px; 
+        transition: 0.3s; 
+        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+      }
+      .sidebar.open { left: 0; }
+      .mob-nav { display: flex; }
+      .mob-close-btn { display: block; }
+      .hero { padding: 40px 25px 20px; }
+      .hero h2 { font-size: 32px; }
+      .desc { font-size: 15px; }
+      .section-card { margin: 20px; padding: 25px; border-radius: 16px; }
+      .bullet-list { grid-template-columns: 1fr; gap: 10px; }
+      pre { padding: 15px; font-size: 12px; }
+      .code-header { padding: 10px 15px; }
+      .brand { padding: 20px; }
     }
 
     /* Custom Scrollbar */
@@ -256,21 +287,23 @@
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
-
-    @media (max-width: 1200px) {
-      .bullet-list { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
 
-<div class="sidebar">
+<div class="mob-nav">
+  <div class="mob-logo">Python Testing</div>
+  <button class="mob-toggle-btn" onclick="toggleSidebar()">☰ Menu</button>
+</div>
+
+<div class="sidebar" id="sidebar">
   <div class="brand">
     <h1>Python Testing</h1>
     <p>Zero to Hero • Mastery Guide</p>
+    <button class="mob-close-btn" onclick="toggleSidebar()">✕ Close</button>
   </div>
   <div class="search-box">
-    <input type="text" id="search" placeholder="Search topics (e.g. mock, fixtures)..." oninput="renderTopicList()">
+    <input type="text" id="search" placeholder="Search topics..." oninput="renderTopicList()">
   </div>
   <div class="topic-list" id="topic-list"></div>
 </div>
@@ -770,6 +803,12 @@ function loadTopic(id) {
     explanations: ["Stay tuned for the full masterclass content."] 
   };
   
+  // Close mobile sidebar if open
+  document.getElementById('sidebar').classList.remove('open');
+  
+  // Update active state in list
+  renderTopicList();
+  
   const progress = (topics.findIndex(x => x.id === id) + 1) / topics.length * 100;
   document.getElementById('progress').style.width = `${progress}%`;
 
@@ -819,10 +858,17 @@ function loadTopic(id) {
     </div>
   `;
   
-  renderTopicList();
+  // Scroll content to top
+  document.querySelector('.main').scrollTop = 0;
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('open');
 }
 
 // Init
+renderTopicList();
 loadTopic(1);
 </script>
 
