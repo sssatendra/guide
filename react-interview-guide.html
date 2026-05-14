@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React Interview Guide — Basic to Extreme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { primaryColor: '#61dafb' } });</script>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #161b27;
+  --border: #2a3348;
+  --accent: #61dafb; /* React Cyan */
+  --text-main: #ffffff;
+  --text-dim: #e2e8f0;
+  --code-bg: #0a0c10;
+  --basic: #10b981;
+  --inter: #3b82f6;
+  --adv: #8b5cf6;
+  --extreme: #ef4444;
+  --success: #34d399;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text-main);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+.logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:.75rem}
+.logo span{color:var(--text-dim);font-weight:400;font-size:.8rem}
+.back-hub{color:var(--text-dim);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.back-hub:hover{background:var(--border);color:var(--accent)}
+
+.layout{display:flex;height:calc(100vh - 56px)}
+.sidebar{width:350px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:all .3s}
+.main{flex:1;overflow-y:auto;padding:2rem;background:radial-gradient(circle at top right, rgba(97,218,251,0.03), transparent)}
+
+.sb-header{padding:1.25rem;border-bottom:1px solid var(--border)}
+.search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;color:#fff;font-family:inherit;font-size:.85rem;outline:none}
+.search:focus{border-color:var(--accent)}
+.q-list{flex:1;overflow-y:auto;padding:1rem}
+.cat-group{margin-bottom:1.5rem}
+.cat-title{font-size:.65rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:.75rem;padding-left:.5rem}
+
+.q-item{padding:.85rem;border-radius:10px;border:1px solid transparent;cursor:pointer;margin-bottom:.4rem;transition:all .2s}
+.q-item:hover{background:rgba(255,255,255,0.03);border-color:var(--border)}
+.q-item.active{background:rgba(97,218,251,0.1);border-color:var(--accent)}
+.q-title{font-size:.82rem;font-weight:500;margin-bottom:.4rem;line-height:1.4}
+.q-meta{display:flex;gap:.5rem;align-items:center}
+.level-dot{width:6px;height:6px;border-radius:50%}
+
+.ans-card{max-width:900px;margin:0 auto}
+.ans-header{margin-bottom:2rem}
+.ans-level{display:inline-block;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem}
+.level-basic{background:rgba(16,185,129,0.15);color:var(--basic);border:1px solid rgba(16,185,129,0.3)}
+.level-intermediate{background:rgba(59,130,246,0.15);color:var(--inter);border:1px solid rgba(59,130,246,0.3)}
+.level-advanced{background:rgba(139,92,246,0.15);color:var(--adv);border:1px solid rgba(139,92,246,0.3)}
+.level-extreme{background:rgba(239,68,68,0.15);color:var(--extreme);border:1px solid rgba(239,68,68,0.3)}
+
+.ans-title{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1.5rem}
+.ans-def{font-size:1.1rem;color:var(--text-dim);line-height:1.6;margin-bottom:2rem}
+
+.sec-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem;margin-top:3rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.expl-list{list-style:none;margin-bottom:2.5rem}
+.expl-item{position:relative;padding-left:1.5rem;margin-bottom:1rem;font-size:.95rem;color:var(--text-dim);line-height:1.6}
+.expl-item::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+.visual-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;display:flex;justify-content:center;overflow:hidden}
+.mermaid{background:transparent !important}
+
+.code-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.code-header{padding:.75rem 1rem;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.code-lang{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);text-transform:uppercase}
+.code-body{padding:1.25rem;font-family:'JetBrains Mono',monospace;font-size:.88rem;line-height:1.6;overflow-x:auto;color:#d1d5db}
+
+.kw{color:#fbbf24} .fn{color:#60a5fa} .str{color:#34d399} .num{color:#f87171} .com{color:#6b7280} .op{color:#818cf8}
+
+.output-wrap{background:#000;border:1px solid var(--border);border-radius:12px;padding:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:2.5rem}
+.output-title{font-size:.65rem;color:var(--text-dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:0.1em}
+.output-text{color:var(--success);font-size:.85rem;white-space:pre-wrap}
+
+.tip-box{background:linear-gradient(135deg, rgba(97,218,251,0.1) 0%, transparent 100%);border:1px solid rgba(97,218,251,0.2);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;margin-top:2rem}
+.tip-box::before{content:'PRO TIP';position:absolute;top:0;right:0;background:var(--accent);color:#000;font-size:.6rem;font-weight:800;padding:4px 10px;border-bottom-left-radius:8px}
+.tip-text{font-size:.92rem;color:var(--text-dim);line-height:1.6}
+
+.mob-menu-btn{display:none}
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-350px;top:56px;height:calc(100vh - 56px);z-index:900}
+  .sidebar.open{left:0}
+  .mob-menu-btn{display:block;background:none;border:none;color:var(--accent);font-size:1.5rem;cursor:pointer}
+}
+
+.welcome{text-align:center;padding-top:10vh}
+.welcome h1{font-family:'Syne',sans-serif;font-size:3.5rem;margin-bottom:1rem;background:linear-gradient(to right, #fff, var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome p{color:var(--text-dim);max-width:500px;margin:0 auto 2rem;font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+    ⚛️ <span>React Master</span>
+  </div>
+  <a href="index.html" class="back-hub">← Mastery Hub</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <input type="text" class="search" placeholder="Search React topics..." onkeyup="filterQ()">
+    </div>
+    <div class="q-list" id="qList"></div>
+  </div>
+
+  <div class="main" id="mainContent">
+    <div class="welcome" id="welcomeScreen">
+      <h1>React Mastery.</h1>
+      <p>From component foundations to Fiber reconciliation and Concurrent rendering.</p>
+      <div style="color:var(--accent); font-size: 2rem;">⚛️</div>
+    </div>
+    <div class="ans-card" id="ansCard" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ── 1. CORE ARCHITECTURE ──
+  {
+    id: 1,
+    title: "Virtual DOM Deep Dive",
+    level: "basic",
+    category: "1. Core Architecture",
+    def: "The <strong>Virtual DOM</strong> is an in-memory representation of real DOM elements, used to optimize rendering performance.",
+    expl: [
+      "Initial Render: React builds a full V-DOM tree.",
+      "Update: When state changes, a new V-DOM tree is created.",
+      "Diffing: React compares the new V-DOM with the previous snapshot.",
+      "Patching: Only the calculated differences are applied to the real DOM."
+    ],
+    mermaid: "graph TD\n  State[State Change] --> VNew[New V-DOM]\n  VPrev[Previous V-DOM] --> Diff[Diffing Algorithm]\n  VNew --> Diff\n  Diff --> Real[Real DOM Patch]",
+    code: `<span class="kw">const</span> [toggle, setToggle] = <span class="fn">useState</span>(<span class="kw">false</span>);
+<span class="com">// Only the text node inside the div changes</span>
+<span class="kw">return</span> <span class="op">&lt;</span><span class="fn">div</span><span class="op">&gt;</span>{toggle ? <span class="str">'ON'</span> : <span class="str">'OFF'</span>}<span class="op">&lt;/</span><span class="fn">div</span><span class="op">&gt;</span>;`,
+    output: "// Real DOM: <div>OFF</div> -> <div>ON</div>",
+    tip: "V-DOM is about 'batching' and 'minimal updates'. It's not inherently faster than raw DOM, but it's more efficient for complex UI flows."
+  },
+  {
+    id: 2,
+    title: "React Fiber Reconciler",
+    level: "advanced",
+    category: "1. Core Architecture",
+    def: "<strong>Fiber</strong> is the engine introduced in React 16 to enable incremental rendering and better scheduling.",
+    expl: [
+      "Breaks work into 'Fibers' (units of work).",
+      "Uses two phases: Render phase (pure, can be paused) and Commit phase (mutates DOM, synchronous).",
+      "Foundation for Concurrent React (Suspense, Transitions).",
+      "Allows priority-based scheduling of updates."
+    ],
+    mermaid: "graph LR\n  W[Work Loop] --> F[Fiber Unit]\n  F --> |Yield if high prio task| B[Browser]\n  B --> |Resume| F2[Next Fiber]",
+    code: `<span class="com">// Internally, a Fiber is a JS Object:</span>
+{
+  type: <span class="str">'div'</span>,
+  key: <span class="kw">null</span>,
+  stateNode: divElement,
+  <span class="kw">return</span>: parentFiber,
+  child: firstChildFiber,
+  sibling: nextSiblingFiber
+}`,
+    output: "// Fiber structure allows traversal without recursion",
+    tip: "Explain that Fiber is essentially a re-implementation of the stack, specifically for React components."
+  },
+
+  // ── 2. HOOKS & STATE ──
+  {
+    id: 11,
+    title: "The Rules of Hooks",
+    level: "basic",
+    category: "2. Hooks & State",
+    def: "A set of constraints that ensure hooks work correctly and predictably.",
+    expl: [
+      "Only call hooks at the Top Level (not inside loops, conditions, or nested functions).",
+      "Only call hooks from React Function Components or Custom Hooks.",
+      "Reason: React relies on the <strong>call order</strong> of hooks to link state to the component."
+    ],
+    code: `<span class="com">// BAD: Conditional hook</span>
+<span class="kw">if</span> (user) <span class="fn">useState</span>();
+
+<span class="com">// GOOD: Top level</span>
+<span class="kw">const</span> [user, setUser] = <span class="fn">useState</span>();`,
+    output: "Uncaught Error: Rendered more hooks than during the previous render.",
+    tip: "If you need a hook conditionally, put the condition inside the hook (e.g., inside useEffect)."
+  },
+  {
+    id: 12,
+    title: "useMemo vs useCallback",
+    level: "intermediate",
+    category: "2. Hooks & State",
+    def: "Performance hooks for memoizing values and functions.",
+    expl: [
+      "useMemo: Memoizes the <strong>result</strong> of a calculation.",
+      "useCallback: Memoizes the <strong>function definition</strong> itself.",
+      "Both help prevent unnecessary re-renders in children that use React.memo."
+    ],
+    code: `<span class="kw">const</span> memoValue = <span class="fn">useMemo</span>(() => <span class="fn">heavyCalc</span>(a), [a]);
+<span class="kw">const</span> memoFn = <span class="fn">useCallback</span>(() => <span class="fn">doSomething</span>(a), [a]);`,
+    output: "// Only re-executes if 'a' changes",
+    tip: "Don't use them everywhere. They have overhead. Use them when identity stability is required (e.g., in dependency arrays)."
+  },
+
+  // ── 3. PERFORMANCE ──
+  {
+    id: 21,
+    title: "React.memo & Shallow Comparison",
+    level: "intermediate",
+    category: "3. Performance",
+    def: "A Higher Order Component that prevents a component from re-rendering if its props haven't changed.",
+    expl: [
+      "Performs a 'Shallow Compare' of props by default.",
+      "Primitives match by value; Objects/Functions match by reference.",
+      "Use custom comparison function as second argument if needed."
+    ],
+    code: `<span class="kw">const</span> MyComp = <span class="fn">React.memo</span>(props => {
+  <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">div</span><span class="op">&gt;</span>{props.val}<span class="op">&lt;/</span><span class="fn">div</span><span class="op">&gt;</span>;
+});`,
+    output: "// Comp only re-renders if props.val changes reference",
+    tip: "Always use useCallback for function props passed to memoized components."
+  },
+
+  // ── 5. ADVANCED PATTERNS ──
+  {
+    id: 51,
+    title: "React Server Components (RSC)",
+    level: "advanced",
+    category: "5. Advanced Patterns",
+    def: "Components that execute exclusively on the server, sending zero JavaScript to the client.",
+    expl: [
+      "Reduce bundle size: Heavy libraries stay on the server.",
+      "Direct Database Access: No need for a separate API layer in many cases.",
+      "Interoperability: RSCs can render Client Components, but not vice versa.",
+      "Hydration: RSCs do not hydrate; they are static HTML units."
+    ],
+    mermaid: "graph LR\n  S[Server] --> |RSC Payload| C[Client]\n  C --> |Hydrate| CC[Client Components]\n  C --> |Static| RSC[Server Components]",
+    code: `<span class="com">// Server Component</span>
+<span class="kw">async function</span> <span class="fn">Page</span>() {
+  <span class="kw">const</span> data = <span class="kw">await</span> db.<span class="fn">query</span>();
+  <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">ClientList</span> items={data} <span class="op">/&gt;</span>;
+}`,
+    output: "// Page logic runs on server; ClientList is hydrated on client",
+    tip: "RSC is NOT SSR. SSR is about the initial HTML; RSC is about the component execution environment."
+  },
+
+  // ── 8. EXTREME ──
+  {
+    id: 100,
+    title: "Suspense & The 'Throwing' Pattern",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "How Suspense works internally by catching thrown Promises.",
+    expl: [
+      "When a component needs data, it 'throws' a Promise.",
+      "The nearest Suspense boundary catches this Promise.",
+      "Suspense renders the fallback UI.",
+      "Once the Promise resolves, React restarts the rendering from the boundary."
+    ],
+    mermaid: "graph TD\n  R[Render Comp] --> |Need Data| T[Throw Promise]\n  T --> SB[Suspense Boundary]\n  SB --> F[Show Fallback]\n  P[Promise Resolve] --> R",
+    code: `<span class="kw">function</span> <span class="fn">readData</span>(resource) {
+  <span class="kw">const</span> status = resource.<span class="fn">status</span>();
+  <span class="kw">if</span> (status === <span class="str">'pending'</span>) <span class="kw">throw</span> resource.<span class="fn">promise</span>;
+  <span class="kw">return</span> resource.<span class="fn">data</span>;
+}`,
+    output: "// Component 'suspends' until promise resolves",
+    tip: "This is why you can't use 'await' in client components directly (yet)—they use this 'throw' mechanic."
+  },
+  {
+    id: 101,
+    title: "Lane Priorities & Bitwise Scheduling",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "React's internal priority system using bitmasks.",
+    expl: [
+      "Lanes (31 bits) represent different update priorities (Sync, Input, Default, Idle).",
+      "React uses bitwise operators (AND, OR, NOT) to check and combine priorities.",
+      "Allows 'Entanglement': linking related updates together even if they arrive at different times."
+    ],
+    code: `<span class="kw">const</span> NoLanes   = <span class="num">0b0000000000000000000000000000000</span>;
+<span class="kw">const</span> SyncLane  = <span class="num">0b0000000000000000000000000000001</span>;
+<span class="kw">const</span> InputLane = <span class="num">0b0000000000000000000000000000010</span>;`,
+    output: "// React reconciles lanes in priority order",
+    tip: "This allows React to interrupt a 'DefaultLane' render to process a 'SyncLane' (user input) render."
+  },
+
+  // ── 1. CORE ARCHITECTURE ──
+  {
+    id: 3,
+    title: "Class Components vs Functional Components",
+    level: "basic",
+    category: "1. Core Architecture",
+    def: "Different ways to declare components in React. Functional components are modern and use hooks, while class components are older and use lifecycle methods.",
+    expl: [
+      "Functional Components: Simple JavaScript functions. Use hooks for state and side effects.",
+      "Class Components: ES6 classes extending React.Component. Have this.state and lifecycle methods like componentDidMount.",
+      "React team recommends functional components for all new code."
+    ],
+    code: `<span class="com">// Functional</span>
+<span class="kw">function</span> <span class="fn">MyComp</span>() { <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">div</span><span class="op">&gt;</span>Hello<span class="op">&lt;/</span><span class="fn">div</span><span class="op">&gt;</span>; }
+
+<span class="com">// Class</span>
+<span class="kw">class</span> MyComp <span class="kw">extends</span> React.Component {
+  <span class="fn">render</span>() { <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">div</span><span class="op">&gt;</span>Hello<span class="op">&lt;/</span><span class="fn">div</span><span class="op">&gt;</span>; }
+}`,
+    output: "// Both output <div>Hello</div>",
+    tip: "If asked in an interview, be able to translate a class component's lifecycle methods into the equivalent useEffect hooks."
+  },
+  {
+    id: 4,
+    title: "What is JSX?",
+    level: "basic",
+    category: "1. Core Architecture",
+    def: "JSX is a syntax extension for JavaScript that looks similar to XML/HTML, used to describe what the UI should look like.",
+    expl: [
+      "It is NOT valid JavaScript. Browsers can't read it natively.",
+      "Tools like Babel transpile JSX into React.createElement() calls.",
+      "Allows embedding JS expressions inside curly braces {}."
+    ],
+    code: `<span class="kw">const</span> element = <span class="op">&lt;</span><span class="fn">h1</span> className=<span class="str">"greeting"</span><span class="op">&gt;</span>Hello, {name}<span class="op">&lt;/</span><span class="fn">h1</span><span class="op">&gt;</span>;
+<span class="com">// Transpiles to:</span>
+<span class="kw">const</span> element = React.<span class="fn">createElement</span>(
+  <span class="str">'h1'</span>, {className: <span class="str">'greeting'</span>}, <span class="str">'Hello, '</span>, name
+);`,
+    output: "// Rendered as standard JS objects before becoming DOM nodes",
+    tip: "Mention that with React 17+, you don't even need to import React to use JSX, because of the new JSX transform."
+  },
+
+  // ── 2. HOOKS & STATE ──
+  {
+    id: 13,
+    title: "useEffect Cleanup Function",
+    level: "intermediate",
+    category: "2. Hooks & State",
+    def: "A function returned by useEffect that runs before the component unmounts and before the next effect runs.",
+    expl: [
+      "Prevents memory leaks (e.g., removing event listeners, clearing intervals).",
+      "Runs on unmount AND before every re-execution of the effect (if dependencies change)."
+    ],
+    code: `<span class="fn">useEffect</span>(() => {
+  <span class="kw">const</span> timer = <span class="fn">setInterval</span>(() => <span class="fn">tick</span>(), <span class="num">1000</span>);
+  <span class="com">// Cleanup function</span>
+  <span class="kw">return</span> () => <span class="fn">clearInterval</span>(timer);
+}, []);`,
+    output: "// Interval is safely cleared when component unmounts",
+    tip: "A common pitfall is forgetting cleanup for event listeners, which causes multiple listeners to trigger."
+  },
+  {
+    id: 14,
+    title: "useState Asynchronous Nature",
+    level: "intermediate",
+    category: "2. Hooks & State",
+    def: "State updates in React are asynchronous and batched for performance.",
+    expl: [
+      "Calling setCount(count + 1) does NOT immediately update the count variable.",
+      "React batches multiple state updates into a single re-render.",
+      "To update state based on previous state, pass a callback function to the setter."
+    ],
+    code: `<span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+<span class="com">// BAD: Might read stale state if called in quick succession</span>
+<span class="fn">setCount</span>(count + <span class="num">1</span>); 
+
+<span class="com">// GOOD: Uses functional update</span>
+<span class="fn">setCount</span>(prev => prev + <span class="num">1</span>);`,
+    output: "// Functional update ensures correct sequencing",
+    tip: "React 18 introduced automatic batching for all events (promises, timeouts, native events)."
+  },
+  {
+    id: 15,
+    title: "useRef vs useState",
+    level: "intermediate",
+    category: "2. Hooks & State",
+    def: "Both retain values across renders, but updating useRef does NOT trigger a re-render.",
+    expl: [
+      "useRef returns a mutable ref object whose .current property is initialized to the passed argument.",
+      "Often used to access underlying DOM elements directly.",
+      "Useful for storing mutable instance variables (like interval IDs) without triggering renders."
+    ],
+    code: `<span class="kw">const</span> renderCount = <span class="fn">useRef</span>(<span class="num">0</span>);
+<span class="kw">const</span> [state, setState] = <span class="fn">useState</span>(<span class="num">0</span>);
+
+renderCount.current++; <span class="com">// Does not re-render</span>
+<span class="fn">setState</span>(<span class="num">1</span>); <span class="com">// Re-renders</span>`,
+    output: "// renderCount increments silently",
+    tip: "Never read or write ref.current during rendering; only do it in event handlers or effects."
+  },
+  {
+    id: 16,
+    title: "Custom Hooks",
+    level: "advanced",
+    category: "2. Hooks & State",
+    def: "JavaScript functions that start with 'use' and can call other Hooks.",
+    expl: [
+      "Allow extraction of stateful logic into reusable functions.",
+      "They share stateful logic, NOT state itself. Each component calling the hook gets its own independent state.",
+      "Great for data fetching, event listeners, and form handling."
+    ],
+    code: `<span class="kw">function</span> <span class="fn">useWindowWidth</span>() {
+  <span class="kw">const</span> [width, setWidth] = <span class="fn">useState</span>(window.innerWidth);
+  <span class="fn">useEffect</span>(() => {
+    <span class="kw">const</span> handleResize = () => <span class="fn">setWidth</span>(window.innerWidth);
+    window.<span class="fn">addEventListener</span>(<span class="str">'resize'</span>, handleResize);
+    <span class="kw">return</span> () => window.<span class="fn">removeEventListener</span>(<span class="str">'resize'</span>, handleResize);
+  }, []);
+  <span class="kw">return</span> width;
+}`,
+    output: "// Now any component can easily access live window width",
+    tip: "The 'use' prefix is mandatory to let React's lint rules check for Hook constraint violations."
+  },
+
+  // ── 3. PERFORMANCE ──
+  {
+    id: 22,
+    title: "List Keys & Reconciliation",
+    level: "intermediate",
+    category: "3. Performance",
+    def: "Keys help React identify which items have changed, are added, or are removed in lists.",
+    expl: [
+      "Without keys, React mutates every element if a new element is inserted at the start.",
+      "Keys must be unique among siblings.",
+      "Using array indices as keys is dangerous if the list order changes."
+    ],
+    code: `<span class="com">// BAD: Index as key (if list order changes)</span>
+{items.<span class="fn">map</span>((item, index) => <span class="op">&lt;</span><span class="fn">li</span> key={index}<span class="op">&gt;</span>{item.name}<span class="op">&lt;/</span><span class="fn">li</span><span class="op">&gt;</span>)}
+
+<span class="com">// GOOD: Unique ID</span>
+{items.<span class="fn">map</span>(item => <span class="op">&lt;</span><span class="fn">li</span> key={item.id}<span class="op">&gt;</span>{item.name}<span class="op">&lt;/</span><span class="fn">li</span><span class="op">&gt;</span>)}`,
+    output: "// Proper keys optimize DOM patching",
+    tip: "If a component has a key and its key changes, React completely destroys and mounts a fresh instance of the component."
+  },
+
+  // ── 4. CONTEXT & STATE MANAGEMENT ──
+  {
+    id: 30,
+    title: "Context API Deep Dive",
+    level: "advanced",
+    category: "4. Context & Redux",
+    def: "A way to pass data through the component tree without having to pass props down manually at every level (Prop Drilling).",
+    expl: [
+      "Created with React.createContext().",
+      "Provided with <MyContext.Provider value={...}>.",
+      "Consumed with useContext(MyContext).",
+      "Any change to Provider value re-renders ALL consumers, which can cause performance issues."
+    ],
+    code: `<span class="kw">const</span> ThemeContext = React.<span class="fn">createContext</span>(<span class="str">'light'</span>);
+
+<span class="com">// Provider</span>
+<span class="op">&lt;</span><span class="fn">ThemeContext.Provider</span> value=<span class="str">"dark"</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="fn">App</span> <span class="op">/&gt;</span>
+<span class="op">&lt;/</span><span class="fn">ThemeContext.Provider</span><span class="op">&gt;</span>
+
+<span class="com">// Consumer</span>
+<span class="kw">const</span> theme = <span class="fn">useContext</span>(ThemeContext);`,
+    output: "// theme === 'dark'",
+    tip: "For complex state with high update frequency, Context isn't great. State managers like Redux or Zustand use subscriptions to bypass Context re-render cascades."
+  },
+  {
+    id: 31,
+    title: "Redux Architecture",
+    level: "advanced",
+    category: "4. Context & Redux",
+    def: "A predictable state container for JavaScript apps based on Flux architecture.",
+    expl: [
+      "Single Source of Truth: The 'Store'.",
+      "State is Read-Only: Only modified by dispatching 'Actions'.",
+      "Changes are made with pure functions: 'Reducers'.",
+      "Modern Redux uses Redux Toolkit (RTK) to eliminate boilerplate."
+    ],
+    code: `<span class="com">// RTK Slice</span>
+<span class="kw">const</span> counterSlice = <span class="fn">createSlice</span>({
+  name: <span class="str">'counter'</span>,
+  initialState: { value: <span class="num">0</span> },
+  reducers: {
+    <span class="fn">increment</span>: state => { state.value += <span class="num">1</span>; } <span class="com">// Immer allows "mutation"</span>
+  }
+});`,
+    output: "// Redux enforces unidirectional data flow",
+    tip: "Mention that RTK uses Immer under the hood so you can write mutative code that safely produces immutable updates."
+  },
+
+  // ── 5. ROUTING & ECOSYSTEM ──
+  {
+    id: 40,
+    title: "React Router & Client-Side Routing",
+    level: "intermediate",
+    category: "5. Routing & SSR",
+    def: "Handling navigation in a Single Page Application (SPA) without reloading the page.",
+    expl: [
+      "Uses HTML5 History API (pushState) to change URLs without server requests.",
+      "Browser intercepts URL changes and renders the corresponding React component.",
+      "Prevents flash of unstyled content and provides app-like experience."
+    ],
+    code: `<span class="op">&lt;</span><span class="fn">BrowserRouter</span><span class="op">&gt;</span>
+  <span class="op">&lt;</span><span class="fn">Routes</span><span class="op">&gt;</span>
+    <span class="op">&lt;</span><span class="fn">Route</span> path=<span class="str">"/"</span> element={<span class="op">&lt;</span><span class="fn">Home</span> <span class="op">/&gt;</span>} <span class="op">/&gt;</span>
+    <span class="op">&lt;</span><span class="fn">Route</span> path=<span class="str">"/about"</span> element={<span class="op">&lt;</span><span class="fn">About</span> <span class="op">/&gt;</span>} <span class="op">/&gt;</span>
+  <span class="op">&lt;/</span><span class="fn">Routes</span><span class="op">&gt;</span>
+<span class="op">&lt;/</span><span class="fn">BrowserRouter</span><span class="op">&gt;</span>`,
+    output: "// Navigating to /about instantly loads <About />",
+    tip: "Understand the difference between React Router v6 (components) and modern Next.js/Remix file-based routing."
+  },
+  {
+    id: 41,
+    title: "Server-Side Rendering (SSR) vs Static Site Generation (SSG)",
+    level: "advanced",
+    category: "5. Routing & SSR",
+    def: "Different ways of pre-rendering React HTML before sending it to the client.",
+    expl: [
+      "SSR: Generates HTML on the server on EVERY request. Slower but data is always fresh.",
+      "SSG: Generates HTML at BUILD time. Extremely fast, but data can get stale.",
+      "Next.js handles both paradigms easily."
+    ],
+    mermaid: "graph TD\n  Client[Client Request] --> |SSR| Server[Server Render HTML]\n  Client --> |SSG| CDN[CDN Returns Pre-built HTML]",
+    code: `<span class="com">// Next.js SSR Example</span>
+<span class="kw">export async function</span> <span class="fn">getServerSideProps</span>() {
+  <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.test'</span>);
+  <span class="kw">const</span> data = <span class="kw">await</span> res.<span class="fn">json</span>();
+  <span class="kw">return</span> { props: { data } };
+}`,
+    output: "// HTML is sent to client fully populated",
+    tip: "Explain 'Hydration'—the process where React attaches event listeners to the static HTML received from the server."
+  },
+
+  // ── 6. ADVANCED PATTERNS ──
+  {
+    id: 52,
+    title: "Higher-Order Components (HOCs)",
+    level: "advanced",
+    category: "6. Advanced Patterns",
+    def: "A pattern where a function takes a component and returns a new component.",
+    expl: [
+      "Used for cross-cutting concerns (authentication, logging, data fetching).",
+      "Largely replaced by Custom Hooks, but still present in older codebases and some libraries (like Redux connect).",
+      "Names usually start with 'with' (e.g., withRouter, withAuth)."
+    ],
+    code: `<span class="kw">const</span> <span class="fn">withAuth</span> = (WrappedComponent) => {
+  <span class="kw">return</span> (props) => {
+    <span class="kw">if</span> (!props.isAuthenticated) <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">Login</span> <span class="op">/&gt;</span>;
+    <span class="kw">return</span> <span class="op">&lt;</span><span class="fn">WrappedComponent</span> {...props} <span class="op">/&gt;</span>;
+  };
+};`,
+    output: "// HOC injects logic wrapping the component",
+    tip: "Hooks are preferred because HOCs can cause 'wrapper hell' in the component tree."
+  },
+  {
+    id: 53,
+    title: "Render Props Pattern",
+    level: "advanced",
+    category: "6. Advanced Patterns",
+    def: "A technique for sharing code between React components using a prop whose value is a function.",
+    expl: [
+      "The component provides the state, the render prop dictates how to render it.",
+      "Used heavily by libraries like Formik and React-Motion.",
+      "Also mostly replaced by Custom Hooks."
+    ],
+    code: `<span class="op">&lt;</span><span class="fn">MouseTracker</span> render={(x, y) => (
+  <span class="op">&lt;</span><span class="fn">h1</span><span class="op">&gt;</span>Mouse is at {x}, {y}<span class="op">&lt;/</span><span class="fn">h1</span><span class="op">&gt;</span>
+)} <span class="op">/&gt;</span>`,
+    output: "// The Tracker handles logic, the child handles UI",
+    tip: "Both Render Props and HOCs were workarounds for sharing stateful logic before Hooks existed."
+  },
+
+  // ── 8. EXTREME ──
+  {
+    id: 102,
+    title: "Concurrent Mode & useTransition",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "React 18's ability to interrupt rendering to keep the UI responsive.",
+    expl: [
+      "By default, React renders are synchronous and block the main thread.",
+      "useTransition allows marking some state updates as 'non-urgent'.",
+      "React will pause the non-urgent render if a more urgent event (like typing) comes in."
+    ],
+    code: `<span class="kw">const</span> [isPending, startTransition] = <span class="fn">useTransition</span>();
+
+<span class="fn">startTransition</span>(() => {
+  <span class="com">// Slow, non-urgent update</span>
+  <span class="fn">setSearchQuery</span>(input);
+});`,
+    output: "// Typing remains smooth while searchQuery renders in background",
+    tip: "This relies entirely on the Fiber architecture's ability to yield execution back to the browser."
+  }
+
+];
+
+function renderQList(data) {
+  const list = document.getElementById('qList');
+  const cats = [...new Set(data.map(q => q.category))].sort();
+  list.innerHTML = cats.map(cat => {
+    const catQs = data.filter(q => q.category === cat);
+    return `
+      <div class="cat-group">
+        <div class="cat-title">${cat}</div>
+        ${catQs.map(q => `
+          <div class="q-item" onclick="showAns(${q.id})" id="q-${q.id}">
+            <div class="q-title">${q.title}</div>
+            <div class="q-meta">
+              <div class="level-dot" style="background: var(--${q.level})"></div>
+              <span style="font-size: .6rem; color: var(--text-dim); text-transform: uppercase;">${q.level}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function showAns(id) {
+  const q = questions.find(x => x.id === id);
+  const welcome = document.getElementById('welcomeScreen');
+  const card = document.getElementById('ansCard');
+  welcome.style.display = 'none';
+  card.style.display = 'block';
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'ans-header';
+  header.innerHTML = `
+    <div class="ans-level level-${q.level}">${q.level}</div>
+    <h2 class="ans-title">${q.title}</h2>
+    <p class="ans-def">${q.def}</p>
+  `;
+  card.appendChild(header);
+
+  if(q.mermaid) {
+    const vTitle = document.createElement('div');
+    vTitle.className = 'sec-title';
+    vTitle.innerText = 'Logic Visualization';
+    card.appendChild(vTitle);
+    const mWrap = document.createElement('div');
+    mWrap.className = 'visual-wrap';
+    mWrap.innerHTML = `<div class="mermaid">${q.mermaid}</div>`;
+    card.appendChild(mWrap);
+  }
+
+  const eTitle = document.createElement('div');
+  eTitle.className = 'sec-title';
+  eTitle.innerText = 'Technical Breakdown';
+  card.appendChild(eTitle);
+  const eList = document.createElement('ul');
+  eList.className = 'expl-list';
+  eList.innerHTML = q.expl.map(e => `<li class="expl-item">${e}</li>`).join('');
+  card.appendChild(eList);
+
+  const cTitle = document.createElement('div');
+  cTitle.className = 'sec-title';
+  cTitle.innerText = 'Code Example';
+  card.appendChild(cTitle);
+  const cWrap = document.createElement('div');
+  cWrap.className = 'code-wrap';
+  cWrap.innerHTML = `
+    <div class="code-header"><span class="code-lang">jsx</span></div>
+    <pre class="code-body"><code>${q.code}</code></pre>
+  `;
+  card.appendChild(cWrap);
+
+  const oWrap = document.createElement('div');
+  oWrap.className = 'output-wrap';
+  oWrap.innerHTML = `
+    <div class="output-title">React Behavior</div>
+    <div class="output-text">${q.output}</div>
+  `;
+  card.appendChild(oWrap);
+
+  const tBox = document.createElement('div');
+  tBox.className = 'tip-box';
+  tBox.innerHTML = `<div class="tip-text"><strong>Senior Strategy:</strong> ${q.tip}</div>`;
+  card.appendChild(tBox);
+
+  if(q.mermaid) {
+    mermaid.init(undefined, card.querySelectorAll('.mermaid'));
+  }
+
+  document.querySelectorAll('.q-item').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('q-'+id);
+  if(target) target.classList.add('active');
+
+  if(window.innerWidth <= 900) toggleSidebar();
+}
+
+function filterQ() {
+  const term = document.querySelector('.search').value.toLowerCase();
+  const filtered = questions.filter(q => q.title.toLowerCase().includes(term) || q.category.toLowerCase().includes(term));
+  renderQList(filtered);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+renderQList(questions);
+</script>
+</body>
+</html>

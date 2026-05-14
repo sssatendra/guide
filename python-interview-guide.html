@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Interview Guide — Basic to Extreme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { primaryColor: '#3776ab' } });</script>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #161b27;
+  --border: #2a3348;
+  --accent: #3776ab; /* Python Blue */
+  --accent-2: #ffd343; /* Python Yellow */
+  --text-main: #ffffff;
+  --text-dim: #e2e8f0;
+  --code-bg: #0a0c10;
+  --basic: #10b981;
+  --inter: #3b82f6;
+  --adv: #8b5cf6;
+  --extreme: #ef4444;
+  --success: #34d399;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text-main);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+.logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:.75rem}
+.logo span{color:var(--text-dim);font-weight:400;font-size:.8rem}
+.logo .py-y{color:var(--accent-2)}
+.back-hub{color:var(--text-dim);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.back-hub:hover{background:var(--border);color:var(--accent)}
+
+.layout{display:flex;height:calc(100vh - 56px)}
+.sidebar{width:350px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:all .3s}
+.main{flex:1;overflow-y:auto;padding:2rem;background:radial-gradient(circle at top right, rgba(55,118,171,0.05), transparent)}
+
+.sb-header{padding:1.25rem;border-bottom:1px solid var(--border)}
+.search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;color:#fff;font-family:inherit;font-size:.85rem;outline:none}
+.search:focus{border-color:var(--accent)}
+.q-list{flex:1;overflow-y:auto;padding:1rem}
+.cat-group{margin-bottom:1.5rem}
+.cat-title{font-size:.65rem;font-weight:800;color:var(--accent-2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:.75rem;padding-left:.5rem}
+
+.q-item{padding:.85rem;border-radius:10px;border:1px solid transparent;cursor:pointer;margin-bottom:.4rem;transition:all .2s}
+.q-item:hover{background:rgba(255,255,255,0.03);border-color:var(--border)}
+.q-item.active{background:rgba(55,118,171,0.15);border-color:var(--accent)}
+.q-title{font-size:.82rem;font-weight:500;margin-bottom:.4rem;line-height:1.4}
+.q-meta{display:flex;gap:.5rem;align-items:center}
+.level-dot{width:6px;height:6px;border-radius:50%}
+
+.ans-card{max-width:900px;margin:0 auto}
+.ans-header{margin-bottom:2rem}
+.ans-level{display:inline-block;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem}
+.level-basic{background:rgba(16,185,129,0.15);color:var(--basic);border:1px solid rgba(16,185,129,0.3)}
+.level-intermediate{background:rgba(59,130,246,0.15);color:var(--inter);border:1px solid rgba(59,130,246,0.3)}
+.level-advanced{background:rgba(139,92,246,0.15);color:var(--adv);border:1px solid rgba(139,92,246,0.3)}
+.level-extreme{background:rgba(239,68,68,0.15);color:var(--extreme);border:1px solid rgba(239,68,68,0.3)}
+
+.ans-title{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1.5rem}
+.ans-def{font-size:1.1rem;color:var(--text-dim);line-height:1.6;margin-bottom:2rem}
+
+.sec-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem;margin-top:3rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.expl-list{list-style:none;margin-bottom:2.5rem}
+.expl-item{position:relative;padding-left:1.5rem;margin-bottom:1rem;font-size:.95rem;color:var(--text-dim);line-height:1.6}
+.expl-item::before{content:'→';position:absolute;left:0;color:var(--accent-2);font-weight:700}
+
+.visual-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;display:flex;justify-content:center;overflow:hidden}
+.mermaid{background:transparent !important}
+
+.code-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.code-header{padding:.75rem 1rem;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.code-lang{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);text-transform:uppercase}
+.code-body{padding:1.25rem;font-family:'JetBrains Mono',monospace;font-size:.88rem;line-height:1.6;overflow-x:auto;color:#d1d5db}
+
+.kw{color:#fbbf24} .fn{color:#60a5fa} .str{color:#34d399} .num{color:#f87171} .com{color:#6b7280} .op{color:#818cf8}
+
+.output-wrap{background:#000;border:1px solid var(--border);border-radius:12px;padding:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:2.5rem}
+.output-title{font-size:.65rem;color:var(--text-dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:0.1em}
+.output-text{color:var(--success);font-size:.85rem;white-space:pre-wrap}
+
+.tip-box{background:linear-gradient(135deg, rgba(55,118,171,0.1) 0%, transparent 100%);border:1px solid rgba(55,118,171,0.2);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;margin-top:2rem}
+.tip-box::before{content:'PRO TIP';position:absolute;top:0;right:0;background:var(--accent-2);color:#000;font-size:.6rem;font-weight:800;padding:4px 10px;border-bottom-left-radius:8px}
+.tip-text{font-size:.92rem;color:var(--text-dim);line-height:1.6}
+
+.mob-menu-btn{display:none}
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-350px;top:56px;height:calc(100vh - 56px);z-index:900}
+  .sidebar.open{left:0}
+  .mob-menu-btn{display:block;background:none;border:none;color:var(--accent);font-size:1.5rem;cursor:pointer}
+}
+
+.welcome{text-align:center;padding-top:10vh}
+.welcome h1{font-family:'Syne',sans-serif;font-size:3.5rem;margin-bottom:1rem;background:linear-gradient(to right, #fff, var(--accent-2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome p{color:var(--text-dim);max-width:500px;margin:0 auto 2rem;font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+    🐍 <span class="py-b">Python</span> <span class="py-y">Master</span>
+  </div>
+  <a href="index.html" class="back-hub">← Mastery Hub</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <input type="text" class="search" placeholder="Search Python topics..." onkeyup="filterQ()">
+    </div>
+    <div class="q-list" id="qList"></div>
+  </div>
+
+  <div class="main" id="mainContent">
+    <div class="welcome" id="welcomeScreen">
+      <h1>Python Deep Dive.</h1>
+      <p>Master Lambdas, Generators, the GIL, Memory Management, and CPython internals.</p>
+      <div style="color:var(--accent-2); font-size: 2rem;">🐍</div>
+    </div>
+    <div class="ans-card" id="ansCard" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  // ── 1. BASICS ──
+  {
+    id: 1,
+    title: "What is a lambda function?",
+    level: "basic",
+    category: "1. Basics",
+    def: "An anonymous, one-line function defined with the <code>lambda</code> keyword.",
+    expl: [
+      "Syntax: <code>lambda arguments: expression</code>.",
+      "Used for short-lived, throwaway functions.",
+      "Can have any number of arguments but only one expression.",
+      "Automatically returns the result of the expression."
+    ],
+    code: `add = lambda x, y: x + y\nprint(add(5, 3))`,
+    output: "8",
+    tip: "Use lambdas for simple operations; use 'def' for anything that requires documentation or multiple steps."
+  },
+  {
+    id: 2,
+    title: "What are the limitations of lambda functions?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Restricted syntax and functionality compared to standard functions.",
+    expl: [
+      "Can only contain a single expression.",
+      "Cannot contain statements (like <code>assert</code>, <code>raise</code>, or assignments).",
+      "No multi-line logic or docstrings.",
+      "Harder to debug because they are anonymous (show up as '<lambda>' in tracebacks)."
+    ],
+    code: ` # This is NOT allowed\n# lambda x: if x > 0: return x`,
+    output: "SyntaxError: invalid syntax",
+    tip: "If you find yourself nesting lambdas, it's time to refactor to a proper function."
+  },
+  {
+    id: 3,
+    title: "What does map() do?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Applies a given function to each item of an iterable and returns an iterator.",
+    expl: [
+      "Syntax: <code>map(function, iterable)</code>.",
+      "Returns a map object (an iterator).",
+      "Lazy evaluation: only computes values when needed.",
+      "Can take multiple iterables if the function expects multiple arguments."
+    ],
+    code: `nums = [1, 2, 3]\nsquared = map(lambda x: x**2, nums)\nprint(list(squared))`,
+    output: "[1, 4, 9]",
+    tip: "Map is memory efficient because it doesn't create the whole list at once."
+  },
+  {
+    id: 4,
+    title: "What does filter() do?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Filters elements from an iterable based on a function that returns a boolean.",
+    expl: [
+      "Syntax: <code>filter(function, iterable)</code>.",
+      "Returns an iterator containing elements for which the function returns True.",
+      "If the function is <code>None</code>, it removes all 'falsy' values.",
+      "Lazy evaluation like <code>map()</code>."
+    ],
+    code: `nums = [1, 2, 3, 4]\nevens = filter(lambda x: x % 2 == 0, nums)\nprint(list(evens))`,
+    output: "[2, 4]",
+    tip: "Use filter(None, list) to quickly remove 0, '', None, and False from a list."
+  },
+  {
+    id: 5,
+    title: "What does reduce() do?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Cumulative application of a function to the items of an iterable to reduce it to a single value.",
+    expl: [
+      "Part of the <code>functools</code> module in Python 3.",
+      "Takes a function of two arguments and applies it to the first two elements, then the result with the third, etc.",
+      "Can take an optional initial value.",
+      "Commonly used for summing or finding products."
+    ],
+    code: `from functools import reduce\nnums = [1, 2, 3, 4]\nsum_all = reduce(lambda x, y: x + y, nums)\nprint(sum_all)`,
+    output: "10",
+    tip: "For summing, <code>sum()</code> is faster and more readable than <code>reduce()</code>."
+  },
+  {
+    id: 6,
+    title: "Can lambda have multiple arguments?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Yes, lambdas can accept any number of comma-separated arguments.",
+    expl: [
+      "Just like regular functions, they support positional and keyword arguments.",
+      "They also support <code>*args</code> and <code>**kwargs</code>.",
+      "The arguments are defined before the colon."
+    ],
+    code: `multi = lambda x, y, z=1: x * y * z\nprint(multi(2, 3, 4))`,
+    output: "24",
+    tip: "Keep the argument list short to maintain readability."
+  },
+  {
+    id: 7,
+    title: "Can lambda contain multiple statements?",
+    level: "basic",
+    category: "1. Basics",
+    def: "No, a lambda can only contain a single expression.",
+    expl: [
+      "An expression returns a value; a statement performs an action.",
+      "You cannot use <code>if</code>/<code>else</code> blocks (though ternary is allowed).",
+      "No loops (<code>for</code>/<code>while</code>) or <code>print</code> statements (in Python 2, though allowed in Python 3 as an expression)."
+    ],
+    code: `check = lambda x: "High" if x > 10 else "Low"\nprint(check(15))`,
+    output: "\"High\"",
+    tip: "Use ternary operators (<code>x if cond else y</code>) to handle simple logic inside lambdas."
+  },
+  {
+    id: 8,
+    title: "Lambda vs Normal Function",
+    level: "basic",
+    category: "1. Basics",
+    def: "Comparison of <code>lambda</code> vs <code>def</code>.",
+    expl: [
+      "Lambda is anonymous; <code>def</code> is named.",
+      "Lambda is a single expression; <code>def</code> is a block of statements.",
+      "Lambda has implicit return; <code>def</code> requires an explicit <code>return</code>.",
+      "Lambda is suitable for short tasks; <code>def</code> for reuse and complexity."
+    ],
+    code: `def add_def(x, y): return x + y\nadd_lam = lambda x, y: x + y`,
+    output: "// Both perform same logic",
+    tip: "If you need a docstring or multiple lines, <code>def</code> is mandatory."
+  },
+  {
+    id: 9,
+    title: "Where is lambda commonly used?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Popular use cases in Python projects.",
+    expl: [
+      "Key functions for sorting: <code>sorted(list, key=lambda...)</code>.",
+      "Event handlers in GUI libraries (like Tkinter/PyQt).",
+      "Quick data transformations in Pandas (<code>apply(lambda...)</code>).",
+      "Arguments for <code>map()</code> and <code>filter()</code>."
+    ],
+    code: `data = [{"name": "A", "age": 25}, {"name": "B", "age": 20}]\nsorted_data = sorted(data, key=lambda x: x["age"])`,
+    output: "// Sorted by age: B then A",
+    tip: "Lambda shines as the 'key' argument in sorting operations."
+  },
+  {
+    id: 10,
+    title: "Closure issue with lambda in loops",
+    level: "advanced",
+    category: "1. Basics",
+    def: "A common pitfall where lambdas in a loop share the same variable reference.",
+    expl: [
+      "Lambdas use lexical scoping—they look up the value when CALLED, not when DEFINED.",
+      "By the time the lambda runs, the loop variable has its final value.",
+      "Fix: Use a default argument to 'capture' the current value of the variable."
+    ],
+    code: `funcs = [lambda: i for i in range(3)]\nprint([f() for f in funcs]) # [2, 2, 2]\n\n# Corrected\nfuncs = [lambda i=i: i for i in range(3)]\nprint([f() for f in funcs]) # [0, 1, 2]`,
+    output: "[2, 2, 2]\n[0, 1, 2]",
+    tip: "Always use default arguments (<code>i=i</code>) when creating functions inside a loop."
+  },
+
+  // ── 2. MAP & FILTER DEEP DIVE ──
+  {
+    id: 11,
+    title: "What does map() return in Python 3?",
+    level: "basic",
+    category: "2. Map & Filter",
+    def: "A map object, which is an iterator.",
+    expl: [
+      "In Python 2, it returned a list.",
+      "In Python 3, it is lazy; it only yields values when you iterate over it.",
+      "This is more memory efficient for large datasets.",
+      "Must be converted to a list/tuple to see all elements at once."
+    ],
+    code: `m = map(str, [1, 2])\nprint(m) # <map object at ...>\nprint(list(m))`,
+    output: "<map object at ...>\n['1', '2']",
+    tip: "Iterators can only be consumed ONCE."
+  },
+  {
+    id: 12,
+    title: "map() vs for loop",
+    level: "basic",
+    category: "2. Map & Filter",
+    def: "Performance and readability comparison.",
+    expl: [
+      "<code>map()</code> is often faster than a manual <code>for</code> loop because the loop is pushed into the C-implemented engine.",
+      "For loops are more flexible (can contain logic, breaks, etc.).",
+      "Map is more 'functional' and concise."
+    ],
+    code: `nums = [1, 2]\n# For Loop\nres = []\nfor n in nums: res.append(n*2)\n# Map\nres = list(map(lambda n: n*2, nums))`,
+    output: "// Both result in [2, 4]",
+    tip: "Use <code>map()</code> when applying a simple built-in function to every element."
+  },
+  {
+    id: 13,
+    title: "map() vs List Comprehension",
+    level: "intermediate",
+    category: "2. Map & Filter",
+    def: "Choosing between functional and idiomatic styles.",
+    expl: [
+      "List Comprehensions are usually more readable to Pythonistas.",
+      "List Comprehensions allow for easy filtering (<code>if</code> condition).",
+      "Map is slightly faster when using built-in functions (like <code>map(str, arr)</code>).",
+      "List Comprehension immediately creates a list in memory (unless it's a generator expression)."
+    ],
+    code: `nums = [1, 2, 3]\n# List Comp\nsq = [x**2 for x in nums]\n# Map\nsq = list(map(lambda x: x**2, nums))`,
+    output: "// List comprehension is usually preferred",
+    tip: "Prefer list comprehensions for readability unless performance metrics dictate otherwise."
+  },
+  {
+    id: 14,
+    title: "Is map() faster than List Comprehension?",
+    level: "advanced",
+    category: "2. Map & Filter",
+    def: "Technical performance analysis.",
+    expl: [
+      "Case 1: Using a lambda—List Comprehension is usually faster because lambda calls add overhead.",
+      "Case 2: Using a built-in C function—<code>map()</code> is faster as it's a direct loop in C code.",
+      "The difference is usually negligible for small lists."
+    ],
+    code: `import timeit\n# map(str, data) vs [str(x) for x in data]\n# Map usually wins here.`,
+    output: "// map() + C function = High speed",
+    tip: "Don't micro-optimize unless you are processing millions of items."
+  },
+  {
+    id: 15,
+    title: "Can map() take multiple iterables?",
+    level: "intermediate",
+    category: "2. Map & Filter",
+    def: "Parallel processing of multiple sequences.",
+    expl: [
+      "The function must accept as many arguments as there are iterables.",
+      "It stops at the shortest iterable.",
+      "Equivalent to <code>zip()</code> followed by a map."
+    ],
+    code: `a = [1, 2, 3]\nb = [10, 20]\nres = map(lambda x, y: x + y, a, b)\nprint(list(res))`,
+    output: "[11, 22]",
+    tip: "Use this to perform element-wise arithmetic across lists."
+  },
+  {
+    id: 16,
+    title: "filter() vs map()",
+    level: "basic",
+    category: "2. Map & Filter",
+    def: "Distinguishing the two main functional tools.",
+    expl: [
+      "Map: Changes the values, keeps the length.",
+      "Filter: Keeps the values, changes the length.",
+      "Map's function can return anything; Filter's function must return a truthy/falsy value."
+    ],
+    code: `data = [1, 2, 3]\nm = list(map(lambda x: x > 1, data)) # [False, True, True]\nf = list(filter(lambda x: x > 1, data)) # [2, 3]`,
+    output: "// m: boolean list, f: filtered list",
+    tip: "If you want to 'remove' items, use filter."
+  },
+  {
+    id: 17,
+    title: "What happens if filter condition is False?",
+    level: "basic",
+    category: "2. Map & Filter",
+    def: "The element is excluded from the result.",
+    expl: [
+      "The function is applied to the element.",
+      "If the result is <code>False</code> (or falsy like 0, None, []), the element is dropped.",
+      "If the result is <code>True</code>, it is included."
+    ],
+    code: `data = [0, 1, 2]\nres = filter(lambda x: x > 0, data)\nprint(list(res))`,
+    output: "[1, 2]",
+    tip: "Remember that filter() doesn't change the data elements themselves."
+  },
+  {
+    id: 18,
+    title: "Filter(None, iterable)",
+    level: "intermediate",
+    category: "2. Map & Filter",
+    def: "The shorthand for removing falsy values.",
+    expl: [
+      "When the first argument is <code>None</code>, <code>filter()</code> uses the identity function.",
+      "It removes everything that evaluates to <code>False</code> in a boolean context.",
+      "Removes: 0, 0.0, '', None, False, [], {}, ()."
+    ],
+    code: `data = [1, 0, 'Hi', '', None, False]\nprint(list(filter(None, data)))`,
+    output: "[1, 'Hi']",
+    tip: "This is a clean 'Pythonic' way to sanitize data from a messy API or user input."
+  },
+
+  // ── 3. DATA STRUCTURE INTERNALS ──
+  {
+    id: 19,
+    title: "How do Dictionaries work internally?",
+    level: "advanced",
+    category: "3. Data Structures",
+    def: "Dictionaries are implemented as Hash Tables with open addressing.",
+    expl: [
+      "Keys are hashed into integer indices.",
+      "Collision handling: Uses 'Open Addressing' (probing) to find another slot.",
+      "Performance: O(1) average case for lookups, insertions, and deletions.",
+      "Order: Since Python 3.7+, insertion order is guaranteed (uses a separate dense index array)."
+    ],
+    mermaid: "graph LR\n  Key[Key] --> Hash[Hash Function]\n  Hash --> Index[Index Array]\n  Index --> Bucket[Data Bucket]",
+    code: `d = {"a": 1, "b": 2}\n# Internally: hash("a") % size -> slot`,
+    output: "// O(1) Complexity",
+    tip: "Only 'Hashable' objects (like strings, numbers, tuples) can be dictionary keys."
+  },
+  {
+    id: 20,
+    title: "List vs Tuple Internals",
+    level: "intermediate",
+    category: "3. Data Structures",
+    def: "Mutable vs Immutable storage differences.",
+    expl: [
+      "List: Over-allocated dynamic array. Has extra space for future growth.",
+      "Tuple: Static array with fixed size. Allocated exactly the space it needs.",
+      "Memory: Tuples are slightly smaller and faster to create.",
+      "Tuples are hashable (if elements are hashable); Lists never are."
+    ],
+    code: `import sys\na = [1, 2, 3]\nb = (1, 2, 3)\nprint(sys.getsizeof(a) > sys.getsizeof(b))`,
+    output: "True",
+    tip: "Use tuples for fixed data structures to improve code intent and performance."
+  },
+  {
+    id: 21,
+    title: "Set vs List performance",
+    level: "intermediate",
+    category: "3. Data Structures",
+    def: "O(1) vs O(n) membership testing.",
+    expl: [
+      "List: Uses linear search. <code>x in list</code> is O(n).",
+      "Set: Uses hash table. <code>x in set</code> is O(1).",
+      "Use sets for unique collections and frequent membership checks."
+    ],
+    code: `large_list = list(range(10000))\nlarge_set = set(large_list)\n# '9999 in large_set' is instantaneous`,
+    output: "// Set lookup is significantly faster",
+    tip: "Always convert a list to a set if you need to check 'in' multiple times in a loop."
+  },
+
+  // ── 4. CONTROL FLOW & SCOPING ──
+  {
+    id: 22,
+    title: "LEGB Rule",
+    level: "intermediate",
+    category: "4. Scoping",
+    def: "The order in which Python resolves variable names.",
+    expl: [
+      "L: Local (Inside current function).",
+      "E: Enclosing (Outer functions in nested setups).",
+      "G: Global (Module level).",
+      "B: Built-in (Language defaults like len, range)."
+    ],
+    mermaid: "graph TD\n  L[Local] --> E[Enclosing]\n  E --> G[Global]\n  G --> B[Built-in]",
+    code: `x = 'global'\ndef outer():\n    x = 'enclosing'\n    def inner():\n        x = 'local'\n        print(x)`,
+    output: "// Resolves from inner to outer",
+    tip: "Understanding LEGB is crucial for avoiding 'UnboundLocalError'."
+  },
+  {
+    id: 23,
+    title: "Global vs Nonlocal",
+    level: "intermediate",
+    category: "4. Scoping",
+    def: "Keywords to modify variables in higher scopes.",
+    expl: [
+      "<code>global</code>: Access/modify a variable at the top (module) level.",
+      "<code>nonlocal</code>: Access/modify a variable in the nearest ENCLOSING scope (not global).",
+      "Required when you want to assign to a variable that wasn't defined in the current scope."
+    ],
+    code: `def outer():\n    count = 0\n    def inner():\n        nonlocal count\n        count += 1\n    inner()\n    return count`,
+    output: "1",
+    tip: "Avoid using 'global' as it makes state management unpredictable."
+  },
+
+  // ── 5. ADVANCED CONCEPTS ──
+  {
+    id: 24,
+    title: "Iterators and Iterables",
+    level: "intermediate",
+    category: "5. Iteration",
+    def: "The protocol behind 'for' loops.",
+    expl: [
+      "Iterable: An object that returns an iterator via <code>__iter__()</code> (e.g. list, string).",
+      "Iterator: An object with a <code>__next__()</code> method that produces values.",
+      "Iterators raise <code>StopIteration</code> when empty.",
+      "Iterables can be iterated multiple times; Iterators are one-way streams."
+    ],
+    code: `it = iter([1, 2])\nprint(next(it))\nprint(next(it))\n# next(it) -> StopIteration`,
+    output: "1\n2",
+    tip: "Every iterator is an iterable, but not every iterable is an iterator."
+  },
+  {
+    id: 25,
+    title: "Generators (yield)",
+    level: "intermediate",
+    category: "5. Iteration",
+    def: "Functions that maintain state and produce values one-by-one.",
+    expl: [
+      "Uses <code>yield</code> instead of <code>return</code>.",
+      "Pauses execution and returns a value to the caller.",
+      "Resumes where it left off when <code>next()</code> is called again.",
+      "Highly memory efficient for large sequences."
+    ],
+    code: `def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        yield a\n        a, b = b, a + b`,
+    output: "// Yields Fibonacci numbers without storing the list",
+    tip: "Generators are ideal for processing large log files line-by-line."
+  },
+  {
+    id: 26,
+    title: "Decorators (@)",
+    level: "advanced",
+    category: "5. Functions",
+    def: "A function that modifies the behavior of another function.",
+    expl: [
+      "Wrapped around a function using the <code>@</code> syntax.",
+      "The decorator receives the function as an argument and returns a new function (wrapper).",
+      "Commonly used for logging, timing, and authorization.",
+      "Use <code>functools.wraps</code> to preserve metadata."
+    ],
+    code: `def debug(func):\n    def wrapper(*args):\n        print(f"Calling {func.__name__}")\n        return func(*args)\n    return wrapper\n\n@debug\ndef add(a, b): return a + b`,
+    output: "// Logs 'Calling add' before result",
+    tip: "Think of decorators as 'Middlewares' for your functions."
+  },
+
+  // ── 6. INTERNALS & PERFORMANCE ──
+  {
+    id: 27,
+    title: "The GIL (Global Interpreter Lock)",
+    level: "advanced",
+    category: "6. Internals",
+    def: "A mutex that protects access to Python objects, preventing multiple threads from executing bytecode at once.",
+    expl: [
+      "Makes CPython thread-safe but prevents CPU-bound multithreading from being truly parallel.",
+      "I/O bound tasks still benefit from threading because the GIL is released during I/O.",
+      "Solution for CPU parallelism: <code>multiprocessing</code> module.",
+      "Recent efforts (PEP 703) aim to make the GIL optional."
+    ],
+    mermaid: "graph TD\n  T1[Thread 1] --> |Hold| GIL\n  T2[Thread 2] --> |Wait| GIL\n  GIL --> |Run| CPU",
+    code: `# This runs on 1 core despite threading\nfor i in range(2): threading.Thread(target=heavy_work).start()`,
+    output: "// 100% CPU usage on ONLY ONE CORE",
+    tip: "Always mention the GIL when discussing Python performance in high-concurrency systems."
+  },
+  {
+    id: 28,
+    title: "Garbage Collection (GC)",
+    level: "advanced",
+    category: "6. Internals",
+    def: "Python's automatic memory management system.",
+    expl: [
+      "1. Reference Counting: Immediate deletion when ref count hits 0.",
+      "2. Cyclic GC: Detects circular references (A -> B -> A) that ref counting misses.",
+      "Generational GC: Objects are promoted from Gen 0 to Gen 1 to Gen 2. New objects are checked more often."
+    ],
+    code: `import gc\n# gc.collect() manually triggers collection`,
+    output: "// Automated background cleanup",
+    tip: "Avoid circular references (e.g. parent points to child, child points to parent) for better performance."
+  },
+  {
+    id: 29,
+    title: "What is __slots__?",
+    level: "advanced",
+    category: "6. Internals",
+    def: "A class attribute that restricts the creation of <code>__dict__</code> for instances.",
+    expl: [
+      "By default, every instance has a dictionary (<code>__dict__</code>) for dynamic attributes.",
+      "<code>__slots__</code> reserves space for a fixed set of attributes.",
+      "Saves significant memory for millions of instances.",
+      "Prevents dynamic addition of new attributes."
+    ],
+    code: `class Point:\n    __slots__ = ('x', 'y')\n    def __init__(self, x, y): self.x, self.y = x, y`,
+    output: "// Memory usage reduced by ~40-60%",
+    tip: "Use slots for 'Data Classes' that will be instantiated in large numbers."
+  },
+
+  // ── 7. EXTREME / ARCHITECTURE ──
+  {
+    id: 30,
+    title: "Descriptors",
+    level: "extreme",
+    category: "7. Extreme",
+    def: "A powerful protocol for customizing attribute access.",
+    expl: [
+      "A class that implements <code>__get__</code>, <code>__set__</code>, or <code>__delete__</code>.",
+      "Used behind the scenes for <code>@property</code>, <code>@classmethod</code>, and <code>@staticmethod</code>.",
+      "Allows for advanced validation or lazy-loading patterns."
+    ],
+    code: `class PositiveNum:\n    def __set__(self, obj, val):\n        if val < 0: raise ValueError\n        obj._val = val\n\nclass Data:\n    score = PositiveNum()`,
+    output: "// score assignment is now validated",
+    tip: "Descriptors are the 'true' way to implement logic during attribute assignment."
+  },
+  {
+    id: 31,
+    title: "Metaclasses",
+    level: "extreme",
+    category: "7. Extreme",
+    def: "The 'classes' of classes.",
+    expl: [
+      "A metaclass defines how a class object itself is created.",
+      "The default metaclass is <code>type</code>.",
+      "Used for automatic registration of classes, enforcing interface rules, or adding methods dynamically.",
+      "Syntax: <code>class MyClass(metaclass=MyMeta):</code>."
+    ],
+    code: `class Meta(type):\n    def __new__(cls, name, bases, dct):\n        dct['is_awesome'] = True\n        return super().__new__(cls, name, bases, dct)`,
+    output: "// All classes using this meta will have .is_awesome = True",
+    tip: "Metaclasses are a sharp tool. Use them only when inheritance and decorators fail."
+  },
+  {
+    id: 32,
+    title: "Context Managers (__enter__/__exit__)",
+    level: "intermediate",
+    category: "5. Functions",
+    def: "Objects that manage resources using the <code>with</code> statement.",
+    expl: [
+      "<code>__enter__</code>: Setup logic (open file, connect DB).",
+      "<code>__exit__</code>: Teardown logic (close file, disconnect DB).",
+      "Guarantees resource cleanup even if errors occur.",
+      "Can also be created using <code>@contextlib.contextmanager</code>."
+    ],
+    code: `with open('test.txt', 'w') as f:\n    f.write('Hello')\n# File closes here automatically`,
+    output: "// Safe resource handling",
+    tip: "Always use context managers for files and network sockets."
+  },
+  {
+    id: 33,
+    title: "Pass by Object Reference",
+    level: "intermediate",
+    category: "1. Basics",
+    def: "Python's unique way of passing arguments to functions.",
+    expl: [
+      "Not 'Pass by Value' or 'Pass by Reference'.",
+      "Object references are passed by value.",
+      "Mutable objects (lists, dicts) can be modified in-place.",
+      "Immutable objects (strings, ints) cannot be changed; a new object is created."
+    ],
+    code: `def mod(l): l.append(1)\nnums = []\nmod(nums)\nprint(nums)`,
+    output: "[1]",
+    tip: "Be careful with mutable default arguments! <code>def func(l=[])</code> shares the list across all calls."
+  },
+  {
+    id: 34,
+    title: "is vs ==",
+    level: "basic",
+    category: "1. Basics",
+    def: "Identity vs Equality check.",
+    expl: [
+      "<code>==</code> checks for VALUE equality (Are the data contents the same?).",
+      "<code>is</code> checks for IDENTITY (Do they point to the same memory address?).",
+      "Use <code>is</code> for Singletons like <code>None</code>."
+    ],
+    code: `a = [1, 2]\nb = [1, 2]\nprint(a == b) # True\nprint(a is b) # False`,
+    output: "True\nFalse",
+    tip: "Never use <code>is</code> for numbers or strings unless you are doing low-level caching checks."
+  },
+  {
+    id: 35,
+    title: "List Slicing [start:stop:step]",
+    level: "basic",
+    category: "3. Data Structures",
+    def: "Extracting sub-parts of a sequence.",
+    expl: [
+      "Syntax: <code>[start:stop:step]</code>.",
+      "Negative indices count from the end.",
+      "Omitting values uses defaults (0, end, 1).",
+      "<code>[::-1]</code> is the standard way to reverse a list/string."
+    ],
+    code: `s = "Python"\nprint(s[1:4]) # yth\nprint(s[::-1]) # nohtyP`,
+    output: "\"yth\"\n\"nohtyP\"",
+    tip: "Slicing creates a SHALLOW copy of the sub-sequence."
+  },
+  {
+    id: 36,
+    title: "F-strings (formatted strings)",
+    level: "basic",
+    category: "1. Basics",
+    def: "Literal String Interpolation introduced in Python 3.6.",
+    expl: [
+      "Fastest and most readable way to format strings.",
+      "Prefix with <code>f</code> and use <code>{expression}</code>.",
+      "Supports complex expressions and number formatting.",
+      "Safer and easier than <code>%</code> or <code>.format()</code>."
+    ],
+    code: `name = "Dev"\nprint(f"Hello, {name.upper()}")`,
+    output: "\"Hello, DEV\"",
+    tip: "F-strings are evaluated at runtime, making them extremely powerful."
+  },
+  {
+    id: 37,
+    title: "List Comprehension vs Generator Expression",
+    level: "intermediate",
+    category: "5. Iteration",
+    def: "Square brackets vs Parentheses.",
+    expl: [
+      "List Comprehension: <code>[x for x in data]</code> - Creates a full list in memory.",
+      "Generator Expression: <code>(x for x in data)</code> - Returns an iterator, yields items one-by-one.",
+      "Generators are much more memory efficient for large datasets."
+    ],
+    code: `data = range(1000000)\nlist_comp = [x for x in data]\ngen_exp = (x for x in data)`,
+    output: "// list_comp uses MBs of RAM; gen_exp uses almost zero",
+    tip: "Use generator expressions whenever you are passing the result to a function like <code>sum()</code> or <code>min()</code>."
+  },
+  {
+    id: 38,
+    title: "How dictionary order is maintained",
+    level: "advanced",
+    category: "3. Data Structures",
+    def: "Internals of Python 3.7+ dictionaries.",
+    expl: [
+      "Before 3.7, dicts were unordered.",
+      "Now, dicts use a 'compact' layout: a sparse array of indices and a dense array of actual entries.",
+      "The dense array keeps items in the order they were inserted.",
+      "Saves memory and provides deterministic iteration."
+    ],
+    code: `d = {"a": 1, "b": 2}\nprint(list(d.keys()))`,
+    output: "['a', 'b']",
+    tip: "You no longer need <code>collections.OrderedDict</code> unless you specifically need its extra features (like <code>move_to_end</code>)."
+  },
+  {
+    id: 39,
+    title: "Async / Await (The Event Loop)",
+    level: "advanced",
+    category: "6. Internals",
+    def: "Single-threaded concurrency for I/O bound tasks.",
+    expl: [
+      "<code>async def</code> defines a coroutine.",
+      "<code>await</code> pauses execution of the coroutine until the task finishes, yielding control back to the loop.",
+      "The Event Loop schedules multiple coroutines on a single thread.",
+      "Ideal for network requests and database operations."
+    ],
+    mermaid: "graph LR\n  Loop[Event Loop] --> |Run| C1[Task 1]\n  C1 --> |Await| Loop\n  Loop --> |Run| C2[Task 2]",
+    code: `import asyncio\nasync def main():\n    await asyncio.sleep(1)\n    print("Done")\nasyncio.run(main())`,
+    output: "// 1 second pause, then 'Done'",
+    tip: "Async doesn't make code 'parallel'—it makes it 'concurrent'. It won't help with heavy math."
+  },
+  {
+    id: 40,
+    title: "Type Hinting & Mypy",
+    level: "intermediate",
+    category: "1. Basics",
+    def: "Static typing for a dynamic language.",
+    expl: [
+      "Introduced via PEP 484 (Python 3.5+).",
+      "Does NOT enforce types at runtime (Python remains dynamic).",
+      "Used by IDEs and static analysis tools (like Mypy) to catch bugs early.",
+      "Syntax: <code>var: type = value</code>, <code>def f(x: int) -> str:</code>."
+    ],
+    code: `def greet(name: str) -> str:\n    return "Hello " + name`,
+    output: "// No runtime change; helps IDE catch errors",
+    tip: "Use Type Hints in all professional projects to improve documentation and maintainability."
+  },
+  {
+    id: 41,
+    title: "zip() and enumerate()",
+    level: "basic",
+    category: "5. Iteration",
+    def: "Essential iteration helpers.",
+    expl: [
+      "<code>zip()</code>: Combines multiple iterables element-wise.",
+      "<code>enumerate()</code>: Adds a counter (index) to an iterable.",
+      "Both return iterators."
+    ],
+    code: `names = ["A", "B"]\nfor i, name in enumerate(names):\n    print(i, name)`,
+    output: "0 A\n1 B",
+    tip: "Use <code>zip(*list_of_lists)</code> to transpose a matrix."
+  },
+  {
+    id: 42,
+    title: "super() and MRO",
+    level: "advanced",
+    category: "1. Basics",
+    def: "Method Resolution Order in multiple inheritance.",
+    expl: [
+      "<code>super()</code> returns a proxy object that delegates method calls to a parent or sibling class.",
+      "MRO (Method Resolution Order) is the sequence in which classes are searched.",
+      "Python uses the C3 Linearization algorithm for MRO.",
+      "Check MRO via <code>ClassName.mro()</code>."
+    ],
+    mermaid: "graph TD\n  A[Base] --> B[Left]\n  A --> C[Right]\n  B --> D[Child]\n  C --> D",
+    code: `class A: pass\nclass B(A): pass\nprint(B.mro())`,
+    output: "[<class '__main__.B'>, <class '__main__.A'>, <class 'object'>]",
+    tip: "Always use super() instead of hardcoding the parent class name to support cooperative multiple inheritance."
+  },
+  {
+    id: 43,
+    title: "*args and **kwargs",
+    level: "basic",
+    category: "1. Basics",
+    def: "Variable-length arguments.",
+    expl: [
+      "<code>*args</code>: Collects extra positional arguments into a tuple.",
+      "<code>**kwargs</code>: Collects extra keyword arguments into a dictionary.",
+      "Allows for flexible function signatures."
+    ],
+    code: `def f(*args, **kwargs):\n    print(args, kwargs)\nf(1, a=2)`,
+    output: "(1,) {'a': 2}",
+    tip: "Use these when writing decorators or proxy functions."
+  },
+  {
+    id: 44,
+    title: "Deep Copy vs Shallow Copy",
+    level: "intermediate",
+    category: "1. Basics",
+    def: "Copying complex objects.",
+    expl: [
+      "Shallow Copy: Creates a new object but references the original elements (nested objects are shared).",
+      "Deep Copy: Creates a new object and recursively copies all nested elements.",
+      "Use the <code>copy</code> module."
+    ],
+    code: `import copy\nl1 = [[1]]\nl2 = copy.copy(l1)\nl3 = copy.deepcopy(l1)\nl1[0][0] = 9\nprint(l2[0][0], l3[0][0])`,
+    output: "9 1",
+    tip: "Deep copy can be slow for very large/deep objects."
+  },
+  {
+    id: 45,
+    title: "Monkey Patching",
+    level: "advanced",
+    category: "7. Extreme",
+    def: "Replacing or extending code at runtime.",
+    expl: [
+      "You can assign a new function to an existing class or module attribute.",
+      "Commonly used in testing to mock network calls or external APIs.",
+      "Can be dangerous if used in production as it hides code intent."
+    ],
+    code: `import math\ndef fake_sin(x): return 0\nmath.sin = fake_sin\nprint(math.sin(1.0))`,
+    output: "0",
+    tip: "Use monkey patching sparingly; preferred alternatives include dependency injection or mocking libraries."
+  },
+  {
+    id: 46,
+    title: "The import system",
+    level: "advanced",
+    category: "6. Internals",
+    def: "How Python finds and loads modules.",
+    expl: [
+      "Python checks <code>sys.modules</code> (cache) first.",
+      "If not found, it searches <code>sys.path</code> (built-ins, site-packages, local dir).",
+      "<code>__init__.py</code> marks a directory as a package.",
+      "Relative imports (<code>from . import x</code>) only work within packages."
+    ],
+    code: `import sys\nprint(sys.path[0])`,
+    output: "// Current script directory",
+    tip: "Never name your scripts the same as standard library modules (like <code>math.py</code>) or imports will fail."
+  },
+  {
+    id: 47,
+    title: "Serialization (Pickle vs JSON)",
+    level: "intermediate",
+    category: "1. Basics",
+    def: "Converting objects to byte streams.",
+    expl: [
+      "JSON: Text-based, cross-language, limited to basic types.",
+      "Pickle: Binary, Python-specific, can serialize almost any Python object (including classes).",
+      "<strong>Warning:</strong> Never unpickle data from an untrusted source (remote code execution risk)."
+    ],
+    code: `import pickle\ndata = {"a": 1}\np = pickle.dumps(data)\nprint(pickle.loads(p))`,
+    output: "{'a': 1}",
+    tip: "For data storage, prefer JSON or Protobuf; use Pickle only for temporary Python-to-Python transfer."
+  },
+  {
+    id: 48,
+    title: "dir() vs vars()",
+    level: "basic",
+    category: "1. Basics",
+    def: "Introspection tools.",
+    expl: [
+      "<code>dir(obj)</code>: Returns a list of all valid attributes/methods for the object.",
+      "<code>vars(obj)</code>: Returns the <code>__dict__</code> attribute (instance variables) of the object.",
+      "<code>dir()</code> is more comprehensive; <code>vars()</code> is for data mapping."
+    ],
+    code: `class A: x=1\na = A()\nprint('x' in dir(a))\nprint(vars(a))`,
+    output: "True\n{}",
+    tip: "Use <code>dir()</code> in the REPL to quickly explore an unfamiliar library."
+  },
+  {
+    id: 49,
+    title: "Walrus Operator (:=)",
+    level: "intermediate",
+    category: "1. Basics",
+    def: "Assignment Expression introduced in Python 3.8.",
+    expl: [
+      "Assigns a value to a variable as part of an expression.",
+      "Commonly used in <code>while</code> loops or <code>if</code> statements to avoid double evaluation.",
+      "Can improve performance and reduce line count."
+    ],
+    code: `if (n := len([1, 2, 3])) > 2:\n    print(f"Long list of {n}")`,
+    output: "\"Long list of 3\"",
+    tip: "Don't overuse it; sometimes a separate assignment line is clearer."
+  },
+  {
+    id: 50,
+    title: "Decorators with Arguments",
+    level: "advanced",
+    category: "5. Functions",
+    def: "A decorator that accepts its own parameters.",
+    expl: [
+      "Requires three levels of nested functions.",
+      "The outermost function takes the arguments and returns the actual decorator.",
+      "The actual decorator takes the function and returns the wrapper."
+    ],
+    code: `def repeat(n):\n    def decorator(func):\n        def wrapper(*args):\n            for _ in range(n): func(*args)\n        return wrapper\n    return decorator\n\n@repeat(3)\ndef hi(): print("Hi")`,
+    output: "Hi\nHi\nHi",
+    tip: "This is how frameworks like Flask handle routing (<code>@app.route('/path')</code>)."
+  }
+];
+
+function renderQList(data) {
+  const list = document.getElementById('qList');
+  const cats = [...new Set(data.map(q => q.category))].sort();
+  list.innerHTML = cats.map(cat => {
+    const catQs = data.filter(q => q.category === cat);
+    return `
+      <div class="cat-group">
+        <div class="cat-title">${cat}</div>
+        ${catQs.map(q => `
+          <div class="q-item" onclick="showAns(${q.id})" id="q-${q.id}">
+            <div class="q-title">${q.title}</div>
+            <div class="q-meta">
+              <div class="level-dot" style="background: var(--${q.level})"></div>
+              <span style="font-size: .6rem; color: var(--text-dim); text-transform: uppercase;">${q.level}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function showAns(id) {
+  const q = questions.find(x => x.id === id);
+  const welcome = document.getElementById('welcomeScreen');
+  const card = document.getElementById('ansCard');
+  welcome.style.display = 'none';
+  card.style.display = 'block';
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'ans-header';
+  header.innerHTML = `
+    <div class="ans-level level-${q.level}">${q.level}</div>
+    <h2 class="ans-title">${q.title}</h2>
+    <p class="ans-def">${q.def}</p>
+  `;
+  card.appendChild(header);
+
+  if(q.mermaid) {
+    const vTitle = document.createElement('div');
+    vTitle.className = 'sec-title';
+    vTitle.innerText = 'Logic Visualization';
+    card.appendChild(vTitle);
+    const mWrap = document.createElement('div');
+    mWrap.className = 'visual-wrap';
+    mWrap.innerHTML = `<div class="mermaid">${q.mermaid}</div>`;
+    card.appendChild(mWrap);
+  }
+
+  const eTitle = document.createElement('div');
+  eTitle.className = 'sec-title';
+  eTitle.innerText = 'Pythonic Explanation';
+  card.appendChild(eTitle);
+  const eList = document.createElement('ul');
+  eList.className = 'expl-list';
+  eList.innerHTML = q.expl.map(e => `<li class="expl-item">${e}</li>`).join('');
+  card.appendChild(eList);
+
+  const cTitle = document.createElement('div');
+  cTitle.className = 'sec-title';
+  cTitle.innerText = 'Code Snapshot';
+  card.appendChild(cTitle);
+  const cWrap = document.createElement('div');
+  cWrap.className = 'code-wrap';
+  cWrap.innerHTML = `
+    <div class="code-header"><span class="code-lang">python</span></div>
+    <pre class="code-body"><code>${q.code}</code></pre>
+  `;
+  card.appendChild(cWrap);
+
+  const oWrap = document.createElement('div');
+  oWrap.className = 'output-wrap';
+  oWrap.innerHTML = `
+    <div class="output-title">Python Output</div>
+    <div class="output-text">${q.output}</div>
+  `;
+  card.appendChild(oWrap);
+
+  const tBox = document.createElement('div');
+  tBox.className = 'tip-box';
+  tBox.innerHTML = `<div class="tip-text"><strong>Senior Developer Insights:</strong> ${q.tip}</div>`;
+  card.appendChild(tBox);
+
+  if(q.mermaid) {
+    mermaid.init(undefined, card.querySelectorAll('.mermaid'));
+  }
+
+  document.querySelectorAll('.q-item').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('q-'+id);
+  if(target) target.classList.add('active');
+
+  if(window.innerWidth <= 900) toggleSidebar();
+}
+
+function filterQ() {
+  const term = document.querySelector('.search').value.toLowerCase();
+  const filtered = questions.filter(q => q.title.toLowerCase().includes(term) || q.category.toLowerCase().includes(term));
+  renderQList(filtered);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+renderQList(questions);
+</script>
+</body>
+</html>

@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Interview Guide — Basic to Extreme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<script>mermaid.initialize({ startOnLoad: false, theme: 'dark', themeVariables: { primaryColor: '#eab308' } });</script>
+<style>
+:root {
+  --bg: #0f1117;
+  --card: #161b27;
+  --border: #2a3348;
+  --accent: #eab308;
+  --text-main: #ffffff;
+  --text-dim: #e2e8f0;
+  --code-bg: #0a0c10;
+  --basic: #10b981;
+  --inter: #3b82f6;
+  --adv: #8b5cf6;
+  --extreme: #ef4444;
+  --success: #34d399;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text-main);font-family:'Inter',sans-serif;overflow-x:hidden}
+
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
+.logo{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:.75rem}
+.logo span{color:var(--text-dim);font-weight:400;font-size:.8rem}
+.back-hub{color:var(--text-dim);text-decoration:none;font-size:.8rem;padding:6px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.back-hub:hover{background:var(--border);color:var(--accent)}
+
+.layout{display:flex;height:calc(100vh - 56px)}
+.sidebar{width:350px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:all .3s}
+.main{flex:1;overflow-y:auto;padding:2rem;background:radial-gradient(circle at top right, rgba(234,179,8,0.03), transparent)}
+
+.sb-header{padding:1.25rem;border-bottom:1px solid var(--border)}
+.search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;color:#fff;font-family:inherit;font-size:.85rem;outline:none}
+.search:focus{border-color:var(--accent)}
+.q-list{flex:1;overflow-y:auto;padding:1rem}
+.cat-group{margin-bottom:1.5rem}
+.cat-title{font-size:.65rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:.75rem;padding-left:.5rem}
+
+.q-item{padding:.85rem;border-radius:10px;border:1px solid transparent;cursor:pointer;margin-bottom:.4rem;transition:all .2s}
+.q-item:hover{background:rgba(255,255,255,0.03);border-color:var(--border)}
+.q-item.active{background:rgba(234,179,8,0.1);border-color:var(--accent)}
+.q-title{font-size:.82rem;font-weight:500;margin-bottom:.4rem;line-height:1.4}
+.q-meta{display:flex;gap:.5rem;align-items:center}
+.level-dot{width:6px;height:6px;border-radius:50%}
+
+.ans-card{max-width:900px;margin:0 auto}
+.ans-header{margin-bottom:2rem}
+.ans-level{display:inline-block;padding:4px 10px;border-radius:6px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:1rem}
+.level-basic{background:rgba(16,185,129,0.15);color:var(--basic);border:1px solid rgba(16,185,129,0.3)}
+.level-intermediate{background:rgba(59,130,246,0.15);color:var(--inter);border:1px solid rgba(59,130,246,0.3)}
+.level-advanced{background:rgba(139,92,246,0.15);color:var(--adv);border:1px solid rgba(139,92,246,0.3)}
+.level-extreme{background:rgba(239,68,68,0.15);color:var(--extreme);border:1px solid rgba(239,68,68,0.3)}
+
+.ans-title{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin-bottom:1.5rem}
+.ans-def{font-size:1.1rem;color:var(--text-dim);line-height:1.6;margin-bottom:2rem}
+
+.sec-title{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem;margin-top:3rem}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.expl-list{list-style:none;margin-bottom:2.5rem}
+.expl-item{position:relative;padding-left:1.5rem;margin-bottom:1rem;font-size:.95rem;color:var(--text-dim);line-height:1.6}
+.expl-item::before{content:'→';position:absolute;left:0;color:var(--accent);font-weight:700}
+
+.visual-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:2rem;margin-bottom:2rem;display:flex;justify-content:center;overflow:hidden}
+.mermaid{background:transparent !important}
+
+.code-wrap{background:var(--code-bg);border:1px solid var(--border);border-radius:12px;margin-bottom:1.5rem;overflow:hidden}
+.code-header{padding:.75rem 1rem;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.code-lang{font-size:.7rem;font-family:'JetBrains Mono',monospace;color:var(--text-dim);text-transform:uppercase}
+.code-body{padding:1.25rem;font-family:'JetBrains Mono',monospace;font-size:.88rem;line-height:1.6;overflow-x:auto;color:#d1d5db}
+
+.kw{color:#fbbf24} .fn{color:#60a5fa} .str{color:#34d399} .num{color:#f87171} .com{color:#6b7280} .op{color:#818cf8}
+
+.output-wrap{background:#000;border:1px solid var(--border);border-radius:12px;padding:1rem;font-family:'JetBrains Mono',monospace;margin-bottom:2.5rem}
+.output-title{font-size:.65rem;color:var(--text-dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:0.1em}
+.output-text{color:var(--success);font-size:.85rem;white-space:pre-wrap}
+
+.tip-box{background:linear-gradient(135deg, rgba(234,179,8,0.1) 0%, transparent 100%);border:1px solid rgba(234,179,8,0.2);border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;margin-top:2rem}
+.tip-box::before{content:'PRO TIP';position:absolute;top:0;right:0;background:var(--accent);color:#000;font-size:.6rem;font-weight:800;padding:4px 10px;border-bottom-left-radius:8px}
+.tip-text{font-size:.92rem;color:var(--text-dim);line-height:1.6}
+
+.mob-menu-btn{display:none}
+@media(max-width:900px){
+  .sidebar{position:fixed;left:-350px;top:56px;height:calc(100vh - 56px);z-index:900}
+  .sidebar.open{left:0}
+  .mob-menu-btn{display:block;background:none;border:none;color:var(--accent);font-size:1.5rem;cursor:pointer}
+}
+
+.welcome{text-align:center;padding-top:10vh}
+.welcome h1{font-family:'Syne',sans-serif;font-size:3.5rem;margin-bottom:1rem;background:linear-gradient(to right, #fff, var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.welcome p{color:var(--text-dim);max-width:500px;margin:0 auto 2rem;font-size:1.1rem}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+    JS <span>Interview Master</span>
+  </div>
+  <a href="index.html" class="back-hub">← Mastery Hub</a>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <input type="text" class="search" placeholder="Search questions..." onkeyup="filterQ()">
+    </div>
+    <div class="q-list" id="qList"></div>
+  </div>
+
+  <div class="main" id="mainContent">
+    <div class="welcome" id="welcomeScreen">
+      <h1>JS: Basic to Extreme</h1>
+      <p>A comprehensive deep dive into JavaScript internals, patterns, and senior-level challenges.</p>
+      <div style="color:var(--accent); font-size: 2rem;">⚡</div>
+    </div>
+    <div class="ans-card" id="ansCard" style="display:none"></div>
+  </div>
+</div>
+<script>
+const questions = [
+  // ── 1. JAVASCRIPT BASICS ──
+  {
+    id: 1,
+    title: "What is JavaScript?",
+    level: "basic",
+    category: "1. Basics",
+    def: "<strong>JavaScript</strong> is a high-level, interpreted (JIT), multi-paradigm language that serves as the engine of the modern web.",
+    expl: [
+      "Dynamic & Weakly Typed: Variables are not bound to a specific type.",
+      "Single-threaded: Executes one task at a time on the main thread.",
+      "Non-blocking: Uses the Event Loop to handle asynchronous operations.",
+      "Prototype-based: Objects inherit directly from other objects."
+    ],
+    code: `const msg = "JS is everywhere";\nconsole.log(typeof msg);`,
+    output: "\"string\"",
+    tip: "Emphasize its 'Single-threaded but non-blocking' nature as a core strength."
+  },
+  {
+    id: 2,
+    title: "Difference between JavaScript and TypeScript?",
+    level: "basic",
+    category: "1. Basics",
+    def: "TypeScript is a strongly typed superset of JavaScript developed by Microsoft.",
+    expl: [
+      "TS provides static typing; JS is dynamic.",
+      "TS catches type-related bugs at compile time.",
+      "TS requires a transpilation step (TSC) to run in browsers.",
+      "TS supports features like Interfaces and Generics more robustly."
+    ],
+    code: `// TS\nlet id: number = 10;\n// JS\nlet id = 10;`,
+    output: "// Compiled JS is identical",
+    tip: "Mention that TS is great for large-scale enterprise applications to reduce runtime errors."
+  },
+  {
+    id: 3,
+    title: "Difference between var, let, and const?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Declaration keywords with different scoping and hoisting rules.",
+    expl: [
+      "var: Function-scoped, hoisted (as undefined), can be redeclared.",
+      "let: Block-scoped, hoisted to TDZ, cannot be redeclared in same scope.",
+      "const: Block-scoped, immutable binding (reference cannot change), must be initialized."
+    ],
+    mermaid: "graph TD\n  V[var] --> FS[Function Scope]\n  L[let] --> BS[Block Scope]\n  C[const] --> BS\n  BS --> TDZ[Temporal Dead Zone]",
+    code: `{\n  var x = 1;\n  let y = 2;\n}\nconsole.log(x); // 1\nconsole.log(y); // Error`,
+    output: "1\nReferenceError: y is not defined",
+    tip: "Explain the 'Temporal Dead Zone' for let/const to show deeper knowledge."
+  },
+  {
+    id: 4,
+    title: "What are primitive data types?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Basic data types that are not objects and have no methods.",
+    expl: [
+      "String, Number, BigInt, Boolean, Undefined, Null, Symbol.",
+      "Primitives are passed by value and are immutable.",
+      "All other types (Array, Object, Function) are reference types."
+    ],
+    code: `let a = 10;\nlet b = a;\nb = 20;\nconsole.log(a); // 10`,
+    output: "10",
+    tip: "Remember 'typeof null' is 'object'—it's a known JS bug."
+  },
+  {
+    id: 5,
+    title: "Difference between null and undefined?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Both represent absence of value, but with different semantic meanings.",
+    expl: [
+      "undefined: Variable declared but not assigned a value (automatic).",
+      "null: Intentional absence of any object value (manual).",
+      "typeof undefined is 'undefined'; typeof null is 'object'."
+    ],
+    code: `let x;\nlet y = null;\nconsole.log(x == y); // true\nconsole.log(x === y); // false`,
+    output: "true\nfalse",
+    tip: "Use null to explicitly 'clear' a variable or indicate a missing result."
+  },
+  {
+    id: 6,
+    title: "Difference between == and ===?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Comparison operators with and without type coercion.",
+    expl: [
+      "== (Abstract Equality): Compares values after converting to a common type.",
+      "=== (Strict Equality): Compares both value and type without conversion.",
+      "Standard best practice is to always use ===."
+    ],
+    code: `console.log(5 == '5'); // true\nconsole.log(5 === '5'); // false`,
+    output: "true\nfalse",
+    tip: "Mention that == is useful only in very specific cases like checking for both null/undefined (val == null)."
+  },
+  {
+    id: 7,
+    title: "What is type coercion?",
+    level: "basic",
+    category: "1. Basics",
+    def: "The automatic or implicit conversion of values from one data type to another.",
+    expl: [
+      "Implicit: Happens automatically (e.g., '5' + 5 = '55').",
+      "Explicit: Done manually using functions like Number() or String().",
+      "Tricky cases: [] + [] = '', [] + {} = '[object Object]'."
+    ],
+    code: `console.log('5' - 2); // 3 (String becomes Number)\nconsole.log('5' + 2); // '52' (Number becomes String)`,
+    output: "3\n\"52\"",
+    tip: "Know the difference between '+' (prefers string) and other operators (prefer numbers)."
+  },
+  {
+    id: 8,
+    title: "Truthy and Falsy values",
+    level: "basic",
+    category: "1. Basics",
+    def: "Values that evaluate to true or false in a boolean context.",
+    expl: [
+      "Falsy: false, 0, -0, 0n, '', null, undefined, NaN.",
+      "Truthy: Everything else (including [], {}, 'false').",
+      "Common mistake: Empty arrays and objects are truthy."
+    ],
+    code: `if ([]) console.log("Truthy!");\nif ("") console.log("Won't run");`,
+    output: "\"Truthy!\"",
+    tip: "Be careful with 0 and empty strings in conditional checks; use explicit comparison if needed."
+  },
+  {
+    id: 9,
+    title: "What is Hoisting?",
+    level: "basic",
+    category: "1. Basics",
+    def: "The behavior where declarations are moved to the top of their scope during compilation.",
+    expl: [
+      "Function declarations are fully hoisted.",
+      "Var is hoisted and initialized as undefined.",
+      "Let/Const are hoisted but remain in the Temporal Dead Zone (TDZ).",
+      "Initializations (assignments) are NOT hoisted."
+    ],
+    code: `console.log(a); // undefined\nvar a = 5;\n\nhello(); // "Hi"\nfunction hello() { console.log("Hi"); }`,
+    output: "undefined\n\"Hi\"",
+    tip: "Always declare variables at the top of their scope to avoid hoisting confusion."
+  },
+  {
+    id: 10,
+    title: "Explain scope in JavaScript",
+    level: "basic",
+    category: "1. Basics",
+    def: "The accessibility of variables and functions in different parts of code.",
+    expl: [
+      "Global Scope: Accessible everywhere.",
+      "Function Scope: Accessible only within the function (var).",
+      "Block Scope: Accessible only within the {} block (let/const).",
+      "Lexical Scope: Outer variables accessible to inner functions."
+    ],
+    mermaid: "graph TD\n  GS[Global Scope] --> FS[Function Scope]\n  FS --> BS[Block Scope]",
+    code: `const global = "I am global";\nfunction test() {\n  const local = "I am local";\n  console.log(global);\n}\ntest();`,
+    output: "\"I am global\"",
+    tip: "Minimize global variables to prevent naming collisions and memory bloat."
+  },
+  {
+    id: 11,
+    title: "What is block scope?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Scope restricted to the nearest curly braces {}.",
+    expl: [
+      "Introduced with ES6 (let/const).",
+      "Applies to if-statements, for-loops, and naked blocks.",
+      "Helps prevent variable leakage from loops and conditions."
+    ],
+    code: `if (true) {\n  let x = 10;\n}\nconsole.log(x); // ReferenceError`,
+    output: "Uncaught ReferenceError: x is not defined",
+    tip: "Block scope makes code more predictable and debugging easier."
+  },
+  {
+    id: 12,
+    title: "Function Declaration vs Expression?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Two ways to define functions with different hoisting behavior.",
+    expl: [
+      "Declaration: <code>function name() {}</code>. Hoisted fully.",
+      "Expression: <code>const name = function() {}</code>. Not hoisted (TDZ).",
+      "Expressions allow for anonymous functions and immediate use in HOFs."
+    ],
+    code: `sayHi(); // Works\nfunction sayHi() { console.log('Hi'); }\n\nsayBye(); // Error\nconst sayBye = () => console.log('Bye');`,
+    output: "\"Hi\"\nUncaught ReferenceError: sayBye is not defined",
+    tip: "Use expressions (const + arrow) to enforce clean code order (declaration before use)."
+  },
+  {
+    id: 13,
+    title: "What are Arrow Functions?",
+    level: "basic",
+    category: "1. Basics",
+    def: "A shorter syntax for writing functions introduced in ES6.",
+    expl: [
+      "No <code>this</code>, <code>arguments</code>, or <code>super</code> bindings.",
+      "Cannot be used as constructors (new).",
+      "Implicit return for single-line expressions."
+    ],
+    code: `const add = (a, b) => a + b;\nconsole.log(add(2, 3));`,
+    output: "5",
+    tip: "Arrow functions are perfect for callbacks and functional methods (map/filter)."
+  },
+  {
+    id: 14,
+    title: "Arrow vs Regular Functions",
+    level: "basic",
+    category: "1. Basics",
+    def: "Key differences in behavior, especially regarding the 'this' keyword.",
+    expl: [
+      "Regular: <code>this</code> is dynamic (depends on how it's called).",
+      "Arrow: <code>this</code> is lexical (inherited from parent scope).",
+      "Regular functions have an <code>arguments</code> object; arrows do not.",
+      "Arrows cannot be constructors; regulars can."
+    ],
+    code: `const obj = {\n  val: 10,\n  reg: function() { console.log(this.val); },\n  arr: () => console.log(this.val)\n};\nobj.reg(); // 10\nobj.arr(); // undefined`,
+    output: "10\nundefined",
+    tip: "Use regular functions for methods on objects, and arrows for internal callbacks."
+  },
+  {
+    id: 15,
+    title: "What is 'this' in JavaScript?",
+    level: "basic",
+    category: "1. Basics",
+    def: "A keyword referring to the context in which a function is executing.",
+    expl: [
+      "Global Context: Window (in browsers).",
+      "Method Call: The object before the dot.",
+      "Constructor Call: The newly created instance.",
+      "Arrow Function: Inherited from the surrounding scope."
+    ],
+    code: `function checkThis() { console.log(this); }\ncheckThis(); // Window\n\nconst obj = { m: checkThis };\nobj.m(); // obj`,
+    output: "Window\n{ m: f }",
+    tip: "Master call(), apply(), and bind() to manually control 'this' context."
+  },
+  {
+    id: 16,
+    title: "Explain Template Literals",
+    level: "basic",
+    category: "1. Basics",
+    def: "Modern string syntax using backticks `` allowing for interpolation and multi-line strings.",
+    expl: [
+      "Use <code>${expression}</code> to inject variables.",
+      "Supports multi-line strings without escape characters.",
+      "Can be used for 'Tagged Templates' (advanced)."
+    ],
+    code: `const name = 'JS';\nconsole.log(\`Hello, \${name}!\\nNext line.\`);`,
+    output: "\"Hello, JS!\\nNext line.\"",
+    tip: "Template literals are much cleaner than string concatenation with '+'."
+  },
+  {
+    id: 17,
+    title: "Map, Filter, and Reduce",
+    level: "basic",
+    category: "1. Basics",
+    def: "Higher-order array methods for functional data processing.",
+    expl: [
+      "Map: Returns a new array with transformed elements.",
+      "Filter: Returns a new array with elements that pass a test.",
+      "Reduce: Reduces array to a single value (sum, object, etc.).",
+      "None of these mutate the original array."
+    ],
+    code: `const nums = [1, 2, 3];\nconst doubled = nums.map(n => n * 2);\nconst evens = nums.filter(n => n % 2 === 0);\nconst sum = nums.reduce((acc, n) => acc + n, 0);`,
+    output: "// doubled: [2,4,6], evens: [2], sum: 6",
+    tip: "Map is for 1:1 transformations; Filter is for subsets; Reduce is for anything else."
+  },
+  {
+    id: 18,
+    title: "forEach vs map",
+    level: "basic",
+    category: "1. Basics",
+    def: "Two ways to iterate over arrays with different return values.",
+    expl: [
+      "forEach: Just executes a callback; returns undefined.",
+      "map: Executes a callback and returns a NEW array.",
+      "Use forEach for side effects (logging); use map for data transformations."
+    ],
+    code: `const arr = [1, 2];\nconst a = arr.forEach(x => x * 2);\nconst b = arr.map(x => x * 2);`,
+    output: "// a: undefined, b: [2, 4]",
+    tip: "Never use map if you don't intend to use the returned array."
+  },
+  {
+    id: 19,
+    title: "What are callbacks?",
+    level: "basic",
+    category: "1. Basics",
+    def: "Functions passed as arguments to other functions to be executed later.",
+    expl: [
+      "Used extensively in asynchronous operations (timers, events).",
+      "Allows for asynchronous execution in a single-threaded language.",
+      "Can lead to 'Callback Hell' if nested too deeply."
+    ],
+    code: `function greet(name, callback) {\n  console.log('Hello ' + name);\n  callback();\n}\ngreet('User', () => console.log('Done'));`,
+    output: "\"Hello User\"\n\"Done\"",
+    tip: "Callbacks are the foundation, but modern JS prefers Promises and Async/Await."
+  },
+  {
+    id: 20,
+    title: "Higher-Order Functions",
+    level: "basic",
+    category: "1. Basics",
+    def: "Functions that take other functions as arguments or return them.",
+    expl: [
+      "Map, Filter, Reduce are HOFs.",
+      "Essential for functional programming patterns.",
+      "Allows for code abstraction and reusability."
+    ],
+    code: `const multiplier = (factor) => (num) => num * factor;\nconst double = multiplier(2);\nconsole.log(double(5));`,
+    output: "10",
+    tip: "Explain that HOFs treat functions as 'first-class citizens'."
+  },
+  {
+    id: 21,
+    title: "What are Closures?",
+    level: "basic",
+    category: "1. Basics",
+    def: "A function bundled together with references to its surrounding state (lexical environment).",
+    expl: [
+      "Inner functions have access to variables defined in their outer scope.",
+      "This scope persists even after the outer function finishes execution.",
+      "Used for data privacy (encapsulation) and function factories."
+    ],
+    mermaid: "graph LR\n  Outer[Outer scope] -- Persists --> Inner[Inner Function]\n  Inner -- Accesses --> OuterVar[Outer Variables]",
+    code: `function outer() {\n  let secret = 'shh';\n  return () => console.log(secret);\n}\nconst tell = outer();\ntell();`,
+    output: "\"shh\"",
+    tip: "Closures are the key to modular, private code in JavaScript."
+  },
+  {
+    id: 22,
+    title: "Explain Lexical Scope",
+    level: "basic",
+    category: "1. Basics",
+    def: "The scope of a variable is determined by its position in the source code.",
+    expl: [
+      "Inner functions can access variables in their parent's scope.",
+      "The engine looks 'upwards' through the scope chain.",
+      "It is 'static', meaning it doesn't change during runtime."
+    ],
+    code: `const x = 10;\nfunction a() {\n  console.log(x); // Accesses global x\n}\na();`,
+    output: "10",
+    tip: "Contrast this with 'Dynamic Scope' (which JS does not have) to impress interviewers."
+  },
+  {
+    id: 23,
+    title: "Spread Operator (...)",
+    level: "basic",
+    category: "1. Basics",
+    def: "Allows an iterable (array/object) to be expanded in places where zero or more arguments or elements are expected.",
+    expl: [
+      "Arrays: <code>const combined = [...a, ...b];</code>.",
+      "Objects: <code>const newObj = {...oldObj};</code> (Shallow Copy).",
+      "Function Calls: <code>Math.max(...nums);</code>."
+    ],
+    code: `const arr = [1, 2];\nconst copy = [...arr, 3];\nconsole.log(copy);`,
+    output: "[1, 2, 3]",
+    tip: "Mention it only performs a shallow copy for nested elements."
+  },
+  {
+    id: 24,
+    title: "What is Destructuring?",
+    level: "basic",
+    category: "1. Basics",
+    def: "A syntax to extract values from arrays or properties from objects into distinct variables.",
+    expl: [
+      "Objects: <code>const { name, age } = user;</code>.",
+      "Arrays: <code>const [first, second] = list;</code>.",
+      "Can provide default values and aliases."
+    ],
+    code: `const obj = { x: 1, y: 2 };\nconst { x: xCoord } = obj;\nconsole.log(xCoord);`,
+    output: "1",
+    tip: "Use destructuring in function parameters for cleaner, more readable code."
+  },
+  {
+    id: 25,
+    title: "Default Parameters",
+    level: "basic",
+    category: "1. Basics",
+    def: "Allows formal parameters to be initialized with default values if no value or undefined is passed.",
+    expl: [
+      "Syntax: <code>function (a = 10) {}</code>.",
+      "Default values are evaluated at call time.",
+      "Only triggered by <code>undefined</code>, not <code>null</code> or <code>0</code>."
+    ],
+    code: `function greet(name = 'Guest') { console.log(name); }\ngreet();\ngreet(undefined);\ngreet(null);`,
+    output: "\"Guest\"\n\"Guest\"\nnull",
+    tip: "Remember that null is considered a 'value' and won't trigger the default."
+  },
+  {
+    id: 26,
+    title: "Optional Chaining (?.)",
+    level: "basic",
+    category: "1. Basics",
+    def: "Allows reading the value of a property located deep within a chain of connected objects without checking each reference.",
+    expl: [
+      "Stops and returns <code>undefined</code> if a reference is nullish.",
+      "Prevents 'Cannot read property X of undefined' errors.",
+      "Works for function calls too: <code>obj.method?.()</code>."
+    ],
+    code: `const user = {};\nconsole.log(user?.address?.city);`,
+    output: "undefined",
+    tip: "Essential for handling API responses where some fields might be missing."
+  },
+  {
+    id: 27,
+    title: "Nullish Coalescing (??)",
+    level: "basic",
+    category: "1. Basics",
+    def: "A logical operator that returns its right-hand side operand when its left-hand side is null or undefined.",
+    expl: [
+      "Difference from <code>||</code>: <code>||</code> fails for 0 and ''.",
+      "<code>??</code> only fails for <code>null</code> and <code>undefined</code>.",
+      "Great for setting default config values."
+    ],
+    code: `const count = 0;\nconsole.log(count || 10); // 10\nconsole.log(count ?? 10); // 0`,
+    output: "10\n0",
+    tip: "Use ?? when you want to treat 0 or '' as valid values."
+  },
+  {
+    id: 28,
+    title: "Shallow vs Deep Copy",
+    level: "basic",
+    category: "1. Basics",
+    def: "Ways to copy objects with varying levels of independence for nested properties.",
+    expl: [
+      "Shallow: Only the top-level properties are copied. Nested objects share references.",
+      "Deep: All levels are copied recursively. Changes never affect the original.",
+      "Methods: <code>{...obj}</code> (Shallow), <code>structuredClone(obj)</code> (Deep)."
+    ],
+    code: `const original = { a: { b: 1 } };\nconst shallow = { ...original };\nshallow.a.b = 2;\nconsole.log(original.a.b); // 2`,
+    output: "2",
+    tip: "Avoid JSON.parse(JSON.stringify()) for deep copies as it loses methods and Symbols."
+  },
+  {
+    id: 29,
+    title: "What is JSON?",
+    level: "basic",
+    category: "1. Basics",
+    def: "JavaScript Object Notation — a lightweight format for storing and transporting data.",
+    expl: [
+      "Language-independent data format.",
+      "JSON.stringify(): Object -> String.",
+      "JSON.parse(): String -> Object.",
+      "Requires double quotes for keys and strings."
+    ],
+    code: `const str = '{"id": 1}';\nconst obj = JSON.parse(str);\nconsole.log(obj.id);`,
+    output: "1",
+    tip: "Remember that JSON cannot store functions or circular references."
+  },
+  {
+    id: 30,
+    title: "parseInt vs Number()",
+    level: "basic",
+    category: "1. Basics",
+    def: "Two ways to convert strings to numbers with different parsing logic.",
+    expl: [
+      "parseInt: Parses until it hits a non-digit character. Can specify radix (base).",
+      "Number(): Strict conversion. Returns NaN if the string contains non-numeric characters.",
+      "parseInt('10px') = 10; Number('10px') = NaN."
+    ],
+    code: `console.log(parseInt('10.5'));\nconsole.log(Number('10.5'));`,
+    output: "10\n10.5",
+    tip: "Always specify the radix (usually 10) in parseInt() to avoid legacy octal issues."
+  },
+  // ── 2. ARRAYS & OBJECTS ──
+  {
+    id: 31,
+    title: "How do arrays work internally?",
+    level: "advanced",
+    category: "2. Arrays & Objects",
+    def: "JS Arrays are specialized objects that V8 optimizes for performance using different internal modes.",
+    expl: [
+      "SMI (Small Integer): Packed contiguous memory for integers.",
+      "Double: For floating point numbers.",
+      "Holey: When indices are missing (sparse).",
+      "Dictionary Mode: Slower hash-map based storage for very sparse or non-indexed properties."
+    ],
+    mermaid: "graph LR\n  P[Packed SMI] --> PD[Packed Double]\n  PD --> PH[Packed Holey]\n  PH --> D[Dictionary Elements]",
+    code: `const arr = [1, 2, 3]; // SMI\narr.push(4.5); // Transition to Double\narr[100] = 10; // Transition to Holey`,
+    output: "// V8 internal state transition",
+    tip: "Maintain 'Packed' arrays by avoiding holes and consistent types for max speed."
+  },
+  {
+    id: 32,
+    title: "Mutable vs Immutable Operations",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Difference between changing an existing object versus creating a new one.",
+    expl: [
+      "Mutable: push(), pop(), splice(), sort(), reverse().",
+      "Immutable: concat(), slice(), map(), filter(), spread (...).",
+      "Immutability is preferred in state management (Redux/React)."
+    ],
+    code: `const a = [1];\na.push(2); // Mutated\nconst b = [...a, 3]; // Immutable`,
+    output: "// a: [1, 2], b: [1, 2, 3]",
+    tip: "Always use immutable operations when dealing with React state to ensure proper re-rendering."
+  },
+  {
+    id: 33,
+    title: "Remove duplicates from an array",
+    level: "basic",
+    category: "2. Arrays & Objects",
+    def: "Techniques to filter unique elements.",
+    expl: [
+      "Set: <code>[...new Set(arr)]</code> (Fastest/Cleanest).",
+      "Filter: <code>arr.filter((val, i) => arr.indexOf(val) === i)</code>.",
+      "Reduce: Building an accumulator object/map."
+    ],
+    code: `const arr = [1, 1, 2, 2, 3];\nconst unique = [...new Set(arr)];`,
+    output: "[1, 2, 3]",
+    tip: "Set is O(n) while filter + indexOf is O(n²) Alexandr prefer Set for performance."
+  },
+  {
+    id: 34,
+    title: "How to flatten nested arrays?",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Reducing multi-dimensional arrays into a single dimension.",
+    expl: [
+      "flat(): <code>arr.flat(depth)</code> (Modern).",
+      "flatMap(): Map and then flatten by 1 level.",
+      "Recursion: For very old environments or custom logic."
+    ],
+    code: `const nested = [1, [2, [3]]];\nconsole.log(nested.flat(2));`,
+    output: "[1, 2, 3]",
+    tip: "Use Infinity as depth to flatten an array of any depth: arr.flat(Infinity)."
+  },
+  {
+    id: 35,
+    title: "What is Object Destructuring?",
+    level: "basic",
+    category: "2. Arrays & Objects",
+    def: "Extracting multiple properties from an object into variables in a single statement.",
+    expl: [
+      "Saves lines of code.",
+      "Allows for default values: <code>const { x = 0 } = obj;</code>.",
+      "Supports renaming: <code>const { x: xPos } = obj;</code>."
+    ],
+    code: `const user = { name: 'Ali', role: 'Dev' };\nconst { name, role } = user;`,
+    output: "// name: 'Ali', role: 'Dev'",
+    tip: "Use it to pluck exactly what you need from large API response objects."
+  },
+  {
+    id: 36,
+    title: "Object.freeze() vs Object.seal()",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Methods to restrict modifications to an object.",
+    expl: [
+      "Seal: Cannot add/delete properties, but CAN modify existing ones.",
+      "Freeze: Cannot add, delete, OR modify existing properties. (Read-only).",
+      "Both are shallow—they don't protect nested objects automatically."
+    ],
+    code: `const obj = { a: 1 };\nObject.freeze(obj);\nobj.a = 2; // Fails silently (or error in strict mode)`,
+    output: "// obj.a remains 1",
+    tip: "Freeze is useful for constants and configuration objects that must never change."
+  },
+  {
+    id: 37,
+    title: "What is Object.create()?",
+    level: "advanced",
+    category: "2. Arrays & Objects",
+    def: "Creates a new object using an existing object as the prototype.",
+    expl: [
+      "Allows for explicit prototype linking.",
+      "Can create an object with NO prototype (Object.create(null)).",
+      "Useful for inheritance patterns without classes."
+    ],
+    code: `const proto = { greet: () => 'Hi' };\nconst obj = Object.create(proto);\nconsole.log(obj.greet());`,
+    output: "\"Hi\"",
+    tip: "Use Object.create(null) for 'Dictionary' objects to avoid prototype pollution risks."
+  },
+  {
+    id: 38,
+    title: "in operator vs hasOwnProperty()",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Different ways to check if a property exists on an object.",
+    expl: [
+      "in: Checks the object AND its prototype chain.",
+      "hasOwnProperty: Checks ONLY the object itself (not inherited).",
+      "Modern alternative: Object.hasOwn(obj, prop)."
+    ],
+    code: `const obj = { a: 1 };\nconsole.log('a' in obj);\nconsole.log('toString' in obj);\nconsole.log(obj.hasOwnProperty('toString'));`,
+    output: "true\ntrue\nfalse",
+    tip: "Always use hasOwnProperty or Object.hasOwn when iterating over properties to avoid inherited junk."
+  },
+  {
+    id: 39,
+    title: "How does Object Reference work?",
+    level: "basic",
+    category: "2. Arrays & Objects",
+    def: "Objects are stored in memory and variables hold a pointer (reference) to that memory address.",
+    expl: [
+      "Copying an object variable only copies the reference.",
+      "Modifying through one variable affects all references.",
+      "Comparison (==) checks if both point to the SAME memory address."
+    ],
+    code: `const a = { x: 1 };\nconst b = a;\nb.x = 2;\nconsole.log(a.x); // 2`,
+    output: "2",
+    tip: "This is why you need 'Shallow' or 'Deep' copies to create independent objects."
+  },
+  {
+    id: 40,
+    title: "Pass by Value vs Pass by Reference",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "How data is passed into functions.",
+    expl: [
+      "Primitives (Value): Function gets a copy. Changing it inside doesn't affect outside.",
+      "Objects (Reference): Function gets a reference. Mutating properties affects outside.",
+      "Wait: Reassigning the whole object inside doesn't affect outside reference."
+    ],
+    code: `function mut(o) { o.x = 2; }\nconst obj = { x: 1 };\nmut(obj);\nconsole.log(obj.x);`,
+    output: "2",
+    tip: "Technically, JS is 'Call by Sharing'. Values are copies, but for objects, the value IS the reference."
+  },
+  {
+    id: 41,
+    title: "Maps and Sets",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Modern collection types introduced in ES6.",
+    expl: [
+      "Map: Key-value pairs where keys can be ANY type (objects, functions).",
+      "Set: Collection of UNIQUE values.",
+      "Both preserve insertion order and are iterable."
+    ],
+    code: `const m = new Map(); m.set({}, 'Val');\nconst s = new Set([1, 1, 2]);`,
+    output: "// m.size is 1, s.size is 2",
+    tip: "Use Map for heavy additions/removals and non-string keys."
+  },
+  {
+    id: 42,
+    title: "Object vs Map",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Comparison of the two key-value storage methods.",
+    expl: [
+      "Keys: Object keys are strings/symbols; Map keys can be anything.",
+      "Size: Map has a .size property; Objects require manual counting.",
+      "Performance: Map is optimized for frequent additions/removals.",
+      "Prototypes: Objects have default keys (toString, etc.); Maps are clean."
+    ],
+    code: `const map = new Map();\nmap.set(123, 'Number key');\nconst obj = { 123: 'Stringified key' };`,
+    output: "// map[123] vs obj['123']",
+    tip: "Default to Object for simple data; use Map for complex logic or large datasets."
+  },
+  {
+    id: 43,
+    title: "How to clone an object deeply?",
+    level: "intermediate",
+    category: "2. Arrays & Objects",
+    def: "Creating a completely independent copy of a nested structure.",
+    expl: [
+      "Modern: structuredClone(obj).",
+      "Legacy/Safe: JSON.parse(JSON.stringify(obj)) - limited.",
+      "Library: _.cloneDeep (lodash).",
+      "Manual: Recursive function (complex edge cases)."
+    ],
+    code: `const original = { a: { b: 1 } };\nconst deep = structuredClone(original);\ndeep.a.b = 99;\nconsole.log(original.a.b); // 1`,
+    output: "1",
+    tip: "structuredClone() is built into the platform now. Use it!"
+  },
+
+  // ── 3. FUNCTIONS ──
+  {
+    id: 44,
+    title: "What is Currying?",
+    level: "intermediate",
+    category: "3. Functions",
+    def: "Technique of converting a function that takes multiple arguments into a sequence of functions that each take a single argument.",
+    expl: [
+      "Allows for partial application of arguments.",
+      "Helps in creating reusable utility functions.",
+      "Foundation for functional composition."
+    ],
+    code: `const sum = a => b => a + b;\nconst addFive = sum(5);\nconsole.log(addFive(10));`,
+    output: "15",
+    tip: "Currying makes code more modular and declarative."
+  },
+  {
+    id: 45,
+    title: "What is Function Composition?",
+    level: "advanced",
+    category: "3. Functions",
+    def: "Combining two or more functions to produce a new function.",
+    expl: [
+      "Math: f(g(x)).",
+      "Pipes: Data flows through a series of transformations.",
+      "Reduces intermediate variable noise."
+    ],
+    code: `const compose = (f, g) => (x) => f(g(x));\nconst add1 = x => x + 1;\nconst double = x => x * 2;\nconst addThenDouble = compose(double, add1);\nconsole.log(addThenDouble(5));`,
+    output: "12",
+    tip: "composition is better than nesting functions deeply."
+  },
+  {
+    id: 46,
+    title: "Explain IIFE",
+    level: "intermediate",
+    category: "3. Functions",
+    def: "Immediately Invoked Function Expression.",
+    expl: [
+      "Executed as soon as it is defined.",
+      "Creates a private scope, preventing global namespace pollution.",
+      "Used before ES6 modules to encapsulate code."
+    ],
+    code: `(function() {\n  const secret = 'IIFE';\n  console.log('Running!');\n})();`,
+    output: "\"Running!\"",
+    tip: "Mostly replaced by ESM, but still useful for one-off async initializations."
+  },
+  {
+    id: 47,
+    title: "What is Memoization?",
+    level: "advanced",
+    category: "3. Functions",
+    def: "An optimization technique that caches the results of expensive function calls.",
+    expl: [
+      "Checks if the result for given arguments is already in the cache.",
+      "Returns cached result if hit; computes and caches if miss.",
+      "Requires pure functions (same input = same output)."
+    ],
+    code: `const cache = {};\nfunction slow(n) {\n  if (n in cache) return cache[n];\n  const res = n * 2; // Expensive work\n  cache[n] = res;\n  return res;\n}`,
+    output: "// Second call is O(1)",
+    tip: "Use memoization for heavy UI calculations or recursive algorithms like Fibonacci."
+  },
+  {
+    id: 48,
+    title: "Debounce vs Throttle",
+    level: "advanced",
+    category: "3. Functions",
+    def: "Rate-limiting techniques for performance-heavy callbacks (resize, scroll, search).",
+    expl: [
+      "Debounce: Wait until the user STOPS for X ms before firing.",
+      "Throttle: Fire at most once every X ms, regardless of activity.",
+      "Analogy: Debounce is 'Elevator wait'; Throttle is 'Staggered traffic light'."
+    ],
+    mermaid: "graph LR\n  E[Events] --> D[Debounce]\n  D --> |Last Only| F[Fire]\n  E --> T[Throttle]\n  T --> |Every X ms| F",
+    code: `// High frequency events\nwindow.addEventListener('resize', debounce(cb, 200));\nwindow.addEventListener('scroll', throttle(cb, 100));`,
+    output: "// Significant CPU usage reduction",
+    tip: "Use Debounce for search inputs and Throttle for scroll tracking."
+  },
+  {
+    id: 49,
+    title: "Implement Debounce Manually",
+    level: "advanced",
+    category: "3. Functions",
+    def: "Coding a debounce utility from scratch.",
+    expl: [
+      "Uses a closure to track the timer.",
+      "Clears previous timer on every call.",
+      "Starts a new timer that fires the callback."
+    ],
+    code: `function debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}`,
+    output: "// Closure holds 'timer' state",
+    tip: "Be prepared to write this on a whiteboard; it's a very common live coding task."
+  },
+  {
+    id: 50,
+    title: "Implement Throttle Manually",
+    level: "advanced",
+    category: "3. Functions",
+    def: "Coding a throttle utility from scratch.",
+    expl: [
+      "Uses a flag (boolean) or timestamp to track 'cool down'.",
+      "Only fires if enough time has passed.",
+      "Ignores calls made during the cool down period."
+    ],
+    code: `function throttle(fn, limit) {\n  let wait = false;\n  return (...args) => {\n    if (wait) return;\n    fn(...args);\n    wait = true;\n    setTimeout(() => wait = false, limit);\n  };\n}`,
+    output: "// Closure holds 'wait' state",
+    tip: "Explain that throttle ensures the UI stays responsive without overloading the main thread."
+  },
+  {
+    id: 51,
+    title: "Sync vs Async Functions",
+    level: "basic",
+    category: "3. Functions",
+    def: "The execution flow of code relative to time.",
+    expl: [
+      "Synchronous: Line-by-line. Next line waits for the current one to finish.",
+      "Asynchronous: Task starts now, finishes later. Doesn't block the rest of the code.",
+      "JS uses the Event Loop to make async possible on a single thread."
+    ],
+    code: `console.log(1);\nsetTimeout(() => console.log(2), 0);\nconsole.log(3);`,
+    output: "1\n3\n2",
+    tip: "Async is non-blocking, which is why the browser stays responsive during API calls."
+  },
+  {
+    id: 52,
+    title: "What are Pure Functions?",
+    level: "intermediate",
+    category: "3. Functions",
+    def: "Functions that produce the same output for the same input and have no side effects.",
+    expl: [
+      "Predictable and easy to test.",
+      "Doesn't modify variables outside its scope.",
+      "Fundamental for React components and Redux reducers."
+    ],
+    code: `const add = (a, b) => a + b; // Pure\n\nlet total = 0;\nconst addT = (n) => total += n; // Impure (Side effect)`,
+    output: "// add(2,2) is always 4",
+    tip: "Purity enables 'Referential Transparency', where a function call can be replaced by its result."
+  },
+  {
+    id: 53,
+    title: "What are Side Effects?",
+    level: "intermediate",
+    category: "3. Functions",
+    def: "Any interaction with the outside world from within a function.",
+    expl: [
+      "Modifying global variables.",
+      "Console logging or UI updates.",
+      "API calls (Network I/O).",
+      "Reading/Writing to the DOM."
+    ],
+    code: `function updateUI() {\n  document.body.innerText = 'Changed';\n}`,
+    output: "// State outside function changed",
+    tip: "In React, use useEffect to isolate side effects from the pure rendering cycle."
+  },
+  // ── 4. ASYNCHRONOUS JAVASCRIPT ──
+  {
+    id: 54,
+    title: "What is the Event Loop?",
+    level: "advanced",
+    category: "4. Async",
+    def: "The mechanism that allows JS to perform non-blocking I/O operations despite being single-threaded.",
+    expl: [
+      "Monitors the Call Stack and the Callback Queue.",
+      "If the stack is empty, it pushes the first task from the queue to the stack.",
+      "Consists of Macrotask and Microtask queues."
+    ],
+    mermaid: "graph TD\n  S[Call Stack] --> W[Web APIs]\n  W --> Q[Task Queue]\n  Q --> |Event Loop| S",
+    code: `console.log('Start');\nsetTimeout(() => console.log('Timeout'), 0);\nconsole.log('End');`,
+    output: "\"Start\"\n\"End\"\n\"Timeout\"",
+    tip: "Explain that the Event Loop is part of the browser environment (Libuv in Node), not the JS engine (V8) itself."
+  },
+  {
+    id: 55,
+    title: "Explain Call Stack",
+    level: "basic",
+    category: "4. Async",
+    def: "A LIFO (Last-In, First-Out) structure that keeps track of function calls.",
+    expl: [
+      "When a function is called, it's pushed to the stack.",
+      "When it returns, it's popped off.",
+      "Synchronous code runs entirely on the stack."
+    ],
+    code: `function a() { b(); }\nfunction b() { console.log('in b'); }\na();`,
+    output: "\"in b\"",
+    tip: "A 'Stack Overflow' occurs when you have too many recursive calls without a base case."
+  },
+  {
+    id: 56,
+    title: "What are Web APIs?",
+    level: "intermediate",
+    category: "4. Async",
+    def: "External functionalities provided by the browser environment.",
+    expl: [
+      "Examples: setTimeout, Fetch, DOM Events, Geolocation.",
+      "They run outside the JS engine and notify the engine via the Task Queue.",
+      "This is how 'multi-tasking' happens in a single-threaded language."
+    ],
+    code: `fetch('https://api.com').then(res => console.log(res));`,
+    output: "// Request handled by browser network thread",
+    tip: "Distinguish between JS core features (V8) and Browser environment features (Web APIs)."
+  },
+  {
+    id: 57,
+    title: "Macro task vs Micro task?",
+    level: "advanced",
+    category: "4. Async",
+    def: "Two different queues for asynchronous callbacks with different priorities.",
+    expl: [
+      "Microtasks (Higher Priority): Promises, queueMicrotask, MutationObserver.",
+      "Macrotasks (Lower Priority): setTimeout, setInterval, setImmediate, I/O, UI rendering.",
+      "Event Loop: Executes all Microtasks before the next Macrotask."
+    ],
+    mermaid: "graph TD\n  CS[Call Stack] --> MT[Microtasks Queue]\n  MT --> |Run ALL| R[Render]\n  R --> MA[Macrotask Queue]\n  MA --> |Run ONE| CS",
+    code: `setTimeout(() => console.log('Macro'), 0);\nPromise.resolve().then(() => console.log('Micro'));`,
+    output: "\"Micro\"\n\"Macro\"",
+    tip: "Interview favorite: Mention that microtask starvation can block the UI because rendering only happens after microtask queue is empty."
+  },
+  {
+    id: 58,
+    title: "What is a Promise?",
+    level: "intermediate",
+    category: "4. Async",
+    def: "An object representing the eventual completion (or failure) of an asynchronous operation.",
+    expl: [
+      "Solves 'Callback Hell' by allowing chaining.",
+      "Has three states: Pending, Fulfilled, Rejected.",
+      "Immutable: Once it settles, its value/reason cannot change."
+    ],
+    code: `const p = new Promise((resolve) => resolve('Success'));\np.then(val => console.log(val));`,
+    output: "\"Success\"",
+    tip: "Promises are the backbone of modern async JS."
+  },
+  {
+    id: 59,
+    title: "Promise States",
+    level: "basic",
+    category: "4. Async",
+    def: "The lifecycle of a Promise object.",
+    expl: [
+      "Pending: Initial state, neither fulfilled nor rejected.",
+      "Fulfilled: Operation completed successfully.",
+      "Rejected: Operation failed.",
+      "Settled: Either fulfilled or rejected."
+    ],
+    mermaid: "stateDiagram-v2\n  [*] --> Pending\n  Pending --> Fulfilled: resolve()\n  Pending --> Rejected: reject()",
+    code: `const p = new Promise((res, rej) => {});\nconsole.log(p); // Promise { <pending> }`,
+    output: "Promise { <pending> }",
+    tip: "A Promise can only settle ONCE."
+  },
+  {
+    id: 60,
+    title: "Promise vs Callback",
+    level: "intermediate",
+    category: "4. Async",
+    def: "Comparing two ways of handling async logic.",
+    expl: [
+      "Readability: Promises support flat .then() chains; callbacks nest.",
+      "Error Handling: Promises have .catch(); callbacks require manual checking (err-first).",
+      "Composition: Promises allow Promise.all, etc.; callbacks are harder to sync."
+    ],
+    code: `// Callback\ngetData((err, data) => { if(!err) console.log(data); });\n// Promise\ngetData().then(data => console.log(data)).catch(err => {});`,
+    output: "// Cleaner flow with Promises",
+    tip: "Promises provide a standardized way to handle asynchronous values."
+  },
+  {
+    id: 61,
+    title: "What is async/await?",
+    level: "intermediate",
+    category: "4. Async",
+    def: "Syntactic sugar built on top of Promises for writing asynchronous code that looks synchronous.",
+    expl: [
+      "async: Makes a function return a Promise.",
+      "await: Pauses function execution until the Promise settles.",
+      "Improves readability and error handling (try/catch)."
+    ],
+    code: `async function fetchUser() {\n  const res = await fetch('/user');\n  const user = await res.json();\n  return user;\n}`,
+    output: "// Returns a Promise",
+    tip: "Await only works inside an async function (or top-level in modern modules)."
+  },
+  {
+    id: 62,
+    title: "How does async/await work internally?",
+    level: "advanced",
+    category: "4. Async",
+    def: "Internal mechanics using Generators and Promises.",
+    expl: [
+      "The engine uses 'Generators' to pause the function.",
+      "It wraps the awaited value in a Promise.",
+      "When the Promise resolves, it 'yields' the value back to the generator to resume."
+    ],
+    mermaid: "graph LR\n  A[Async Func] --> G[Generator]\n  G --> |Pause| P[Promise]\n  P --> |Resolve| G\n  G --> |Resume| A",
+    code: `// Approximate transpiled code\nspawn(function* () {\n  const user = yield fetch('/user');\n});`,
+    output: "// Transpilers like Babel show this logic",
+    tip: "Understanding that it's just Generators + Promises shows high seniority."
+  },
+  {
+    id: 63,
+    title: "Promise.all vs allSettled vs race vs any",
+    level: "advanced",
+    category: "4. Async",
+    def: "Utility methods for handling multiple concurrent promises.",
+    expl: [
+      "all: Waits for ALL to succeed. Fails if ONE fails.",
+      "allSettled: Waits for all to FINISH, regardless of success/failure.",
+      "race: Settles as soon as the FIRST one settles (success or fail).",
+      "any: Settles as soon as the FIRST one succeeds. Fails if ALL fail."
+    ],
+    code: `Promise.all([p1, p2]).then(results => ...);`,
+    output: "// Results is an array of values",
+    tip: "Use allSettled when you want to know the outcome of all tasks even if some fail."
+  },
+  {
+    id: 64,
+    title: "What is Callback Hell?",
+    level: "basic",
+    category: "4. Async",
+    def: "The 'Pyramid of Doom' created by deeply nested callbacks.",
+    expl: [
+      "Makes code hard to read, maintain, and debug.",
+      "Error handling becomes messy and repetitive.",
+      "Inversion of control (you trust external code to call your callback)."
+    ],
+    code: `a(() => {\n  b(() => {\n    c(() => {\n      console.log('Hell!');\n    });\n  });\n});`,
+    output: "// Nested indentation looks like a triangle",
+    tip: "This was the #1 reason Promises were introduced."
+  },
+  {
+    id: 65,
+    title: "How to avoid Callback Hell?",
+    level: "basic",
+    category: "4. Async",
+    def: "Strategies for flattening async code.",
+    expl: [
+      "Use Promises and .then() chaining.",
+      "Use Async/Await (Best).",
+      "Modularize: Break callbacks into named functions.",
+      "Use a control flow library (async.js - legacy)."
+    ],
+    code: `// Before\na(() => b(() => {}));\n// After\nawait a(); await b();`,
+    output: "// Clean, linear flow",
+    tip: "Promisification (turning a callback API into a promise API) is the standard fix."
+  },
+  {
+    id: 66,
+    title: "What are Generators?",
+    level: "advanced",
+    category: "4. Async",
+    def: "Functions that can be paused and resumed, allowing for custom iteration logic.",
+    expl: [
+      "Syntax: <code>function* name() { yield val; }</code>.",
+      "Returns an Iterator object with a <code>.next()</code> method.",
+      "Can produce values lazily (one at a time)."
+    ],
+    code: `function* count() {\n  yield 1; yield 2;\n}\nconst c = count();\nconsole.log(c.next().value);`,
+    output: "1",
+    tip: "Generators are the secret sauce behind redux-saga and async/await."
+  },
+  {
+    id: 67,
+    title: "What are Async Generators?",
+    level: "extreme",
+    category: "4. Async",
+    def: "Combining Generators with Promises for asynchronous iteration.",
+    expl: [
+      "Syntax: <code>async function* name() { yield await fetch(); }</code>.",
+      "Used with the <code>for await...of</code> loop.",
+      "Perfect for streaming data or paginated API results."
+    ],
+    code: `async function* stream() {\n  yield await p1;\n  yield await p2;\n}\nfor await (const val of stream()) { ... }`,
+    output: "// Processes each item as it arrives",
+    tip: "Extremely useful for handling large data streams without loading everything into memory."
+  },
+  {
+    id: 68,
+    title: "Fetch API",
+    level: "basic",
+    category: "4. Async",
+    def: "The modern browser interface for making HTTP requests.",
+    expl: [
+      "Promise-based.",
+      "Requires a two-step process: fetch() -> response.json().",
+      "Doesn't reject on 404/500 (only on network failure)."
+    ],
+    code: `fetch(url)\n  .then(r => r.json())\n  .then(d => console.log(d));`,
+    output: "// Async data fetched",
+    tip: "Always check 'response.ok' to handle HTTP error codes properly."
+  },
+  {
+    id: 69,
+    title: "Fetch vs Axios",
+    level: "intermediate",
+    category: "4. Async",
+    def: "Comparing the native API with a popular library.",
+    expl: [
+      "Axios: Auto JSON parsing, built-in XSRF protection, interceptors.",
+      "Fetch: Native (no bundle size), but more boilerplate.",
+      "Axios rejects on 4xx/5xx errors automatically."
+    ],
+    code: `// Axios\nconst res = await axios.get(url);\n// Fetch\nconst res = await fetch(url);\nconst data = await res.json();`,
+    output: "// Axios is more feature-rich out of the box",
+    tip: "Choose Fetch for simple projects; Axios for complex apps needing interceptors/global config."
+  },
+  {
+    id: 70,
+    title: "AbortController",
+    level: "advanced",
+    category: "4. Async",
+    def: "A way to cancel an ongoing asynchronous operation (like fetch).",
+    expl: [
+      "Create a controller: <code>new AbortController()</code>.",
+      "Pass <code>controller.signal</code> to the fetch request.",
+      "Call <code>controller.abort()</code> to cancel."
+    ],
+    code: `const c = new AbortController();\nfetch(url, { signal: c.signal });\nc.abort(); // Request cancelled`,
+    output: "Uncaught DOMException: The user aborted a request.",
+    tip: "Crucial for 'Cleanup' in React useEffect to prevent memory leaks and race conditions."
+  },
+  // ── 5. DOM & BROWSER ──
+  {
+    id: 71,
+    title: "What is the DOM?",
+    level: "basic",
+    category: "5. DOM & Browser",
+    def: "Document Object Model — a programming interface for HTML documents.",
+    expl: [
+      "Represents the page as a tree of objects.",
+      "Allows JS to change content, style, and structure.",
+      "Not part of the JS language itself, but a Web API."
+    ],
+    mermaid: "graph TD\n  D[Document] --> H[HTML]\n  H --> B[Body]\n  B --> D1[Div]\n  B --> S[Script]",
+    code: `document.getElementById('id').innerText = 'New Text';`,
+    output: "// Browser UI updates",
+    tip: "Direct DOM manipulation is slow; this is why frameworks like React use a Virtual DOM."
+  },
+  {
+    id: 72,
+    title: "DOM vs Virtual DOM",
+    level: "intermediate",
+    category: "5. DOM & Browser",
+    def: "Comparing real browser elements with their abstract representations.",
+    expl: [
+      "DOM: Updating it triggers expensive reflow/repaint.",
+      "Virtual DOM: A lightweight copy of the DOM in memory.",
+      "Diffing: React compares VDOMs and only updates the CHANGED parts of the real DOM."
+    ],
+    code: `// DOM (Slow)\nli.textContent = 'New';\n// VDOM (Fast)\n{ type: 'li', props: { text: 'New' } }`,
+    output: "// Real DOM only sees one surgical update",
+    tip: "Virtual DOM is an optimization pattern, not a browser feature."
+  },
+  {
+    id: 73,
+    title: "Event Bubbling vs Capturing",
+    level: "intermediate",
+    category: "5. DOM & Browser",
+    def: "The two phases of event propagation in the DOM.",
+    expl: [
+      "Bubbling (Default): Event goes from target up to the root (Inside -> Out).",
+      "Capturing: Event goes from root down to the target (Outside -> In).",
+      "addEventListener(type, cb, useCapture) - third param controls the phase."
+    ],
+    mermaid: "graph TD\n  Root --> Parent\n  Parent --> Child\n  Child -- Bubbling --> Parent\n  Parent -- Bubbling --> Root",
+    code: `el.addEventListener('click', cb, true); // Capturing\nel.addEventListener('click', cb); // Bubbling`,
+    output: "// Event flow direction changes",
+    tip: "Most developers only ever use Bubbling."
+  },
+  {
+    id: 74,
+    title: "Event Delegation",
+    level: "intermediate",
+    category: "5. DOM & Browser",
+    def: "Attaching a single event listener to a parent to manage many children.",
+    expl: [
+      "Uses the 'Bubbling' phase.",
+      "Checks <code>event.target</code> to determine which child triggered the event.",
+      "Memory efficient and works for dynamically added children."
+    ],
+    code: `ul.onclick = (e) => {\n  if (e.target.tagName === 'LI') console.log('Clicked item!');\n};`,
+    output: "\"Clicked item!\"",
+    tip: "Perfect for large lists or tables where adding 1000 listeners would be a performance disaster."
+  },
+  {
+    id: 75,
+    title: "preventDefault vs stopPropagation",
+    level: "basic",
+    category: "5. DOM & Browser",
+    def: "Methods to control default browser behavior and event flow.",
+    expl: [
+      "preventDefault: Stops the BROWSER'S default action (e.g., following a link).",
+      "stopPropagation: Stops the event from travelign up/down the DOM tree.",
+      "They are independent—you can use both at once."
+    ],
+    code: `link.onclick = (e) => {\n  e.preventDefault(); // Don't navigate\n  e.stopPropagation(); // Don't alert parent\n};`,
+    output: "// Browser stays on page, event ends here",
+    tip: "Use stopPropagation sparingly as it can break global click-tracking analytics."
+  },
+  // ── 6. OOP IN JAVASCRIPT ──
+  {
+    id: 76,
+    title: "Prototypal Inheritance",
+    level: "advanced",
+    category: "6. OOP",
+    def: "The way JS objects link to other objects to share properties and methods.",
+    expl: [
+      "Every object has a private property pointing to another object: its 'Prototype'.",
+      "Methods are not copied; they are accessed via the Prototype Chain.",
+      "Object.prototype is the top of the chain (it has no prototype)."
+    ],
+    mermaid: "graph TD\n  Arr[Array Instance] --> AP[Array.prototype]\n  AP --> OP[Object.prototype]\n  OP --> NULL[null]",
+    code: `const arr = [];\nconsole.log(arr.hasOwnProperty('push')); // false (it's on prototype)`,
+    output: "false",
+    tip: "Explain that this is memory-efficient because methods exist in only one place."
+  },
+  {
+    id: 77,
+    title: "Class vs Prototype",
+    level: "intermediate",
+    category: "6. OOP",
+    def: "Comparing ES6 Classes with traditional prototype links.",
+    expl: [
+      "ES6 Classes are 'Syntactic Sugar' over prototypal inheritance.",
+      "Classes provide a clearer, more familiar syntax (like Java/C#).",
+      "Internally, both use the same prototype mechanism."
+    ],
+    code: `class User { greet() {} }\n// is same as\nfunction User() {}\nUser.prototype.greet = function() {}`,
+    output: "// Both result in the same internal structure",
+    tip: "Use classes for clean code, but understand prototypes to fix internal issues."
+  },
+  {
+    id: 78,
+    title: "Inheritance, Polymorphism, Encapsulation",
+    level: "advanced",
+    category: "6. OOP",
+    def: "The pillars of Object Oriented Programming in JS.",
+    expl: [
+      "Inheritance: Using <code>extends</code> to share logic.",
+      "Polymorphism: Overriding parent methods in a child class.",
+      "Encapsulation: Keeping data private (using #private fields or closures).",
+      "Abstraction: Hiding complex internal logic behind simple methods."
+    ],
+    code: `class Animal { speak() { return '...'; } }\nclass Dog extends Animal { speak() { return 'Bark'; } }`,
+    output: "// Polymorphism in action",
+    tip: "Modern JS supports #privateFields for true native encapsulation."
+  },
+  {
+    id: 79,
+    title: "How does the 'new' keyword work?",
+    level: "advanced",
+    category: "6. OOP",
+    def: "The four steps that occur when you instantiate an object.",
+    expl: [
+      "1. Creates a new empty object {}.",
+      "2. Links this object's prototype to the constructor's prototype.",
+      "3. Calls the constructor with <code>this</code> pointing to the new object.",
+      "4. Returns the object (unless the constructor returns another object)."
+    ],
+    code: `function Person(n) { this.name = n; }\nconst p = new Person('Ali');`,
+    output: "// { name: 'Ali' } created and linked",
+    tip: "If you forget 'new', 'this' will point to the global object (Window)—a major bug source."
+  },
+  // ── 7. ADVANCED JAVASCRIPT ──
+  {
+    id: 80,
+    title: "Execution Context",
+    level: "extreme",
+    category: "7. Advanced",
+    def: "The environment in which JS code is evaluated and executed.",
+    expl: [
+      "Global Execution Context: Created when the script starts.",
+      "Function Execution Context: Created for every function call.",
+      "Phases: Memory Creation (hoisting) and Code Execution.",
+      "Stored in the Call Stack."
+    ],
+    mermaid: "graph TD\n  GEC[Global Context] --> FEC1[Function A Context]\n  FEC1 --> FEC2[Function B Context]",
+    code: `var a = 1; function b() { var c = 2; }`,
+    output: "// Engine creates specialized scopes in memory",
+    tip: "This is the most fundamental concept for understanding how JS works under the hood."
+  },
+  {
+    id: 81,
+    title: "Temporal Dead Zone (TDZ)",
+    level: "advanced",
+    category: "7. Advanced",
+    def: "The period between variable hoisting and its actual initialization.",
+    expl: [
+      "Applies to <code>let</code> and <code>const</code>.",
+      "Accessing a variable in its TDZ results in a ReferenceError.",
+      "Exists to encourage better coding patterns (declare before use)."
+    ],
+    code: `console.log(a); // OK (undefined)\nconsole.log(b); // ReferenceError\nvar a = 1; let b = 2;`,
+    output: "undefined\nUncaught ReferenceError: b is not defined",
+    tip: "TDZ ensures that variables aren't used before they are ready."
+  },
+  {
+    id: 82,
+    title: "WeakMap and WeakSet",
+    level: "advanced",
+    category: "7. Advanced",
+    def: "Special collections that don't prevent their keys/elements from being garbage collected.",
+    expl: [
+      "WeakMap keys must be Objects.",
+      "They are not enumerable (cannot loop over them).",
+      "Perfect for storing private data or metadata without causing memory leaks."
+    ],
+    code: `let obj = { x: 1 };\nconst wm = new WeakMap();\nwm.set(obj, 'meta');\nobj = null; // obj is now eligible for GC`,
+    output: "// 'meta' entry will be automatically removed from wm",
+    tip: "Use WeakMap when you want the data to 'disappear' as soon as the object it's associated with is gone."
+  },
+  {
+    id: 83,
+    title: "Symbols",
+    level: "intermediate",
+    category: "7. Advanced",
+    def: "A unique and immutable primitive data type often used for private object keys.",
+    expl: [
+      "Every Symbol() call returns a unique value.",
+      "They are hidden from standard for...in loops.",
+      "Used for 'Well-known Symbols' like Symbol.iterator."
+    ],
+    code: `const id = Symbol('id');\nconst obj = { [id]: 123 };\nconsole.log(Object.keys(obj));`,
+    output: "[]",
+    tip: "Symbols are the standard way to add 'private' metadata to objects without risking key collisions."
+  },
+  {
+    id: 84,
+    title: "CommonJS vs ES Modules",
+    level: "intermediate",
+    category: "7. Advanced",
+    def: "The two main module systems in the JS ecosystem.",
+    expl: [
+      "CommonJS (Node.js): <code>require()</code>, <code>module.exports</code>. Synchronous, runtime loading.",
+      "ESM (Modern): <code>import</code>, <code>export</code>. Asynchronous, static analysis (allows tree-shaking).",
+      "Browsers natively support ESM."
+    ],
+    code: `// CJS\nconst fs = require('fs');\n// ESM\nimport fs from 'fs';`,
+    output: "// ESM is the future of JS modules",
+    tip: "Static imports in ESM allow bundlers to remove unused code (Tree Shaking)."
+  },
+  {
+    id: 85,
+    title: "V8 Garbage Collection",
+    level: "extreme",
+    category: "7. Advanced",
+    def: "How the engine reclaims memory from unused objects.",
+    expl: [
+      "Generational: Divided into Young (New) and Old space.",
+      "Scavenger: Fast GC for short-lived objects in Young space.",
+      "Mark-Sweep-Compact: Throrough GC for long-lived objects in Old space.",
+      "Uses the 'Reachability' algorithm (Root -> reachable objects)."
+    ],
+    mermaid: "graph LR\n  Root --> A[Object A]\n  A --> B[Object B]\n  X[Unreachable Object] --> GC[Deleted]",
+    code: `let obj = { x: 1 };\nobj = null; // unreachable`,
+    output: "// Memory will be reclaimed in the next GC cycle",
+    tip: "Avoid global variables and closure-based memory leaks to help the GC."
+  },
+  {
+    id: 86,
+    title: "Hidden Classes in V8",
+    level: "extreme",
+    category: "7. Advanced",
+    def: "An internal optimization where V8 creates 'Classes' for objects to speed up property access.",
+    expl: [
+      "JS objects are dynamic, but V8 makes them behave like static classes.",
+      "Adding properties in different orders creates DIFFERENT hidden classes.",
+      "Objects with the same hidden class share optimized code."
+    ],
+    code: `const o1 = { x: 1, y: 2 };\nconst o2 = { y: 2, x: 1 }; // DIFFERENT Hidden Classes!`,
+    output: "// V8 cannot optimize o2 as well as o1",
+    tip: "Always initialize object properties in the same order and same quantity."
+  },
+  // ── 8. EXTREME / SENIOR-LEVEL ──
+  {
+    id: 87,
+    title: "Implement Bind polyfill",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "Writing the internal logic of Function.prototype.bind.",
+    expl: [
+      "Needs to return a new function.",
+      "Must handle partial application (currying).",
+      "Needs to correctly bind the 'this' context using .apply()."
+    ],
+    code: `Function.prototype.myBind = function(ctx, ...args) {\n  const fn = this;\n  return function(...newArgs) {\n    return fn.apply(ctx, [...args, ...newArgs]);\n  };\n};`,
+    output: "// Functional equivalent of native .bind()",
+    tip: "This is a classic 'Staff Engineer' interview question."
+  },
+  {
+    id: 88,
+    title: "Implement your own Promise",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "Building the core logic of the Promise A+ spec.",
+    expl: [
+      "Needs a state (pending/fulfilled/rejected).",
+      "Needs queues for .then() and .catch() callbacks.",
+      "Must handle asynchronous resolution.",
+      "Needs a way to chain results."
+    ],
+    code: `class MyPromise {\n  constructor(exec) {\n    this.state = 'pending';\n    this.val = null;\n    this.cbs = [];\n    const res = (v) => {\n      this.state = 'fulfilled';\n      this.val = v;\n      this.cbs.forEach(cb => cb(v));\n    };\n    exec(res);\n  }\n  then(cb) { this.cbs.push(cb); }\n}`,
+    output: "// Basic implementation showing the observer pattern",
+    tip: "Mention that the real spec is much more complex (handles chaining and nested promises)."
+  },
+  {
+    id: 89,
+    title: "Microtask Starvation",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "A performance trap where the microtask queue never empties, freezing the UI.",
+    expl: [
+      "If a microtask continuously adds more microtasks, the Event Loop stays in the 'Flush Microtasks' phase.",
+      "Rendering and Macrotasks (user events) never get a chance to run.",
+      "The browser tab completely freezes."
+    ],
+    code: `function freeze() {\n  Promise.resolve().then(freeze);\n}\nfreeze();`,
+    output: "// Browser Tab Crashes",
+    tip: "Always break long-running tasks into macrotasks (using setTimeout) to keep the UI responsive."
+  },
+  {
+    id: 90,
+    title: "How React Fiber works internally?",
+    level: "extreme",
+    category: "8. Extreme",
+    def: "React's reimplementation of the reconciliation algorithm to support incremental rendering.",
+    expl: [
+      "Breaks rendering work into small chunks (Fibers).",
+      "Uses a 'Work Loop' that can pause and resume work based on frame time.",
+      "Prioritizes tasks: User input (high) vs data fetching (low).",
+      "Enabled features like Suspense and Concurrent Mode."
+    ],
+    mermaid: "graph TD\n  W[Work Loop] -->|Chunk 1| F1[Fiber 1]\n  F1 -->|Yield?| B[Browser]\n  B -->|Resume| W\n  W -->|Chunk 2| F2[Fiber 2]",
+    code: `// Fiber is a JS object representing a unit of work\nconst fiber = { tag, key, type, stateNode, ... };`,
+    output: "// Reconciliation is now interruptible",
+    tip: "Fiber is basically a 'Virtual Stack' for React components."
+  }
+];
+
+function renderQList(data) {
+  const list = document.getElementById('qList');
+  const cats = [...new Set(data.map(q => q.category))].sort();
+  list.innerHTML = cats.map(cat => {
+    const catQs = data.filter(q => q.category === cat);
+    return `
+      <div class="cat-group">
+        <div class="cat-title">${cat}</div>
+        ${catQs.map(q => `
+          <div class="q-item" onclick="showAns(${q.id})" id="q-${q.id}">
+            <div class="q-title">${q.title}</div>
+            <div class="q-meta">
+              <div class="level-dot" style="background: var(--${q.level})"></div>
+              <span style="font-size: .6rem; color: var(--text-dim); text-transform: uppercase;">${q.level}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function showAns(id) {
+  const q = questions.find(x => x.id === id);
+  const welcome = document.getElementById('welcomeScreen');
+  const card = document.getElementById('ansCard');
+  welcome.style.display = 'none';
+  card.style.display = 'block';
+  card.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.className = 'ans-header';
+  header.innerHTML = `
+    <div class="ans-level level-${q.level}">${q.level}</div>
+    <h2 class="ans-title">${q.title}</h2>
+    <p class="ans-def">${q.def}</p>
+  `;
+  card.appendChild(header);
+
+  if(q.mermaid) {
+    const vTitle = document.createElement('div');
+    vTitle.className = 'sec-title';
+    vTitle.innerText = 'Logic Visualization';
+    card.appendChild(vTitle);
+    const mWrap = document.createElement('div');
+    mWrap.className = 'visual-wrap';
+    mWrap.innerHTML = `<div class="mermaid">${q.mermaid}</div>`;
+    card.appendChild(mWrap);
+  }
+
+  const eTitle = document.createElement('div');
+  eTitle.className = 'sec-title';
+  eTitle.innerText = 'Deep Dive Explanation';
+  card.appendChild(eTitle);
+  const eList = document.createElement('ul');
+  eList.className = 'expl-list';
+  eList.innerHTML = q.expl.map(e => `<li class="expl-item">${e}</li>`).join('');
+  card.appendChild(eList);
+
+  const cTitle = document.createElement('div');
+  cTitle.className = 'sec-title';
+  cTitle.innerText = 'Code Sample';
+  card.appendChild(cTitle);
+  const cWrap = document.createElement('div');
+  cWrap.className = 'code-wrap';
+  cWrap.innerHTML = `
+    <div class="code-header"><span class="code-lang">javascript</span></div>
+    <pre class="code-body"><code>${q.code}</code></pre>
+  `;
+  card.appendChild(cWrap);
+
+  const oWrap = document.createElement('div');
+  oWrap.className = 'output-wrap';
+  oWrap.innerHTML = `
+    <div class="output-title">Console Output</div>
+    <div class="output-text">${q.output}</div>
+  `;
+  card.appendChild(oWrap);
+
+  const tBox = document.createElement('div');
+  tBox.className = 'tip-box';
+  tBox.innerHTML = `<div class="tip-text"><strong>Senior Interview Context:</strong> ${q.tip}</div>`;
+  card.appendChild(tBox);
+
+  if(q.mermaid) {
+    mermaid.init(undefined, card.querySelectorAll('.mermaid'));
+  }
+
+  document.querySelectorAll('.q-item').forEach(el => el.classList.remove('active'));
+  const target = document.getElementById('q-'+id);
+  if(target) target.classList.add('active');
+
+  if(window.innerWidth <= 900) toggleSidebar();
+}
+
+function filterQ() {
+  const term = document.querySelector('.search').value.toLowerCase();
+  const filtered = questions.filter(q => q.title.toLowerCase().includes(term) || q.category.toLowerCase().includes(term));
+  renderQList(filtered);
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+renderQList(questions);
+</script>
+</body>
+</html>
