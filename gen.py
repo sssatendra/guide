@@ -1,0 +1,1094 @@
+import json
+
+questions = [
+    {
+        "id": 1,
+        "title": "Design Parking Lot",
+        "category": "LLD",
+        "companies": ["Amazon", "Uber", "Microsoft"],
+        "tldr": "Object-oriented design of a multi-level parking lot with various vehicle types, parking spots, and ticketing.",
+        "reqs": ["Support multiple levels and entry/exit points", "Handle different vehicle sizes (Motorcycle, Car, Truck)", "Issue parking tickets and process payments", "Display available spots per level"],
+        "nfreqs": ["Concurrency: Handle multiple vehicles entering/exiting simultaneously", "Low latency for spot assignment", "Extensibility for new vehicle types"],
+        "components": [
+            ["ParkingLot", "Singleton class managing the entire lot, levels, and entry/exit panels."],
+            ["Level", "Manages a specific floor, tracking available spots for each vehicle type."],
+            ["ParkingSpot", "Abstract base class for different spot sizes (Compact, Large, Motorbike)."],
+            ["Vehicle", "Abstract base class for Car, Truck, Motorcycle."],
+            ["Ticket / Payment", "Manages entry time, exit time, and calculates fare based on duration."]
+        ],
+        "decisions": [
+            ["Concurrency Control", "Use thread-safe data structures or database transactions to prevent double-booking a spot."],
+            ["Spot Allocation Algorithm", "Find the first available spot vs closest to entrance. Min-heap can be used for nearest spot."]
+        ]
+    },
+    {
+        "id": 2,
+        "title": "Movie Ticket Booking System",
+        "category": "LLD",
+        "companies": ["BookMyShow", "Amazon", "Netflix"],
+        "tldr": "A booking system for cinemas that handles concurrent seat reservations, multiple screens, and shows.",
+        "reqs": ["Browse cities, cinemas, and movies", "Select seats for a specific showtime", "Prevent double booking (seat locking)", "Payment integration and ticket generation"],
+        "nfreqs": ["High concurrency during blockbuster releases", "ACID properties for booking transactions", "5-minute lock on seats during checkout"],
+        "components": [
+            ["Cinema / Screen / Show", "Hierarchical models representing theaters, halls, and specific movie timings."],
+            ["Seat / ShowSeat", "Physical seat layout vs the state of a seat for a specific show."],
+            ["Booking / Payment", "Transaction entities tracking user reservations and payment statuses."],
+            ["SearchCatalog", "Optimized index for finding movies by city, language, or genre."]
+        ],
+        "decisions": [
+            ["Seat Locking Mechanism", "Use Redis distributed locks or row-level locking (SELECT FOR UPDATE) in SQL for 5-minute holds."],
+            ["Search Optimization", "Use Elasticsearch for fast text and geographical search queries."]
+        ]
+    },
+    {
+        "id": 3,
+        "title": "Splitwise",
+        "category": "LLD",
+        "companies": ["Splitwise", "Uber", "Atlassian"],
+        "tldr": "An expense sharing application that tracks balances between friends and simplifies group debts.",
+        "reqs": ["Add users and create groups", "Add expenses (Equal, Exact, Percent, Shares)", "Track balances between users", "Simplify debts algorithmically"],
+        "nfreqs": ["High precision for currency math", "Low latency balance calculation", "Audit trail for expense modifications"],
+        "components": [
+            ["User / Group", "Entities managing individuals and their collections."],
+            ["Expense", "Base class with subclasses like EqualExpense, ExactExpense, PercentExpense."],
+            ["Split", "Represents how much a specific user owes in a single expense."],
+            ["BalanceManager", "Service that computes real-time net balances between any two users."],
+            ["DebtSimplifier", "Graph algorithm service to minimize the number of transactions."]
+        ],
+        "decisions": [
+            ["Debt Simplification", "Model debts as a directed graph. Use max-flow or greedy algorithm to settle balances."],
+            ["Concurrency", "Handle concurrent expense additions using optimistic locking on user balances."]
+        ]
+    },
+    {
+        "id": 4,
+        "title": "Design an Elevator System",
+        "category": "LLD",
+        "companies": ["Microsoft", "Amazon", "Apple"],
+        "tldr": "A controller for a group of elevators managing passenger requests optimally across multiple floors.",
+        "reqs": ["Internal buttons (floors) and external buttons (up/down)", "Handle multiple elevators in a building", "Optimal routing algorithm to minimize wait time", "Emergency and maintenance states"],
+        "nfreqs": ["Real-time state updates", "Fairness vs Throughput trade-off", "Fault tolerance if an elevator fails"],
+        "components": [
+            ["ElevatorCar", "Tracks current floor, direction (UP, DOWN, IDLE), and door state."],
+            ["ElevatorController", "Assigns external requests to the most appropriate elevator car."],
+            ["Button / Display", "Internal/External buttons and floor displays."],
+            ["Request", "Encapsulates the source floor, destination, and direction."]
+        ],
+        "decisions": [
+            ["Routing Algorithm", "SCAN algorithm (Elevator Algorithm) or LOOK. Car continues in one direction until all requests are served, then reverses."],
+            ["Dispatcher Logic", "Assign request to the nearest car moving in the same direction, or an idle car."]
+        ]
+    },
+    {
+        "id": 5,
+        "title": "Design Logging Framework (log4j)",
+        "category": "LLD",
+        "companies": ["LinkedIn", "Atlassian", "Oracle"],
+        "tldr": "A customizable, high-performance logging library for applications with levels, appenders, and layouts.",
+        "reqs": ["Support logging levels (INFO, DEBUG, ERROR)", "Multiple outputs (Console, File, Network)", "Customizable log formatting", "Thread-safe and low-latency"],
+        "nfreqs": ["Minimal overhead to application performance", "Asynchronous logging support", "Configuration hot-reloading"],
+        "components": [
+            ["Logger", "Main interface for the application to log messages."],
+            ["Appender", "Strategy pattern for destinations (ConsoleAppender, FileAppender, AsyncAppender)."],
+            ["Layout / Formatter", "Defines the string format of the log (JSON, PlainText)."],
+            ["LogManager", "Singleton factory managing logger instances and configurations."]
+        ],
+        "decisions": [
+            ["Asynchronous Logging", "Use a bounded blocking queue or Disruptor pattern to offload I/O from the main application thread."],
+            ["Thread Safety", "Ensure thread safety without heavy locking. ThreadLocal can be used for context (MDC)."]
+        ]
+    },
+    {
+        "id": 6,
+        "title": "Paytm/PhonePe Wallet System",
+        "category": "LLD",
+        "companies": ["Paytm", "PhonePe", "Stripe"],
+        "tldr": "A digital wallet system enabling users to store money, transfer to others, and view transaction history.",
+        "reqs": ["Add money via bank/card", "Wallet-to-wallet transfers", "Check balance and view passbook", "Handle concurrent transactions"],
+        "nfreqs": ["ACID compliance for all money transfers", "Idempotency for retries", "High throughput for transactions"],
+        "components": [
+            ["Wallet", "Stores the user's current balance and currency."],
+            ["Transaction", "Tracks sender, receiver, amount, timestamp, and status (PENDING, SUCCESS, FAILED)."],
+            ["Ledger", "Append-only log of all financial movements for audit."],
+            ["PaymentGateway", "Interface to external banking systems."]
+        ],
+        "decisions": [
+            ["ACID Transactions", "Use relational database with row-level locking (`SELECT ... FOR UPDATE`) on wallet rows during transfer."],
+            ["Idempotency", "Use a unique transaction ID for every request to prevent double-charging on network retries."]
+        ]
+    },
+    {
+        "id": 7,
+        "title": "Cache System (LRU/LFU)",
+        "category": "LLD",
+        "companies": ["Google", "Amazon", "Microsoft"],
+        "tldr": "An in-memory key-value cache with a fixed capacity and an eviction policy.",
+        "reqs": ["Put and Get operations in O(1) time", "Evict least recently or least frequently used item when full", "Support concurrency"],
+        "nfreqs": ["High hit rate", "Thread-safe operations without major bottlenecks", "Extensible to new eviction policies"],
+        "components": [
+            ["Cache", "Main interface for clients."],
+            ["EvictionPolicy", "Strategy interface (LRUPolicy, LFUPolicy)."],
+            ["Storage", "HashMap for O(1) key-value lookups."],
+            ["DoublyLinkedList", "Used by LRU to maintain usage order in O(1)."]
+        ],
+        "decisions": [
+            ["Data Structures", "LRU: HashMap + DoublyLinkedList. LFU: Two HashMaps (key->val, freq->list) + min_freq tracker."],
+            ["Concurrency", "ReadWriteLocks or ConcurrentHashMap. Lock striping can be used to improve write throughput."]
+        ]
+    },
+    {
+        "id": 8,
+        "title": "Design a Rate Limiter",
+        "category": "LLD",
+        "companies": ["Stripe", "Atlassian", "Uber"],
+        "tldr": "A component that restricts the number of requests a user can make within a time window.",
+        "reqs": ["Allow/Deny requests based on user/IP rules", "Support different algorithms (Token Bucket, Sliding Window)", "Distributed environment support"],
+        "nfreqs": ["Extremely low latency added to requests", "Memory efficient", "Eventual consistency is acceptable"],
+        "components": [
+            ["RateLimiter", "Interface with `allowRequest()` method."],
+            ["RuleManager", "Fetches and caches limits for users/endpoints."],
+            ["AlgorithmStrategy", "Implementations like TokenBucket, SlidingWindowLog, SlidingWindowCounter."],
+            ["Storage", "Redis or local memory to store counts/timestamps."]
+        ],
+        "decisions": [
+            ["Algorithm Choice", "Sliding Window Counter offers the best balance of accuracy and memory efficiency."],
+            ["Distributed Storage", "Use Redis Lua scripts to execute check-and-decrement operations atomically."]
+        ]
+    },
+    {
+        "id": 9,
+        "title": "Design a Banking System",
+        "category": "LLD",
+        "companies": ["JPMorgan", "Goldman Sachs", "Intuit"],
+        "tldr": "A core banking system handling accounts, deposits, withdrawals, and inter-account transfers.",
+        "reqs": ["Create accounts (Savings, Checking)", "Deposit and withdraw funds", "Transfer between accounts", "Generate monthly statements"],
+        "nfreqs": ["Strict ACID compliance", "Auditability of every change", "Concurrent access handling"],
+        "components": [
+            ["Account", "Stores balance and account details."],
+            ["Transaction", "Double-entry bookkeeping record."],
+            ["AccountService", "Handles business logic for moving money."],
+            ["StatementGenerator", "Batch job to compile monthly transaction history."]
+        ],
+        "decisions": [
+            ["Double-Entry Bookkeeping", "Every transaction creates two ledger entries (credit and debit) to ensure system balance is always zero."],
+            ["Database Locks", "Use pessimistic locking on account rows during transfers to prevent race conditions. Always acquire locks in a consistent order (e.g., lower Account ID first) to prevent deadlocks."]
+        ]
+    },
+    {
+        "id": 10,
+        "title": "Food Delivery App (Zomato / Swiggy)",
+        "category": "LLD",
+        "companies": ["Zomato", "Swiggy", "UberEats"],
+        "tldr": "Platform connecting users, restaurants, and delivery drivers.",
+        "reqs": ["Browse restaurants and menus", "Place orders and make payments", "Assign delivery drivers", "Real-time order tracking"],
+        "nfreqs": ["Search performance", "Real-time location updates", "State machine for order transitions"],
+        "components": [
+            ["Restaurant / Menu", "Catalog management."],
+            ["Order / Cart", "Shopping cart and order lifecycle."],
+            ["DriverMatchingService", "Finds the nearest available driver using spatial indexing."],
+            ["TrackingService", "Pushes real-time GPS updates via WebSockets."]
+        ],
+        "decisions": [
+            ["State Machine", "Use a defined state machine for Order (Placed -> Accepted -> Prepared -> PickedUp -> Delivered)."],
+            ["Geo-Spatial Index", "Use Geohash or Quadtree (Redis Geospatial) for fast driver proximity searches."]
+        ]
+    },
+    {
+        "id": 11,
+        "title": "Ride-Sharing App (Uber / Ola)",
+        "category": "LLD",
+        "companies": ["Uber", "Lyft", "Ola"],
+        "tldr": "App matching riders with drivers, tracking trips, and processing payments.",
+        "reqs": ["Request a ride", "Match rider with nearest driver", "Calculate fare (surge pricing)", "Trip lifecycle and tracking"],
+        "nfreqs": ["High write throughput for GPS locations", "Low latency matching", "Concurrency control for ride acceptance"],
+        "components": [
+            ["Rider / Driver", "User models with real-time state."],
+            ["Trip", "Lifecycle from requested, accepted, arriving, started, completed."],
+            ["LocationService", "Ingests GPS pings and updates spatial indexes."],
+            ["PricingEngine", "Calculates base fare + time + distance + surge multiplier."]
+        ],
+        "decisions": [
+            ["Matching Strategy", "Send request to nearest drivers sequentially or batch broadcast to a radius. Use optimistic locking to prevent two drivers accepting one ride."],
+            ["Location Tracking", "Buffer GPS pings locally on device and send in batches to reduce network calls."]
+        ]
+    },
+    {
+        "id": 12,
+        "title": "Notification Service",
+        "category": "LLD",
+        "companies": ["Amazon", "Google", "Facebook"],
+        "tldr": "A centralized service to send SMS, Email, and Push notifications.",
+        "reqs": ["Send different types of notifications", "Handle user preferences (opt-outs)", "Rate limiting per user", "Retry mechanism"],
+        "nfreqs": ["High throughput", "Pluggable providers", "No data loss (at-least-once delivery)"],
+        "components": [
+            ["NotificationRequest", "Encapsulates payload and recipient."],
+            ["ChannelProvider", "Strategy pattern (EmailProvider, SMSProvider)."],
+            ["PreferencesManager", "Checks if user has muted channels."],
+            ["MessageQueue", "Kafka or RabbitMQ for async processing and retries."]
+        ],
+        "decisions": [
+            ["Async Processing", "Queue requests to decouple API from slow external providers (SendGrid, Twilio)."],
+            ["Retry Policy", "Use exponential backoff for failed sends. Move to Dead Letter Queue (DLQ) after max retries."]
+        ]
+    },
+    {
+        "id": 13,
+        "title": "Library Management System",
+        "category": "LLD",
+        "companies": ["Amazon", "Microsoft"],
+        "tldr": "A system to manage book inventory, member borrowing, and fine calculations.",
+        "reqs": ["Search books by title, author, subject", "Checkout and return books", "Reserve unavailable books", "Calculate overdue fines"],
+        "nfreqs": ["Data integrity", "Easy to extend with new item types (Magazines, DVDs)"],
+        "components": [
+            ["Book / BookItem", "Book represents the title; BookItem represents a specific physical copy with a barcode."],
+            ["Member / Librarian", "User roles with different permissions."],
+            ["Lending", "Tracks checkout date, due date, and return date."],
+            ["FineService", "Calculates and processes payments for late returns."]
+        ],
+        "decisions": [
+            ["Barcode/RFID Integration", "Design `BookItem` to be easily scannable. State transitions: Available -> Loaned -> Lost."],
+            ["Search", "Implement a Catalog service using a Trie or Elasticsearch for fast prefix matching."]
+        ]
+    },
+    {
+        "id": 14,
+        "title": "Online Shopping Cart + Checkout System",
+        "category": "LLD",
+        "companies": ["Amazon", "Flipkart", "Shopify"],
+        "tldr": "E-commerce core components handling cart state, inventory reservation, and checkout.",
+        "reqs": ["Add/remove items from cart", "Apply promo codes", "Reserve inventory during checkout", "Process payments and create orders"],
+        "nfreqs": ["Cart persistence across sessions", "Prevent overselling inventory", "Payment idempotency"],
+        "components": [
+            ["Cart / CartItem", "Stores user selections."],
+            ["InventoryManager", "Tracks available stock levels."],
+            ["PricingCalculator", "Applies taxes, shipping, and discounts."],
+            ["Order / Payment", "Immutable records generated post-checkout."]
+        ],
+        "decisions": [
+            ["Inventory Reservation", "Soft-lock inventory when user enters checkout. Release lock if checkout times out (e.g., 10 mins)."],
+            ["Pricing Pattern", "Use Decorator pattern for applying cascading discounts and taxes."]
+        ]
+    },
+    {
+        "id": 15,
+        "title": "URL Shortener",
+        "category": "LLD",
+        "companies": ["TinyURL", "Bitly", "Google"],
+        "tldr": "Service to generate short aliases for long URLs and redirect users.",
+        "reqs": ["Generate unique short URL", "Redirect short URL to long URL", "Custom aliases", "Link expiration and analytics"],
+        "nfreqs": ["Extremely low read latency", "High availability", "Collision prevention"],
+        "components": [
+            ["URLMap", "Database entity mapping short code to long URL."],
+            ["KeyGenerator", "Pre-generates and doles out unique Base62 strings."],
+            ["RedirectController", "Handles HTTP 301/302 redirects."],
+            ["AnalyticsService", "Tracks click counts asynchronously."]
+        ],
+        "decisions": [
+            ["Key Generation", "Use an offline Key Generation Service (KGS) that pre-computes unique Base62 codes to guarantee uniqueness and high write speed."],
+            ["Caching", "Use Memcached/Redis to cache the most frequently accessed short URLs to achieve sub-millisecond reads."]
+        ]
+    },
+    {
+        "id": 16,
+        "title": "Task Scheduler (Cron-like)",
+        "category": "LLD",
+        "companies": ["Atlassian", "Microsoft", "Google"],
+        "tldr": "A system to execute recurring or delayed tasks at specific times.",
+        "reqs": ["Schedule jobs (one-time or cron)", "Execute jobs via worker threads", "Handle job failures and retries", "Cancel scheduled jobs"],
+        "nfreqs": ["High precision (milliseconds)", "Fault tolerance", "Scalable worker pool"],
+        "components": [
+            ["Job", "Interface with `execute()` method and cron expression."],
+            ["Scheduler", "Main loop that checks for due jobs."],
+            ["Timer/Queue", "Data structure (Min-Heap or Timing Wheel) to track next execution times."],
+            ["WorkerPool", "Thread pool that consumes and runs due jobs."]
+        ],
+        "decisions": [
+            ["Data Structure", "Use a Min-Heap based on execution time, or a Hashed Timing Wheel for O(1) scheduling and cancellation."],
+            ["Distributed execution", "Use Redis ZSET for distributed scheduling where score is the execution timestamp."]
+        ]
+    },
+    {
+        "id": 17,
+        "title": "Meeting Room Booking System",
+        "category": "LLD",
+        "companies": ["WeWork", "Microsoft", "Google"],
+        "tldr": "Application to search and reserve meeting rooms in corporate offices.",
+        "reqs": ["Search available rooms by time, capacity, and amenities", "Book a room", "Cancel booking", "Send invites"],
+        "nfreqs": ["Concurrency control to prevent double booking", "Optimized interval search"],
+        "components": [
+            ["Room", "Details capacity and equipment (Whiteboard, Projector)."],
+            ["Booking", "Time interval (start, end) and organizer."],
+            ["SearchEngine", "Filters rooms based on criteria and availability."],
+            ["NotificationService", "Sends calendar invites to attendees."]
+        ],
+        "decisions": [
+            ["Interval Overlap", "Check availability using SQL: `NOT (new_start < existing_end AND new_end > existing_start)`. Use interval trees in memory for fast checks."],
+            ["Concurrency", "Use optimistic locking or database transactions when persisting the booking."]
+        ]
+    },
+    {
+        "id": 18,
+        "title": "Chess Game",
+        "category": "LLD",
+        "companies": ["Microsoft", "Amazon"],
+        "tldr": "Object-oriented model for a 2-player chess game with move validation and checkmate detection.",
+        "reqs": ["8x8 board with 32 pieces", "Move validation per piece rules", "En passant, castling, promotion", "Check and Checkmate detection", "Move history / undo"],
+        "nfreqs": ["Extensible code (Command pattern for undo)", "Clean separation of logic and UI"],
+        "components": [
+            ["Board / Spot", "2D array of Spots, each holding an optional Piece."],
+            ["Piece", "Abstract class with `isValidMove()` overridden by King, Queen, Rook, etc."],
+            ["Move", "Records start spot, end spot, piece moved, and piece killed (for undo)."],
+            ["Game / Player", "Manages turns, current state (Active, BlackWin, WhiteWin, Stalemate)."]
+        ],
+        "decisions": [
+            ["Move Validation", "Piece checks general movement rules. Board checks for obstacles. Game checks if the move leaves the King in check."],
+            ["Undo Functionality", "Use the Command pattern. Store a stack of `Move` objects to reverse state."]
+        ]
+    },
+    {
+        "id": 19,
+        "title": "Tic Tac Toe",
+        "category": "LLD",
+        "companies": ["Google", "Amazon", "Microsoft"],
+        "tldr": "A scalable N x N Tic Tac Toe game.",
+        "reqs": ["Support 2 players, alternate turns", "N x N grid", "O(1) win detection", "Game over states (Win, Draw)"],
+        "nfreqs": ["Optimized win checking", "Clean OOD principles"],
+        "components": [
+            ["Board", "N x N grid managing piece placements."],
+            ["Player", "Holds player symbol (X or O)."],
+            ["Game", "Manages turns, tracks total moves for draw detection."],
+            ["WinAnalyzer", "Optimized logic to check rows, columns, and diagonals."]
+        ],
+        "decisions": [
+            ["O(1) Win Detection", "Maintain 1D arrays for row counts, col counts, and two integers for diagonals. Increment for Player 1, decrement for Player 2. If any value reaches N or -N, the player wins."]
+        ]
+    },
+    {
+        "id": 20,
+        "title": "Snake & Ladder",
+        "category": "LLD",
+        "companies": ["Amazon", "Flipkart"],
+        "tldr": "Multiplayer board game with dice rolling and automated position updates.",
+        "reqs": ["N x N board with snakes and ladders", "Multiple players taking turns", "Dice roller (1 to 6)", "Win condition (reach exactly 100)"],
+        "nfreqs": ["Configurable board size and number of snakes/ladders", "Easy to add new rules (e.g., extra turn on 6)"],
+        "components": [
+            ["Board", "Holds the mapping of snakes (head -> tail) and ladders (bottom -> top)."],
+            ["Dice", "Generates random numbers."],
+            ["Player", "Tracks current position on the board."],
+            ["Game", "Main loop handling turns, moving players, and evaluating rules."]
+        ],
+        "decisions": [
+            ["Board Representation", "Use a HashMap<Integer, Integer> for snakes and ladders. Key is start position, Value is end position. Makes position updates O(1)."],
+            ["Game Loop", "Use a Queue of players. Dequeue player, roll dice, update pos, enqueue player (unless they won)."]
+        ]
+    },
+    {
+        "id": 21,
+        "title": "Vending Machine Design",
+        "category": "LLD",
+        "companies": ["Amazon", "Microsoft"],
+        "tldr": "State machine based design for a vending machine handling cash, inventory, and dispensing.",
+        "reqs": ["Accept coins/notes", "Select product", "Dispense product and change", "Handle out of stock and cancel requests"],
+        "nfreqs": ["Robust state transitions", "Extensible to new payment methods"],
+        "components": [
+            ["VendingMachine", "Context class holding current state, inventory, and inserted money."],
+            ["State", "State pattern interface (Idle, HasMoney, Dispensing, DispenseChange)."],
+            ["Inventory", "Tracks items in slots and quantities."],
+            ["Coin / Banknote", "Enums for accepted currency."]
+        ],
+        "decisions": [
+            ["State Pattern", "Crucial to prevent invalid actions (e.g., dispensing without money). State classes handle inputs and transition the machine."],
+            ["Change Calculation", "Use a Greedy algorithm to dispense change with the largest available denominations."]
+        ]
+    },
+    {
+        "id": 22,
+        "title": "Car Rental System (ZoomCar-like)",
+        "category": "LLD",
+        "companies": ["Uber", "ZoomCar", "Expedia"],
+        "tldr": "System to search, reserve, and manage rental vehicles.",
+        "reqs": ["Search cars by location, type, availability", "Reserve a car with dates", "Calculate pricing (hourly/daily)", "Manage vehicle fleet and maintenance"],
+        "nfreqs": ["Prevent double booking", "Barcode scanning for pickup/drop-off"],
+        "components": [
+            ["Store / Branch", "Physical locations holding inventory."],
+            ["Vehicle", "Base class for Car, SUV, Van. Tracks status (Available, Rented, Maintenance)."],
+            ["Reservation", "Links User, Vehicle, dates, and Payment."],
+            ["SearchCatalog", "Filters inventory based on dates and locations."]
+        ],
+        "decisions": [
+            ["Availability Check", "Similar to meeting rooms. Check against existing reservations for the requested dates."],
+            ["Pricing Strategy", "Strategy pattern to handle dynamic pricing, late fees, and insurance additions."]
+        ]
+    },
+    {
+        "id": 23,
+        "title": "ATM Machine Design",
+        "category": "LLD",
+        "companies": ["Visa", "Mastercard", "Banking"],
+        "tldr": "Software for an ATM handling card reading, PIN validation, cash dispensing, and bank APIs.",
+        "reqs": ["Read card and validate PIN", "Withdraw cash", "Check balance", "Deposit cash/cheques"],
+        "nfreqs": ["Hardware abstraction", "Secure transactions", "State management"],
+        "components": [
+            ["ATM", "Singleton context managing states and hardware interfaces."],
+            ["ATMState", "State pattern (Idle, CardInserted, PinEntered, TransactionPending)."],
+            ["HardwareInterfaces", "CardReader, CashDispenser, Keypad, Printer."],
+            ["BankService", "Network interface to communicate with core banking servers."]
+        ],
+        "decisions": [
+            ["State Pattern", "Ensures operations follow the strict sequence (e.g., cannot withdraw before PIN validation)."],
+            ["Chain of Responsibility", "For cash dispensing. Handlers for $100, $50, $20 bills pass the remaining amount down the chain."]
+        ]
+    },
+    {
+        "id": 24,
+        "title": "Movie Recommendation Engine",
+        "category": "LLD",
+        "companies": ["Netflix", "Amazon", "Hulu"],
+        "tldr": "LLD of the serving layer for a recommendation system.",
+        "reqs": ["Fetch top recommendations for a user", "Update user preferences based on watch history", "Filter by genre"],
+        "nfreqs": ["Low latency serving", "A/B testing support for ML models"],
+        "components": [
+            ["UserProfile", "Stores user features and watch history."],
+            ["MovieMetadata", "Stores movie features (genre, actors)."],
+            ["RecommenderStrategy", "Interface for ML models (CollaborativeFiltering, ContentBased)."],
+            ["RecommendationService", "Aggregates inputs and calls the active strategy."]
+        ],
+        "decisions": [
+            ["Strategy Pattern", "Allows hot-swapping recommendation algorithms or running them side-by-side for A/B testing."],
+            ["Caching", "Pre-compute recommendations offline (batch) and cache in Redis for O(1) reads."]
+        ]
+    },
+    {
+        "id": 25,
+        "title": "E-commerce Product Catalogue System",
+        "category": "LLD",
+        "companies": ["Amazon", "Flipkart", "eBay"],
+        "tldr": "Core data model and search engine for millions of products with varying attributes.",
+        "reqs": ["Add/Update products", "Support dynamic attributes (e.g., Size for shoes, RAM for laptops)", "Search and filter by categories and attributes", "Inventory integration"],
+        "nfreqs": ["Highly extensible schema", "Fast search queries"],
+        "components": [
+            ["Product", "Base entity with common fields (ID, Title, Price, Category)."],
+            ["Category", "Hierarchical structure (Electronics -> Phones -> Smartphones)."],
+            ["AttributeValue", "Key-value pairs for dynamic fields."],
+            ["SearchEngine", "Interface bridging to Elasticsearch or Solr."]
+        ],
+        "decisions": [
+            ["Dynamic Attributes", "Use EAV (Entity-Attribute-Value) pattern or NoSQL JSON blobs to store varied specifications without altering the database schema."],
+            ["Search", "Denormalize product data into flat JSON documents for Elasticsearch to enable faceted search and filtering."]
+        ]
+    },
+    {
+        "id": 26,
+        "title": "Coupon/Discount Engine (E-commerce)",
+        "category": "LLD",
+        "companies": ["Amazon", "Shopify", "Uber"],
+        "tldr": "Rule-based engine to validate and apply promotional codes to shopping carts.",
+        "reqs": ["Support multiple rule types (Percentage, Flat, BOGO)", "Validate conditions (Min cart value, User eligibility, Expiry)", "Calculate final discount amount"],
+        "nfreqs": ["Extensible for new marketing strategies", "Fast evaluation"],
+        "components": [
+            ["Coupon", "Code string, validity period, and associated Rules."],
+            ["Condition", "Strategy interface (MinCartValueCondition, FirstTimeUserCondition)."],
+            ["DiscountAction", "Strategy interface (PercentageOff, FlatOff)."],
+            ["DiscountEngine", "Takes a Cart and Coupon, evaluates conditions, applies actions."]
+        ],
+        "decisions": [
+            ["Rule Engine Pattern", "Use Composite pattern to chain multiple `Condition` objects. If all evaluate to true, execute the `DiscountAction`."],
+            ["Decorator Pattern", "If multiple coupons can stack, wrap the Cart pricing calculation in Decorators."]
+        ]
+    },
+    {
+        "id": 27,
+        "title": "Workflow Orchestration System",
+        "category": "LLD",
+        "companies": ["Temporal", "Airflow", "Netflix"],
+        "tldr": "A system to define, schedule, and monitor multi-step distributed workflows.",
+        "reqs": ["Define workflows as DAGs (Directed Acyclic Graphs)", "Execute tasks with dependencies", "Retry tasks on failure", "Track state of workflows"],
+        "nfreqs": ["Fault tolerance (resume from last successful step)", "Scalable worker execution"],
+        "components": [
+            ["WorkflowDef", "Graph of Task definitions."],
+            ["TaskDef", "Executable unit of work."],
+            ["WorkflowExecution", "Instance tracking current state."],
+            ["Scheduler / Dispatcher", "Evaluates DAG, pushes ready tasks to queue."],
+            ["Worker", "Consumes tasks, reports success/failure."]
+        ],
+        "decisions": [
+            ["DAG Evaluation", "Use topological sort or dependency counters. When a task finishes, decrement counters of dependent tasks. If counter hits 0, enqueue it."],
+            ["State Persistence", "Event sourcing. Store every state transition in a database so the workflow can be recovered if the orchestrator crashes."]
+        ]
+    },
+    {
+        "id": 28,
+        "title": "Audit Logging Service",
+        "category": "LLD",
+        "companies": ["Stripe", "Datadog", "AWS"],
+        "tldr": "A secure, append-only service to track 'who did what, when' for compliance.",
+        "reqs": ["Log events (actor, action, resource, timestamp)", "Immutable storage", "Search by actor or resource", "High write throughput"],
+        "nfreqs": ["Tamper-evident logs", "Asynchronous writing to avoid blocking main application"],
+        "components": [
+            ["AuditEvent", "Data model containing structured payload."],
+            ["AuditClient", "SDK used by applications. Buffers and batches events."],
+            ["IngestionAPI", "Receives batches, pushes to message queue."],
+            ["StorageWriter", "Consumes queue, writes to immutable storage (e.g., S3 Object Lock, AWS QLDB)."]
+        ],
+        "decisions": [
+            ["Immutability", "Use cryptographic hashing (blockchain-like chains) or cloud-provider immutable storage (WORM) to guarantee logs cannot be altered."],
+            ["Buffering", "Use Kafka to decouple high-volume writes from database inserts."]
+        ]
+    },
+    {
+        "id": 29,
+        "title": "Social Feed Ranking System (Instagram)",
+        "category": "LLD",
+        "companies": ["Facebook", "Instagram", "Twitter"],
+        "tldr": "Object models and interfaces for gathering network posts and ranking them for a user.",
+        "reqs": ["Fetch posts from followed users", "Apply ranking algorithms based on engagement", "Support infinite scroll pagination"],
+        "nfreqs": ["Low latency for feed generation", "Extensible ranking logic"],
+        "components": [
+            ["User / Post", "Core entities."],
+            ["FeedGenerator", "Fan-out service to assemble candidate posts."],
+            ["Ranker", "Strategy pattern interface to score posts."],
+            ["Edge", "Represents connection strength between User A and User B."]
+        ],
+        "decisions": [
+            ["Fan-out on Write vs Read", "For normal users, push posts to followers' feeds on write. For celebrities, pull on read."],
+            ["Ranking Strategy", "Score = w1*(Recency) + w2*(Affinity) + w3*(Engagement). Inject different `Ranker` strategies for A/B testing."]
+        ]
+    },
+    {
+        "id": 30,
+        "title": "In-Memory Key-Value Store",
+        "category": "LLD",
+        "companies": ["Redis", "Memcached", "Amazon"],
+        "tldr": "A simple thread-safe data structure implementation mimicking Redis basics.",
+        "reqs": ["GET, PUT, DELETE operations", "Support for TTL (Time-To-Live)", "Support nested data types (Dict, List)"],
+        "nfreqs": ["Thread-safety for concurrent access", "Efficient cleanup of expired keys"],
+        "components": [
+            ["Store", "Main class wrapping a `ConcurrentHashMap`."],
+            ["ValueObject", "Wrapper holding actual data, type enum, and expiry timestamp."],
+            ["CleanupTask", "Background thread that periodically sweeps expired keys."]
+        ],
+        "decisions": [
+            ["Eviction Strategy", "Active expiry (background thread sweeping) + Passive expiry (check TTL on GET and delete if expired)."],
+            ["Concurrency", "Use fine-grained locking or `ConcurrentHashMap` to allow concurrent reads and isolated writes."]
+        ]
+    },
+    {
+        "id": 31,
+        "title": "Multi-threaded Parentheses Validator",
+        "category": "Concurrency",
+        "companies": ["Google", "Microsoft"],
+        "tldr": "Validate a massive string of parentheses concurrently by splitting the workload.",
+        "reqs": ["Check if parentheses sequence is balanced", "Utilize multiple threads for huge files", "Combine results from sub-tasks"],
+        "nfreqs": ["Thread synchronization", "Optimal chunk sizing"],
+        "components": [
+            ["ChunkProcessor", "Callable/Runnable that processes a substring and returns net open/close count."],
+            ["Coordinator", "Splits the string, submits to ThreadPool, and merges results."]
+        ],
+        "decisions": [
+            ["Merging Logic", "A chunk returns `(unmatched_close, unmatched_open)`. When merging Chunk A and Chunk B, unmatched closes in B can cancel unmatched opens in A. Final result must be `(0,0)`."]
+        ]
+    },
+    {
+        "id": 32,
+        "title": "Thread Pool Design",
+        "category": "Concurrency",
+        "companies": ["Oracle", "Apple", "Uber"],
+        "tldr": "Implement a custom Thread Pool executor from scratch.",
+        "reqs": ["Initialize pool with N worker threads", "Submit Runnable tasks", "Queue pending tasks", "Shutdown gracefully"],
+        "nfreqs": ["Thread synchronization", "Prevent memory leaks", "Wait/Notify mechanisms"],
+        "components": [
+            ["ThreadPool", "Manages lifecycle, holds the blocking queue."],
+            ["WorkerThread", "Extends Thread. Runs in an infinite loop polling the queue for tasks."],
+            ["BlockingQueue", "Thread-safe queue (using ReentrantLock and Condition variables)."]
+        ],
+        "decisions": [
+            ["Task Polling", "Workers use `take()` on the blocking queue, which parks the thread until a task is available, saving CPU cycles."],
+            ["Shutdown", "Set a volatile flag `isShutdown`. Interrupt waiting threads to break them out of `take()`."]
+        ]
+    },
+    {
+        "id": 33,
+        "title": "Producer-Consumer Problem",
+        "category": "Concurrency",
+        "companies": ["Amazon", "Microsoft", "LinkedIn"],
+        "tldr": "Classic synchronization problem bounding a shared buffer.",
+        "reqs": ["Producers generate data and put in buffer", "Consumers take data and process it", "Producers block if buffer full", "Consumers block if buffer empty"],
+        "nfreqs": ["Prevent race conditions", "Avoid deadlocks"],
+        "components": [
+            ["SharedBuffer", "Fixed size array or queue."],
+            ["Producer / Consumer", "Runnable classes."],
+            ["SynchronizationPrimitives", "Semaphores or Lock/Condition variables."]
+        ],
+        "decisions": [
+            ["Synchronization", "Use two Semaphores (`emptyCount`, `fullCount`) and a Mutex for buffer access. Alternatively, use Java's `wait()` and `notifyAll()` in a synchronized block."]
+        ]
+    },
+    {
+        "id": 34,
+        "title": "Bank Transaction Concurrency Problem",
+        "category": "Concurrency",
+        "companies": ["Goldman Sachs", "JPMorgan", "Stripe"],
+        "tldr": "Safely transfer money between accounts concurrently.",
+        "reqs": ["Transfer money from Account A to Account B", "Prevent deadlocks when multiple transfers occur simultaneously", "Ensure data consistency"],
+        "nfreqs": ["Deadlock avoidance", "Thread safety"],
+        "components": [
+            ["Account", "Holds balance and a `ReentrantLock`."],
+            ["TransferTask", "Runnable executing the transfer logic."]
+        ],
+        "decisions": [
+            ["Deadlock Avoidance", "Always acquire locks in a globally consistent order. E.g., always lock the account with the smaller ID first, then the larger ID. This prevents circular wait."]
+        ]
+    },
+    {
+        "id": 35,
+        "title": "Call Centre Queue Dispatcher",
+        "category": "Concurrency",
+        "companies": ["Amazon", "Twilio", "Uber"],
+        "tldr": "Simulate a call center dispatching incoming calls to available agents.",
+        "reqs": ["Handle incoming calls", "Route to available agent", "Queue calls if all agents busy", "Agents have tiers (Junior, Senior, Manager)"],
+        "nfreqs": ["Escalation logic", "Concurrent queueing"],
+        "components": [
+            ["Call", "Represents the customer request."],
+            ["Employee", "Base class for Respondent, Manager, Director. Tracks availability (boolean)."],
+            ["CallHandler", "Singleton managing queues of calls and lists of available employees."]
+        ],
+        "decisions": [
+            ["Escalation", "If Junior cannot handle, return call to CallHandler to enqueue in Senior queue."],
+            ["Concurrency", "Use `BlockingQueue` for incoming calls. Employees run in their own threads polling the queue."]
+        ]
+    }
+]
+
+html_template = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Design — LLD & Concurrency (35 Questions)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
+.logo{font-size:.95rem;font-weight:700;color:#10b981}
+.logo span{color:#ffffff;font-weight:400;font-size:.78rem}
+.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
+.srch:focus{border-color:#10b981}
+.srch::placeholder{color:#ffffff}
+.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#ffffff;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#252d40;color:#10b981;border-color:#10b98155}
+.mob-toggle{display:none;background:#10b981;border:none;border-radius:8px;padding:.38rem .75rem;color:#000;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;align-items:center;white-space:nowrap}
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:300px;min-width:300px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
+.sb-inner{padding:.4rem .35rem}
+.main{flex:1;overflow-y:auto}
+.wrap{padding:1.25rem 1.25rem 2rem;max-width:860px}
+.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.mob-title{font-size:.9rem;font-weight:700;color:#ffffff}
+.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#ffffff;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
+.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
+.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
+.mob-search input:focus{border-color:#10b981}
+.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+.mob-filters{padding:.4rem .75rem .5rem;background:#161b27;display:flex;gap:.4rem;flex-wrap:wrap}
+.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
+.qi:hover{background:#1e2535;border-color:#2a3348}
+.qi.active{background:#1e2535;border-left:3px solid #10b981;border-color:#10b98133}
+.qi.hidden{display:none}
+.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#ffffff;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:#10b981}
+.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1;font-weight:500}
+.qi.active .qt{color:#ffffff;font-weight:600}
+.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome h2{font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
+.welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:1.5rem;text-align:left}
+.wcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
+.wcard h4{font-size:.72rem;font-weight:700;color:#10b981;margin-bottom:.3rem}
+.wcard p{font-size:.72rem;color:#ffffff;line-height:1.5}
+.prog-strip{background:#1e2535;border-radius:4px;height:3px;margin-bottom:1rem;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#10b981,#3b82f6);border-radius:4px;transition:width .4s}
+.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.qnum{background:#10b981;color:#000;font-size:.67rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
+.qtitle{font-size:1.05rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
+.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;align-items:center}
+.fbadge{font-size:.66rem;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:600}
+.tldr{background:#1e2535;border-left:3px solid #10b981;border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.83rem;line-height:1.8;color:#ffffff;margin-bottom:1.1rem}
+.tldr strong{color:#ffffff}
+.slabel{font-size:.65rem;font-weight:700;letter-spacing:.12em;color:#ffffff;text-transform:uppercase;margin:1.1rem 0 .5rem;padding-left:2px}
+
+.dbox{margin-bottom:1.1rem;border:1px solid #2a3348;border-radius:10px;overflow:hidden;background:#161b27;padding: 1rem; text-align: center; color: #a1a1aa; font-size: 0.8rem; border-style: dashed;}
+.rgrid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1.1rem}
+.rcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.7rem}
+.rcard h4{font-size:.65rem;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+.rcard li{font-size:.76rem;color:#ffffff;list-style:none;padding:2px 0 2px 13px;position:relative;line-height:1.55}
+.rcard li::before{content:'→';position:absolute;left:0;color:#3b82f6;font-size:.6rem;top:4px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.1rem}
+.ccard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.65rem .8rem}
+.cname{font-size:.76rem;font-weight:700;color:#f59e0b;margin-bottom:.28rem; font-family: 'JetBrains Mono', monospace;}
+.cdesc{font-size:.73rem;color:#ffffff;line-height:1.6}
+.dlist{margin-bottom:1.1rem}
+.drow{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.6rem .8rem;margin-bottom:.4rem;display:grid;grid-template-columns:160px 1fr;gap:.65rem}
+.dq{font-size:.74rem;font-weight:600;color:#ffffff;line-height:1.5}
+.da{font-size:.74rem;color:#ffffff;line-height:1.6}
+.navrow{display:flex;gap:.5rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid #2a3348}
+.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.5rem .8rem;color:#ffffff;font-size:.74rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45}
+.nbtn:hover{background:#252d40;color:#ffffff;border-color:#ffffff}
+.nbtn.off{opacity:.25;pointer-events:none}
+@media(max-width:680px){
+  .sidebar{display:none}
+  .mob-toggle{display:flex}
+  .srch{width:130px}
+  .wgrid,.rgrid,.cgrid{grid-template-columns:1fr}
+  .drow{grid-template-columns:1fr}
+  .layout{height:auto;flex-direction:column}
+  .main{overflow-y:visible}
+  .wrap{padding:1rem .9rem 3rem}
+  .welcome{padding:2rem .5rem}
+  .topbar{padding:.55rem .75rem}
+  .logo span{display:none}
+}
+.mermaid-container { background: transparent; padding: 1.5rem 1rem; margin-bottom: 1.5rem; overflow-x: auto; display: flex; justify-content: center; }
+.mermaid-container pre { margin: 0; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Questions</button>
+    <div class="logo">System Design<span> · LLD & Concurrency</span></div>
+  </div>
+  <div class="topbar-right">
+    <a href="index.html" class="fbtn" style="text-decoration: none;">🏠 Home</a>
+    <input class="srch" id="dsrch" type="text" placeholder="Search…" oninput="doSearch(this.value,'desk')">
+    <button class="fbtn" id="fhi" onclick="toggleF('lld')">📦 LLD</button>
+    <button class="fbtn" id="ffaang" onclick="toggleF('concurrency')">⚡ Concurrency</button>
+  </div>
+</div>
+
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-title">📋 All 35 Questions</div>
+    <button class="mob-close" onclick="closeMob()">✕ Close</button>
+  </div>
+  <div class="mob-filters">
+    <button class="fbtn" id="mfhi" onclick="toggleF('lld')">📦 LLD Only</button>
+    <button class="fbtn" id="mffaang" onclick="toggleF('concurrency')">⚡ Concurrency Only</button>
+  </div>
+  <div class="mob-search"><input type="text" id="msrch" placeholder="Search questions…" oninput="doSearch(this.value,'mob')"></div>
+  <div class="mob-list" id="moblist">
+  <!-- POPULATED BY JS -->
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="deskqlist">
+  <!-- POPULATED BY JS -->
+  </div></div>
+  <div class="main"><div class="wrap" id="mainwrap">
+    <div id="welcome">
+      <div class="welcome">
+        <h2>LLD & Concurrency Interview Guide</h2>
+        <p>35 questions · Master Object-Oriented Design and Multithreading<br>
+        <span style="color:#10b981;font-weight:600">📱 Mobile:</span> tap <strong style="color:#10b981">☰ Questions</strong> above &nbsp;|&nbsp;
+        <span style="color:#ffffff">Desktop:</span> use sidebar or ↑↓ keys</p>
+        <div class="wgrid">
+          <div class="wcard"><h4>📦 Core Components</h4><p>Identification of the key classes and their responsibilities in a scalable application.</p></div>
+          <div class="wcard"><h4>📋 Requirements</h4><p>Functional and non-functional requirements to set the scope of the design.</p></div>
+          <div class="wcard"><h4>⚡ Design Decisions</h4><p>Design patterns, algorithmic optimizations, and thread-safety tradeoffs.</p></div>
+        </div>
+        
+        <div style="margin-top: 2.5rem; text-align: left; background: #1e2535; padding: 1.5rem; border-radius: 12px; border: 1px solid #2a3348;">
+            <h3 style="color: #10b981; font-size: 1rem; margin-bottom: 1rem;">Steps for Answering LLD Questions</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">1. Clarify Requirements:</strong> Define scope, core features, and constraints.</div>
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">2. Identify Core Components:</strong> Determine primary entities and their relations.</div>
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">3. Design the Interactions:</strong> Map out the flow of data between classes.</div>
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">4. Define Classes & Methods:</strong> Write out the APIs, attributes, and signatures.</div>
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">5. Consider Edge Cases:</strong> Concurrency, failures, boundary limits.</div>
+                <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">6. Review and Refine:</strong> Optimize data structures and apply design patterns.</div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <div id="qcontent"></div>
+  </div></div>
+</div>
+
+<script>
+const QS = """
+
+js_code = """
+let curQ = 0;
+let fstate = '';
+
+function initList() {
+  const ml = document.getElementById('moblist');
+  const dl = document.getElementById('deskqlist');
+  ml.innerHTML = ''; dl.innerHTML = '';
+  
+  QS.forEach(q => {
+    const qn = q.id < 10 ? '0'+q.id : q.id;
+    const catColor = q.category === 'LLD' ? '#10b981' : '#f59e0b';
+    
+    const html = `<div class="qi" id="qi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+      <span class="qn">${qn}</span>
+      <span class="qt">${q.title}</span>
+      <span class="fdot" style="background:${catColor}"></span>
+    </div>`;
+    dl.innerHTML += html;
+    
+    const mhtml = `<div class="qi mob-qi" id="mqi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+      <span class="qn">${qn}</span>
+      <span class="qt">${q.title}</span>
+      <span class="fdot" style="background:${catColor}"></span>
+    </div>`;
+    ml.innerHTML += mhtml;
+  });
+}
+
+function showQ(id) {
+  curQ = id;
+  const q = QS.find(x => x.id === id);
+  if (!q) return;
+  
+  closeMob();
+  document.getElementById('welcome').style.display = 'none';
+  
+  document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+  const dqi = document.getElementById('qi-'+id);
+  const mqi = document.getElementById('mqi-'+id);
+  if(dqi) dqi.classList.add('active');
+  if(mqi) mqi.classList.add('active');
+  
+  const qn = q.id < 10 ? '0'+q.id : q.id;
+  const pct = Math.round((q.id / QS.length) * 100);
+  
+  let badgesHTML = `<span class="fbadge" style="color:#10b981;border-color:#10b98133;background:#10b98115">${q.category}</span>`;
+  q.companies.forEach(c => {
+    badgesHTML += `<span class="fbadge" style="color:#e2e8f0;border-color:#2a3348;background:#1e2535">${c}</span>`;
+  });
+  
+  let reqsHTML = '';
+  q.reqs.forEach(r => { reqsHTML += `<li>${r}</li>`; });
+  
+  let nfreqsHTML = '';
+  q.nfreqs.forEach(r => { nfreqsHTML += `<li>${r}</li>`; });
+  
+  let compHTML = '';
+  q.components.forEach(c => {
+    compHTML += `<div class="ccard">
+      <div class="cname">${c[0]}</div>
+      <div class="cdesc">${c[1]}</div>
+    </div>`;
+  });
+  
+  let decHTML = '';
+  q.decisions.forEach(d => {
+    decHTML += `<div class="drow">
+      <div class="dq">${d[0]}</div>
+      <div class="da">${d[1]}</div>
+    </div>`;
+  });
+  
+  let navHTML = '';
+  if (id > 1) {
+    const prev = QS.find(x => x.id === id - 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id-1})">← Previous<br><span style="color:#8b949e;font-size:0.65rem">${prev.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">← Previous</button>`;
+  }
+  
+  if (id < QS.length) {
+    const next = QS.find(x => x.id === id + 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id+1})">Next →<br><span style="color:#8b949e;font-size:0.65rem">${next.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">Next →</button>`;
+  }
+  
+  let mermaidHtml = `<div class="slabel">System Flowchart / Class Diagram</div>
+    <div class="mermaid-container"><pre class="mermaid" id="mermaid-canvas-${q.id}">${q.diagram}</pre></div>`;
+  
+  const content = `
+    <div class="prog-strip"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div class="badges">${badgesHTML}</div>
+    <div class="qhead">
+      <div class="qnum">${qn}</div>
+      <div class="qtitle">${q.title}</div>
+    </div>
+    
+    <div class="tldr"><strong>TL;DR:</strong> ${q.tldr}</div>
+    
+    <div class="slabel">Requirements</div>
+    <div class="rgrid">
+      <div class="rcard"><h4>Functional</h4><ul>${reqsHTML}</ul></div>
+      <div class="rcard"><h4>Non-Functional / Scale</h4><ul>${nfreqsHTML}</ul></div>
+    </div>
+    
+    ${mermaidHtml}
+    
+    <div class="slabel">Core Components (Class/Entity)</div>
+    <div class="cgrid">${compHTML}</div>
+    
+    <div class="slabel">Design Decisions & Patterns</div>
+    <div class="dlist">${decHTML}</div>
+    
+    <div class="navrow">${navHTML}</div>
+  `;
+  
+  
+  document.getElementById('qcontent').innerHTML = content;
+  document.getElementById('mainwrap').scrollTop = 0;
+  
+  if (window.renderMermaid) {
+    setTimeout(() => window.renderMermaid(`mermaid-canvas-${q.id}`), 50);
+  }
+
+  
+  if(dqi) {
+    const sb = document.querySelector('.sidebar');
+    const offset = dqi.offsetTop - sb.offsetTop;
+    if (offset < sb.scrollTop || offset > sb.scrollTop + sb.clientHeight - 40) {
+      sb.scrollTop = offset - 100;
+    }
+  }
+}
+
+function openMob() {
+  document.getElementById('moboverlay').classList.add('open');
+}
+function closeMob() {
+  document.getElementById('moboverlay').classList.remove('open');
+}
+
+function toggleF(f) {
+  if(fstate === f) {
+    fstate = '';
+    document.getElementById('fhi').classList.remove('on');
+    document.getElementById('ffaang').classList.remove('on');
+    document.getElementById('mfhi').classList.remove('on');
+    document.getElementById('mffaang').classList.remove('on');
+  } else {
+    fstate = f;
+    document.getElementById('fhi').classList.toggle('on', f === 'lld');
+    document.getElementById('ffaang').classList.toggle('on', f === 'concurrency');
+    document.getElementById('mfhi').classList.toggle('on', f === 'lld');
+    document.getElementById('mffaang').classList.toggle('on', f === 'concurrency');
+  }
+  applyFilters();
+}
+
+function doSearch(val, source) {
+  if (source === 'desk') {
+    document.getElementById('msrch').value = val;
+  } else {
+    document.getElementById('dsrch').value = val;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const val = document.getElementById('dsrch').value.toLowerCase();
+  
+  document.querySelectorAll('.qi').forEach(el => {
+    const qid = parseInt(el.id.replace('qi-','').replace('mqi-',''));
+    const q = QS.find(x => x.id === qid);
+    if(!q) return;
+    
+    let matchF = true;
+    if (fstate === 'lld' && q.category !== 'LLD') matchF = false;
+    if (fstate === 'concurrency' && q.category !== 'Concurrency') matchF = false;
+    
+    let matchS = true;
+    if (val && !q.title.toLowerCase().includes(val) && !q.companies.join(' ').toLowerCase().includes(val)) {
+      matchS = false;
+    }
+    
+    if (matchF && matchS) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (curQ > 0) {
+    if (e.key === 'ArrowDown' || e.key === 'j') {
+      if (curQ < QS.length) { showQ(curQ + 1); e.preventDefault(); }
+    } else if (e.key === 'ArrowUp' || e.key === 'k') {
+      if (curQ > 1) { showQ(curQ - 1); e.preventDefault(); }
+    }
+  }
+});
+
+initList();
+</script>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: false, 
+    theme: 'base',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#161b27',
+      primaryTextColor: '#ffffff',
+      primaryBorderColor: '#10b981',
+      lineColor: '#3b82f6',
+      secondaryColor: '#1e2535',
+      tertiaryColor: '#1e2535',
+      fontFamily: '"JetBrains Mono", monospace'
+    },
+    flowchart: {
+      curve: 'basis',
+      padding: 25
+    }
+  });
+  window.renderMermaid = async function(id) {
+    try {
+      await mermaid.run({
+        querySelector: '#' + id
+      });
+    } catch(e) {
+      console.error(e);
+    }
+  };
+</script>
+</body>
+
+</html>
+"""
+
+
+for q in questions:
+    diagram = "flowchart TB\n"
+    classes = []
+    for c in q["components"]:
+        cls_names = [x.strip() for x in c[0].split("/")]
+        safe_names = ["".join(filter(str.isalnum, x)) for x in cls_names]
+        classes.append(safe_names)
+        for i, safe_cls in enumerate(safe_names):
+            if safe_cls:
+                display_name = cls_names[i]
+                diagram += f"    {safe_cls}[\"{display_name}\"]\n"
+                if i > 0:
+                    diagram += f"    {safe_names[i-1]} -.-> {safe_cls}\n"
+    if len(classes) > 1:
+        for i in range(1, len(classes)):
+            if classes[i-1] and classes[i] and classes[i-1][-1] and classes[i][0]:
+                diagram += f"    {classes[i-1][-1]} ==> {classes[i][0]}\n"
+    
+    diagram += "    classDef default fill:#1e2535,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;\n"
+    diagram += "    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;\n"
+    q["diagram"] = diagram
+
+full_html = html_template + json.dumps(questions) + ";" + js_code
+
+with open("c:\\Users\\sssat\\OneDrive\\Documents\\test\\system-design-lld.html", "w", encoding="utf-8") as f:
+    f.write(full_html)
+print("done")

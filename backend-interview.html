@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backend Engineering & System Design (40 Concepts)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
+.logo{font-size:.95rem;font-weight:700;color:#6366f1}
+.logo span{color:#ffffff;font-weight:400;font-size:.78rem}
+.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
+.srch:focus{border-color:#6366f1}
+.srch::placeholder{color:#ffffff}
+.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#ffffff;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#252d40;color:#6366f1;border-color:#6366f155}
+.mob-toggle{display:none;background:#6366f1;border:none;border-radius:8px;padding:.38rem .75rem;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;align-items:center;white-space:nowrap}
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:320px;min-width:320px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
+.sb-inner{padding:.4rem .35rem}
+.main{flex:1;overflow-y:auto}
+.wrap{padding:1.5rem 2rem 3rem;max-width:960px}
+.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.mob-title{font-size:.9rem;font-weight:700;color:#ffffff}
+.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#ffffff;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
+.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
+.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
+.mob-search input:focus{border-color:#6366f1}
+.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
+.qi:hover{background:#1e2535;border-color:#2a3348}
+.qi.active{background:#1e2535;border-left:3px solid #6366f1;border-color:#6366f133}
+.qi.hidden{display:none}
+.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#ffffff;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:#6366f1}
+.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1;font-weight:500}
+.qi.active .qt{color:#ffffff;font-weight:600}
+.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome h2{font-size:1.5rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
+.welcome p{font-size:.9rem;color:#9ca3af;line-height:1.75}
+.prog-strip{background:#1e2535;border-radius:4px;height:3px;margin-bottom:1rem;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:4px;transition:width .4s}
+.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.qnum{background:#6366f1;color:#fff;font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
+.qtitle{font-size:1.2rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
+.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:1rem;align-items:center}
+.fbadge{font-size:.66rem;padding:3px 9px;border-radius:10px;border:1px solid;font-weight:600}
+.tldr{background:#1e2535;border-left:3px solid #6366f1;border-radius:0 8px 8px 0;padding:1rem;font-size:.85rem;line-height:1.6;color:#e5e7eb;margin-bottom:1.5rem}
+.tldr strong{color:#ffffff}
+.slabel{font-size:.7rem;font-weight:700;letter-spacing:.1em;color:#9ca3af;text-transform:uppercase;margin:1.5rem 0 .75rem;border-bottom:1px solid #2a3348;padding-bottom:.4rem}
+.explanation{font-size:.85rem;color:#d1d5db;line-height:1.7;margin-bottom:1.5rem}
+.explanation p{margin-bottom:.8rem}
+.explanation ul{margin-left:1.5rem;margin-bottom:1rem}
+.explanation li{margin-bottom:.4rem}
+.explanation strong{color:#fff;font-weight:600}
+.explanation code{background:#1e2535;color:#f472b6;padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.75rem;border:1px solid #2a3348}
+.comparison-table{width:100%;border-collapse:collapse;margin:1rem 0 1.5rem;font-size:.8rem}
+.comparison-table th{background:#1e2535;color:#fff;font-weight:600;padding:.75rem;text-align:left;border:1px solid #2a3348}
+.comparison-table td{padding:.75rem;border:1px solid #2a3348;color:#d1d5db;line-height:1.5}
+.navrow{display:flex;gap:.5rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid #2a3348}
+.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.6rem 1rem;color:#ffffff;font-size:.8rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45}
+.nbtn:hover{background:#252d40;color:#ffffff;border-color:#ffffff}
+.nbtn.off{opacity:.25;pointer-events:none}
+.mermaid-container{background:transparent;padding:1.5rem 1rem;margin-bottom:1.5rem;overflow-x:auto;display:flex;justify-content:center;border-radius:12px;border:1px dashed #2a3348}
+.mermaid-container pre{margin:0; width:100%; display:flex; justify-content:center;}
+.mermaid-container svg{max-width:100%; height:auto !important; min-height:250px;}
+@media(max-width:768px){
+  .sidebar{display:none}
+  .mob-toggle{display:flex}
+  .srch{display:none}
+  .layout{height:auto;flex-direction:column}
+  .main{overflow-y:visible}
+  .wrap{padding:1.25rem 1rem 3rem}
+  .welcome{padding:2rem .5rem}
+  .topbar{padding:.55rem .75rem}
+  .logo span{display:none}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Menu</button>
+    <div class="logo">Backend <span>· Interview Guide</span></div>
+  </div>
+  <div class="topbar-right">
+    <a href="index.html" class="fbtn" style="text-decoration:none">🏠 Home</a>
+    <input class="srch" id="dsrch" type="text" placeholder="Search concepts…" oninput="doSearch(this.value,'desk')">
+  </div>
+</div>
+
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-title">📋 40 Concepts</div>
+    <button class="mob-close" onclick="closeMob()">✕ Close</button>
+  </div>
+  <div class="mob-search"><input type="text" id="msrch" placeholder="Search…" oninput="doSearch(this.value,'mob')"></div>
+  <div class="mob-list" id="moblist"></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="deskqlist"></div></div>
+  <div class="main"><div class="wrap" id="mainwrap">
+    <div id="welcome">
+      <div class="welcome">
+        <h2>Backend Engineering Mastery</h2>
+        <p>40 Essential Concepts spanning Core APIs, Databases, Caching, Scaling, and Real-World Reliability.</p>
+        <div style="margin-top: 2.5rem; text-align: left; background: #1e2535; padding: 1.5rem; border-radius: 12px; border: 1px solid #2a3348;">
+            <h3 style="color: #6366f1; font-size: 1rem; margin-bottom: 1rem;">Why this guide?</h3>
+            <p style="font-size:0.85rem; line-height: 1.6; margin-bottom: 1rem;">This guide strips away the fluff and gives you the exact mental models, tradeoffs, and deep technical understandings required to ace Senior Backend and System Design interviews.</p>
+            <ul style="font-size:0.85rem; line-height: 1.6; margin-left: 1.5rem; color: #d1d5db;">
+                <li><strong>Core Concepts:</strong> Auth, REST vs GraphQL, Idempotency.</li>
+                <li><strong>Databases:</strong> ACID, Transactions, Sharding, Locking.</li>
+                <li><strong>Caching & Scaling:</strong> Eviction, CDNs, Load Balancing, Microservices.</li>
+                <li><strong>Reliability:</strong> Race Conditions, Circuit Breakers, Sagas, Observability.</li>
+            </ul>
+        </div>
+      </div>
+    </div>
+    <div id="qcontent"></div>
+  </div></div>
+</div>
+
+<script>
+const QS = [{"title": "REST vs GraphQL vs gRPC", "category": "Core Concepts", "tldr": "REST is resource-based and ubiquitous, GraphQL is query-based and solves over/under-fetching, while gRPC is highly performant and uses Protocol Buffers for service-to-service communication.", "explanation": "<p>Choosing the right API paradigm is critical for backend architecture.</p>\n        <ul>\n            <li><strong>REST (Representational State Transfer):</strong> Standard architecture using HTTP methods (GET, POST, PUT, DELETE) and endpoints mapped to resources. Great for public APIs.</li>\n            <li><strong>GraphQL:</strong> A query language that lets clients request exactly what they need. Reduces multiple round-trips but adds complexity in caching and rate limiting.</li>\n            <li><strong>gRPC:</strong> Developed by Google, runs over HTTP/2, and uses Protobuf (binary). Highly efficient, strongly typed, and ideal for internal microservices.</li>\n        </ul>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>REST</th><th>GraphQL</th><th>gRPC</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Payload</td><td>JSON / XML</td><td>JSON</td><td>Protobuf (Binary)</td></tr>\n                <tr><td>Performance</td><td>Moderate</td><td>Moderate</td><td>High</td></tr>\n                <tr><td>Use Case</td><td>Public APIs, CRUD</td><td>Complex UI, Mobile</td><td>Internal Microservices</td></tr>\n            </tbody>\n        </table>", "diagram": "flowchart TB\n    Client((Client)) -->|\"REST: /api/users\"| REST_API[REST API]\n    Client -->|\"GraphQL: query{user{id}}\"| GQL_API[GraphQL Server]\n    Client -->|\"gRPC: GetUser()\"| gRPC_API[gRPC Server]\n    \n    REST_API -. JSON .-> Client\n    GQL_API -. JSON .-> Client\n    gRPC_API -. Protobuf .-> Client\n    \n    classDef api fill:#1e2535,stroke:#6366f1,stroke-width:2px,color:#fff\n    classDef client fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff\n    \n    class REST_API,GQL_API,gRPC_API api\n    class Client client", "id": 1}, {"title": "Authentication vs Authorization", "category": "Core Concepts", "tldr": "Authentication confirms <strong>who you are</strong> (identity), while Authorization determines <strong>what you can do</strong> (permissions).", "explanation": "<p>Security is a two-step process:</p>\n        <ul>\n            <li><strong>Authentication (AuthN):</strong> The process of verifying a user's identity. This is typically done via passwords, biometric data, or multi-factor authentication (MFA).</li>\n            <li><strong>Authorization (AuthZ):</strong> The process of verifying what specific applications, files, and data a user has access to. Role-Based Access Control (RBAC) and Attribute-Based Access Control (ABAC) are common paradigms.</li>\n        </ul>", "diagram": "flowchart LR\n    User([User]) -->|1. Provides Credentials| AuthN[Authentication]\n    AuthN -->|2. Validates Identity| IdentityStore[(Identity DB)]\n    IdentityStore -.->|3. Confirms Who| AuthN\n    AuthN -->|4. Requests Resource| AuthZ[Authorization]\n    AuthZ -->|5. Checks Permissions| RoleStore[(Roles/Permissions DB)]\n    RoleStore -.->|6. Confirms Access Level| AuthZ\n    AuthZ -->|7. Grants Access| Resource[Protected Resource]\n    \n    classDef process fill:#1e2535,stroke:#10b981,stroke-width:2px,color:#fff\n    classDef db fill:#3b82f6,stroke:#1e40af,stroke-width:2px,color:#fff\n    \n    class AuthN,AuthZ process\n    class IdentityStore,RoleStore db", "id": 2}, {"title": "JWT vs Session-based Authentication", "category": "Core Concepts", "tldr": "Session-based auth is stateful (stored on server), whereas JWT is stateless (client stores token with a signed payload).", "explanation": "<p>These are the two dominant methods for maintaining user state across HTTP requests.</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>Session-Based</th><th>JWT (Stateless)</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>State</td><td>Stateful (Stored in DB/Redis)</td><td>Stateless (Self-contained)</td></tr>\n                <tr><td>Revocation</td><td>Easy (Delete session from DB)</td><td>Hard (Requires blacklists or short expiry)</td></tr>\n                <tr><td>Scalability</td><td>Requires shared session store</td><td>Highly scalable, no DB lookups</td></tr>\n                <tr><td>Security</td><td>Vulnerable to CSRF (if cookies)</td><td>Vulnerable to XSS (if stored in LocalStorage)</td></tr>\n            </tbody>\n        </table>\n        <p><strong>Best Practice:</strong> Use sessions for high-security applications where immediate revocation is needed. Use JWTs for stateless microservices and mobile APIs.</p>", "id": 3}, {"title": "OAuth 2.0 & OpenID Connect", "category": "Core Concepts", "tldr": "OAuth 2.0 is an authorization framework allowing third-party access (delegated access). OpenID Connect (OIDC) sits on top of OAuth to provide authentication (identity).", "explanation": "<p>OAuth 2.0 and OIDC power the modern \"Log in with Google/GitHub\" experience.</p>\n        <ul>\n            <li><strong>OAuth 2.0:</strong> Grants access tokens. It does NOT provide identity information. It just says \"this app has permission to access your photos.\"</li>\n            <li><strong>OpenID Connect (OIDC):</strong> An identity layer over OAuth 2.0. It provides an <code>id_token</code> (a JWT) that contains claims about the user (email, name).</li>\n        </ul>\n        <p>Common Grants: <code>Authorization Code Flow</code> (for web/mobile apps) and <code>Client Credentials Flow</code> (for machine-to-machine).</p>", "id": 4}, {"title": "MVC Architecture", "category": "Core Concepts", "tldr": "Model-View-Controller separates an application into three interconnected components: Data (Model), UI (View), and Logic (Controller).", "explanation": "<p>MVC is a foundational software design pattern:</p>\n        <ul>\n            <li><strong>Model:</strong> Manages the data, logic, and rules of the application. Communicates with the database.</li>\n            <li><strong>View:</strong> The user interface. Displays data to the user.</li>\n            <li><strong>Controller:</strong> Handles user input, manipulates the model, and updates the view.</li>\n        </ul>\n        <p>In modern backend APIs, the \"View\" is often replaced by a JSON response, leading to patterns like Layered Architecture (Controller -> Service -> Repository).</p>", "id": 5}, {"title": "Idempotency in APIs", "category": "Core Concepts", "tldr": "An API is idempotent if making multiple identical requests has the same effect as making a single request.", "explanation": "<p>Idempotency ensures that network retries (due to timeouts or failures) don't result in unintended side effects, such as a user being charged twice.</p>\n        <ul>\n            <li><strong>Idempotent Methods:</strong> <code>GET</code>, <code>PUT</code>, <code>DELETE</code>.</li>\n            <li><strong>Non-Idempotent Methods:</strong> <code>POST</code>.</li>\n        </ul>\n        <p>To make <code>POST</code> idempotent, clients should generate a unique <code>Idempotency-Key</code> header. The server checks if it has seen this key before; if so, it returns the cached response instead of reprocessing.</p>", "id": 6}, {"title": "API Gateways & BFF", "category": "Core Concepts", "tldr": "An API Gateway is a single entry point for all clients. A BFF (Backend-For-Frontend) is an API Gateway tailored for a specific UI client (e.g., Mobile vs. Web).", "explanation": "<p>In microservice architectures, clients shouldn't communicate directly with 50 different microservices.</p>\n        <ul>\n            <li><strong>API Gateway:</strong> Handles routing, rate limiting, authentication, SSL termination, and caching. Acts as a reverse proxy.</li>\n            <li><strong>BFF Pattern:</strong> Instead of one giant API Gateway, you create multiple smaller gateways optimized for specific clients. A Mobile BFF might aggregate data differently than a Web BFF to save bandwidth.</li>\n        </ul>", "diagram": "flowchart TD\n    Web[Web Client] --> BFF_Web[Web BFF]\n    Mob[Mobile Client] --> BFF_Mob[Mobile BFF]\n    \n    BFF_Web --> Auth[Auth Service]\n    BFF_Web --> User[User Service]\n    \n    BFF_Mob --> Auth\n    BFF_Mob --> Order[Order Service]\n    \n    classDef bff fill:#3b82f6,stroke:#1e40af,color:#fff\n    classDef svc fill:#1e2535,stroke:#6366f1,color:#fff\n    \n    class BFF_Web,BFF_Mob bff\n    class Auth,User,Order svc", "id": 7}, {"title": "WebSockets vs Long Polling", "category": "Core Concepts", "tldr": "WebSockets provide a persistent, full-duplex connection. Long Polling holds an HTTP request open until data is available.", "explanation": "<p>For real-time applications (chat, stock tickers):</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Technique</th><th>Description</th><th>Best For</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Polling</td><td>Client repeatedly requests data every X seconds. High overhead.</td><td>Legacy systems.</td></tr>\n                <tr><td>Long Polling</td><td>Server holds request open until data arrives. Lower overhead but requires reconnects.</td><td>Environments where WebSockets are blocked.</td></tr>\n                <tr><td>WebSockets</td><td>Persistent TCP connection. Bidirectional communication with minimal overhead.</td><td>Chat apps, live games.</td></tr>\n                <tr><td>SSE (Server-Sent Events)</td><td>Unidirectional (Server to Client) over HTTP.</td><td>Real-time notifications, logs.</td></tr>\n            </tbody>\n        </table>", "id": 8}, {"title": "Service Discovery", "category": "Core Concepts", "tldr": "A mechanism for microservices to locate each other dynamically as their IP addresses and ports change in dynamic environments like Kubernetes.", "explanation": "<p>In modern cloud environments, instances scale up and down. Hardcoding IP addresses is impossible.</p>\n        <ul>\n            <li><strong>Service Registry:</strong> A database containing the network locations of service instances (e.g., Consul, Eureka, ZooKeeper).</li>\n            <li><strong>Client-Side Discovery:</strong> The client queries the registry and load balances the requests itself.</li>\n            <li><strong>Server-Side Discovery:</strong> The client routes through a load balancer, which queries the registry.</li>\n        </ul>\n        <p>In Kubernetes, CoreDNS and ClusterIP services handle this natively.</p>", "id": 9}, {"title": "Rate Limiting Strategies", "category": "Core Concepts", "tldr": "Techniques to control the rate of traffic sent or received by a network to prevent DoS attacks and resource exhaustion.", "explanation": "<p>Common Rate Limiting Algorithms:</p>\n        <ul>\n            <li><strong>Token Bucket:</strong> Tokens are added at a constant rate. Each request costs a token. Allows bursts of traffic.</li>\n            <li><strong>Leaky Bucket:</strong> Requests enter a queue (bucket) and are processed at a constant rate. Smooths out traffic.</li>\n            <li><strong>Fixed Window Counter:</strong> Tracks requests per minute (e.g., 00:00 to 00:01). Suffers from the \"boundary effect\" (spikes at the edge of the window).</li>\n            <li><strong>Sliding Window Log:</strong> Keeps a timestamp of every request. Extremely accurate but high memory cost.</li>\n        </ul>", "diagram": "flowchart LR\n    Req[Incoming Request] --> Check{Has Tokens?}\n    Check -->|Yes| Bucket[Token Bucket]\n    Bucket -->|Consume Token| Process[Process Request]\n    Check -->|No| Reject[Return 429 Too Many Requests]\n    \n    Refill((Refill at Constant Rate)) -.-> Bucket\n    \n    classDef process fill:#10b981,stroke:#047857,color:#fff\n    classDef reject fill:#ef4444,stroke:#b91c1c,color:#fff\n    \n    class Process process\n    class Reject reject", "id": 10}, {"title": "Relational vs NoSQL", "category": "Databases & Data Handling", "tldr": "Relational (SQL) databases use rigid schemas and tables, ensuring strong consistency. NoSQL databases use flexible data models (documents, key-value, graphs) optimized for specific access patterns and horizontal scale.", "explanation": "<p>Choosing a database is the most critical architectural decision.</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>Relational (PostgreSQL, MySQL)</th><th>NoSQL (MongoDB, DynamoDB)</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Structure</td><td>Tables with rows and columns (rigid schema)</td><td>JSON Documents, Key-Value, Wide-Column, Graph</td></tr>\n                <tr><td>Scaling</td><td>Vertical (Scale Up - bigger CPU/RAM)</td><td>Horizontal (Scale Out - more commodity servers)</td></tr>\n                <tr><td>Transactions</td><td>Strong ACID compliance</td><td>Often BASE, limited to single-document transactions</td></tr>\n                <tr><td>Use Case</td><td>Financial data, complex joins, strict integrity</td><td>Rapid prototyping, massive read/write scale, unstructured data</td></tr>\n            </tbody>\n        </table>", "diagram": "flowchart LR\n    subgraph SQL [Relational]\n        Tables[(Users Table)] --- ForeignKeys[Foreign Keys] --- Orders[(Orders Table)]\n    end\n    \n    subgraph NoSQL [Document NoSQL]\n        JSON[{ \"id\": 1, \"name\": \"Alice\", \"orders\": [...] }]\n    end\n    \n    classDef sql fill:#3b82f6,stroke:#1e40af,color:#fff\n    classDef nosql fill:#10b981,stroke:#047857,color:#fff\n    \n    class SQL sql\n    class NoSQL nosql", "id": 11}, {"title": "ACID vs BASE Properties", "category": "Databases & Data Handling", "tldr": "ACID guarantees exact data validity (relational). BASE provides high availability and accepts eventual consistency (NoSQL).", "explanation": "<p>These paradigms describe how a database handles state changes.</p>\n        <ul>\n            <li><strong>ACID:</strong>\n                <ul>\n                    <li><strong>Atomicity:</strong> All or nothing (entire transaction succeeds or fails).</li>\n                    <li><strong>Consistency:</strong> Data moves from one valid state to another.</li>\n                    <li><strong>Isolation:</strong> Concurrent transactions don't interfere with each other.</li>\n                    <li><strong>Durability:</strong> Once committed, data remains even in a crash.</li>\n                </ul>\n            </li>\n            <li><strong>BASE:</strong>\n                <ul>\n                    <li><strong>Basically Available:</strong> The system guarantees availability.</li>\n                    <li><strong>Soft State:</strong> State may change over time without input due to eventual consistency.</li>\n                    <li><strong>Eventual Consistency:</strong> The system will eventually become consistent once it stops receiving input.</li>\n                </ul>\n            </li>\n        </ul>", "id": 12}, {"title": "Database Normalization", "category": "Databases & Data Handling", "tldr": "The process of organizing data in a relational database to minimize redundancy and dependency.", "explanation": "<p>Normalization structures tables to reduce data anomalies (Insert, Update, Delete anomalies).</p>\n        <ul>\n            <li><strong>1NF (First Normal Form):</strong> Each column must contain atomic (indivisible) values. No repeating groups.</li>\n            <li><strong>2NF (Second Normal Form):</strong> Must be in 1NF. All non-key attributes must be fully functionally dependent on the primary key. (Removes partial dependencies).</li>\n            <li><strong>3NF (Third Normal Form):</strong> Must be in 2NF. All non-key attributes must be independent of other non-key attributes. (Removes transitive dependencies).</li>\n        </ul>\n        <p><em>Note: Denormalization is often applied in read-heavy applications or data warehouses to improve read performance by avoiding expensive Joins.</em></p>", "id": 13}, {"title": "Indexes and B-Trees", "category": "Databases & Data Handling", "tldr": "An index is a data structure that improves the speed of data retrieval at the cost of additional storage and slower writes. Most relational DBs use B-Trees for indexing.", "explanation": "<p>If you query a table without an index, the database must perform a <strong>Full Table Scan (O(N))</strong>. An index works like a book's index at the back.</p>\n        <ul>\n            <li><strong>B-Tree (Balanced Tree):</strong> The default index type. It keeps data sorted and allows searches, sequential access, insertions, and deletions in logarithmic time <strong>O(log N)</strong>.</li>\n            <li><strong>Hash Index:</strong> Excellent for exact match lookups (O(1)) but cannot be used for range queries (e.g., <code>age > 20</code>).</li>\n        </ul>\n        <p><strong>Trade-off:</strong> Every time you INSERT, UPDATE, or DELETE a row, the database must also update the index, making writes slower.</p>", "id": 14}, {"title": "Sharding vs Partitioning", "category": "Databases & Data Handling", "tldr": "Partitioning divides a large table into smaller, manageable pieces. Sharding is a form of horizontal partitioning where pieces are distributed across multiple servers.", "explanation": "<p>When a database gets too large for a single disk, we must split it.</p>\n        <ul>\n            <li><strong>Vertical Partitioning:</strong> Splitting columns of a table into separate tables. Used for isolating infrequently accessed columns (e.g., large text blobs).</li>\n            <li><strong>Horizontal Partitioning:</strong> Splitting rows of a table into separate tables on the same server based on a partition key (e.g., partitioned by year).</li>\n            <li><strong>Sharding:</strong> Distributing horizontally partitioned data across multiple independent database servers (nodes). Crucial for massive scale, but introduces complexity (distributed joins are very slow).</li>\n        </ul>", "diagram": "flowchart TD\n    DB[(Massive DB)] -->|Sharding| S1[(Shard 1: A-H)]\n    DB -->|Sharding| S2[(Shard 2: I-P)]\n    DB -->|Sharding| S3[(Shard 3: Q-Z)]\n    \n    classDef db fill:#1e2535,stroke:#6366f1,stroke-width:2px,color:#fff\n    class DB,S1,S2,S3 db", "id": 15}, {"title": "Database Replication", "category": "Databases & Data Handling", "tldr": "Copying data across multiple servers to improve read performance, ensure high availability, and provide disaster recovery.", "explanation": "<p>Replication ensures that if one server dies, data is not lost.</p>\n        <ul>\n            <li><strong>Master-Slave (Leader-Follower):</strong> One node handles all Writes. Changes are replicated asynchronously to Slave nodes. Slaves handle Read requests. Great for read-heavy apps. <em>Risk: Data lag on slaves.</em></li>\n            <li><strong>Multi-Master (Leader-Leader):</strong> Multiple nodes accept Writes. Highly available for writes, but conflict resolution (when two nodes write to the same record) is highly complex.</li>\n        </ul>", "id": 16}, {"title": "CAP Theorem", "category": "Databases & Data Handling", "tldr": "A distributed system can only provide two of three guarantees simultaneously: Consistency, Availability, and Partition Tolerance.", "explanation": "<p>In distributed systems, network partitions (P) are inevitable (networks will fail). Therefore, you must choose between C and A.</p>\n        <ul>\n            <li><strong>CP (Consistency & Partition Tolerance):</strong> If a network fails, the system blocks requests (reducing availability) until it can guarantee consistency. <em>(e.g., MongoDB, HBase, Redis Cluster)</em></li>\n            <li><strong>AP (Availability & Partition Tolerance):</strong> The system returns the most recent data available, even if it's stale (sacrificing consistency). <em>(e.g., Cassandra, DynamoDB, CouchDB)</em></li>\n            <li><strong>CA:</strong> A single-node relational database. Cannot survive network partitions.</li>\n        </ul>", "id": 17}, {"title": "PACELC Theorem", "category": "Databases & Data Handling", "tldr": "An extension of CAP. If there is a Partition (P), how does the system trade off Availability (A) and Consistency (C)? Else (E), when the system is running normally, how does it trade off Latency (L) and Consistency (C)?", "explanation": "<p>CAP only applies when there's a failure. PACELC explains what happens during normal operations.</p>\n        <p><strong>Example: DynamoDB (PA/EL)</strong></p>\n        <ul>\n            <li>Under a Partition (P), it chooses Availability (A).</li>\n            <li>Else (E), under normal operations, it chooses Latency (L) over strong Consistency (C) (yielding eventual consistency for faster reads).</li>\n        </ul>", "id": 18}, {"title": "Optimistic vs Pessimistic Locking", "category": "Databases & Data Handling", "tldr": "Strategies for handling concurrent updates. Optimistic checks for conflicts before committing. Pessimistic locks the record the moment it's read.", "explanation": "<p>When two users try to buy the last concert ticket simultaneously, how do you prevent double-selling?</p>\n        <ul>\n            <li><strong>Optimistic Locking:</strong> Assumes conflicts are rare. Adds a <code>version</code> column. Both users read version 1. User A updates and increments to version 2. User B tries to update version 1, but the DB sees it's now version 2 and rejects User B.</li>\n            <li><strong>Pessimistic Locking:</strong> Assumes conflicts are common. Uses <code>SELECT ... FOR UPDATE</code>. User A reads and locks the row. User B's read is blocked until User A finishes their transaction. Slower, but prevents conflicts entirely.</li>\n        </ul>", "id": 19}, {"title": "Change Data Capture (CDC)", "category": "Databases & Data Handling", "tldr": "A design pattern used to track and propagate data changes (INSERT, UPDATE, DELETE) in a database to downstream systems in real-time.", "explanation": "<p>Instead of doing expensive batch queries (e.g., \"give me all users updated in the last 10 minutes\"), CDC listens to the database's internal transaction log (like PostgreSQL's WAL or MySQL's Binlog).</p>\n        <p><strong>Use Cases:</strong></p>\n        <ul>\n            <li>Keeping a search index (Elasticsearch) in sync with a primary database.</li>\n            <li>Updating an in-memory cache (Redis) automatically when DB data changes.</li>\n            <li>Streaming data to an analytical data warehouse.</li>\n        </ul>\n        <p><em>Debezium</em> is the industry standard open-source tool for CDC.</p>", "id": 20}, {"title": "Cache Invalidation & Eviction", "category": "Caching & Performance", "tldr": "Eviction decides which data leaves when memory is full (e.g., LRU). Invalidation is actively removing data because the underlying database record changed.", "explanation": "<p>Phil Karlton famously said: <em>\"There are only two hard things in Computer Science: cache invalidation and naming things.\"</em></p>\n        <p><strong>Eviction Policies (When full):</strong></p>\n        <ul>\n            <li><strong>LRU (Least Recently Used):</strong> Discards items accessed furthest in the past. The most common algorithm.</li>\n            <li><strong>LFU (Least Frequently Used):</strong> Discards items accessed least often overall.</li>\n            <li><strong>FIFO (First In, First Out):</strong> Evicts the oldest items in the cache regardless of usage.</li>\n        </ul>\n        <p><strong>Invalidation Strategies (Keeping data fresh):</strong></p>\n        <ul>\n            <li><strong>Write-Through:</strong> Data is written into the cache and the database simultaneously. High write latency, but ensures strong consistency.</li>\n            <li><strong>Write-Around:</strong> Data goes directly to the DB, bypassing the cache. Cache is updated only on a cache miss.</li>\n            <li><strong>Write-Back:</strong> Data is written to the cache immediately and confirmed to the client. The cache asynchronously writes to the DB. High risk of data loss on crash.</li>\n        </ul>", "id": 21}, {"title": "Redis vs Memcached", "category": "Caching & Performance", "tldr": "Both are fast, in-memory data stores. Memcached is simple and strictly for caching strings. Redis is an advanced data structure server with persistence capabilities.", "explanation": "<p>When choosing an in-memory cache:</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>Redis</th><th>Memcached</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Data Structures</td><td>Strings, Hashes, Lists, Sets, Sorted Sets, Bitmaps</td><td>Only Strings (Key-Value)</td></tr>\n                <tr><td>Persistence</td><td>Yes (RDB Snapshots and AOF logs)</td><td>No (Volatile only)</td></tr>\n                <tr><td>Pub/Sub Support</td><td>Yes</td><td>No</td></tr>\n                <tr><td>Threading</td><td>Single-threaded (avoids locks)</td><td>Multi-threaded (scales better vertically)</td></tr>\n            </tbody>\n        </table>\n        <p><strong>Verdict:</strong> Use Memcached if you literally just need a dumb, lightning-fast HTML/JSON string cache. Use Redis for virtually everything else (queues, leaderboards, sessions, geospacial data).</p>", "id": 22}, {"title": "CDN (Content Delivery Network)", "category": "Caching & Performance", "tldr": "A geographically distributed network of proxy servers that cache static assets closer to the end user to reduce latency.", "explanation": "<p>If your server is in New York, a user in Tokyo will experience 200ms+ latency just to download your logo. CDNs solve this.</p>\n        <ul>\n            <li><strong>Edge Servers:</strong> The servers located near the users (e.g., in Tokyo).</li>\n            <li><strong>Origin Server:</strong> Your actual backend server in New York.</li>\n        </ul>\n        <p>When a user requests an image, the Edge Server intercepts it. If cached (Cache Hit), it serves it immediately (10ms). If not (Cache Miss), it pulls from the Origin, caches it, and serves it.</p>\n        <p><em>Modern CDNs (Cloudflare, Fastly) can also cache dynamic API responses and execute edge compute functions (WebAssembly/V8 Isolates).</em></p>", "diagram": "flowchart LR\n    User[User in Tokyo] -->|Requests Image| Edge[Edge Server (Tokyo)]\n    Edge -->|Cache Miss| Origin[Origin Server (New York)]\n    Origin -->|Returns Image| Edge\n    Edge -->|Caches & Returns| User\n    \n    User2[User 2 in Tokyo] -->|Requests Image| Edge\n    Edge -->|Cache Hit (Fast!)| User2\n    \n    classDef edge fill:#f59e0b,stroke:#b45309,color:#fff\n    classDef origin fill:#1e2535,stroke:#6366f1,color:#fff\n    \n    class Edge edge\n    class Origin origin", "id": 23}, {"title": "Message Queues vs Event Streams", "category": "Systems & Scaling", "tldr": "Queues (RabbitMQ) are for executing tasks where messages are consumed and deleted. Streams (Kafka) are an immutable log of events that multiple consumers can read and replay.", "explanation": "<p>Both are forms of asynchronous communication, but their semantics are drastically different.</p>\n        <ul>\n            <li><strong>Message Queues (Command pattern):</strong> \"Service A tells Service B to Send an Email.\" Once Service B reads the message, it is acknowledged and removed from the queue. Great for task distribution (worker pools).</li>\n            <li><strong>Event Streams (Event-driven pattern):</strong> \"Service A announces a User was Created.\" The event is appended to a log. It is NOT deleted when read. Service B (Email), Service C (Analytics), and Service D (Billing) can all independently read the same event from the log at different speeds.</li>\n        </ul>", "id": 24}, {"title": "Kafka vs RabbitMQ", "category": "Systems & Scaling", "tldr": "RabbitMQ is a traditional message broker focusing on complex routing. Kafka is a distributed event streaming platform built for massive throughput and replayability.", "explanation": "<p>Choosing the right broker prevents architectural headaches later.</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>RabbitMQ (Queue)</th><th>Apache Kafka (Stream)</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Architecture</td><td>Smart Broker, Dumb Consumers</td><td>Dumb Broker, Smart Consumers</td></tr>\n                <tr><td>Data Retention</td><td>Deleted after acknowledgment</td><td>Retained based on time/size (Replayable)</td></tr>\n                <tr><td>Throughput</td><td>10K - 50K msgs/sec</td><td>100K - 1M+ msgs/sec</td></tr>\n                <tr><td>Routing</td><td>Complex (Direct, Topic, Fanout exchanges)</td><td>Simple (Topics/Partitions)</td></tr>\n            </tbody>\n        </table>", "id": 25}, {"title": "Forward vs Reverse Proxy", "category": "Systems & Scaling", "tldr": "A Forward Proxy protects the client. A Reverse Proxy protects the server.", "explanation": "<p>Proxies act as intermediaries in network traffic.</p>\n        <ul>\n            <li><strong>Forward Proxy:</strong> Sits in front of client machines. When an employee tries to visit a website, the request goes through the corporate forward proxy. The internet only sees the proxy's IP. Used for content filtering, anonymity (VPNs), and corporate security.</li>\n            <li><strong>Reverse Proxy:</strong> Sits in front of backend servers. When a user tries to visit your website, they hit the reverse proxy (like Nginx). The proxy then forwards the request to the appropriate backend server. Used for load balancing, SSL termination, caching, and hiding internal architecture.</li>\n        </ul>", "diagram": "flowchart LR\n    subgraph Forward Proxy Setup\n        Client1[Client] --> FProxy[Forward Proxy]\n        FProxy --> Int1((Internet))\n    end\n    \n    subgraph Reverse Proxy Setup\n        Int2((Internet)) --> RProxy[Reverse Proxy (Nginx)]\n        RProxy --> Srv1[Server A]\n        RProxy --> Srv2[Server B]\n    end\n    \n    classDef proxy fill:#3b82f6,stroke:#1e40af,color:#fff\n    class FProxy,RProxy proxy", "id": 26}, {"title": "Load Balancing Algorithms", "category": "Systems & Scaling", "tldr": "Techniques used by a Load Balancer to distribute incoming traffic efficiently across multiple backend servers.", "explanation": "<p>A reverse proxy is useless if it sends all traffic to one node.</p>\n        <ul>\n            <li><strong>Round Robin:</strong> Distributes requests sequentially (Server A, then B, then C, repeat). Bad if servers have different capacities.</li>\n            <li><strong>Least Connections:</strong> Sends the request to the server with the fewest active connections. Great for long-lived requests (like WebSockets).</li>\n            <li><strong>IP Hash:</strong> Uses a hash of the client's IP address to determine the server. Guarantees a specific client always hits the same server (Sticky Sessions). Useful for legacy stateful apps.</li>\n            <li><strong>Weighted Round Robin:</strong> Assigns a weight to each server. A server with weight 3 gets 3 times more requests than a server with weight 1.</li>\n        </ul>", "id": 27}, {"title": "Horizontal vs Vertical Scaling", "category": "Systems & Scaling", "tldr": "Vertical scaling (Scale Up) means adding more power to one machine. Horizontal scaling (Scale Out) means adding more machines to the pool.", "explanation": "<p>How do you handle increased traffic?</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Aspect</th><th>Vertical Scaling (Scale Up)</th><th>Horizontal Scaling (Scale Out)</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>How?</td><td>Upgrade CPU, RAM, or Disk</td><td>Add more servers behind a load balancer</td></tr>\n                <tr><td>Limits</td><td>Hardware constraints (can't have infinite RAM)</td><td>Theoretically infinite</td></tr>\n                <tr><td>Downtime</td><td>Requires restarting the server</td><td>Zero downtime (add nodes dynamically)</td></tr>\n                <tr><td>Complexity</td><td>Very low (code doesn't change)</td><td>High (requires stateless architecture, distributed databases)</td></tr>\n            </tbody>\n        </table>", "id": 28}, {"title": "Microservices vs Monolith", "category": "Systems & Scaling", "tldr": "Monoliths package all features into one deployable unit. Microservices split features into independent, network-communicating services.", "explanation": "<p>The architectural pendulum.</p>\n        <ul>\n            <li><strong>Monolith:</strong> Simple to develop, test, and deploy initially. However, as the team grows, merge conflicts explode, the codebase becomes spaghetti, and scaling requires copying the entire app even if only the \"Billing\" feature is under load.</li>\n            <li><strong>Microservices:</strong> Services are split by business domain. Independent deployments, independent scaling, and you can use different languages. <em>The massive downside:</em> Operational complexity, network latency, distributed debugging, and complex data joins.</li>\n        </ul>\n        <p><strong>Rule of thumb:</strong> Start with a modular monolith. Extract microservices only when organizational scaling or severe performance bottlenecks demand it.</p>", "id": 29}, {"title": "Serverless Architecture", "category": "Systems & Scaling", "tldr": "An execution model where the cloud provider dynamically manages the allocation and provisioning of servers (e.g., AWS Lambda). You only pay for exact compute time used.", "explanation": "<p>\"Serverless\" does not mean no servers; it means you don't manage them.</p>\n        <ul>\n            <li><strong>Pros:</strong> Zero maintenance, auto-scaling to thousands of concurrent requests instantly, and extremely cheap for low-traffic applications (pay per millisecond).</li>\n            <li><strong>Cons:</strong> \"Cold Starts\" (the delay when a function is invoked after being idle), vendor lock-in, and terrible pricing for highly predictable, constant, heavy workloads (a dedicated EC2 instance is cheaper for 24/7 heavy CPU usage).</li>\n        </ul>", "id": 30}, {"title": "Circuit Breaker Pattern", "category": "Reliability & Real-World Problems", "tldr": "A design pattern that prevents an application from repeatedly trying to execute an operation that's likely to fail, saving system resources and preventing cascading failures.", "explanation": "<p>When Service A calls Service B, and Service B is down, Service A will hang until it times out. If 1,000 requests hit Service A, it will exhaust its threads waiting for B, causing Service A to crash too (Cascading Failure).</p>\n        <p>A Circuit Breaker wraps the network call and monitors for failures:</p>\n        <ul>\n            <li><strong>Closed:</strong> Everything is fine. Requests flow normally.</li>\n            <li><strong>Open:</strong> The failure threshold is reached (e.g., 5 timeouts). The breaker \"trips\". All subsequent requests immediately fail (Fail Fast) without even trying to hit Service B.</li>\n            <li><strong>Half-Open:</strong> After a timeout, the breaker lets a single test request through. If it succeeds, the breaker resets to Closed. If it fails, it goes back to Open.</li>\n        </ul>", "diagram": "flowchart TD\n    Req[Incoming Request] --> CB{Circuit Breaker State}\n    CB -->|Closed| Call[Call External Service]\n    CB -->|Open| Fail[Immediate Fallback / Error]\n    CB -->|Half-Open| Test[Send 1 Test Request]\n    \n    Test -->|Success| Reset[Reset to Closed]\n    Test -->|Fail| Open[Back to Open]\n    \n    classDef state fill:#1e2535,stroke:#6366f1,color:#fff\n    class CB state", "id": 31}, {"title": "Rate Limiting vs Throttling", "category": "Reliability & Real-World Problems", "tldr": "Rate limiting restricts the total number of requests a user can make. Throttling slows down the processing of requests rather than outright rejecting them.", "explanation": "<p>Both control traffic, but their UX impact differs.</p>\n        <ul>\n            <li><strong>Rate Limiting:</strong> \"You can only make 100 API calls per minute.\" If you make 101, you get an HTTP 429 (Too Many Requests) error. It's a hard stop.</li>\n            <li><strong>Throttling:</strong> \"We will process your data, but we're going to do it slowly to save bandwidth.\" Think of an ISP slowing down your internet speed after you hit a data cap. The request succeeds, but at a degraded performance level.</li>\n        </ul>", "id": 32}, {"title": "Saga Pattern (Distributed Transactions)", "category": "Reliability & Real-World Problems", "tldr": "A sequence of local transactions where each transaction updates data within a single service. If a step fails, compensating transactions are triggered to undo preceding steps.", "explanation": "<p>In a monolith, you use ACID transactions. In microservices, you cannot wrap a database commit around three different databases spanning three services.</p>\n        <p><strong>Example (E-Commerce):</strong></p>\n        <ol>\n            <li>Order Service creates Order (Pending).</li>\n            <li>Inventory Service reserves items.</li>\n            <li>Payment Service charges credit card. <em>(Fails due to insufficient funds)</em></li>\n        </ol>\n        <p>Because Payment failed, a <strong>Compensating Transaction</strong> must be sent backward: Inventory Service must un-reserve the items, and Order Service must mark the Order as Failed. This is eventually consistent.</p>", "id": 33}, {"title": "Race Conditions", "category": "Reliability & Real-World Problems", "tldr": "A flaw that occurs when the timing of events affects the correctness of an operation, usually happening when multiple threads access and mutate shared data concurrently.", "explanation": "<p><strong>The classic ATM problem:</strong></p>\n        <ul>\n            <li>Account Balance is $100.</li>\n            <li>Thread A reads $100. Thread B reads $100.</li>\n            <li>Thread A subtracts $50 and writes $50.</li>\n            <li>Thread B subtracts $40 and writes $60 (overwriting Thread A's math!).</li>\n            <li>Final balance is $60 instead of $10.</li>\n        </ul>\n        <p><strong>Solutions:</strong> Use Database Locks (Pessimistic/Optimistic), Atomic Operations (e.g., Redis `INCR`), or synchronize thread access in code (Mutexes).</p>", "id": 34}, {"title": "Deadlocks", "category": "Reliability & Real-World Problems", "tldr": "A situation where two or more processes are unable to proceed because each is waiting for the other to release a resource.", "explanation": "<p>Deadlocks freeze systems completely.</p>\n        <p><strong>Scenario:</strong></p>\n        <ul>\n            <li>Process 1 locks Table A, and needs Table B to finish.</li>\n            <li>Process 2 locks Table B, and needs Table A to finish.</li>\n            <li>They wait for each other infinitely.</li>\n        </ul>\n        <p><strong>Prevention:</strong> Always acquire locks in the same hierarchical order across the entire application (e.g., always lock A before B). Use lock timeouts so transactions eventually fail rather than hanging forever.</p>", "id": 35}, {"title": "Polling vs Webhooks", "category": "Reliability & Real-World Problems", "tldr": "Polling is the client constantly asking the server if an event happened. A Webhook is the server telling the client exactly when the event happens.", "explanation": "<p>When waiting for a third-party event (e.g., waiting for Stripe to confirm a payment):</p>\n        <table class=\"comparison-table\">\n            <thead>\n                <tr><th>Feature</th><th>Polling</th><th>Webhooks</th></tr>\n            </thead>\n            <tbody>\n                <tr><td>Mechanism</td><td>Client: \"Is it done yet?\" (Every 5 secs)</td><td>Server: \"Hey Client, it's done. Here's the data.\"</td></tr>\n                <tr><td>Overhead</td><td>Very High (99% of requests return \"No\")</td><td>Very Low (1 request upon completion)</td></tr>\n                <tr><td>Latency</td><td>Delayed up to the polling interval</td><td>Real-time</td></tr>\n                <tr><td>Setup</td><td>Simple</td><td>Requires the client to expose a public endpoint</td></tr>\n            </tbody>\n        </table>", "id": 36}, {"title": "Single Point of Failure (SPOF)", "category": "Reliability & Real-World Problems", "tldr": "A part of a system that, if it fails, will stop the entire system from working.", "explanation": "<p>System design interviews heavily scrutinize SPOFs.</p>\n        <p><strong>Common SPOFs:</strong></p>\n        <ul>\n            <li>A single un-replicated relational database.</li>\n            <li>A single Load Balancer routing all traffic.</li>\n            <li>A single availability zone (Data Center).</li>\n        </ul>\n        <p><strong>Mitigation:</strong> Redundancy. Deploy multiple load balancers, use database replication (Master-Slave), and deploy across Multi-AZ (Availability Zones).</p>", "id": 37}, {"title": "Disaster Recovery: RTO vs RPO", "category": "Reliability & Real-World Problems", "tldr": "Metrics that define business continuity. RTO is how fast you must recover. RPO is how much data you can afford to lose.", "explanation": "<p>When the database server literally catches fire:</p>\n        <ul>\n            <li><strong>RTO (Recovery Time Objective):</strong> The maximum acceptable downtime. If RTO is 1 hour, your system must be back online in 1 hour. Requires automated failover scripts.</li>\n            <li><strong>RPO (Recovery Point Objective):</strong> The maximum acceptable data loss, measured in time. If RPO is 15 minutes, you must back up data every 15 minutes. If a crash happens, you lose at most 15 minutes of user data.</li>\n        </ul>\n        <p><em>Lowering RTO and RPO to near-zero requires active-active multi-region deployments, which is astronomically expensive.</em></p>", "id": 38}, {"title": "Observability (Logs, Metrics, Traces)", "category": "Reliability & Real-World Problems", "tldr": "The Three Pillars of Observability allow engineers to understand the internal state of a system from the outside.", "explanation": "<p>Monitoring tells you a system is broken. Observability tells you <em>why</em>.</p>\n        <ul>\n            <li><strong>Logs:</strong> Discrete records of events (e.g., \"User 123 failed login at 10:04 AM\"). Tools: ELK Stack, Splunk, Datadog.</li>\n            <li><strong>Metrics:</strong> Aggregated numeric data over time (e.g., \"CPU is at 95%\", \"500 errors spiked\"). Highly efficient to store. Tools: Prometheus, Grafana.</li>\n            <li><strong>Distributed Traces:</strong> Tracks the lifecycle of a single request as it jumps across 10 different microservices. Identifies exactly which service is causing the latency. Tools: Jaeger, OpenTelemetry.</li>\n        </ul>", "diagram": "flowchart LR\n    Req[Request] --> S1[Service 1]\n    S1 -->|Span A: 50ms| S2[Service 2]\n    S2 -->|Span B: 200ms| DB[(Database)]\n    S1 -->|Span C: 10ms| Cache[(Redis)]\n    \n    classDef trace fill:#1e2535,stroke:#a855f7,stroke-width:2px,color:#fff\n    class S1,S2,DB,Cache trace", "id": 39}, {"title": "Blue-Green vs Canary Deployments", "category": "Reliability & Real-World Problems", "tldr": "Deployment strategies that eliminate downtime and reduce the risk of deploying broken code to production.", "explanation": "<p>Replacing code on a live server causes dropped requests. Advanced routing solves this.</p>\n        <ul>\n            <li><strong>Blue-Green Deployment:</strong> You have two identical production environments. Blue is currently live. You deploy new code to Green. Once tested, you flip the router to point 100% of traffic to Green. If something breaks, flip back to Blue instantly.</li>\n            <li><strong>Canary Release:</strong> You route a tiny subset of traffic (e.g., 5%) to the new version (the Canary). If error rates are stable, you slowly ramp up traffic (10%, 25%, 100%). Identifies bugs without affecting the entire user base.</li>\n        </ul>", "id": 40}];
+let curQ = 0;
+
+function getCatColor(cat) {
+  if(cat === 'Core Concepts') return '#6366f1';
+  if(cat === 'Databases & Data Handling') return '#10b981';
+  if(cat === 'Caching & Performance') return '#f59e0b';
+  if(cat === 'Systems & Scaling') return '#3b82f6';
+  if(cat === 'Reliability & Real-World Problems') return '#ef4444';
+  return '#ffffff';
+}
+
+function initList() {
+  const ml = document.getElementById('moblist');
+  const dl = document.getElementById('deskqlist');
+  ml.innerHTML = ''; dl.innerHTML = '';
+  
+  let curCat = '';
+  
+  QS.forEach(q => {
+    if (q.category !== curCat) {
+      curCat = q.category;
+      const catHTML = `<div style="font-size:0.65rem;font-weight:700;color:#9ca3af;text-transform:uppercase;margin:1rem 0 0.3rem 0.6rem;letter-spacing:0.05em">${curCat}</div>`;
+      dl.innerHTML += catHTML;
+      ml.innerHTML += catHTML;
+    }
+  
+    const qn = q.id < 10 ? '0'+q.id : q.id;
+    const catColor = getCatColor(q.category);
+    
+    const html = `<div class="qi" id="qi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+      <span class="qn">${qn}</span>
+      <span class="qt">${q.title}</span>
+      <span class="fdot" style="background:${catColor}"></span>
+    </div>`;
+    dl.innerHTML += html;
+    
+    const mhtml = `<div class="qi mob-qi" id="mqi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+      <span class="qn">${qn}</span>
+      <span class="qt">${q.title}</span>
+      <span class="fdot" style="background:${catColor}"></span>
+    </div>`;
+    ml.innerHTML += mhtml;
+  });
+}
+
+function showQ(id) {
+  curQ = id;
+  const q = QS.find(x => x.id === id);
+  if (!q) return;
+  
+  closeMob();
+  document.getElementById('welcome').style.display = 'none';
+  
+  document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+  const dqi = document.getElementById('qi-'+id);
+  const mqi = document.getElementById('mqi-'+id);
+  if(dqi) dqi.classList.add('active');
+  if(mqi) mqi.classList.add('active');
+  
+  const qn = q.id < 10 ? '0'+q.id : q.id;
+  const pct = Math.round((q.id / QS.length) * 100);
+  const catColor = getCatColor(q.category);
+  
+  let badgesHTML = `<span class="fbadge" style="color:${catColor};border-color:${catColor}55;background:${catColor}15">${q.category}</span>`;
+  
+  let navHTML = '';
+  if (id > 1) {
+    const prev = QS.find(x => x.id === id - 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id-1})">&larr; Previous<br><span style="color:#8b949e;font-size:0.65rem">${prev.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">&larr; Previous</button>`;
+  }
+  
+  if (id < QS.length) {
+    const next = QS.find(x => x.id === id + 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id+1})">Next &rarr;<br><span style="color:#8b949e;font-size:0.65rem">${next.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">Next &rarr;</button>`;
+  }
+  
+  let mermaidHtml = '';
+  if (q.diagram) {
+     mermaidHtml = `<div class="slabel">Visualization</div>
+     <div class="mermaid-container"><pre class="mermaid" id="mermaid-canvas-${q.id}">${q.diagram}</pre></div>`;
+  }
+  
+  const content = `
+    <div class="prog-strip"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div class="badges">${badgesHTML}</div>
+    <div class="qhead">
+      <div class="qnum">${qn}</div>
+      <div class="qtitle">${q.title}</div>
+    </div>
+    
+    <div class="tldr"><strong>TL;DR:</strong> ${q.tldr}</div>
+    
+    <div class="slabel">Deep Dive</div>
+    <div class="explanation">${q.explanation}</div>
+    
+    ${mermaidHtml}
+    
+    <div class="navrow">${navHTML}</div>
+  `;
+  
+  document.getElementById('qcontent').innerHTML = content;
+  document.getElementById('mainwrap').scrollTop = 0;
+  
+  if (q.diagram && window.renderMermaid) {
+    setTimeout(() => window.renderMermaid(`mermaid-canvas-${q.id}`), 50);
+  }
+  
+  if(dqi) {
+    const sb = document.querySelector('.sidebar');
+    const offset = dqi.offsetTop - sb.offsetTop;
+    if (offset < sb.scrollTop || offset > sb.scrollTop + sb.clientHeight - 40) {
+      sb.scrollTop = offset - 100;
+    }
+  }
+}
+
+function openMob() {
+  document.getElementById('moboverlay').classList.add('open');
+}
+function closeMob() {
+  document.getElementById('moboverlay').classList.remove('open');
+}
+
+function doSearch(val, source) {
+  if (source === 'desk') {
+    document.getElementById('msrch').value = val;
+  } else {
+    document.getElementById('dsrch').value = val;
+  }
+  val = val.toLowerCase();
+  
+  document.querySelectorAll('.qi').forEach(el => {
+    const qid = parseInt(el.id.replace('qi-','').replace('mqi-',''));
+    const q = QS.find(x => x.id === qid);
+    if(!q) return;
+    
+    if (val && !q.title.toLowerCase().includes(val) && !q.category.toLowerCase().includes(val)) {
+      el.classList.add('hidden');
+    } else {
+      el.classList.remove('hidden');
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (curQ > 0) {
+    if (e.key === 'ArrowDown' || e.key === 'j') {
+      if (curQ < QS.length) { showQ(curQ + 1); e.preventDefault(); }
+    } else if (e.key === 'ArrowUp' || e.key === 'k') {
+      if (curQ > 1) { showQ(curQ - 1); e.preventDefault(); }
+    }
+  }
+});
+
+initList();
+</script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: false, 
+    theme: 'base',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#1e2535',
+      primaryTextColor: '#ffffff',
+      primaryBorderColor: '#6366f1',
+      lineColor: '#6366f1',
+      secondaryColor: '#161b27',
+      tertiaryColor: '#161b27',
+      fontFamily: '"JetBrains Mono", monospace'
+    },
+    flowchart: { curve: 'basis', padding: 25 }
+  });
+  window.renderMermaid = async function(id) {
+    try {
+      await mermaid.run({ querySelector: '#' + id });
+    } catch(e) { console.error(e); }
+  };
+</script>
+</body>
+</html>
