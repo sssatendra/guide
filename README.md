@@ -66,6 +66,10 @@ A curated collection of high-fidelity, senior-level engineering guides. Designed
 - **Level**: Senior+
 - **Focus**: APIs, Database Internals, Scaling, Caching, and Real-World Reliability.
 
+### [Data Structures & Algorithms Guide](dsa-guide.html)
+- **Level**: All Levels
+- **Focus**: Top FAANG Questions, Pattern Recognition, Python & JavaScript Implementations.
+
 ---
 
 ## 🛠️ Technology Stack
