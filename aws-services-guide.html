@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AWS Services Deep Dive — S3, EKS, IAM, Aurora, Lambda</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+
+.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
+.logo{font-size:.95rem;font-weight:700;color:#ff9900}
+.logo span{color:#9ca3af;font-weight:400;font-size:.78rem}
+.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
+.srch:focus{border-color:#ff9900;background:#252d40}
+.srch::placeholder{color:#6b7280}
+.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#9ca3af;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#252d40;color:#ff9900;border-color:#ff990055}
+.mob-toggle{display:none;background:#ff9900;border:none;border-radius:8px;padding:.38rem .75rem;color:#000;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;gap:.35rem;align-items:center;white-space:nowrap}
+
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:300px;min-width:300px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
+.sb-inner{padding:.4rem .35rem}
+.main{flex:1;overflow-y:auto}
+.wrap{padding:1.5rem 2rem 2rem;max-width:1000px}
+
+.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.mob-header-title{font-size:.9rem;font-weight:700;color:#ffffff}
+.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
+.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
+.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
+.mob-search input:focus{border-color:#ff9900}
+.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+
+.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
+.qi:hover{background:#1e2535;border-color:#2a3348}
+.qi.active{background:#1e2535;border-left:3px solid #ff9900;border-color:#ff990033}
+.qi.hidden{display:none}
+.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#4b5563;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:#ff9900}
+.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1}
+.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome h2{font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
+.welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
+
+.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.qnum{background:#ff9900;color:#000;font-size:.67rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
+.qtitle{font-size:1.1rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
+.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;align-items:center}
+.fbadge{font-size:.66rem;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:600;color:#ffffff}
+.def-section{background:#1e2535;border-left:3px solid #ff9900;border-radius:0 8px 8px 0;padding:.85rem 1rem;font-size:.83rem;line-height:1.8;color:#ffffff;margin-bottom:1.2rem}
+.def-section strong{color:#ff9900}
+.slabel{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#6b7280;text-transform:uppercase;margin:1.2rem 0 .6rem;padding-left:2px}
+.code-block{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:1rem;margin-bottom:1.2rem;overflow-x:auto;max-height:300px;overflow-y:auto}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#ffffff;line-height:1.5;display:block;white-space:pre;word-break:break-word}
+.expl-box{background:#1a1f2e;border:1px solid #2a3348;border-radius:8px;padding:.85rem;margin-bottom:1.2rem;font-size:.8rem;color:#e5e7eb;line-height:1.7}
+.expl-box strong{color:#ff9900}
+.arch-box{background:#1a3a3a;border:1px solid #1e6262;border-radius:8px;padding:1rem;margin-bottom:1.2rem;font-size:.8rem;color:#e5e7eb;line-height:1.7;border-left:3px solid #06b6d4}
+.arch-box strong{color:#06b6d4}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
+.io-box{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
+.io-box h5{color:#34d399;font-size:.7rem;font-weight:700;margin-bottom:.4rem;text-transform:uppercase}
+.io-box code{background:#0f1117;border:1px solid #2a3348;border-radius:4px;padding:.25rem .5rem;display:block;margin:.25rem 0;font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#ffffff;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto}
+.realworld-box{background:#2a1a1a;border-left:3px solid #ff9900;border-radius:0 8px 8px 0;padding:1rem;margin-bottom:1.2rem;font-size:.8rem;line-height:1.7}
+.realworld-box strong{color:#ff9900}
+.navrow{display:flex;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #2a3348}
+.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.6rem .8rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45;color:#ffffff}
+.nbtn:hover{background:#252d40;color:#ffffff;border-color:#ff9900}
+.nbtn.off{opacity:.25;pointer-events:none}
+
+@media(max-width:768px){
+  .layout{display:block;height:auto}
+  .sidebar{display:none}
+  .main{width:100%}
+  .wrap{padding:1rem .75rem 2rem}
+  .mob-toggle{display:flex}
+  .mob-overlay.open{display:flex}
+  .io-grid{grid-template-columns:1fr}
+  .fbtn:not(.mob-toggle){display:none}
+  .srch{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">AWS <span>Cloud Mastery</span></div>
+  <div class="topbar-right">
+    <input type="text" class="srch" id="searchbox" placeholder="Search services...">
+    <button class="fbtn" onclick="toggleFilter('all')" id="filter-all">All</button>
+    <button class="fbtn" onclick="toggleFilter('storage')" id="filter-storage">Storage</button>
+    <button class="fbtn" onclick="toggleFilter('container')" id="filter-container">Container</button>
+    <button class="fbtn" onclick="toggleFilter('compute')" id="filter-compute">Compute</button>
+    <button class="fbtn" onclick="toggleFilter('database')" id="filter-db">Database</button>
+    <button class="fbtn" onclick="toggleFilter('security')" id="filter-security">Security</button>
+    <button class="mob-toggle" onclick="toggleMobOverlay()">☰ Menu</button>
+  </div>
+</div>
+
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-header-title">AWS Services</div>
+    <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
+  </div>
+  <div class="mob-search">
+    <input type="text" id="searchbox-mob" placeholder="Search services..." onkeyup="filterQuestions()">
+  </div>
+  <div class="mob-list" id="moblist"></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="deskqlist"></div></div>
+  <div class="main">
+    <div class="wrap" id="content"></div>
+  </div>
+</div>
+
+<script>
+const topics = [
+  {id:1,title:"S3 — Object Storage Fundamentals",cat:"storage",type:"Core"},
+  {id:2,title:"S3 — Advanced Features & Optimization",cat:"storage",type:"Advanced"},
+  {id:3,title:"IAM — Identity & Access Management",cat:"security",type:"Core"},
+  {id:4,title:"IAM — Policies, Roles & Best Practices",cat:"security",type:"Advanced"},
+  {id:5,title:"Lambda — Serverless Computing",cat:"compute",type:"Core"},
+  {id:6,title:"Lambda — Advanced Patterns & Optimization",cat:"compute",type:"Advanced"},
+  {id:7,title:"ECS — Container Orchestration",cat:"container",type:"Core"},
+  {id:8,title:"EKS — Kubernetes on AWS",cat:"container",type:"Advanced"},
+  {id:9,title:"Aurora PostgreSQL — Database",cat:"database",type:"Core"},
+  {id:10,title:"Aurora — Advanced Features & Replication",cat:"database",type:"Advanced"},
+  {id:11,title:"VPC, Networking & Security Groups",cat:"security",type:"Core"},
+  {id:12,title:"CloudWatch, Monitoring & Logging",cat:"security",type:"Core"},
+  {id:13,title:"Real-World: Serverless Data Pipeline",cat:"compute",type:"Project"},
+  {id:14,title:"Real-World: Kubernetes on AWS",cat:"container",type:"Project"},
+];
+
+const content = {
+  1:{
+    title:"S3 — Object Storage Fundamentals",
+    def:"Amazon S3 (Simple Storage Service) is a highly available, durable object storage service. Objects are stored in buckets with unique keys, accessible via HTTP/HTTPS. Built on 11 nines of durability.",
+    badges:["Storage","Object Storage","AWS Core"],
+    examples:[
+      {title:"Creating & Using S3 Buckets",code:`import boto3
+
+# Initialize S3 client
+s3 = boto3.client('s3')
+
+# Create bucket
+s3.create_bucket(
+    Bucket='my-data-bucket',
+    CreateBucketConfiguration={'LocationConstraint': 'us-east-1'}
+)
+
+# Upload object
+s3.put_object(
+    Bucket='my-data-bucket',
+    Key='data/users.csv',
+    Body=open('users.csv', 'rb').read()
+)
+
+# Download object
+response = s3.get_object(Bucket='my-data-bucket', Key='data/users.csv')
+data = response['Body'].read()
+
+# List objects
+response = s3.list_objects_v2(Bucket='my-data-bucket', Prefix='data/')
+for obj in response['Contents']:
+    print(f"{obj['Key']} - {obj['Size']} bytes")`},
+      {title:"S3 Resource-Level Management",code:`import boto3
+
+s3 = boto3.resource('s3')
+
+# Access bucket
+bucket = s3.Bucket('my-data-bucket')
+
+# Upload file
+bucket.upload_file('local_file.txt', 'uploads/file.txt')
+
+# Download file
+bucket.download_file('uploads/file.txt', 'downloaded_file.txt')
+
+# Iterate objects
+for obj in bucket.objects.all():
+    print(f"{obj.key} - {obj.size}")
+
+# Delete object
+s3.Object('my-data-bucket', 'uploads/file.txt').delete()
+
+# Check if object exists
+exists = bucket.Object('uploads/file.txt').load()
+try:
+    exists.load()
+except Exception:
+    print("Object does not exist")`}
+    ],
+    explanation:"S3 is fundamental to AWS. Objects are immutable, versioning can be enabled, and access is controlled via IAM policies and ACLs. Use S3 for data lakes, backups, static website hosting, and data archives.",
+    inputOutput:{
+      input:"s3.put_object(Bucket='bucket', Key='path/file.txt', Body=b'data')",
+      output:"Object uploaded to S3 with metadata returned"
+    },
+    realWorld:"Data lakes: Store terabytes of logs from applications. Machine learning: Training data and model artifacts. Backups: Cost-effective offsite backups. Web hosting: Static assets and website content."
+  },
+  2:{
+    title:"S3 — Advanced Features & Optimization",
+    def:"Advanced S3 features include versioning, lifecycle policies, encryption, multipart uploads, storage classes, and cross-region replication. These enable cost optimization and compliance.",
+    badges:["Optimization","Advanced S3","Best Practices"],
+    examples:[
+      {title:"Lifecycle & Storage Classes",code:`import boto3
+
+s3 = boto3.client('s3')
+
+# Define lifecycle policy
+lifecycle_policy = {
+    'Rules': [
+        {
+            'Id': 'archive-old-logs',
+            'Status': 'Enabled',
+            'Prefix': 'logs/',
+            'Transitions': [
+                {
+                    'Days': 30,
+                    'StorageClass': 'STANDARD_IA'  # After 30 days
+                },
+                {
+                    'Days': 90,
+                    'StorageClass': 'GLACIER'  # After 90 days
+                }
+            ],
+            'Expiration': {
+                'Days': 365  # Delete after 1 year
+            }
+        }
+    ]
+}
+
+s3.put_bucket_lifecycle_configuration(
+    Bucket='my-data-bucket',
+    LifecycleConfiguration=lifecycle_policy
+)`},
+      {title:"Multipart Upload & Encryption",code:`import boto3
+
+s3 = boto3.client('s3')
+
+# Enable versioning
+s3.put_bucket_versioning(
+    Bucket='my-data-bucket',
+    VersioningConfiguration={'Status': 'Enabled'}
+)
+
+# Multipart upload (for large files)
+response = s3.create_multipart_upload(
+    Bucket='my-data-bucket',
+    Key='large-dataset.zip',
+    ServerSideEncryption='AES256'  # Encryption
+)
+upload_id = response['UploadId']
+
+# Upload parts
+parts = []
+with open('large-file.zip', 'rb') as f:
+    part_num = 1
+    for chunk in iter(lambda: f.read(5*1024*1024), b''):
+        part = s3.upload_part(
+            Bucket='my-data-bucket',
+            Key='large-dataset.zip',
+            PartNumber=part_num,
+            UploadId=upload_id,
+            Body=chunk
+        )
+        parts.append({'ETag': part['ETag'], 'PartNumber': part_num})
+        part_num += 1
+
+# Complete upload
+s3.complete_multipart_upload(
+    Bucket='my-data-bucket',
+    Key='large-dataset.zip',
+    UploadId=upload_id,
+    MultipartUpload={'Parts': parts}
+)`}
+    ],
+    explanation:"Storage classes: STANDARD (hot data, high cost), IA (infrequent access, lower cost), GLACIER (archive, very low cost, retrieval delay). Lifecycle policies automatically transition data, saving costs. Encryption ensures security.",
+    inputOutput:{
+      input:"Lifecycle: day 0-30 STANDARD, day 30-90 STANDARD_IA, day 90+ GLACIER, day 365+ DELETE",
+      output:"Automatic transitions reduce storage costs by 80-90% for old data"
+    },
+    realWorld:"Log retention: Keep hot logs in STANDARD for 30 days, then GLACIER for compliance, delete after 7 years. Data lakes: Partition by date, lifecycle moves old partitions to cheaper storage."
+  },
+  3:{
+    title:"IAM — Identity & Access Management",
+    def:"AWS IAM controls who (principals) can do what (actions) on which resources. Uses policies (JSON documents), roles, users, groups, and temporary credentials. Everything in AWS requires IAM permissions.",
+    badges:["Security","Access Control","IAM Core"],
+    examples:[
+      {title:"Creating Users & Policies",code:`import boto3
+
+iam = boto3.client('iam')
+
+# Create user
+iam.create_user(UserName='data-engineer')
+
+# Create access key
+key = iam.create_access_key(UserName='data-engineer')
+print(f"Access Key: {key['AccessKey']['AccessKeyId']}")
+
+# Define inline policy
+policy_doc = {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": ["s3:GetObject", "s3:ListBucket"],
+            "Resource": ["arn:aws:s3:::my-data-bucket/*"]
+        }
+    ]
+}
+
+# Attach policy to user
+iam.put_user_policy(
+    UserName='data-engineer',
+    PolicyName='S3ReadOnly',
+    PolicyDocument=json.dumps(policy_doc)
+)`},
+      {title:"Roles & Temporary Credentials",code:`import boto3
+import json
+
+iam = boto3.client('iam')
+sts = boto3.client('sts')
+
+# Create role for Lambda
+assume_policy = {
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {"Service": "lambda.amazonaws.com"},
+            "Action": "sts:AssumeRole"
+        }
+    ]
+}
+
+role = iam.create_role(
+    RoleName='lambda-execution-role',
+    AssumeRolePolicyDocument=json.dumps(assume_policy)
+)
+
+# Attach managed policy
+iam.attach_role_policy(
+    RoleName='lambda-execution-role',
+    PolicyArn='arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+)
+
+# Assume role (get temporary credentials)
+assumed = sts.assume_role(
+    RoleArn=role['Role']['Arn'],
+    RoleSessionName='lambda-session'
+)
+
+credentials = assumed['Credentials']
+print(f"AccessKeyId: {credentials['AccessKeyId']}")
+print(f"SecretAccessKey: {credentials['SecretAccessKey']}")
+print(f"SessionToken: {credentials['SessionToken']}")`}
+    ],
+    explanation:"Users are for people (developers, analysts). Roles are for services (Lambda, EC2). Policies are JSON documents that specify permissions. Always use least-privilege principle: grant minimum permissions needed.",
+    inputOutput:{
+      input:"IAM Policy grants s3:GetObject on arn:aws:s3:::bucket/*",
+      output:"User/Role can call s3.get_object() for any key in bucket"
+    },
+    realWorld:"Data engineer: IAM user with S3 read + Athena query permissions. Lambda function: IAM role with S3 read + DynamoDB write. Cross-account access: Role in account B assumable by role in account A."
+  },
+  4:{
+    title:"IAM — Policies, Roles & Best Practices",
+    def:"Advanced IAM includes policy evaluation logic, resource-based policies, session policies, permission boundaries, and multi-account architectures. Security requires careful policy design.",
+    badges:["Security","Advanced IAM","Best Practices"],
+    examples:[
+      {title:"Advanced Policy Structure",code:`# Policy with multiple conditions
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowS3ReadWithConditions",
+            "Effect": "Allow",
+            "Action": ["s3:GetObject", "s3:ListBucket"],
+            "Resource": [
+                "arn:aws:s3:::my-bucket",
+                "arn:aws:s3:::my-bucket/*"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "aws:username": "data-engineer"
+                },
+                "IpAddress": {
+                    "aws:SourceIp": ["203.0.113.0/24"]
+                },
+                "DateGreaterThan": {
+                    "aws:CurrentTime": "2024-01-01T00:00:00Z"
+                }
+            }
+        }
+    ]
+}`},
+      {title:"Role Assumption & Cross-Account Access",code:`# Account A: Role that can be assumed by Account B
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::ACCOUNT-B-ID:root"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {
+                "StringEquals": {
+                    "sts:ExternalId": "unique-external-id"
+                }
+            }
+        }
+    ]
+}
+
+# Account B: Policy to assume role in Account A
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "sts:AssumeRole",
+            "Resource": "arn:aws:iam::ACCOUNT-A-ID:role/cross-account-role"
+        }
+    ]
+}`}
+    ],
+    explanation:"Policy evaluation: Explicit Deny always wins. If no Explicit Allow, result is Deny. Resource-based policies (bucket policies, role trust policies) control who can access resources. Use permission boundaries to prevent privilege escalation.",
+    inputOutput:{
+      input:"sts.assume_role(RoleArn='arn:aws:iam::ACCOUNT-B:role/CrossAccountRole')",
+      output:"Returns temporary credentials to access Account B resources"
+    },
+    realWorld:"Multi-account strategy: DevOps account deploys infrastructure, Data account runs analytics, Security account logs audit events. Cross-account roles enable delegated access. MFA requirement for sensitive operations."
+  },
+  5:{
+    title:"Lambda — Serverless Computing",
+    def:"AWS Lambda executes code without managing servers. Pay only for execution time. Scales automatically from zero to thousands of concurrent executions. Triggered by events (S3, DynamoDB, API Gateway, etc).",
+    badges:["Compute","Serverless","Lambda Core"],
+    examples:[
+      {title:"Creating Lambda Function",code:`import json
+
+def lambda_handler(event, context):
+    """Process S3 event"""
+    
+    # Extract S3 bucket and key
+    bucket = event['Records'][0]['s3']['bucket']['name']
+    key = event['Records'][0]['s3']['object']['key']
+    
+    print(f"Processing {key} from {bucket}")
+    
+    # Your business logic here
+    data = {
+        'statusCode': 200,
+        'body': json.dumps({
+            'message': 'File processed',
+            'bucket': bucket,
+            'key': key
+        })
+    }
+    
+    return data
+
+# Deploy via AWS CLI:
+# aws lambda create-function \\
+#   --function-name process-files \\
+#   --runtime python3.11 \\
+#   --role arn:aws:iam::ACCOUNT:role/lambda-role \\
+#   --handler lambda_function.lambda_handler \\
+#   --zip-file fileb://function.zip`},
+      {title:"Lambda with External Triggers",code:`import boto3
+import json
+
+s3 = boto3.client('s3')
+dynamodb = boto3.resource('dynamodb')
+
+def lambda_handler(event, context):
+    # API Gateway trigger
+    if 'body' in event:
+        body = json.loads(event['body'])
+        operation = body.get('operation')
+        
+        if operation == 'upload':
+            # Write to DynamoDB
+            table = dynamodb.Table('ProcessedFiles')
+            table.put_item(Item={
+                'FileId': body['file_id'],
+                'Status': 'Processing',
+                'Timestamp': int(time.time())
+            })
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'message': 'Started processing'})
+            }
+    
+    # S3 trigger
+    elif 'Records' in event:
+        for record in event['Records']:
+            bucket = record['s3']['bucket']['name']
+            key = record['s3']['object']['key']
+            
+            # Download and process
+            obj = s3.get_object(Bucket=bucket, Key=key)
+            data = obj['Body'].read()
+            
+            # Process and upload result
+            result = process_data(data)
+            s3.put_object(
+                Bucket=bucket,
+                Key=f'processed/{key}',
+                Body=json.dumps(result)
+            )`}
+    ],
+    explanation:"Lambda is ideal for event-driven workloads: file processing, real-time data transformation, API backends. Limitations: 15-minute timeout, 10GB memory max, /tmp storage 10GB. Use SQS for longer jobs.",
+    inputOutput:{
+      input:"Event from S3: new file uploaded",
+      output:"Lambda triggered automatically, processes file, stores result"
+    },
+    realWorld:"Image processing: Upload image → Lambda triggers → thumbnail generation → store result. Data pipeline: File arrives in S3 → Lambda extracts → validates → loads to database. Real-time analytics: API call → Lambda → query database → return result."
+  },
+  6:{
+    title:"Lambda — Advanced Patterns & Optimization",
+    def:"Advanced Lambda includes concurrency control, layers for code reuse, environment variables for config, provisioned concurrency for consistent performance, and integration with step functions.",
+    badges:["Optimization","Advanced Lambda","Patterns"],
+    examples:[
+      {title:"Lambda Layers & Concurrency",code:`# Layer structure (third-party libraries)
+layer/
+  python/lib/python3.11/site-packages/
+    requests/
+    numpy/
+
+# Deploy layer
+aws lambda publish-layer-version \\
+  --layer-name shared-dependencies \\
+  --zip-file fileb://layer.zip \\
+  --compatible-runtimes python3.11
+
+# Function using layer
+import boto3
+import requests  # From layer
+
+def lambda_handler(event, context):
+    response = requests.get('https://api.example.com/data')
+    return response.json()
+
+# Set concurrency limits
+aws lambda put-function-concurrency \\
+  --function-name my-function \\
+  --reserved-concurrent-executions 100
+
+# Provisioned concurrency (pay to keep warm)
+aws lambda put-provisioned-concurrency-config \\
+  --function-name my-function \\
+  --provisioned-concurrent-executions 50 \\
+  --qualifier LIVE`},
+      {title:"Step Functions for Complex Workflows",code:`# Step Functions state machine
+import json
+
+definition = {
+    "Comment": "Data processing pipeline",
+    "StartAt": "ValidateInput",
+    "States": {
+        "ValidateInput": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:region:account:function:validate",
+            "Next": "ProcessData"
+        },
+        "ProcessData": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:region:account:function:process",
+            "Retry": [{"ErrorEquals": ["Timeout"], "MaxAttempts": 2}],
+            "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "HandleError"}],
+            "Next": "CheckResult"
+        },
+        "CheckResult": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.success",
+                    "BooleanEquals": True,
+                    "Next": "StorageResult"
+                }
+            ],
+            "Default": "HandleError"
+        },
+        "StorageResult": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:region:account:stateMachine:store",
+            "End": True
+        },
+        "HandleError": {
+            "Type": "Fail",
+            "Error": "ProcessingFailed"
+        }
+    }
+}`}
+    ],
+    explanation:"Layers eliminate code duplication across functions. Concurrency controls prevent cascading failures. Step Functions orchestrate multi-step workflows with error handling and retries. Provisioned concurrency eliminates cold starts.",
+    inputOutput:{
+      input:"Event → Lambda 1 (validate) → Lambda 2 (process) → Lambda 3 (store)",
+      output:"Result stored with full error handling and retry logic"
+    },
+    realWorld:"Data pipeline: Validate → Deduplicate → Transform → Load with automatic retries. Image processing: Resize → Watermark → Upload → Update DB, handle failures gracefully. Recommendation engine: Fetch user data → Calculate scores → Cache results."
+  },
+  7:{
+    title:"ECS — Container Orchestration",
+    def:"AWS ECS (Elastic Container Service) orchestrates Docker containers. Manages deployment, scaling, and monitoring. Supports EC2 launch type (you manage servers) and Fargate (serverless containers).",
+    badges:["Container","Orchestration","ECS"],
+    examples:[
+      {title:"ECS Task Definition & Service",code:`# ECS Task Definition (docker-compose equivalent)
+{
+    "family": "web-app",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512",
+    "containerDefinitions": [
+        {
+            "name": "web",
+            "image": "123456789.dkr.ecr.us-east-1.amazonaws.com/my-app:latest",
+            "portMappings": [
+                {
+                    "containerPort": 8080,
+                    "hostPort": 8080,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "DATABASE_URL",
+                    "value": "postgres://db:5432/app"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/web-app",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ]
+}
+
+# Create service
+aws ecs create-service \\
+  --cluster production \\
+  --service-name web-app \\
+  --task-definition web-app:1 \\
+  --desired-count 3 \\
+  --launch-type FARGATE \\
+  --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx],securityGroups=[sg-xxx]}"`},
+      {title:"Auto Scaling & Updates",code:`# Auto-scaling policy
+aws application-autoscaling register-scalable-target \\
+  --service-namespace ecs \\
+  --resource-id service/production/web-app \\
+  --scalable-dimension ecs:service:DesiredCount \\
+  --min-capacity 1 \\
+  --max-capacity 10
+
+aws application-autoscaling put-scaling-policy \\
+  --policy-name cpu-scaling \\
+  --service-namespace ecs \\
+  --resource-id service/production/web-app \\
+  --scalable-dimension ecs:service:DesiredCount \\
+  --policy-type TargetTrackingScaling \\
+  --target-tracking-scaling-policy-configuration \\
+    "TargetValue=70,PredefinedMetricSpecification={PredefinedMetricType=ECSServiceAverageCPUUtilization}"
+
+# Rolling update to new version
+aws ecs update-service \\
+  --cluster production \\
+  --service web-app \\
+  --task-definition web-app:2 \\
+  --force-new-deployment`}
+    ],
+    explanation:"ECS Fargate is simpler than EC2 (no server management) but you pay per task. ECS EC2 gives more control and can be cheaper with reserved instances. Task definitions are like docker-compose but in JSON.",
+    inputOutput:{
+      input:"Update task definition to new image version",
+      output:"Rolling deployment: old tasks drain, new tasks start, zero downtime"
+    },
+    realWorld:"Microservices: Each service is a separate ECS service. Scaling: CloudWatch metrics trigger auto-scaling to handle traffic spikes. Deployments: New versions deployed with zero-downtime rolling updates."
+  },
+  8:{
+    title:"EKS — Kubernetes on AWS",
+    def:"EKS is AWS managed Kubernetes. You define workloads in YAML, EKS handles orchestration. Better than ECS for complex deployments, multi-cloud strategies, and teams familiar with Kubernetes.",
+    badges:["Container","Kubernetes","Advanced"],
+    examples:[
+      {title:"EKS Cluster Setup",code:`# Create EKS cluster
+aws eks create-cluster \\
+  --name my-cluster \\
+  --version 1.28 \\
+  --role-arn arn:aws:iam::ACCOUNT:role/eks-service-role \\
+  --resources-vpc-config \\
+    subnetIds=subnet-xxx,subnet-yyy \\
+    securityGroupIds=sg-xxx
+
+# Create node group
+aws eks create-nodegroup \\
+  --cluster-name my-cluster \\
+  --nodegroup-name workers \\
+  --scaling-config minSize=2,maxSize=10,desiredSize=3 \\
+  --subnets subnet-xxx subnet-yyy \\
+  --node-role arn:aws:iam::ACCOUNT:role/eks-node-role
+
+# Configure kubectl
+aws eks update-kubeconfig --name my-cluster
+
+# Deploy application
+kubectl apply -f - <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+EOF`},
+      {title:"Service & Ingress",code:`# Expose service
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  rules:
+  - host: example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-service
+            port:
+              number: 80
+EOF
+
+# Monitor deployment
+kubectl get deployments
+kubectl get pods
+kubectl logs nginx-xyz`}
+    ],
+    explanation:"EKS provides managed control plane while you manage nodes (or use Fargate for serverless). Benefits: multi-cloud portability, sophisticated networking, stateful applications, batch jobs.",
+    inputOutput:{
+      input:"kubectl apply deployment.yaml",
+      output:"Kubernetes schedules pods on nodes, manages updates, handles failures"
+    },
+    realWorld:"Microservices architecture: Multiple services deployed as separate pods. Auto-scaling: Pod Autoscaler scales pods, Cluster Autoscaler adds nodes. GitOps: Desired state in Git, Kubernetes reconciles."
+  },
+  9:{
+    title:"Aurora PostgreSQL — Database",
+    def:"Aurora is AWS's distributed SQL database compatible with PostgreSQL. 5x faster than standard PostgreSQL, multi-AZ replication, read replicas, automatic failover, and pay-per-second billing.",
+    badges:["Database","PostgreSQL","Aurora Core"],
+    examples:[
+      {title:"Aurora Cluster Setup & Connection",code:`import boto3
+
+rds = boto3.client('rds')
+
+# Create Aurora cluster
+rds.create_db_cluster(
+    DBClusterIdentifier='analytics-cluster',
+    Engine='aurora-postgresql',
+    EngineVersion='15.2',
+    MasterUsername='postgres',
+    MasterUserPassword='SecurePassword123',
+    DatabaseName='analytics',
+    DBSubnetGroupName='default',
+    VpcSecurityGroupIds=['sg-xxx'],
+    BackupRetentionPeriod=30,
+    EnableCloudwatchLogsExports=['postgresql'],
+    EnableIAMDatabaseAuthentication=True
+)
+
+# Add read replica
+rds.create_db_instance(
+    DBInstanceIdentifier='analytics-reader-1',
+    DBInstanceClass='db.r6g.xlarge',
+    Engine='aurora-postgresql',
+    DBClusterIdentifier='analytics-cluster'
+)
+
+# Connect using psycopg2
+import psycopg2
+
+conn = psycopg2.connect(
+    host='analytics-cluster.cluster-xxxxx.us-east-1.rds.amazonaws.com',
+    user='postgres',
+    password='SecurePassword123',
+    database='analytics'
+)
+
+cur = conn.cursor()
+cur.execute("SELECT version();")
+print(cur.fetchone())`},
+      {title:"Querying & Performance",code:`import psycopg2
+import psycopg2.extras
+
+conn = psycopg2.connect(...)
+cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+# Create table with index
+cur.execute("""
+    CREATE TABLE events (
+        id BIGSERIAL PRIMARY KEY,
+        user_id INT NOT NULL,
+        event_type VARCHAR(50),
+        created_at TIMESTAMP DEFAULT NOW(),
+        data JSONB
+    );
+    CREATE INDEX idx_events_user_created 
+    ON events(user_id, created_at DESC);
+""")
+
+# Batch insert
+rows = [(1, 'login', '2024-01-01'), (2, 'purchase', '2024-01-02')]
+psycopg2.extras.execute_batch(
+    cur, 
+    "INSERT INTO events(user_id, event_type, created_at) VALUES(%s,%s,%s)",
+    rows
+)
+
+# Query with filtering
+cur.execute("""
+    SELECT user_id, COUNT(*) as event_count
+    FROM events
+    WHERE created_at >= NOW() - INTERVAL '7 days'
+    GROUP BY user_id
+    ORDER BY event_count DESC
+    LIMIT 100
+""")
+
+results = cur.fetchall()
+conn.commit()`}
+    ],
+    explanation:"Aurora scales writes automatically within a cluster, reads scale via read replicas in different AZs. Automatic failover if primary goes down. Storage auto-scales up to 128TB. Perfect for OLTP and analytics.",
+    inputOutput:{
+      input:"INSERT 1 million rows into Aurora",
+      output:"Completes in seconds, replicated to standby AZ automatically"
+    },
+    realWorld:"SaaS application: Multi-tenant database with read replicas for reporting. E-commerce: Order data + inventory + customer profiles. Analytics: ETL pipeline loads data from S3 into Aurora, then query."
+  },
+  10:{
+    title:"Aurora — Advanced Features & Replication",
+    def:"Aurora Global Database enables read-only replicas across regions (RPO=0, ~1s RTO). Aurora Serverless auto-scales with zero-management. Parameter groups tune performance.",
+    badges:["Advanced Aurora","Replication","High Availability"],
+    examples:[
+      {title:"Global Database & Replication",code:`import boto3
+
+rds = boto3.client('rds')
+
+# Primary cluster in us-east-1 (already exists)
+# Create secondary cluster in eu-west-1
+rds.create_db_cluster(
+    DBClusterIdentifier='analytics-secondary',
+    Engine='aurora-postgresql',
+    GlobalClusterIdentifier='analytics-global',
+    SourceDBClusterIdentifier='arn:aws:rds:us-east-1:account:cluster:analytics-cluster'
+)
+
+# Add instance to secondary
+rds.create_db_instance(
+    DBInstanceIdentifier='analytics-secondary-1',
+    DBInstanceClass='db.r6g.xlarge',
+    Engine='aurora-postgresql',
+    DBClusterIdentifier='analytics-secondary'
+)
+
+# Failover to secondary (disaster recovery)
+rds.failover_global_cluster(
+    GlobalClusterIdentifier='analytics-global',
+    TargetDbClusterIdentifier='analytics-secondary'
+)
+
+# Check replication lag
+response = rds.describe_db_clusters(
+    DBClusterIdentifier='analytics-secondary'
+)
+print(f"Replication lag: {response['DBClusters'][0].get('GlobalWriteForwardingStatus')}")`},
+      {title:"Aurora Serverless Configuration",code:`# Create Serverless cluster
+rds.create_db_cluster(
+    DBClusterIdentifier='serverless-analytics',
+    Engine='aurora-postgresql',
+    EngineMode='serverless',
+    ScalingConfigurationDetails={
+        'MinCapacity': 2,
+        'MaxCapacity': 16,
+        'AutoPause': True,
+        'SecondsUntilAutoPause': 300
+    }
+)
+
+# Serverless pauses after 5 minutes of inactivity
+# On first query after pause, resumes automatically (no data loss)
+
+# For production, use provisioned instead
+rds.create_db_cluster(
+    DBClusterIdentifier='provisioned-analytics',
+    Engine='aurora-postgresql',
+    EngineMode='provisioned'
+)`}
+    ],
+    explanation:"Global Database replicates data across regions with <1s latency. Perfect for multi-region disaster recovery. Serverless is ideal for unpredictable workloads (auto-scales from 2-16 ACUs). Provisioned is for consistent performance.",
+    inputOutput:{
+      input:"Global DB: us-east-1 (write), eu-west-1 (read-only), replicated continuously",
+      output:"RPO=0 (no data loss), ~1s RTO (read replica in EU available immediately)"
+    },
+    realWorld:"Disaster recovery: Primary in us-east-1 fails, automatic failover promotes eu-west-1 replica. Multi-region analytics: Query data from nearest region. Development: Serverless cluster auto-pauses to save costs."
+  },
+  11:{
+    title:"VPC, Networking & Security Groups",
+    def:"VPCs isolate resources with private networks. Subnets divide VPCs. Security groups act as stateful firewalls (allow/deny rules). Network ACLs are stateless rules at subnet level.",
+    badges:["Networking","Security","Infrastructure"],
+    examples:[
+      {title:"VPC & Subnet Setup",code:`import boto3
+
+ec2 = boto3.client('ec2')
+
+# Create VPC (10.0.0.0/16)
+vpc = ec2.create_vpc(CidrBlock='10.0.0.0/16')
+vpc_id = vpc['Vpc']['VpcId']
+
+# Create public subnet (10.0.1.0/24)
+pub_subnet = ec2.create_subnet(
+    VpcId=vpc_id,
+    CidrBlock='10.0.1.0/24',
+    AvailabilityZone='us-east-1a'
+)
+
+# Create private subnet (10.0.2.0/24)
+priv_subnet = ec2.create_subnet(
+    VpcId=vpc_id,
+    CidrBlock='10.0.2.0/24',
+    AvailabilityZone='us-east-1a'
+)
+
+# Internet Gateway for public subnet
+igw = ec2.create_internet_gateway()
+igw_id = igw['InternetGateway']['InternetGatewayId']
+ec2.attach_internet_gateway(InternetGatewayId=igw_id, VpcId=vpc_id)
+
+# Route table for public subnet
+route_table = ec2.create_route_table(VpcId=vpc_id)
+rt_id = route_table['RouteTable']['RouteTableId']
+ec2.create_route(
+    RouteTableId=rt_id,
+    DestinationCidrBlock='0.0.0.0/0',
+    GatewayId=igw_id
+)
+ec2.associate_route_table(
+    RouteTableId=rt_id,
+    SubnetId=pub_subnet['Subnet']['SubnetId']
+)`},
+      {title:"Security Groups",code:`# Create security group
+sg = ec2.create_security_group(
+    GroupName='web-sg',
+    Description='Web tier security group',
+    VpcId=vpc_id
+)
+sg_id = sg['GroupId']
+
+# Allow inbound HTTP (port 80) from anywhere
+ec2.authorize_security_group_ingress(
+    GroupId=sg_id,
+    IpPermissions=[
+        {
+            'IpProtocol': 'tcp',
+            'FromPort': 80,
+            'ToPort': 80,
+            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'HTTP'}]
+        },
+        {
+            'IpProtocol': 'tcp',
+            'FromPort': 443,
+            'ToPort': 443,
+            'IpRanges': [{'CidrIp': '0.0.0.0/0', 'Description': 'HTTPS'}]
+        }
+    ]
+)
+
+# Allow access from application layer
+app_sg = ec2.create_security_group(
+    GroupName='app-sg',
+    Description='Application tier',
+    VpcId=vpc_id
+)
+app_sg_id = app_sg['GroupId']
+
+# App can talk to database security group
+db_sg = ec2.create_security_group(
+    GroupName='db-sg',
+    Description='Database tier',
+    VpcId=vpc_id
+)
+db_sg_id = db_sg['GroupId']
+
+ec2.authorize_security_group_ingress(
+    GroupId=db_sg_id,
+    IpPermissions=[
+        {
+            'IpProtocol': 'tcp',
+            'FromPort': 5432,
+            'ToPort': 5432,
+            'UserIdGroupPairs': [{'GroupId': app_sg_id}]
+        }
+    ]
+)`}
+    ],
+    explanation:"Security groups are stateful: allow inbound = allow outbound reply. Layer security: ALB in public subnet → app servers in private → database in isolated private. Use Network ACLs for additional filtering.",
+    inputOutput:{
+      input:"Security group: allow HTTP (80) from 0.0.0.0/0",
+      output:"Traffic on port 80 permitted, response allowed back automatically"
+    },
+    realWorld:"Three-tier: web (public, http/https) → app (private, from web only) → db (isolated, from app only). Bastion host in public subnet for SSH access to private resources."
+  },
+  12:{
+    title:"CloudWatch, Monitoring & Logging",
+    def:"CloudWatch collects metrics, logs, and events. Create alarms based on metrics. Send logs to CloudWatch from Lambda, ECS, applications. Use dashboards for visualization.",
+    badges:["Monitoring","Observability","DevOps"],
+    examples:[
+      {title:"CloudWatch Logs & Alarms",code:`import boto3
+
+logs = boto3.client('logs')
+cloudwatch = boto3.client('cloudwatch')
+
+# Create log group
+logs.create_log_group(logGroupName='/aws/lambda/my-function')
+
+# Set retention
+logs.put_retention_policy(
+    logGroupName='/aws/lambda/my-function',
+    retentionInDays=7
+)
+
+# Create metric from logs (count errors)
+logs.put_metric_filter(
+    logGroupName='/aws/lambda/my-function',
+    filterName='error-count',
+    filterPattern='[time, request_id, level = ERROR*, ...]',
+    metricTransformations=[
+        {
+            'metricName': 'LambdaErrors',
+            'metricNamespace': 'CustomMetrics',
+            'metricValue': '1'
+        }
+    ]
+)
+
+# Create alarm on error metric
+cloudwatch.put_metric_alarm(
+    AlarmName='high-lambda-errors',
+    MetricName='LambdaErrors',
+    Namespace='CustomMetrics',
+    Statistic='Sum',
+    Period=60,
+    EvaluationPeriods=1,
+    Threshold=10,
+    ComparisonOperator='GreaterThanThreshold',
+    AlarmActions=['arn:aws:sns:us-east-1:account:alerts']
+)`},
+      {title:"Custom Metrics",code:`import time
+import boto3
+
+cloudwatch = boto3.client('cloudwatch')
+
+def publish_metric(metric_name, value, unit='Count'):
+    """Publish custom metric to CloudWatch"""
+    cloudwatch.put_metric_data(
+        Namespace='MyApplication',
+        MetricData=[
+            {
+                'MetricName': metric_name,
+                'Value': value,
+                'Unit': unit,
+                'Timestamp': int(time.time()),
+                'Dimensions': [
+                    {'Name': 'Environment', 'Value': 'production'},
+                    {'Name': 'Service', 'Value': 'api'}
+                ]
+            }
+        ]
+    )
+
+# In Lambda handler
+def lambda_handler(event, context):
+    start = time.time()
+    
+    # Process event
+    result = process_data(event)
+    
+    duration = time.time() - start
+    publish_metric('ProcessingTime', duration, 'Seconds')
+    publish_metric('SuccessfulProcesses', 1, 'Count')
+    
+    return result`}
+    ],
+    explanation:"CloudWatch is essential for observability. Metrics drive alarms. Logs help debug. Custom metrics track business KPIs. Dashboards visualize operational health. Set up alerts for critical failures.",
+    inputOutput:{
+      input:"Lambda publishes ProcessingTime metric",
+      output:"Visible in CloudWatch console, can create alarm if threshold exceeded"
+    },
+    realWorld:"Production monitoring: Lambda errors → alarm → SMS/email. API latency → dashboard shows trends. Database connections → alarm if exceeding threshold. Custom metrics: request count, business transactions."
+  },
+  13:{
+    title:"Real-World: Serverless Data Pipeline",
+    def:"End-to-end example: S3 upload → Lambda validates → transforms → loads to Aurora → notifies. Demonstrates integration of S3, Lambda, Aurora, SNS, CloudWatch.",
+    badges:["Real-World","Pipeline","Project"],
+    examples:[
+      {title:"Serverless ETL Pipeline",code:`import json
+import boto3
+import logging
+import psycopg2
+
+s3 = boto3.client('s3')
+sns = boto3.client('sns')
+logger = logging.getLogger()
+logger.setLevel('INFO')
+
+def lambda_handler(event, context):
+    """S3 trigger: validate, transform, load to Aurora"""
+    
+    try:
+        # Extract S3 object info
+        bucket = event['Records'][0]['s3']['bucket']['name']
+        key = event['Records'][0]['s3']['object']['key']
+        
+        logger.info(f"Processing s3://{bucket}/{key}")
+        
+        # Download & validate
+        obj = s3.get_object(Bucket=bucket, Key=key)
+        data = obj['Body'].read().decode('utf-8')
+        
+        records = json.loads(data)
+        if not isinstance(records, list):
+            raise ValueError("Invalid format: expected JSON array")
+        
+        logger.info(f"Validated {len(records)} records")
+        
+        # Transform
+        transformed = []
+        for rec in records:
+            rec['processed_at'] = datetime.now().isoformat()
+            rec['source'] = key
+            transformed.append(rec)
+        
+        # Load to Aurora
+        conn = psycopg2.connect(
+            host=os.environ['DB_HOST'],
+            user=os.environ['DB_USER'],
+            password=os.environ['DB_PASS'],
+            database=os.environ['DB_NAME']
+        )
+        
+        cur = conn.cursor()
+        for rec in transformed:
+            cur.execute("""
+                INSERT INTO events(user_id, event_type, data)
+                VALUES(%s, %s, %s)
+            """, (rec['user_id'], rec['type'], json.dumps(rec)))
+        
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        # Notify success
+        sns.publish(
+            TopicArn=os.environ['SNS_TOPIC'],
+            Subject='Pipeline Success',
+            Message=f'Processed {len(transformed)} records from {key}'
+        )
+        
+        return {'statusCode': 200, 'body': 'Success'}
+        
+    except Exception as e:
+        logger.error(f"Error: {str(e)}")
+        sns.publish(
+            TopicArn=os.environ['SNS_TOPIC'],
+            Subject='Pipeline Failed',
+            Message=f'Error processing {key}: {str(e)}'
+        )
+        raise`},
+      {title:"Infrastructure as Code (Terraform)",code:`# Infrastructure definition
+resource "aws_s3_bucket" "data_input" {
+  bucket = "data-input-pipeline"
+}
+
+resource "aws_s3_bucket_notification" "data_input" {
+  bucket = aws_s3_bucket.data_input.id
+  
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.etl.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "input/"
+  }
+}
+
+resource "aws_lambda_function" "etl" {
+  filename      = "lambda.zip"
+  function_name = "etl-processor"
+  role          = aws_iam_role.lambda.arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.11"
+  timeout       = 300
+  
+  environment {
+    variables = {
+      DB_HOST   = aws_rds_cluster_instance.db.address
+      DB_USER   = "etl_user"
+      DB_PASS   = aws_secretsmanager_secret_version.db_pass.secret_string
+      SNS_TOPIC = aws_sns_topic.alerts.arn
+    }
+  }
+}
+
+resource "aws_sns_topic" "alerts" {
+  name = "pipeline-alerts"
+}`}
+    ],
+    explanation:"Serverless is ideal for event-driven pipelines: no servers to manage, pay per invocation, scales automatically. Combine services: S3 triggers Lambda, Lambda loads to Aurora, SNS sends notifications.",
+    inputOutput:{
+      input:"CSV file uploaded to S3",
+      output:"Lambda validates → transforms → loads to Aurora → email confirmation sent"
+    },
+    realWorld:"Data ingestion: Partner uploads daily CSV → automated ETL → available for analytics within minutes. Real-time processing: IoT device data → Lambda processes → stored in Aurora → dashboard updates."
+  },
+  14:{
+    title:"Real-World: Kubernetes on AWS",
+    def:"Production Kubernetes cluster on EKS with multi-tier application, auto-scaling, monitoring, and zero-downtime deployments. Demonstrates DevOps best practices.",
+    badges:["Real-World","Kubernetes","DevOps"],
+    examples:[
+      {title:"Production EKS Setup",code:`# Deploy multi-tier application
+kubectl apply -f - <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: production
+  name: api-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api-server
+      tier: backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: api-server
+        tier: backend
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - api-server
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - name: api
+        image: 123456789.dkr.ecr.us-east-1.amazonaws.com/api:v1.2.3
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: aurora-endpoint.rds.amazonaws.com
+        - name: REDIS_URL
+          value: redis-cache.xxx.ng.0001.use1.cache.amazonaws.com
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: production
+  name: api-service
+spec:
+  type: ClusterIP
+  selector:
+    app: api-server
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: production
+  name: api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-server
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+EOF`},
+      {title:"Monitoring & GitOps",code:`# Install Prometheus for monitoring
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install prometheus prometheus-community/kube-prometheus-stack \\
+  --namespace monitoring --create-namespace
+
+# GitOps with ArgoCD
+helm repo add argocd https://argoproj.github.io/argo-helm
+helm install argocd argocd/argo-cd --namespace argocd --create-namespace
+
+# Application configuration
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: production-api
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/company/k8s-config
+    targetRevision: main
+    path: production/api
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true`}
+    ],
+    explanation:"EKS in production requires: multi-tier deployments, resource limits, health checks, auto-scaling, anti-affinity rules, monitoring. GitOps keeps desired state in Git, Kubernetes reconciles automatically.",
+    inputOutput:{
+      input:"Developer: git push new code",
+      output:"ArgoCD detects change, pulls new image, rolling deployment starts, old pods drain, new pods replace"
+    },
+    realWorld:"Production cluster runs 50+ microservices. Developers define desired state in YAML. ArgoCD continuously syncs Git → cluster. Prometheus scrapes metrics, Grafana shows dashboards. Auto-scaling handles traffic surges."
+  }
+};
+
+function showQ(id) {
+  const question = content[id];
+  if (!question) return;
+
+  let html = `<div style="animation:fadeIn 0.3s;"><div class="qhead">
+    <span class="qnum">${id.toString().padStart(2,'0')}</span>
+    <div><div class="qtitle">${question.title}</div>`;
+
+  html += `<div class="badges">`;
+  (question.badges || []).forEach(badge => {
+    html += `<span class="fbadge" style="border-color:#ff9900;color:#ff9900;">${badge}</span>`;
+  });
+  html += `</div></div></div>`;
+
+  html += `<div class="def-section"><strong>Definition:</strong> ${question.def}</div>`;
+
+  if (question.examples) {
+    question.examples.forEach((example, i) => {
+      html += `<div><div class="slabel">Example ${i+1}: ${example.title}</div>
+        <div class="code-block"><code>${escapeHtml(example.code)}</code></div></div>`;
+    });
+  }
+
+  if (question.explanation) {
+    html += `<div class="expl-box"><strong>Explanation:</strong> ${question.explanation}</div>`;
+  }
+
+  if (question.inputOutput) {
+    html += `<div class="io-grid">
+      <div class="io-box"><h5>Input</h5><code>${escapeHtml(question.inputOutput.input)}</code></div>
+      <div class="io-box"><h5>Output</h5><code>${escapeHtml(question.inputOutput.output)}</code></div>
+    </div>`;
+  }
+
+  if (question.realWorld) {
+    html += `<div class="realworld-box"><strong>🌍 Real-World Application:</strong> ${question.realWorld}</div>`;
+  }
+
+  html += `<div class="navrow">
+    <button class="nbtn ${id===1?'off':''}" onclick="showQ(${id-1})">← Prev</button>
+    <button class="nbtn ${id===Object.keys(content).length?'off':''}" onclick="showQ(${id+1})">Next →</button>
+  </div></div>`;
+
+  document.getElementById('content').innerHTML = html;
+  updateActiveItem(id);
+  window.scrollTo(0,0);
+}
+
+function updateActiveItem(id) {
+  document.querySelectorAll('.qi').forEach(el=>el.classList.remove('active'));
+  document.getElementById(`si-${id}`)?.classList.add('active');
+}
+
+function renderTopics() {
+  let desktop='',mobile='';
+  topics.forEach(topic => {
+    const categoryColor = {storage:'#3b82f6',security:'#f472b6',compute:'#10b981',container:'#06b6d4',database:'#f59e0b'}[topic.cat]||'#6b7280';
+    const item = `<div class="qi" id="si-${topic.id}" onclick="showQ(${topic.id})">
+      <span class="qn">${topic.id.toString().padStart(2,'0')}</span>
+      <span class="qt">${topic.title}</span>
+      <span class="fdot" style="background:${categoryColor}"></span>
+    </div>`;
+    desktop+=item;
+    mobile+=item;
+  });
+  document.getElementById('deskqlist').innerHTML=desktop;
+  document.getElementById('moblist').innerHTML=mobile;
+  showQ(1);
+}
+
+function toggleMobOverlay() {
+  document.getElementById('moboverlay').classList.toggle('open');
+}
+
+function toggleFilter(cat) {
+  const btns=document.querySelectorAll('.fbtn');
+  btns.forEach(btn=>btn.classList.remove('on'));
+  event.target.classList.add('on');
+  const items=document.querySelectorAll('.qi');
+  items.forEach(item => {
+    const id=parseInt(item.id.substring(3));
+    const topic=topics.find(t=>t.id===id);
+    item.classList.toggle('hidden',cat!=='all'&&topic.cat!==cat);
+  });
+}
+
+function filterQuestions() {
+  const search=(document.getElementById('searchbox-mob')?.value||document.getElementById('searchbox')?.value||'').toLowerCase();
+  document.querySelectorAll('.qi').forEach(item => {
+    const text=item.querySelector('.qt').textContent.toLowerCase();
+    item.classList.toggle('hidden',!text.includes(search));
+  });
+}
+
+function escapeHtml(text) {
+  const map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+  return text.replace(/[&<>"']/g,m=>map[m]);
+}
+
+document.addEventListener('DOMContentLoaded',renderTopics);
+document.getElementById('searchbox')?.addEventListener('keyup',filterQuestions);
+</script>
+
+</body>
+</html>

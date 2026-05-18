@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python Data Science — NumPy, Pandas & Spark Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+
+.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
+.logo{font-size:.95rem;font-weight:700;color:#8b5cf6}
+.logo span{color:#9ca3af;font-weight:400;font-size:.78rem}
+.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
+.srch:focus{border-color:#8b5cf6;background:#252d40}
+.srch::placeholder{color:#6b7280}
+.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#9ca3af;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
+.fbtn:hover,.fbtn.on{background:#252d40;color:#8b5cf6;border-color:#8b5cf655}
+.mob-toggle{display:none;background:#8b5cf6;border:none;border-radius:8px;padding:.38rem .75rem;color:#fff;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;gap:.35rem;align-items:center;white-space:nowrap}
+
+.layout{display:flex;height:calc(100vh - 50px)}
+.sidebar{width:300px;min-width:300px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
+.sb-inner{padding:.4rem .35rem}
+.main{flex:1;overflow-y:auto}
+.wrap{padding:1.5rem 2rem 2rem;max-width:980px}
+
+.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.mob-header-title{font-size:.9rem;font-weight:700;color:#ffffff}
+.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
+.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
+.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
+.mob-search input:focus{border-color:#8b5cf6}
+.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+
+.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
+.qi:hover{background:#1e2535;border-color:#2a3348}
+.qi.active{background:#1e2535;border-left:3px solid #8b5cf6;border-color:#8b5cf633}
+.qi.hidden{display:none}
+.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#4b5563;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.qi.active .qn{color:#8b5cf6}
+.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1}
+.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+.welcome{text-align:center;padding:3.5rem 1rem}
+.welcome h2{font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
+.welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
+.wgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin-top:1.5rem;text-align:left}
+.wcard{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
+.wcard h4{font-size:.72rem;font-weight:700;color:#8b5cf6;margin-bottom:.3rem}
+.wcard p{font-size:.72rem;color:#ffffff;line-height:1.5}
+
+.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
+.qnum{background:#8b5cf6;color:#fff;font-size:.67rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
+.qtitle{font-size:1.1rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
+.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;align-items:center}
+.fbadge{font-size:.66rem;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:600;color:#ffffff}
+.def-section{background:#1e2535;border-left:3px solid #8b5cf6;border-radius:0 8px 8px 0;padding:.85rem 1rem;font-size:.83rem;line-height:1.8;color:#ffffff;margin-bottom:1.2rem}
+.def-section strong{color:#8b5cf6}
+.slabel{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#6b7280;text-transform:uppercase;margin:1.2rem 0 .6rem;padding-left:2px}
+.code-block{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:1rem;margin-bottom:1.2rem;overflow-x:auto}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#ffffff;line-height:1.6;display:block;white-space:pre;text-wrap:wrap}
+.keyword{color:#ec4899}
+.string{color:#34d399}
+.comment{color:#6b7280}
+.function{color:#60a5fa}
+.number{color:#fbbf24}
+.expl-box{background:#1a1f2e;border:1px solid #2a3348;border-radius:8px;padding:.85rem;margin-bottom:1.2rem;font-size:.8rem;color:#e5e7eb;line-height:1.7}
+.expl-box strong{color:#8b5cf6}
+.example-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem}
+.example-card{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:1rem}
+.example-card h5{color:#8b5cf6;font-size:.8rem;margin-bottom:.5rem;text-transform:uppercase}
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
+.io-box{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
+.io-box h5{color:#34d399;font-size:.7rem;font-weight:700;margin-bottom:.4rem;text-transform:uppercase}
+.io-box code{background:#0f1117;border:1px solid #2a3348;border-radius:4px;padding:.25rem .5rem;display:block;margin:.25rem 0;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#ffffff;white-space:pre-wrap}
+.realworld-box{background:#1a2f3e;border-left:3px solid #06b6d4;border-radius:0 8px 8px 0;padding:1rem;margin-bottom:1.2rem;font-size:.82rem;line-height:1.7}
+.realworld-box strong{color:#06b6d4}
+.navrow{display:flex;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #2a3348}
+.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.6rem .8rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45;color:#ffffff}
+.nbtn:hover{background:#252d40;color:#ffffff;border-color:#8b5cf6}
+.nbtn.off{opacity:.25;pointer-events:none}
+
+.badge-numpy{background:#1e3a5f;border-color:#3b82f6}
+.badge-pandas{background:#1f3a2a;border-color:#10b981}
+.badge-spark{background:#3a1f2a;border-color:#f472b6}
+
+@media(max-width:768px){
+  .layout{display:block;height:auto}
+  .sidebar{display:none}
+  .main{width:100%}
+  .wrap{padding:1rem .75rem 2rem}
+  .mob-toggle{display:flex}
+  .mob-overlay.open{display:flex}
+  .example-grid,.io-grid{grid-template-columns:1fr}
+  .fbtn:not(.mob-toggle){display:none}
+  .srch{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">NumPy, Pandas & Spark <span>Data Science Mastery</span></div>
+  <div class="topbar-right">
+    <input type="text" class="srch" id="searchbox" placeholder="Search topics...">
+    <button class="fbtn" onclick="toggleFilter('all')" id="filter-all">All</button>
+    <button class="fbtn" onclick="toggleFilter('numpy')" id="filter-numpy">NumPy</button>
+    <button class="fbtn" onclick="toggleFilter('pandas')" id="filter-pandas">Pandas</button>
+    <button class="fbtn" onclick="toggleFilter('spark')" id="filter-spark">Spark</button>
+    <button class="mob-toggle" onclick="toggleMobOverlay()">☰ Menu</button>
+  </div>
+</div>
+
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-header-title">Data Science Topics</div>
+    <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
+  </div>
+  <div class="mob-search">
+    <input type="text" id="searchbox-mob" placeholder="Search topics..." onkeyup="filterQuestions()">
+  </div>
+  <div class="mob-list" id="moblist"></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar"><div class="sb-inner" id="deskqlist"></div></div>
+  <div class="main">
+    <div class="wrap" id="content"></div>
+  </div>
+</div>
+
+<script>
+const topics = [
+  {id:1,title:"NumPy Arrays & Basics",cat:"numpy",section:"Fundamentals"},
+  {id:2,title:"Array Operations & Broadcasting",cat:"numpy",section:"Core Concepts"},
+  {id:3,title:"Indexing & Slicing",cat:"numpy",section:"Manipulation"},
+  {id:4,title:"Mathematical Functions",cat:"numpy",section:"Operations"},
+  {id:5,title:"Linear Algebra with NumPy",cat:"numpy",section:"Advanced"},
+  {id:6,title:"NumPy Performance Optimization",cat:"numpy",section:"Optimization"},
+  {id:7,title:"Pandas Series & DataFrames",cat:"pandas",section:"Fundamentals"},
+  {id:8,title:"Data Loading & I/O",cat:"pandas",section:"Input/Output"},
+  {id:9,title:"Data Cleaning & Handling Missing Data",cat:"pandas",section:"Data Prep"},
+  {id:10,title:"Groupby & Aggregations",cat:"pandas",section:"Analysis"},
+  {id:11,title:"Merging & Joining DataFrames",cat:"pandas",section:"Transformation"},
+  {id:12,title:"Time Series Data",cat:"pandas",section:"Specialized"},
+  {id:13,title:"Pandas Performance & Memory",cat:"pandas",section:"Optimization"},
+  {id:14,title:"Spark Basics & RDDs",cat:"spark",section:"Fundamentals"},
+  {id:15,title:"Spark DataFrames & SQL",cat:"spark",section:"Core Concepts"},
+  {id:16,title:"Spark Transformations & Actions",cat:"spark",section:"Operations"},
+  {id:17,title:"Spark Structured Streaming",cat:"spark",section:"Streaming"},
+  {id:18,title:"MLlib - Machine Learning",cat:"spark",section:"ML"},
+  {id:19,title:"Spark Performance Tuning",cat:"spark",section:"Optimization"},
+  {id:20,title:"Real-World: Data Pipeline",cat:"spark",section:"Real-World"},
+];
+
+const content = {
+  1:{
+    title:"NumPy Arrays & Basics",
+    def:"NumPy (Numerical Python) is a fundamental library for numerical computing. It provides N-dimensional arrays (ndarrays), which are homogeneous collections of elements with the same data type. NumPy is the foundation for pandas, SciPy, and most data science libraries in Python.",
+    badges:["Fundamentals","NumPy Core","Arrays"],
+    examples:[
+      {title:"Creating NumPy Arrays",code:`import numpy as np
+
+# 1D Array
+arr1d = np.array([1, 2, 3, 4, 5])
+print(arr1d)  # [1 2 3 4 5]
+
+# 2D Array (Matrix)
+arr2d = np.array([[1, 2, 3], [4, 5, 6]])
+print(arr2d)
+# [[1 2 3]
+#  [4 5 6]]
+
+# Using built-in functions
+zeros = np.zeros((3, 3))      # 3x3 array of zeros
+ones = np.ones((2, 4))         # 2x4 array of ones
+identity = np.eye(3)           # Identity matrix
+range_arr = np.arange(0, 10, 2) # [0 2 4 6 8]
+linspace = np.linspace(0, 1, 5) # 5 values from 0 to 1`},
+      {title:"Array Properties",code:`arr = np.array([[1, 2, 3], [4, 5, 6]])
+
+print(arr.shape)    # (2, 3) - dimensions
+print(arr.dtype)    # int64  - data type
+print(arr.size)     # 6      - total elements
+print(arr.ndim)     # 2      - number of dimensions
+print(arr.nbytes)   # 48     - memory used (in bytes)`}
+    ],
+    explanation:"NumPy arrays are more efficient than Python lists because they store data contiguously in memory and are implemented in C. This makes NumPy operations significantly faster, especially for large datasets.",
+    inputOutput:{
+      input:"import numpy as np\narr = np.array([1, 2, 3, 4, 5])\nprint(arr.shape)",
+      output:"(5,)"
+    },
+    realWorld:"In data pipelines, NumPy arrays are used to load sensor data, image pixels, or financial time-series data before processing."
+  },
+  2:{
+    title:"Array Operations & Broadcasting",
+    def:"Broadcasting is NumPy's mechanism for performing operations on arrays of different shapes. It automatically aligns dimensions and repeats data where necessary, eliminating the need for explicit loops.",
+    badges:["Core Concepts","NumPy","Performance"],
+    examples:[
+      {title:"Element-wise Operations",code:`import numpy as np
+
+a = np.array([1, 2, 3])
+b = np.array([4, 5, 6])
+
+# Element-wise operations
+print(a + b)        # [5 7 9]
+print(a * b)        # [4 10 18]
+print(a ** b)       # [1 32 729]
+print(np.sqrt(a))   # [1. 1.41421356 1.73205081]`},
+      {title:"Broadcasting Example",code:`import numpy as np
+
+# (3,3) array + (3,) array
+matrix = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+vector = np.array([10, 20, 30])
+
+result = matrix + vector
+print(result)
+# [[11 22 33]
+#  [14 25 36]
+#  [17 28 39]]
+
+# Scalar broadcast
+result2 = matrix * 2
+print(result2)
+# [[ 2  4  6]
+#  [ 8 10 12]
+#  [14 16 18]]`}
+    ],
+    explanation:"Broadcasting eliminates the need for nested loops and explicit replication. This makes code more readable and significantly faster. NumPy handles the shape alignment internally by repeating smaller arrays to match larger ones.",
+    inputOutput:{
+      input:"a = np.array([[1,2],[3,4]])\nb = np.array([10,20])\nprint(a + b)",
+      output:"[[11 22]\n [13 24]]"
+    },
+    realWorld:"In machine learning, broadcasting is used when applying normalization (subtracting means and dividing by standard deviations) to datasets without explicit looping."
+  },
+  3:{
+    title:"Indexing & Slicing",
+    def:"NumPy provides powerful indexing and slicing mechanisms to access and modify array elements. This includes integer indexing, boolean indexing, fancy indexing, and multi-dimensional slicing.",
+    badges:["Manipulation","Indexing","Selection"],
+    examples:[
+      {title:"Basic Indexing & Slicing",code:`import numpy as np
+
+arr = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+# Single element
+print(arr[2])           # 2
+print(arr[-1])          # 9 (last element)
+
+# Slicing
+print(arr[2:6])         # [2 3 4 5]
+print(arr[::2])         # [0 2 4 6 8] (every 2nd element)
+print(arr[::-1])        # [9 8 7 6 5 4 3 2 1 0] (reverse)
+
+# 2D Array Indexing
+arr2d = np.array([[1,2,3], [4,5,6], [7,8,9]])
+print(arr2d[1, 2])      # 6 (row 1, col 2)
+print(arr2d[0, :])      # [1 2 3] (entire first row)
+print(arr2d[:, 1])      # [2 5 8] (entire second column)`},
+      {title:"Boolean Indexing & Fancy Indexing",code:`import numpy as np
+
+arr = np.array([10, 20, 30, 40, 50, 60])
+
+# Boolean indexing (filtering)
+mask = arr > 25
+print(arr[mask])         # [30 40 50 60]
+
+# Fancy indexing (using indices array)
+indices = np.array([0, 2, 4])
+print(arr[indices])      # [10 30 50]
+
+# Conditional operations
+arr2 = np.array([1, 2, 3, 4, 5])
+arr2[arr2 > 3] = 0  # Set values > 3 to 0
+print(arr2)            # [1 2 3 0 0]`}
+    ],
+    explanation:"Indexing and slicing enable efficient data access patterns. Boolean indexing is particularly useful for filtering datasets based on conditions without using explicit loops.",
+    inputOutput:{
+      input:"arr = np.array([[1,2,3],[4,5,6]])\nprint(arr[0, 1])",
+      output:"2"
+    },
+    realWorld:"In real-world data analysis, boolean indexing is used to filter datasets - e.g., selecting all transactions > $100 or all readings where temperature > 30°C."
+  },
+  4:{
+    title:"Mathematical Functions",
+    def:"NumPy provides a comprehensive set of mathematical functions including trigonometric, exponential, logarithmic, statistical, and rounding functions. These are optimized for vectorized operations.",
+    badges:["Operations","Math","Functions"],
+    examples:[
+      {title:"Common Mathematical Functions",code:`import numpy as np
+
+arr = np.array([1, 2, 3, 4, 5])
+
+# Trigonometric
+print(np.sin(arr))          # [-0.84147098  0.90929743  0.14112001 -0.75680975 -0.95892427]
+print(np.cos(arr))
+print(np.tan(arr))
+
+# Exponential & Logarithmic
+print(np.exp(arr))          # [e^1, e^2, e^3, e^4, e^5]
+print(np.log(arr))          # [0. 0.69314718 1.09861229 1.38629436 1.60943791]
+print(np.sqrt(arr))         # [1. 1.41421356 1.73205081 2. 2.23606798]
+
+# Rounding
+arr_float = np.array([1.234, 2.567, 3.891])
+print(np.round(arr_float))  # [1. 3. 4.]
+print(np.ceil(arr_float))   # [2. 3. 4.]
+print(np.floor(arr_float))  # [1. 2. 3.]`},
+      {title:"Aggregation Functions",code:`import numpy as np
+
+arr = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+
+# Basic statistics
+print(np.sum(arr))          # 45 (sum of all elements)
+print(np.mean(arr))         # 5.0 (average)
+print(np.std(arr))          # Standard deviation
+print(np.var(arr))          # Variance
+
+# Along axis
+print(np.sum(arr, axis=0))  # [12 15 18] (sum of columns)
+print(np.sum(arr, axis=1))  # [6 15 24] (sum of rows)
+print(np.mean(arr, axis=1)) # [2. 5. 8.]
+
+# Min/Max
+print(np.min(arr))          # 1
+print(np.max(arr))          # 9
+print(np.argmax(arr))       # 8 (index of max value)`}
+    ],
+    explanation:"These functions are vectorized, meaning they operate on entire arrays without explicit loops. This is orders of magnitude faster than Python loops. Understanding axis parameters is crucial for data analysis.",
+    inputOutput:{
+      input:"arr = np.array([1, 2, 3, 4, 5])\nprint(np.mean(arr))",
+      output:"3.0"
+    },
+    realWorld:"In financial analysis, you'd use np.mean() for average returns, np.std() for volatility, and np.max()/np.min() for peak/trough prices across portfolios."
+  },
+  5:{
+    title:"Linear Algebra with NumPy",
+    def:"NumPy provides linear algebra operations through the np.linalg module, including matrix multiplication, eigenvalue decomposition, matrix inversion, determinants, and solving linear systems.",
+    badges:["Linear Algebra","Advanced","Mathematics"],
+    examples:[
+      {title:"Matrix Operations",code:`import numpy as np
+
+A = np.array([[1, 2], [3, 4]])
+B = np.array([[5, 6], [7, 8]])
+
+# Matrix multiplication
+print(np.dot(A, B))
+# [[19 22]
+#  [43 50]]
+
+# Element-wise multiplication
+print(A * B)
+# [[ 5 12]
+#  [21 32]]
+
+# Matrix transpose
+print(A.T)
+# [[1 3]
+#  [2 4]]
+
+# Matrix inverse
+print(np.linalg.inv(A))
+
+# Determinant
+print(np.linalg.det(A))     # -2.0`},
+      {title:"Eigenvalues & Eigenvectors",code:`import numpy as np
+
+A = np.array([[4, 2], [1, 3]])
+
+# Calculate eigenvalues and eigenvectors
+eigenvalues, eigenvectors = np.linalg.eig(A)
+
+print("Eigenvalues:", eigenvalues)      # [5. 2.]
+print("Eigenvectors:")
+print(eigenvectors)
+
+# Solving linear system: Ax = b
+A = np.array([[3, 1], [1, 2]])
+b = np.array([9, 8])
+x = np.linalg.solve(A, b)
+print("Solution:", x)                  # [2. 3.]`}
+    ],
+    explanation:"Linear algebra is fundamental in machine learning (PCA, SVD), scientific computing, and optimization problems. NumPy's implementation uses optimized BLAS/LAPACK libraries for speed.",
+    inputOutput:{
+      input:"A = np.array([[1,2],[3,4]])\nprint(np.linalg.det(A))",
+      output:"-2.0"
+    },
+    realWorld:"In principal component analysis (PCA), eigenvalue decomposition is used to find the main directions of variance in high-dimensional data for dimensionality reduction."
+  },
+  6:{
+    title:"NumPy Performance Optimization",
+    def:"Optimizing NumPy code involves understanding memory layout, dtype selection, using vectorized operations, and leveraging in-place operations. Performance can be 100-1000x faster than pure Python.",
+    badges:["Optimization","Performance","Advanced"],
+    examples:[
+      {title:"Vectorization vs Loops",code:`import numpy as np
+import time
+
+# Setup large array
+arr = np.random.rand(1000000)
+
+# Method 1: Pure Python loop (SLOW)
+start = time.time()
+result1 = [x ** 2 for x in arr]
+time_loop = time.time() - start
+
+# Method 2: NumPy vectorization (FAST)
+start = time.time()
+result2 = arr ** 2
+time_numpy = time.time() - start
+
+print(f"Python loop: {time_loop:.6f}s")    # ~0.1s
+print(f"NumPy array: {time_numpy:.6f}s")   # ~0.001s
+print(f"Speedup: {time_loop/time_numpy:.1f}x")  # ~100x faster`},
+      {title:"Memory Efficiency & In-place Operations",code:`import numpy as np
+
+# Using specific dtypes to save memory
+arr_float64 = np.ones(1000000, dtype=np.float64)  # 8MB
+arr_float32 = np.ones(1000000, dtype=np.float32)  # 4MB
+arr_int32 = np.ones(1000000, dtype=np.int32)     # 4MB
+
+print(f"float64: {arr_float64.nbytes / 1e6:.1f}MB")
+print(f"float32: {arr_float32.nbytes / 1e6:.1f}MB")
+
+# In-place operations (modify original, don't create new array)
+arr = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+
+# NOT in-place (creates new array)
+result = arr * 2
+
+# In-place (modifies original)
+arr *= 2  # Much more memory efficient`}
+    ],
+    explanation:"The key to NumPy performance is vectorization - avoiding explicit Python loops. Always use NumPy functions that operate on entire arrays at once. In-place operations reduce memory overhead.",
+    inputOutput:{
+      input:"# Python loop vs NumPy\nPython: O(n) with interpreter overhead\nNumPy: O(n) but in optimized C code",
+      output:"NumPy typically 50-1000x faster"
+    },
+    realWorld:"In real-time data processing (streaming data, sensor readings), vectorization is critical to process millions of data points per second without lagging."
+  },
+  7:{
+    title:"Pandas Series & DataFrames",
+    def:"Pandas provides two main data structures: Series (1D labeled array) and DataFrame (2D labeled table). DataFrames are like SQL tables or Excel spreadsheets, with rows and columns that can have different dtypes.",
+    badges:["Fundamentals","Pandas","Data Structure"],
+    examples:[
+      {title:"Creating Series & DataFrames",code:`import pandas as pd
+
+# Creating a Series
+s = pd.Series([10, 20, 30, 40])
+print(s)
+# 0    10
+# 1    20
+# 2    30
+# 3    40
+
+# Series with custom index
+s_named = pd.Series([100, 200, 300], index=['a', 'b', 'c'])
+print(s_named['a'])  # 100
+
+# Creating DataFrame from dict
+data = {
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Age': [25, 30, 35],
+    'Salary': [50000, 60000, 75000]
+}
+df = pd.DataFrame(data)
+
+# Creating DataFrame from list of dicts
+df2 = pd.DataFrame([
+    {'id': 1, 'name': 'Alice', 'score': 95},
+    {'id': 2, 'name': 'Bob', 'score': 87}
+])`},
+      {title:"DataFrame Basic Operations",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'Name': ['Alice', 'Bob', 'Charlie', 'David'],
+    'Age': [25, 30, 35, 40],
+    'Salary': [50000, 60000, 75000, 80000]
+})
+
+# Accessing columns
+print(df['Name'])           # Series
+print(df[['Name', 'Age']])  # DataFrame with 2 columns
+
+# Accessing rows
+print(df.iloc[0])           # First row by position
+print(df.loc[0])            # First row by label
+
+# DataFrame info
+print(df.shape)             # (4, 3) - 4 rows, 3 columns
+print(df.info())            # Column types and non-null counts
+print(df.describe())        # Statistical summary`}
+    ],
+    explanation:"DataFrames are the core data structure in pandas and are used for almost all data manipulation tasks. They combine the flexibility of Python dicts with the efficiency of NumPy arrays.",
+    inputOutput:{
+      input:"df = pd.DataFrame({'A': [1,2,3], 'B': [4,5,6]})\nprint(df.shape)",
+      output:"(3, 2)"
+    },
+    realWorld:"DataFrames are used to store and manipulate data from CSV files, databases, APIs, and web scraping. Every data science project starts with loading data into a DataFrame."
+  },
+  8:{
+    title:"Data Loading & I/O",
+    def:"Pandas provides functions to read and write data in various formats: CSV, Excel, SQL databases, JSON, Parquet, HDF5, and more. These functions handle parsing, type inference, and missing values automatically.",
+    badges:["Input/Output","Data Loading","I/O"],
+    examples:[
+      {title:"Reading Data from Various Sources",code:`import pandas as pd
+
+# Read CSV
+df_csv = pd.read_csv('data.csv')
+df_csv = pd.read_csv('data.csv', delimiter=';', encoding='utf-8')
+
+# Read Excel
+df_excel = pd.read_excel('data.xlsx', sheet_name='Sheet1')
+
+# Read SQL Database
+import sqlalchemy
+engine = sqlalchemy.create_engine('postgresql://user:password@host/db')
+df_sql = pd.read_sql('SELECT * FROM users LIMIT 1000', engine)
+
+# Read JSON
+df_json = pd.read_json('data.json')
+
+# Read Parquet (columnar, efficient)
+df_parquet = pd.read_parquet('data.parquet')`},
+      {title:"Writing Data to Various Formats",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'ID': [1, 2, 3],
+    'Name': ['Alice', 'Bob', 'Charlie'],
+    'Score': [95, 87, 92]
+})
+
+# Write to CSV
+df.to_csv('output.csv', index=False)
+
+# Write to Excel
+df.to_excel('output.xlsx', sheet_name='Data')
+
+# Write to SQL
+engine = sqlalchemy.create_engine('postgresql://user:password@host/db')
+df.to_sql('users', engine, if_exists='append', index=False)
+
+# Write to Parquet (compressed)
+df.to_parquet('output.parquet', compression='snappy')`}
+    ],
+    explanation:"I/O operations are critical for data pipelines. Parquet is recommended for large datasets due to compression and columnar storage. CSV is human-readable but less efficient for large files.",
+    inputOutput:{
+      input:"df = pd.read_csv('sales.csv')\nprint(f'Loaded {len(df)} rows')",
+      output:"Loaded 10000 rows"
+    },
+    realWorld:"In production pipelines, you might read data from S3 or databases, transform it, and write results back to S3 or a data warehouse. Chunked reading (chunksize parameter) handles files larger than RAM."
+  },
+  9:{
+    title:"Data Cleaning & Handling Missing Data",
+    def:"Real-world data is messy. Data cleaning involves handling missing values, removing duplicates, fixing data types, dealing with outliers, and standardizing formats. This typically consumes 70-80% of data science work.",
+    badges:["Data Preparation","Cleaning","Missing Values"],
+    examples:[
+      {title:"Handling Missing Values",code:`import pandas as pd
+import numpy as np
+
+df = pd.DataFrame({
+    'A': [1, 2, np.nan, 4, 5],
+    'B': [10, np.nan, 30, 40, 50],
+    'C': ['cat', 'dog', np.nan, 'cat', 'dog']
+})
+
+# Check missing values
+print(df.isnull())              # Boolean mask
+print(df.isnull().sum())        # Count per column
+
+# Drop rows with any missing values
+df_clean = df.dropna()
+
+# Drop rows where specific column is missing
+df_clean = df.dropna(subset=['A'])
+
+# Fill missing values
+df_filled = df.fillna(0)                    # Fill with 0
+df_filled = df.fillna(df.mean())            # Fill with mean
+df_filled = df.fillna(method='ffill')       # Forward fill
+df_filled = df.fillna(method='bfill')       # Backward fill`},
+      {title:"Data Cleaning Operations",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'Name': ['Alice', 'alice', 'ALICE', 'Bob'],
+    'Age': [25, 25, 25, 30],
+    'Email': ['alice@example.com', 'alice@example.com', 'alice@example.com', 'bob@example.com']
+})
+
+# Remove duplicates
+df_unique = df.drop_duplicates()
+df_unique = df.drop_duplicates(subset=['Email'])
+
+# Standardize string data
+df['Name'] = df['Name'].str.lower().str.strip()
+
+# Fix data types
+df['Age'] = df['Age'].astype('int32')
+df['Registered'] = pd.to_datetime(['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04'])
+
+# Rename columns
+df.rename(columns={'Email': 'EmailAddress'}, inplace=True)
+
+# Handle outliers (e.g., remove values beyond 3 std devs)
+df_no_outliers = df[(df['Age'] - df['Age'].mean()).abs() <= 3 * df['Age'].std()]`}
+    ],
+    explanation:"Data cleaning is an iterative process. Start by understanding your data (df.info(), df.describe()), identify issues, then apply appropriate transformations. Use domain knowledge to decide whether to drop or impute missing values.",
+    inputOutput:{
+      input:"df = pd.DataFrame({'A': [1, np.nan, 3]})\ndf.fillna(df.mean())",
+      output:"     A\n0  1.0\n1  2.0\n2  3.0"
+    },
+    realWorld:"In production, you might build pipelines that automatically detect and flag data quality issues, log warnings, and apply standardized cleaning rules across multiple data sources."
+  },
+  10:{
+    title:"Groupby & Aggregations",
+    def:"The groupby() operation is one of pandas' most powerful features. It splits data into groups based on one or more columns, applies operations to each group, and combines results. This is similar to SQL GROUP BY.",
+    badges:["Analysis","Aggregation","Grouping"],
+    examples:[
+      {title:"Basic Groupby Operations",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'Department': ['Sales', 'Sales', 'IT', 'IT', 'HR', 'HR'],
+    'Employee': ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank'],
+    'Salary': [50000, 55000, 70000, 75000, 45000, 48000]
+})
+
+# Group by department and calculate mean salary
+grouped = df.groupby('Department')['Salary'].mean()
+print(grouped)
+# Department
+# HR       46500.0
+# IT       72500.0
+# Sales    52500.0
+
+# Multiple aggregations
+agg_result = df.groupby('Department').agg({
+    'Salary': ['mean', 'sum', 'count', 'min', 'max']
+})
+print(agg_result)`},
+      {title:"Advanced Groupby with Custom Functions",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'Category': ['A', 'B', 'A', 'B', 'A', 'B'],
+    'Q1': [100, 150, 120, 180, 110, 160],
+    'Q2': [110, 160, 130, 190, 120, 170],
+    'Q3': [120, 170, 140, 200, 130, 180]
+})
+
+# Group and apply custom function
+def custom_stat(x):
+    return {
+        'mean': x.mean(),
+        'trend': x.iloc[-1] - x.iloc[0]  # Last - First
+    }
+
+result = df.groupby('Category')[['Q1', 'Q2', 'Q3']].apply(custom_stat)
+print(result)
+
+# Using multiple columns for grouping
+multi_group = df.groupby(['Category']).size()  # Count per category`}
+    ],
+    explanation:"Groupby is fundamental for exploratory data analysis and reporting. Understanding how to combine groupby with aggregations is essential for generating insights from data.",
+    inputOutput:{
+      input:"df.groupby('Category')['Sales'].sum()",
+      output:"Category\nA    5000\nB    7500"
+    },
+    realWorld:"E-commerce: Group by customer and sum purchases for customer lifetime value. Finance: Group by account and calculate portfolio statistics. HR: Group by department for headcount, salary analysis."
+  },
+  11:{
+    title:"Merging & Joining DataFrames",
+    def:"Merging combines DataFrames on shared columns or indices (similar to SQL JOINs). Types include inner join (intersection), left join (keep left), right join (keep right), and outer join (union).",
+    badges:["Transformation","Joining","Data Integration"],
+    examples:[
+      {title:"DataFrame Merge Operations",code:`import pandas as pd
+
+# Create two DataFrames
+df_customers = pd.DataFrame({
+    'CustomerID': [1, 2, 3, 4],
+    'Name': ['Alice', 'Bob', 'Charlie', 'David']
+})
+
+df_orders = pd.DataFrame({
+    'OrderID': [101, 102, 103, 104],
+    'CustomerID': [1, 2, 1, 3],
+    'Amount': [100, 150, 200, 75]
+})
+
+# Inner join (only matching customer IDs)
+inner = pd.merge(df_customers, df_orders, on='CustomerID', how='inner')
+
+# Left join (all customers, matching orders if exist)
+left = pd.merge(df_customers, df_orders, on='CustomerID', how='left')
+
+# Right join (all orders, matching customers if exist)
+right = pd.merge(df_customers, df_orders, on='CustomerID', how='right')
+
+# Outer join (all rows from both)
+outer = pd.merge(df_customers, df_orders, on='CustomerID', how='outer')`},
+      {title:"Concatenation & Set Operations",code:`import pandas as pd
+
+df1 = pd.DataFrame({
+    'A': [1, 2],
+    'B': [3, 4]
+})
+
+df2 = pd.DataFrame({
+    'A': [5, 6],
+    'B': [7, 8]
+})
+
+# Concatenate (stack) DataFrames
+df_concat = pd.concat([df1, df2], axis=0)  # Stack vertically
+df_concat = pd.concat([df1, df2], axis=1)  # Stack horizontally
+
+# Join on index
+df_left = df1.set_index('A')
+df_right = df2.set_index('A')
+df_joined = df_left.join(df_right, how='inner')`}
+    ],
+    explanation:"Joins are crucial for combining data from multiple tables. Understanding join types is essential. Inner joins reduce data, left joins preserve the 'base' table, outer joins keep everything.",
+    inputOutput:{
+      input:"pd.merge(df1, df2, on='ID', how='inner')",
+      output:"Returns only rows with matching IDs in both DataFrames"
+    },
+    realWorld:"In data warehouses: Customer master + transaction table (inner join for active only), inventory + sales forecasts (left join to keep all products), consolidating data from multiple teams (outer join)."
+  },
+  12:{
+    title:"Time Series Data",
+    def:"Time series data has a temporal component. Pandas provides specialized tools for handling dates, resampling at different frequencies, calculating rolling statistics, and performing time-based analysis.",
+    badges:["Specialized","Time Series","Temporal Analysis"],
+    examples:[
+      {title:"Time Series Basics",code:`import pandas as pd
+
+# Create time series index
+dates = pd.date_range('2024-01-01', periods=30, freq='D')
+data = pd.Series(range(30), index=dates)
+
+# Access by date
+print(data['2024-01-05'])      # Single date
+print(data['2024-01-05':'2024-01-10'])  # Date range
+
+# Create DataFrame with datetime
+df = pd.DataFrame({
+    'Date': pd.date_range('2024-01-01', periods=100),
+    'Price': np.random.randn(100).cumsum() + 100,
+    'Volume': np.random.randint(1000, 10000, 100)
+})
+
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+
+# Time-based selection
+print(df.loc['2024-01'])        # Entire January
+print(df.loc['2024-01-01':'2024-01-10'])  # Specific range`},
+      {title:"Resampling & Rolling Statistics",code:`import pandas as pd
+
+# Create daily time series
+dates = pd.date_range('2024-01-01', periods=365, freq='D')
+daily_sales = pd.Series(np.random.randint(100, 500, 365), index=dates)
+
+# Resample to weekly (sum aggregation)
+weekly = daily_sales.resample('W').sum()
+
+# Resample to monthly (mean)
+monthly = daily_sales.resample('M').mean()
+
+# Calculate rolling mean (7-day moving average)
+rolling_mean = daily_sales.rolling(window=7).mean()
+
+# Rolling statistics
+rolling_std = daily_sales.rolling(window=7).std()
+rolling_max = daily_sales.rolling(window=7).max()`}
+    ],
+    explanation:"Time series analysis is crucial for forecasting and trend detection. Rolling statistics smooth noise, resampling changes granularity, and time-based indexing enables efficient filtering.",
+    inputOutput:{
+      input:"df.resample('M')['Price'].mean()",
+      output:"Date\n2024-01-31    105.3\n2024-02-29    108.7"
+    },
+    realWorld:"Stock market analysis: Daily prices → weekly/monthly trends. Website analytics: Hourly clicks → daily/weekly patterns. Sensor data: Raw measurements → hourly aggregates for anomaly detection."
+  },
+  13:{
+    title:"Pandas Performance & Memory",
+    def:"Optimizing pandas involves choosing appropriate dtypes, using categorical data, chunked reading for large files, using built-in methods instead of apply(), and avoiding unnecessary copies.",
+    badges:["Optimization","Memory","Performance"],
+    examples:[
+      {title:"Memory Optimization Techniques",code:`import pandas as pd
+
+# Create large DataFrame
+df = pd.DataFrame({
+    'int_col': [1, 2, 3] * 1000000,
+    'str_col': ['A', 'B', 'C'] * 1000000,
+    'float_col': [1.1, 2.2, 3.3] * 1000000
+})
+
+print(df.memory_usage(deep=True))
+
+# Downcast numeric types
+df['int_col'] = df['int_col'].astype('int8')  # Instead of int64
+
+# Use categorical for repeated string values
+df['str_col'] = df['str_col'].astype('category')
+
+# After optimization
+print(df.memory_usage(deep=True))  # Much smaller!
+
+# Reading large files in chunks
+chunk_size = 10000
+for chunk in pd.read_csv('huge_file.csv', chunksize=chunk_size):
+    # Process chunk
+    result = chunk[chunk['Amount'] > 1000]`},
+      {title:"Efficient Operations",code:`import pandas as pd
+
+df = pd.DataFrame({
+    'ID': range(100000),
+    'Value': np.random.randn(100000)
+})
+
+# SLOW: Using apply() with lambda
+result_slow = df.apply(lambda row: row['Value'] ** 2, axis=1)
+
+# FAST: Vectorized operation
+result_fast = df['Value'] ** 2
+
+# AVOID: Creating copies
+df_copy = df.copy()  # Use only when necessary
+
+# BETTER: In-place operations
+df.drop(columns=['temp'], inplace=True)
+
+# Use groupby() instead of loops
+# SLOW
+result_slow = []
+for group in df['Category'].unique():
+    result_slow.append(df[df['Category'] == group]['Value'].sum())
+
+# FAST
+result_fast = df.groupby('Category')['Value'].sum()`}
+    ],
+    explanation:"In-place operations, vectorization, and appropriate dtypes are key to performance. Always profile your code to identify bottlenecks. Categorical data can reduce memory by 90% for repeated strings.",
+    inputOutput:{
+      input:"df.dtypes",
+      output:"int_col      int64\nstr_col     object\nfloat_col   float64"
+    },
+    realWorld:"Data pipelines processing millions of records daily must optimize for memory and speed. Using categorical data for region/category fields, chunked reading for multi-GB files, and vectorized operations."
+  },
+  14:{
+    title:"Spark Basics & RDDs",
+    def:"Apache Spark is a distributed computing framework for processing large datasets. RDDs (Resilient Distributed Datasets) are the fundamental data structure - immutable, fault-tolerant collections partitioned across a cluster.",
+    badges:["Fundamentals","Spark","Distributed Computing"],
+    examples:[
+      {title:"Creating and Working with RDDs",code:`from pyspark import SparkContext
+
+# Initialize Spark Context
+sc = SparkContext("local", "RDD Example")
+
+# Create RDD from collection
+rdd1 = sc.parallelize([1, 2, 3, 4, 5])
+
+# Create RDD from external file
+rdd2 = sc.textFile("hdfs://path/to/file.txt")
+
+# RDD transformations (lazy)
+rdd_mapped = rdd1.map(lambda x: x * 2)       # [2, 4, 6, 8, 10]
+rdd_filtered = rdd1.filter(lambda x: x > 2)  # [3, 4, 5]
+
+# RDD actions (trigger computation)
+result = rdd_mapped.collect()     # [2, 4, 6, 8, 10]
+count = rdd_filtered.count()      # 3
+first = rdd1.first()              # 1
+
+sc.stop()`},
+      {title:"RDD Operations",code:`from pyspark import SparkContext
+
+sc = SparkContext("local", "RDD Operations")
+
+rdd = sc.parallelize([1, 2, 3, 4, 5, 6])
+
+# Transformations
+mapped = rdd.map(lambda x: (x, x**2))              # Pairs
+flat = rdd.flatMap(lambda x: [x, x*2])             # Flattened
+reduced = rdd.reduce(lambda x, y: x + y)           # Sum: 21
+
+# Pair RDD operations
+pairs = rdd.map(lambda x: (x % 2, x))  # (0,2), (1,1), (0,4), ...
+grouped = pairs.groupByKey()            # Group by key
+reduced_pairs = pairs.reduceByKey(lambda x, y: x + y)
+
+# Join operations
+rdd1 = sc.parallelize([(1, 'a'), (2, 'b'), (3, 'c')])
+rdd2 = sc.parallelize([(1, 'x'), (2, 'y')])
+joined = rdd1.join(rdd2)  # Inner join on key
+
+sc.stop()`}
+    ],
+    explanation:"RDDs are the foundation of Spark. Key concepts: transformations are lazy (not executed immediately), actions trigger execution, and operations are parallelized across cluster nodes.",
+    inputOutput:{
+      input:"rdd = sc.parallelize([1,2,3,4,5])\nrdd.filter(lambda x: x > 2).collect()",
+      output:"[3, 4, 5]"
+    },
+    realWorld:"RDDs handle unstructured data like raw text logs. Spark automatically partitions data across cluster, handles failures by recomputing lost partitions from original data."
+  },
+  15:{
+    title:"Spark DataFrames & SQL",
+    def:"Spark DataFrames are higher-level abstractions over RDDs with optimizations via Catalyst optimizer. They're similar to pandas DataFrames but distributed. Spark SQL allows querying DataFrames using SQL syntax.",
+    badges:["Core Concepts","SQL","Distributed Data"],
+    examples:[
+      {title:"Creating and Querying DataFrames",code:`from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+
+spark = SparkSession.builder.appName("DF_Example").getOrCreate()
+
+# Create DataFrame from data
+data = [("Alice", 25, 50000), ("Bob", 30, 60000), ("Charlie", 35, 75000)]
+df = spark.createDataFrame(data, ["Name", "Age", "Salary"])
+
+# Create DataFrame from file
+df_csv = spark.read.csv("data.csv", header=True, inferSchema=True)
+df_json = spark.read.json("data.json")
+df_parquet = spark.read.parquet("data.parquet")
+
+# Display DataFrame
+df.show()
+print(df.schema)      # Print schema
+df.printSchema()      # Pretty print schema
+
+# Query using DataFrame API
+result = df.filter(df['Age'] > 28).select('Name', 'Salary')
+result.show()
+
+# SQL queries
+df.createOrReplaceTempView("employees")
+result = spark.sql("SELECT Name, Salary FROM employees WHERE Age > 28")
+result.show()`},
+      {title:"DataFrame Transformations",code:`from pyspark.sql import functions as F
+
+df = spark.createDataFrame([
+    ("Alice", 25, 50000),
+    ("Bob", 30, 60000)
+], ["Name", "Age", "Salary"])
+
+# Filtering
+high_earners = df.filter(F.col('Salary') > 55000)
+
+# Aggregation
+stats = df.groupby('Age').agg(F.avg('Salary').alias('AvgSalary'))
+
+# Sorting
+sorted_df = df.orderBy(F.desc('Salary'))
+
+# Adding columns
+df_with_bonus = df.withColumn('Bonus', F.col('Salary') * 0.1)
+
+# Dropping columns
+df_clean = df_with_bonus.drop('Bonus')
+
+# Joining
+df2 = spark.createDataFrame([('Alice', 'Sales')], ['Name', 'Dept'])
+joined = df.join(df2, 'Name', 'left')`}
+    ],
+    explanation:"DataFrames provide SQL-like syntax and Catalyst optimizer for efficient query execution. Use DataFrames instead of RDDs when working with structured data - they're faster and more intuitive.",
+    inputOutput:{
+      input:"df.groupby('Department').agg(F.sum('Salary')).show()",
+      output:"+----------+----------+\n|Department|sum(Salary)|\n+----------+----------+\n|    Sales |    105000 |\n+----------+----------+"
+    },
+    realWorld:"In data warehouses, DataFrames process structured data from Parquet files, databases, or S3. SQL queries enable data analysts to work alongside engineers in the same framework."
+  },
+  16:{
+    title:"Spark Transformations & Actions",
+    def:"Spark operations are either transformations (return new RDD/DataFrame) or actions (compute results). Understanding this distinction and lazy evaluation is crucial for performance and debugging.",
+    badges:["Operations","Performance","Spark"],
+    examples:[
+      {title:"Transformations (Lazy)",code:`from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = SparkSession.builder.appName("Transform").getOrCreate()
+
+# Read data
+df = spark.read.csv("sales.csv", header=True, inferSchema=True)
+
+# These are transformations - NOT executed yet
+filtered = df.filter(F.col('Amount') > 100)
+selected = filtered.select('ID', 'Amount')
+mapped = selected.withColumn('Tax', F.col('Amount') * 0.1)
+
+# Chain transformations (still not executed)
+result = (df
+    .filter(F.col('Amount') > 100)
+    .select('ID', 'Amount')
+    .withColumn('Tax', F.col('Amount') * 0.1))
+
+print(result)  # Still no execution!`},
+      {title:"Actions (Trigger Computation)",code:`from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = SparkSession.builder.appName("Actions").getOrCreate()
+
+df = spark.read.csv("sales.csv", header=True, inferSchema=True)
+
+# Actions - these EXECUTE the computation
+df.show()                    # Display first 20 rows
+df.show(100)                 # Display 100 rows
+
+count = df.count()           # Count rows
+first = df.first()           # Get first row
+take = df.take(5)            # Get first 5 rows
+
+# Collect (bring to driver - DANGEROUS for large data)
+data = df.collect()          # ONLY use for small DataFrames!
+
+# Write to storage
+df.write.csv("output", header=True, mode="overwrite")
+df.write.parquet("output.parquet", mode="overwrite")
+
+# Aggregations (actions)
+stats = df.groupby('Category').agg(F.sum('Amount')).collect()`}
+    ],
+    explanation:"Lazy evaluation allows Spark to optimize entire job DAG before execution. Always collect() only small data to driver. For large results, write to storage instead.",
+    inputOutput:{
+      input:"df.filter(...).select(...).count()",
+      output:"This EXECUTES all transformations at count()"
+    },
+    realWorld:"Data pipelines must be careful with collect(). Processing billions of records requires writing results to S3 or databases, not collecting to memory. Streaming apps use actions to continuously export results."
+  },
+  17:{
+    title:"Spark Structured Streaming",
+    def:"Structured Streaming treats streaming data as an unbounded table growing continuously. Uses the same DataFrame API as batch processing for consistency. Can read from Kafka, files, sockets.",
+    badges:["Streaming","Real-time","Advanced"],
+    examples:[
+      {title:"Basic Structured Streaming",code:`from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = SparkSession.builder.appName("Streaming").getOrCreate()
+
+# Read from Kafka
+df_stream = (spark.readStream
+    .format("kafka")
+    .option("kafka.bootstrap.servers", "localhost:9092")
+    .option("subscribe", "events_topic")
+    .option("startingOffsets", "latest")
+    .load())
+
+# Parse JSON and transform
+parsed = (df_stream
+    .select(F.from_json(F.col("value").cast("string"), 
+            "id INT, value DOUBLE").alias("data"))
+    .select("data.*"))
+
+# Aggregation (windowed)
+windowed = (parsed
+    .groupby(F.window(F.current_timestamp(), "10 minutes"), "id")
+    .agg(F.avg("value").alias("avg_value")))
+
+# Write results
+query = (windowed
+    .writeStream
+    .format("console")
+    .option("checkpointLocation", "/tmp/checkpoint")
+    .option("path", "output")
+    .option("truncate", False)
+    .start())
+
+query.awaitTermination()`},
+      {title:"Windowing & Stateful Operations",code:`from pyspark.sql import SparkSession, functions as F
+
+spark = SparkSession.builder.appName("Windowing").getOrCreate()
+
+df_stream = (spark.readStream
+    .format("kafka")
+    .option("kafka.bootstrap.servers", "localhost:9092")
+    .option("subscribe", "sensor_data")
+    .load())
+
+# Tumbling window (non-overlapping)
+tumbling = (df_stream
+    .groupby(F.window(F.col("timestamp"), "1 minute"))
+    .agg(F.avg("temperature")))
+
+# Sliding window (overlapping)
+sliding = (df_stream
+    .groupby(F.window(F.col("timestamp"), "10 minutes", "5 minutes"))
+    .agg(F.count("*")))
+
+# Session window (dynamic)
+session = (df_stream
+    .groupby(F.session_window(F.col("timestamp"), "30 minutes"), "user_id")
+    .agg(F.count("*")))`}
+    ],
+    explanation:"Streaming is crucial for real-time dashboards and alerting. Stateless operations (map, filter) are fast; stateful (groupby, join) require state management and checkpointing.",
+    inputOutput:{
+      input:"Query on streaming data processes infinitely until stopped",
+      output:"Results published to console, files, or databases continuously"
+    },
+    realWorld:"IoT sensors stream telemetry → Spark aggregates into 1-min windows → alerts if threshold exceeded. Web logs streamed from Kafka → real-time user activity dashboard. Finance: tick data → rolling price statistics."
+  },
+  18:{
+    title:"MLlib - Machine Learning",
+    def:"Spark MLlib provides distributed machine learning algorithms: classification, regression, clustering, collaborative filtering, and feature engineering. Uses DataFrames for consistent API.",
+    badges:["Machine Learning","MLlib","Advanced"],
+    examples:[
+      {title:"Classification with MLlib",code:`from pyspark.sql import SparkSession
+from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.classification import LogisticRegression
+from pyspark.ml.pipeline import Pipeline
+
+spark = SparkSession.builder.appName("ML").getOrCreate()
+
+# Load data
+df = spark.read.csv("customers.csv", header=True, inferSchema=True)
+
+# Feature engineering - assemble features into vector
+assembler = VectorAssembler(inputCols=['age', 'income', 'credit_score'], 
+                             outputCol='features')
+
+# Create model
+lr = LogisticRegression(labelCol='churn', maxIter=10)
+
+# Create pipeline
+pipeline = Pipeline(stages=[assembler, lr])
+
+# Split data
+train, test = df.randomSplit([0.8, 0.2])
+
+# Train model
+model = pipeline.fit(train)
+
+# Make predictions
+predictions = model.transform(test)
+predictions.select('features', 'churn', 'prediction').show()`},
+      {title:"Clustering with MLlib",code:`from pyspark.ml.feature import VectorAssembler
+from pyspark.ml.clustering import KMeans
+
+spark = SparkSession.builder.appName("Clustering").getOrCreate()
+
+df = spark.read.csv("products.csv", header=True, inferSchema=True)
+
+# Prepare features
+assembler = VectorAssembler(inputCols=['price', 'rating', 'reviews'],
+                             outputCol='features')
+df_featured = assembler.transform(df)
+
+# K-means clustering
+kmeans = KMeans(k=5, seed=42)
+model = kmeans.fit(df_featured)
+
+# Get cluster predictions
+clusters = model.transform(df_featured)
+clusters.select('product_id', 'prediction').show()
+
+# Cluster centers
+for center in model.clusterCenters():
+    print(center)`}
+    ],
+    explanation:"MLlib integrates with Spark's DataFrame API for seamless distributed ML. Pipelines enable reproducible workflows. For advanced ML, use scikit-learn on single machines or TensorFlow/PyTorch for deep learning.",
+    inputOutput:{
+      input:"model.transform(test_df)",
+      output:"Predictions added as 'prediction' column to DataFrame"
+    },
+    realWorld:"Customer churn prediction, product recommendation, fraud detection at scale. Challenges: feature engineering, hyperparameter tuning, handling class imbalance with massive datasets."
+  },
+  19:{
+    title:"Spark Performance Tuning",
+    def:"Optimizing Spark involves partitioning strategy, avoiding shuffles, using appropriate data formats, configuring executors, and understanding the physical execution plan.",
+    badges:["Optimization","Performance","Advanced"],
+    examples:[
+      {title:"Partitioning and Data Format",code:`from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.config("spark.executor.memory", "4g").appName("Tuning").getOrCreate()
+
+df = spark.read.parquet("large_data.parquet")
+
+# Check partition count
+print(f"Partitions: {df.rdd.getNumPartitions()}")
+
+# Repartition for parallelism (more partitions = more parallelism but more overhead)
+df_repartitioned = df.repartition(200)
+
+# Coalesce for reducing partitions (shuffle-free)
+df_coalesced = df.coalesce(50)
+
+# Partition by column (for bucketing)
+df.write.partitionBy("date").mode("overwrite").parquet("output")
+
+# Read only relevant partitions
+df_filtered = spark.read.parquet("output/date=2024-01-01")
+
+# Parquet is most efficient format
+df.write.mode("overwrite").parquet("data.parquet")
+# vs CSV (slower, larger)
+df.write.mode("overwrite").csv("data.csv")`},
+      {title:"Shuffle Optimization & Caching",code:`from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Optimization").getOrCreate()
+
+df = spark.read.parquet("data.parquet")
+
+# AVOID: Multiple shuffles
+result = (df
+    .groupby('category').agg({'amount': 'sum'})  # Shuffle 1
+    .filter(lambda x: x[1] > 1000)               # No shuffle
+    .groupby('region').agg(...)                  # Shuffle 2
+)
+
+# BETTER: Combine operations
+from pyspark.sql import functions as F
+result = (df
+    .groupby('category').agg(F.sum('amount').alias('total'))  # Shuffle 1
+    .filter(F.col('total') > 1000)
+    .cache()  # Cache intermediate result
+)
+
+# Cache data for reuse
+df.cache()  # Or df.persist()
+
+# Use broadcast for small tables
+small_df = spark.read.csv("small_lookup.csv")
+df.join(F.broadcast(small_df), 'id')  # Avoids shuffle
+
+# Analyze execution plan
+df.explain(True)  # Print physical plan`}
+    ],
+    explanation:"Key optimizations: 1) Use Parquet format, 2) Partition data appropriately, 3) Minimize shuffles, 4) Cache intermediate results, 5) Broadcast small tables. Understanding DAG visualization is essential.",
+    inputOutput:{
+      input:"df.explain(True)",
+      output:"== Physical Plan ==\n...detailed execution plan..."
+    },
+    realWorld:"Production jobs processing 100GB+ daily require careful tuning. Shuffle operations can cause bottlenecks. Broadcasting small dimensions (countries, categories) to avoid shuffle is common pattern."
+  },
+  20:{
+    title:"Real-World: Data Pipeline",
+    def:"A complete end-to-end data pipeline combining NumPy, Pandas, and Spark for ingestion, processing, transformation, and storage. Shows practical patterns and best practices.",
+    badges:["Real-World","Integration","Best Practices"],
+    examples:[
+      {title:"End-to-End ETL Pipeline",code:`# ETL Pipeline: Extract -> Transform -> Load
+# Real-world example: Daily sales data processing
+
+import pandas as pd
+import numpy as np
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+# ============ EXTRACT ============
+spark = SparkSession.builder.appName("SalesPipeline").getOrCreate()
+
+# Ingest from S3
+df_raw = spark.read.csv("s3://bucket/raw_sales/*.csv", header=True, inferSchema=True)
+
+print(f"Raw records: {df_raw.count()}")
+
+# ============ TRANSFORM ============
+# Data quality checks
+df_clean = df_raw.filter(
+    (F.col("amount") > 0) &
+    (F.col("date").isNotNull()) &
+    (F.col("customer_id").isNotNull())
+)
+
+# Feature engineering
+df_processed = (df_clean
+    .withColumn("date", F.to_date(F.col("date"), "yyyy-MM-dd"))
+    .withColumn("year_month", F.trunc(F.col("date"), "month"))
+    .withColumn("tax", F.col("amount") * 0.1)
+    .withColumn("total", F.col("amount") + F.col("tax"))
+)
+
+# Aggregations
+daily_summary = (df_processed
+    .groupby(F.col("date"), F.col("region"))
+    .agg(
+        F.count("*").alias("transactions"),
+        F.sum("amount").alias("revenue"),
+        F.avg("amount").alias("avg_transaction"),
+        F.sum("tax").alias("tax_collected")
+    )
+    .orderBy(F.col("date").desc())
+)
+
+# ============ LOAD ============
+# Write to Parquet in S3 (for analytics)
+daily_summary.write.mode("overwrite").parquet("s3://bucket/processed/daily_summary")
+
+# Write to database (for BI tools)
+daily_summary.write.format("jdbc") \
+    .option("url", "jdbc:postgresql://db.example.com/analytics") \
+    .option("dbtable", "daily_sales") \
+    .option("user", "pipeline_user") \
+    .option("password", "***") \
+    .mode("overwrite") \
+    .save()
+
+print(f"Processed {df_clean.count()} records successfully")`},
+      {title:"Real-World: Data Quality & Error Handling",code:`import pandas as pd
+import logging
+from datetime import datetime
+
+# Setup logging
+logging.basicConfig(
+    filename=f'pipeline_{datetime.now():%Y%m%d}.log',
+    level=logging.INFO
+)
+
+def validate_data(df):
+    """Quality checks on DataFrame"""
+    checks = {
+        'total_rows': len(df),
+        'null_amounts': df['amount'].isnull().sum(),
+        'negative_amounts': (df['amount'] < 0).sum(),
+        'missing_dates': df['date'].isnull().sum(),
+    }
+    
+    if checks['null_amounts'] > 0 or checks['negative_amounts'] > 0:
+        logging.warning(f"Quality issues: {checks}")
+        return False
+    
+    return True
+
+# Load data
+try:
+    df = pd.read_csv('sales_data.csv')
+    
+    if not validate_data(df):
+        logging.error("Data validation failed")
+        raise ValueError("Invalid data quality")
+    
+    # Process
+    df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+    df = df.dropna(subset=['amount', 'date'])
+    
+    # Save results
+    df.to_csv('processed_sales.csv', index=False)
+    logging.info(f"Successfully processed {len(df)} records")
+    
+except Exception as e:
+    logging.error(f"Pipeline failed: {str(e)}")
+    raise`}
+    ],
+    explanation:"Real-world pipelines must be robust: handle errors gracefully, validate data quality, log operations, and monitor performance. Automated scheduling (Airflow, Cron) runs pipelines regularly.",
+    inputOutput:{
+      input:"Raw CSV (1M rows) → Pandas validation → Spark transformation → Parquet + DB",
+      output:"Cleaned data in Parquet (analytics) and PostgreSQL (BI tools)"
+    },
+    realWorld:"E-commerce: Daily sales CSVs → deduplication → regional aggregation → dashboard & warehouse. Finance: Transaction files → validation → enrichment → regulatory reporting. IoT: Sensor streams → Spark → time-series DB."
+  }
+};
+
+function showQ(id) {
+  const question = content[id];
+  if (!question) return;
+
+  let html = `<div style="animation: fadeIn 0.3s;"><div class="qhead">
+    <span class="qnum">${id.toString().padStart(2, '0')}</span>
+    <div><div class="qtitle">${question.title}</div>`;
+
+  html += `<div class="badges">`;
+  (question.badges || []).forEach(badge => {
+    html += `<span class="fbadge" style="border-color: #8b5cf6; color: #8b5cf6;">${badge}</span>`;
+  });
+  html += `</div></div></div>`;
+
+  html += `<div class="def-section"><strong>Definition:</strong> ${question.def}</div>`;
+
+  if (question.examples) {
+    question.examples.forEach((example, i) => {
+      html += `<div><div class="slabel">Example ${i + 1}: ${example.title}</div>
+        <div class="code-block"><code>${escapeHtml(example.code)}</code></div></div>`;
+    });
+  }
+
+  if (question.explanation) {
+    html += `<div class="expl-box"><strong>Explanation:</strong> ${question.explanation}</div>`;
+  }
+
+  if (question.inputOutput) {
+    html += `<div class="io-grid">
+      <div class="io-box"><h5>Input</h5><code>${escapeHtml(question.inputOutput.input)}</code></div>
+      <div class="io-box"><h5>Output</h5><code>${escapeHtml(question.inputOutput.output)}</code></div>
+    </div>`;
+  }
+
+  if (question.realWorld) {
+    html += `<div class="realworld-box"><strong>🌍 Real-World Application:</strong> ${question.realWorld}</div>`;
+  }
+
+  html += `<div class="navrow">
+    <button class="nbtn ${id === 1 ? 'off' : ''}" onclick="showQ(${id - 1})">← Prev</button>
+    <button class="nbtn ${id === Object.keys(content).length ? 'off' : ''}" onclick="showQ(${id + 1})">Next →</button>
+  </div></div>`;
+
+  document.getElementById('content').innerHTML = html;
+  updateActiveItem(id);
+  window.scrollTo(0, 0);
+}
+
+function updateActiveItem(id) {
+  document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+  document.getElementById(`si-${id}`)?.classList.add('active');
+}
+
+function renderTopics() {
+  let desktop = '';
+  let mobile = '';
+
+  topics.forEach(topic => {
+    const categoryColor = {
+      numpy: '#3b82f6',
+      pandas: '#10b981',
+      spark: '#f472b6'
+    }[topic.cat] || '#6b7280';
+
+    const item = `<div class="qi" id="si-${topic.id}" onclick="showQ(${topic.id})">
+      <span class="qn">${topic.id.toString().padStart(2, '0')}</span>
+      <span class="qt">${topic.title}</span>
+      <span class="fdot" style="background:${categoryColor}"></span>
+    </div>`;
+
+    desktop += item;
+    mobile += item;
+  });
+
+  document.getElementById('deskqlist').innerHTML = desktop;
+  document.getElementById('moblist').innerHTML = mobile;
+  showQ(1);
+}
+
+function toggleMobOverlay() {
+  document.getElementById('moboverlay').classList.toggle('open');
+}
+
+function toggleFilter(cat) {
+  const btns = document.querySelectorAll('.fbtn');
+  btns.forEach(btn => btn.classList.remove('on'));
+  event.target.classList.add('on');
+
+  const items = document.querySelectorAll('.qi');
+  items.forEach(item => {
+    const id = parseInt(item.id.substring(3));
+    const topic = topics.find(t => t.id === id);
+    item.classList.toggle('hidden', cat !== 'all' && topic.cat !== cat);
+  });
+}
+
+function filterQuestions() {
+  const search = document.getElementById('searchbox-mob')?.value.toLowerCase() ||
+                 document.getElementById('searchbox')?.value.toLowerCase() || '';
+
+  document.querySelectorAll('.qi').forEach(item => {
+    const text = item.querySelector('.qt').textContent.toLowerCase();
+    item.classList.toggle('hidden', !text.includes(search));
+  });
+}
+
+function escapeHtml(text) {
+  const map = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'};
+  return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+document.addEventListener('DOMContentLoaded', renderTopics);
+document.getElementById('searchbox')?.addEventListener('keyup', filterQuestions);
+</script>
+
+</body>
+</html>
