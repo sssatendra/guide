@@ -1,151 +1,606 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AWS Services Deep Dive — S3, EKS, IAM, Aurora, Lambda</title>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0f1117;color:#ffffff;font-family:'Syne',sans-serif;min-height:100vh}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AWS Services Deep Dive — S3, EKS, IAM, Aurora, Lambda, EC2 & More</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
 
-.topbar{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;position:sticky;top:0;z-index:300}
-.logo{font-size:.95rem;font-weight:700;color:#ff9900}
-.logo span{color:#9ca3af;font-weight:400;font-size:.78rem}
-.topbar-right{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
-.srch{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.38rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.8rem;width:200px;outline:none}
-.srch:focus{border-color:#ff9900;background:#252d40}
-.srch::placeholder{color:#6b7280}
-.fbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.36rem .65rem;color:#9ca3af;font-size:.7rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;white-space:nowrap}
-.fbtn:hover,.fbtn.on{background:#252d40;color:#ff9900;border-color:#ff990055}
-.mob-toggle{display:none;background:#ff9900;border:none;border-radius:8px;padding:.38rem .75rem;color:#000;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;gap:.35rem;align-items:center;white-space:nowrap}
+    body {
+      background: #0f1117;
+      color: #ffffff;
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh
+    }
 
-.layout{display:flex;height:calc(100vh - 50px)}
-.sidebar{width:300px;min-width:300px;background:#161b27;border-right:1px solid #2a3348;overflow-y:auto;height:100%;position:sticky;top:50px}
-.sb-inner{padding:.4rem .35rem}
-.main{flex:1;overflow-y:auto}
-.wrap{padding:1.5rem 2rem 2rem;max-width:1000px}
+    .topbar {
+      background: #161b27;
+      border-bottom: 1px solid #2a3348;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .5rem;
+      position: sticky;
+      top: 0;
+      z-index: 300
+    }
 
-.mob-overlay{display:none;position:fixed;inset:0;background:#0f1117;z-index:400;flex-direction:column}
-.mob-overlay.open{display:flex}
-.mob-header{background:#161b27;border-bottom:1px solid #2a3348;padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
-.mob-header-title{font-size:.9rem;font-weight:700;color:#ffffff}
-.mob-close{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.35rem .7rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif}
-.mob-search{padding:.6rem .75rem;background:#161b27;border-bottom:1px solid #2a3348}
-.mob-search input{width:100%;background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.4rem .75rem;color:#ffffff;font-family:'Syne',sans-serif;font-size:.82rem;outline:none}
-.mob-search input:focus{border-color:#ff9900}
-.mob-list{flex:1;overflow-y:auto;padding:.4rem .5rem}
+    .logo {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #ff9900
+    }
 
-.qi{display:flex;align-items:flex-start;gap:.45rem;padding:.52rem .6rem;border-radius:7px;cursor:pointer;border:1px solid transparent;transition:all .12s;margin-bottom:2px}
-.qi:hover{background:#1e2535;border-color:#2a3348}
-.qi.active{background:#1e2535;border-left:3px solid #ff9900;border-color:#ff990033}
-.qi.hidden{display:none}
-.qn{min-width:20px;font-size:.67rem;font-weight:700;color:#4b5563;margin-top:2px;font-family:'JetBrains Mono',monospace;flex-shrink:0}
-.qi.active .qn{color:#ff9900}
-.qt{font-size:.75rem;color:#ffffff;line-height:1.4;flex:1}
-.fdot{width:5px;height:5px;border-radius:50%;margin-top:5px;flex-shrink:0}
+    .logo span {
+      color: #9ca3af;
+      font-weight: 400;
+      font-size: .78rem
+    }
 
-.welcome{text-align:center;padding:3.5rem 1rem}
-.welcome h2{font-size:1.35rem;font-weight:700;color:#ffffff;margin-bottom:.6rem}
-.welcome p{font-size:.84rem;color:#ffffff;line-height:1.75}
+    .topbar-right {
+      display: flex;
+      gap: .4rem;
+      align-items: center;
+      flex-wrap: wrap
+    }
 
-.qhead{display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.85rem;flex-wrap:wrap}
-.qnum{background:#ff9900;color:#000;font-size:.67rem;font-weight:700;padding:3px 8px;border-radius:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;flex-shrink:0}
-.qtitle{font-size:1.1rem;font-weight:700;color:#ffffff;line-height:1.35;flex:1}
-.badges{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.8rem;align-items:center}
-.fbadge{font-size:.66rem;padding:2px 7px;border-radius:10px;border:1px solid;font-weight:600;color:#ffffff}
-.def-section{background:#1e2535;border-left:3px solid #ff9900;border-radius:0 8px 8px 0;padding:.85rem 1rem;font-size:.83rem;line-height:1.8;color:#ffffff;margin-bottom:1.2rem}
-.def-section strong{color:#ff9900}
-.slabel{font-size:.68rem;font-weight:700;letter-spacing:.12em;color:#6b7280;text-transform:uppercase;margin:1.2rem 0 .6rem;padding-left:2px}
-.code-block{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:1rem;margin-bottom:1.2rem;overflow-x:auto;max-height:300px;overflow-y:auto}
-.code-block code{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#ffffff;line-height:1.5;display:block;white-space:pre;word-break:break-word}
-.expl-box{background:#1a1f2e;border:1px solid #2a3348;border-radius:8px;padding:.85rem;margin-bottom:1.2rem;font-size:.8rem;color:#e5e7eb;line-height:1.7}
-.expl-box strong{color:#ff9900}
-.arch-box{background:#1a3a3a;border:1px solid #1e6262;border-radius:8px;padding:1rem;margin-bottom:1.2rem;font-size:.8rem;color:#e5e7eb;line-height:1.7;border-left:3px solid #06b6d4}
-.arch-box strong{color:#06b6d4}
-.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.2rem}
-.io-box{background:#161b27;border:1px solid #2a3348;border-radius:8px;padding:.75rem}
-.io-box h5{color:#34d399;font-size:.7rem;font-weight:700;margin-bottom:.4rem;text-transform:uppercase}
-.io-box code{background:#0f1117;border:1px solid #2a3348;border-radius:4px;padding:.25rem .5rem;display:block;margin:.25rem 0;font-family:'JetBrains Mono',monospace;font-size:.73rem;color:#ffffff;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto}
-.realworld-box{background:#2a1a1a;border-left:3px solid #ff9900;border-radius:0 8px 8px 0;padding:1rem;margin-bottom:1.2rem;font-size:.8rem;line-height:1.7}
-.realworld-box strong{color:#ff9900}
-.navrow{display:flex;gap:.5rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #2a3348}
-.nbtn{background:#1e2535;border:1px solid #2a3348;border-radius:8px;padding:.6rem .8rem;color:#9ca3af;font-size:.75rem;cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;flex:1;text-align:center;line-height:1.45;color:#ffffff}
-.nbtn:hover{background:#252d40;color:#ffffff;border-color:#ff9900}
-.nbtn.off{opacity:.25;pointer-events:none}
+    .srch {
+      background: #1e2535;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .38rem .75rem;
+      color: #ffffff;
+      font-family: 'Syne', sans-serif;
+      font-size: .8rem;
+      width: 200px;
+      outline: none
+    }
 
-@media(max-width:768px){
-  .layout{display:block;height:auto}
-  .sidebar{display:none}
-  .main{width:100%}
-  .wrap{padding:1rem .75rem 2rem}
-  .mob-toggle{display:flex}
-  .mob-overlay.open{display:flex}
-  .io-grid{grid-template-columns:1fr}
-  .fbtn:not(.mob-toggle){display:none}
-  .srch{display:none}
-}
-</style>
+    .srch:focus {
+      border-color: #ff9900;
+      background: #252d40
+    }
+
+    .srch::placeholder {
+      color: #6b7280
+    }
+
+    .fbtn {
+      background: #1e2535;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .36rem .65rem;
+      color: #9ca3af;
+      font-size: .7rem;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .fbtn:hover,
+    .fbtn.on {
+      background: #252d40;
+      color: #ff9900;
+      border-color: #ff990055
+    }
+
+    .mob-toggle {
+      display: none;
+      background: #ff9900;
+      border: none;
+      border-radius: 8px;
+      padding: .38rem .75rem;
+      color: #000;
+      font-size: .75rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      gap: .35rem;
+      align-items: center;
+      white-space: nowrap
+    }
+
+    .layout {
+      display: flex;
+      height: calc(100vh - 50px)
+    }
+
+    .sidebar {
+      width: 300px;
+      min-width: 300px;
+      background: #161b27;
+      border-right: 1px solid #2a3348;
+      overflow-y: auto;
+      height: 100%;
+      position: sticky;
+      top: 50px
+    }
+
+    .sb-inner {
+      padding: .4rem .35rem
+    }
+
+    .main {
+      flex: 1;
+      overflow-y: auto
+    }
+
+    .wrap {
+      padding: 1.5rem 2rem 2rem;
+      max-width: 1000px
+    }
+
+    .mob-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #0f1117;
+      z-index: 400;
+      flex-direction: column
+    }
+
+    .mob-overlay.open {
+      display: flex
+    }
+
+    .mob-header {
+      background: #161b27;
+      border-bottom: 1px solid #2a3348;
+      padding: .65rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .5rem
+    }
+
+    .mob-header-title {
+      font-size: .9rem;
+      font-weight: 700;
+      color: #ffffff
+    }
+
+    .mob-close {
+      background: #1e2535;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .35rem .7rem;
+      color: #9ca3af;
+      font-size: .75rem;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif
+    }
+
+    .mob-search {
+      padding: .6rem .75rem;
+      background: #161b27;
+      border-bottom: 1px solid #2a3348
+    }
+
+    .mob-search input {
+      width: 100%;
+      background: #1e2535;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .4rem .75rem;
+      color: #ffffff;
+      font-family: 'Syne', sans-serif;
+      font-size: .82rem;
+      outline: none
+    }
+
+    .mob-search input:focus {
+      border-color: #ff9900
+    }
+
+    .mob-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: .4rem .5rem
+    }
+
+    .qi {
+      display: flex;
+      align-items: flex-start;
+      gap: .45rem;
+      padding: .52rem .6rem;
+      border-radius: 7px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .12s;
+      margin-bottom: 2px
+    }
+
+    .qi:hover {
+      background: #1e2535;
+      border-color: #2a3348
+    }
+
+    .qi.active {
+      background: #1e2535;
+      border-left: 3px solid #ff9900;
+      border-color: #ff990033
+    }
+
+    .qi.hidden {
+      display: none
+    }
+
+    .qn {
+      min-width: 20px;
+      font-size: .67rem;
+      font-weight: 700;
+      color: #4b5563;
+      margin-top: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0
+    }
+
+    .qi.active .qn {
+      color: #ff9900
+    }
+
+    .qt {
+      font-size: .75rem;
+      color: #ffffff;
+      line-height: 1.4;
+      flex: 1
+    }
+
+    .fdot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0
+    }
+
+    .welcome {
+      text-align: center;
+      padding: 3.5rem 1rem
+    }
+
+    .welcome h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: .6rem
+    }
+
+    .welcome p {
+      font-size: .84rem;
+      color: #ffffff;
+      line-height: 1.75
+    }
+
+    .qhead {
+      display: flex;
+      align-items: flex-start;
+      gap: .65rem;
+      margin-bottom: .85rem;
+      flex-wrap: wrap
+    }
+
+    .qnum {
+      background: #ff9900;
+      color: #000;
+      font-size: .67rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-top: 3px;
+      flex-shrink: 0
+    }
+
+    .qtitle {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.35;
+      flex: 1
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .3rem;
+      margin-bottom: .8rem;
+      align-items: center
+    }
+
+    .fbadge {
+      font-size: .66rem;
+      padding: 2px 7px;
+      border-radius: 10px;
+      border: 1px solid;
+      font-weight: 600;
+      color: #ffffff
+    }
+
+    .def-section {
+      background: #1e2535;
+      border-left: 3px solid #ff9900;
+      border-radius: 0 8px 8px 0;
+      padding: .85rem 1rem;
+      font-size: .83rem;
+      line-height: 1.8;
+      color: #ffffff;
+      margin-bottom: 1.2rem
+    }
+
+    .def-section strong {
+      color: #ff9900
+    }
+
+    .slabel {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: #6b7280;
+      text-transform: uppercase;
+      margin: 1.2rem 0 .6rem;
+      padding-left: 2px
+    }
+
+    .code-block {
+      background: #161b27;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .75rem;
+      color: #ffffff;
+      line-height: 1.5;
+      display: block;
+      white-space: pre;
+      word-break: break-word
+    }
+
+    .expl-box {
+      background: #1a1f2e;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .85rem;
+      margin-bottom: 1.2rem;
+      font-size: .8rem;
+      color: #e5e7eb;
+      line-height: 1.7
+    }
+
+    .expl-box strong {
+      color: #ff9900
+    }
+
+    .arch-box {
+      background: #1a3a3a;
+      border: 1px solid #1e6262;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+      font-size: .8rem;
+      color: #e5e7eb;
+      line-height: 1.7;
+      border-left: 3px solid #06b6d4
+    }
+
+    .arch-box strong {
+      color: #06b6d4
+    }
+
+    .io-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .8rem;
+      margin-bottom: 1.2rem
+    }
+
+    .io-box {
+      background: #161b27;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .75rem
+    }
+
+    .io-box h5 {
+      color: #34d399;
+      font-size: .7rem;
+      font-weight: 700;
+      margin-bottom: .4rem;
+      text-transform: uppercase
+    }
+
+    .io-box code {
+      background: #0f1117;
+      border: 1px solid #2a3348;
+      border-radius: 4px;
+      padding: .25rem .5rem;
+      display: block;
+      margin: .25rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .73rem;
+      color: #ffffff;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 150px;
+      overflow-y: auto
+    }
+
+    .realworld-box {
+      background: #2a1a1a;
+      border-left: 3px solid #ff9900;
+      border-radius: 0 8px 8px 0;
+      padding: 1rem;
+      margin-bottom: 1.2rem;
+      font-size: .8rem;
+      line-height: 1.7
+    }
+
+    .realworld-box strong {
+      color: #ff9900
+    }
+
+    .navrow {
+      display: flex;
+      gap: .5rem;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #2a3348
+    }
+
+    .nbtn {
+      background: #1e2535;
+      border: 1px solid #2a3348;
+      border-radius: 8px;
+      padding: .6rem .8rem;
+      color: #9ca3af;
+      font-size: .75rem;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      transition: all .15s;
+      flex: 1;
+      text-align: center;
+      line-height: 1.45;
+      color: #ffffff
+    }
+
+    .nbtn:hover {
+      background: #252d40;
+      color: #ffffff;
+      border-color: #ff9900
+    }
+
+    .nbtn.off {
+      opacity: .25;
+      pointer-events: none
+    }
+
+    @media(max-width:768px) {
+      .layout {
+        display: block;
+        height: auto
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .main {
+        width: 100%
+      }
+
+      .wrap {
+        padding: 1rem .75rem 2rem
+      }
+
+      .mob-toggle {
+        display: flex
+      }
+
+      .mob-overlay.open {
+        display: flex
+      }
+
+      .io-grid {
+        grid-template-columns: 1fr
+      }
+
+      .fbtn:not(.mob-toggle) {
+        display: none
+      }
+
+      .srch {
+        display: none
+      }
+    }
+  </style>
 </head>
+
 <body>
 
-<div class="topbar">
-  <div class="logo">AWS <span>Cloud Mastery</span></div>
-  <div class="topbar-right">
-    <input type="text" class="srch" id="searchbox" placeholder="Search services...">
-    <button class="fbtn" onclick="toggleFilter('all')" id="filter-all">All</button>
-    <button class="fbtn" onclick="toggleFilter('storage')" id="filter-storage">Storage</button>
-    <button class="fbtn" onclick="toggleFilter('container')" id="filter-container">Container</button>
-    <button class="fbtn" onclick="toggleFilter('compute')" id="filter-compute">Compute</button>
-    <button class="fbtn" onclick="toggleFilter('database')" id="filter-db">Database</button>
-    <button class="fbtn" onclick="toggleFilter('security')" id="filter-security">Security</button>
-    <button class="mob-toggle" onclick="toggleMobOverlay()">☰ Menu</button>
+  <div class="topbar">
+    <div class="logo">AWS <span>Cloud Mastery</span></div>
+    <div class="topbar-right">
+      <input type="text" class="srch" id="searchbox" placeholder="Search services...">
+      <button class="fbtn" onclick="toggleFilter('all')" id="filter-all">All</button>
+      <button class="fbtn" onclick="toggleFilter('storage')" id="filter-storage">Storage</button>
+      <button class="fbtn" onclick="toggleFilter('container')" id="filter-container">Container</button>
+      <button class="fbtn" onclick="toggleFilter('compute')" id="filter-compute">Compute</button>
+      <button class="fbtn" onclick="toggleFilter('database')" id="filter-db">Database</button>
+      <button class="fbtn" onclick="toggleFilter('security')" id="filter-security">Security</button>
+      <button class="mob-toggle" onclick="toggleMobOverlay()">☰ Menu</button>
+    </div>
   </div>
-</div>
 
-<div class="mob-overlay" id="moboverlay">
-  <div class="mob-header">
-    <div class="mob-header-title">AWS Services</div>
-    <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
+  <div class="mob-overlay" id="moboverlay">
+    <div class="mob-header">
+      <div class="mob-header-title">AWS Services</div>
+      <button class="mob-close" onclick="toggleMobOverlay()">✕</button>
+    </div>
+    <div class="mob-search">
+      <input type="text" id="searchbox-mob" placeholder="Search services..." onkeyup="filterQuestions()">
+    </div>
+    <div class="mob-list" id="moblist"></div>
   </div>
-  <div class="mob-search">
-    <input type="text" id="searchbox-mob" placeholder="Search services..." onkeyup="filterQuestions()">
+
+  <div class="layout">
+    <div class="sidebar">
+      <div class="sb-inner" id="deskqlist"></div>
+    </div>
+    <div class="main">
+      <div class="wrap" id="content"></div>
+    </div>
   </div>
-  <div class="mob-list" id="moblist"></div>
-</div>
 
-<div class="layout">
-  <div class="sidebar"><div class="sb-inner" id="deskqlist"></div></div>
-  <div class="main">
-    <div class="wrap" id="content"></div>
-  </div>
-</div>
+  <script>
+    const topics = [
+      { id: 1, title: "S3 — Object Storage Fundamentals", cat: "storage", type: "Core" },
+      { id: 2, title: "S3 — Advanced Features & Optimization", cat: "storage", type: "Advanced" },
+      { id: 3, title: "IAM — Identity & Access Management", cat: "security", type: "Core" },
+      { id: 4, title: "IAM — Policies, Roles & Best Practices", cat: "security", type: "Advanced" },
+      { id: 5, title: "Lambda — Serverless Computing", cat: "compute", type: "Core" },
+      { id: 6, title: "Lambda — Advanced Patterns & Optimization", cat: "compute", type: "Advanced" },
+      { id: 7, title: "ECS — Container Orchestration", cat: "container", type: "Core" },
+      { id: 8, title: "EKS — Kubernetes on AWS", cat: "container", type: "Advanced" },
+      { id: 9, title: "Aurora PostgreSQL — Database", cat: "database", type: "Core" },
+      { id: 10, title: "Aurora — Advanced Features & Replication", cat: "database", type: "Advanced" },
+      { id: 11, title: "VPC, Networking & Security Groups", cat: "security", type: "Core" },
+      { id: 12, title: "CloudWatch, Monitoring & Logging", cat: "security", type: "Core" },
+      { id: 13, title: "Real-World: Serverless Data Pipeline", cat: "compute", type: "Project" },
+      { id: 14, title: "Real-World: Kubernetes on AWS", cat: "container", type: "Project" },
+      { id: 15, title: "EC2 — Virtual Servers & Compute", cat: "compute", type: "Core" },
+      { id: 16, title: "DynamoDB — NoSQL Database", cat: "database", type: "Core" },
+      { id: 17, title: "API Gateway — API Management", cat: "compute", type: "Core" },
+      { id: 18, title: "SQS & SNS — Decoupling & Messaging", cat: "compute", type: "Advanced" },
+      { id: 19, title: "ElastiCache — In-Memory Data Store", cat: "database", type: "Advanced" }
+    ];
 
-<script>
-const topics = [
-  {id:1,title:"S3 — Object Storage Fundamentals",cat:"storage",type:"Core"},
-  {id:2,title:"S3 — Advanced Features & Optimization",cat:"storage",type:"Advanced"},
-  {id:3,title:"IAM — Identity & Access Management",cat:"security",type:"Core"},
-  {id:4,title:"IAM — Policies, Roles & Best Practices",cat:"security",type:"Advanced"},
-  {id:5,title:"Lambda — Serverless Computing",cat:"compute",type:"Core"},
-  {id:6,title:"Lambda — Advanced Patterns & Optimization",cat:"compute",type:"Advanced"},
-  {id:7,title:"ECS — Container Orchestration",cat:"container",type:"Core"},
-  {id:8,title:"EKS — Kubernetes on AWS",cat:"container",type:"Advanced"},
-  {id:9,title:"Aurora PostgreSQL — Database",cat:"database",type:"Core"},
-  {id:10,title:"Aurora — Advanced Features & Replication",cat:"database",type:"Advanced"},
-  {id:11,title:"VPC, Networking & Security Groups",cat:"security",type:"Core"},
-  {id:12,title:"CloudWatch, Monitoring & Logging",cat:"security",type:"Core"},
-  {id:13,title:"Real-World: Serverless Data Pipeline",cat:"compute",type:"Project"},
-  {id:14,title:"Real-World: Kubernetes on AWS",cat:"container",type:"Project"},
-];
-
-const content = {
-  1:{
-    title:"S3 — Object Storage Fundamentals",
-    def:"Amazon S3 (Simple Storage Service) is a highly available, durable object storage service. Objects are stored in buckets with unique keys, accessible via HTTP/HTTPS. Built on 11 nines of durability.",
-    badges:["Storage","Object Storage","AWS Core"],
-    examples:[
-      {title:"Creating & Using S3 Buckets",code:`import boto3
+    const content = {
+      1: {
+        title: "S3 — Object Storage Fundamentals",
+        def: "Amazon S3 (Simple Storage Service) is a highly available, durable object storage service. Objects are stored in buckets with unique keys, accessible via HTTP/HTTPS. Built on 11 nines of durability.",
+        badges: ["Storage", "Object Storage", "AWS Core"],
+        examples: [
+          {
+            title: "Creating & Using S3 Buckets", code: `import boto3
 
 # Initialize S3 client
 s3 = boto3.client('s3')
@@ -171,7 +626,8 @@ data = response['Body'].read()
 response = s3.list_objects_v2(Bucket='my-data-bucket', Prefix='data/')
 for obj in response['Contents']:
     print(f"{obj['Key']} - {obj['Size']} bytes")`},
-      {title:"S3 Resource-Level Management",code:`import boto3
+          {
+            title: "S3 Resource-Level Management", code: `import boto3
 
 s3 = boto3.resource('s3')
 
@@ -197,20 +653,21 @@ try:
     exists.load()
 except Exception:
     print("Object does not exist")`}
-    ],
-    explanation:"S3 is fundamental to AWS. Objects are immutable, versioning can be enabled, and access is controlled via IAM policies and ACLs. Use S3 for data lakes, backups, static website hosting, and data archives.",
-    inputOutput:{
-      input:"s3.put_object(Bucket='bucket', Key='path/file.txt', Body=b'data')",
-      output:"Object uploaded to S3 with metadata returned"
-    },
-    realWorld:"Data lakes: Store terabytes of logs from applications. Machine learning: Training data and model artifacts. Backups: Cost-effective offsite backups. Web hosting: Static assets and website content."
-  },
-  2:{
-    title:"S3 — Advanced Features & Optimization",
-    def:"Advanced S3 features include versioning, lifecycle policies, encryption, multipart uploads, storage classes, and cross-region replication. These enable cost optimization and compliance.",
-    badges:["Optimization","Advanced S3","Best Practices"],
-    examples:[
-      {title:"Lifecycle & Storage Classes",code:`import boto3
+        ],
+        explanation: "S3 is fundamental to AWS. Objects are immutable, versioning can be enabled, and access is controlled via IAM policies and ACLs. Use S3 for data lakes, backups, static website hosting, and data archives.",
+        inputOutput: {
+          input: "s3.put_object(Bucket='bucket', Key='path/file.txt', Body=b'data')",
+          output: "Object uploaded to S3 with metadata returned"
+        },
+        realWorld: "Data lakes: Store terabytes of logs from applications. Machine learning: Training data and model artifacts. Backups: Cost-effective offsite backups. Web hosting: Static assets and website content."
+      },
+      2: {
+        title: "S3 — Advanced Features & Optimization",
+        def: "Advanced S3 features include versioning, lifecycle policies, encryption, multipart uploads, storage classes, and cross-region replication. These enable cost optimization and compliance.",
+        badges: ["Optimization", "Advanced S3", "Best Practices"],
+        examples: [
+          {
+            title: "Lifecycle & Storage Classes", code: `import boto3
 
 s3 = boto3.client('s3')
 
@@ -242,7 +699,8 @@ s3.put_bucket_lifecycle_configuration(
     Bucket='my-data-bucket',
     LifecycleConfiguration=lifecycle_policy
 )`},
-      {title:"Multipart Upload & Encryption",code:`import boto3
+          {
+            title: "Multipart Upload & Encryption", code: `import boto3
 
 s3 = boto3.client('s3')
 
@@ -282,20 +740,21 @@ s3.complete_multipart_upload(
     UploadId=upload_id,
     MultipartUpload={'Parts': parts}
 )`}
-    ],
-    explanation:"Storage classes: STANDARD (hot data, high cost), IA (infrequent access, lower cost), GLACIER (archive, very low cost, retrieval delay). Lifecycle policies automatically transition data, saving costs. Encryption ensures security.",
-    inputOutput:{
-      input:"Lifecycle: day 0-30 STANDARD, day 30-90 STANDARD_IA, day 90+ GLACIER, day 365+ DELETE",
-      output:"Automatic transitions reduce storage costs by 80-90% for old data"
-    },
-    realWorld:"Log retention: Keep hot logs in STANDARD for 30 days, then GLACIER for compliance, delete after 7 years. Data lakes: Partition by date, lifecycle moves old partitions to cheaper storage."
-  },
-  3:{
-    title:"IAM — Identity & Access Management",
-    def:"AWS IAM controls who (principals) can do what (actions) on which resources. Uses policies (JSON documents), roles, users, groups, and temporary credentials. Everything in AWS requires IAM permissions.",
-    badges:["Security","Access Control","IAM Core"],
-    examples:[
-      {title:"Creating Users & Policies",code:`import boto3
+        ],
+        explanation: "Storage classes: STANDARD (hot data, high cost), IA (infrequent access, lower cost), GLACIER (archive, very low cost, retrieval delay). Lifecycle policies automatically transition data, saving costs. Encryption ensures security.",
+        inputOutput: {
+          input: "Lifecycle: day 0-30 STANDARD, day 30-90 STANDARD_IA, day 90+ GLACIER, day 365+ DELETE",
+          output: "Automatic transitions reduce storage costs by 80-90% for old data"
+        },
+        realWorld: "Log retention: Keep hot logs in STANDARD for 30 days, then GLACIER for compliance, delete after 7 years. Data lakes: Partition by date, lifecycle moves old partitions to cheaper storage."
+      },
+      3: {
+        title: "IAM — Identity & Access Management",
+        def: "AWS IAM controls who (principals) can do what (actions) on which resources. Uses policies (JSON documents), roles, users, groups, and temporary credentials. Everything in AWS requires IAM permissions.",
+        badges: ["Security", "Access Control", "IAM Core"],
+        examples: [
+          {
+            title: "Creating Users & Policies", code: `import boto3
 
 iam = boto3.client('iam')
 
@@ -324,7 +783,8 @@ iam.put_user_policy(
     PolicyName='S3ReadOnly',
     PolicyDocument=json.dumps(policy_doc)
 )`},
-      {title:"Roles & Temporary Credentials",code:`import boto3
+          {
+            title: "Roles & Temporary Credentials", code: `import boto3
 import json
 
 iam = boto3.client('iam')
@@ -363,20 +823,21 @@ credentials = assumed['Credentials']
 print(f"AccessKeyId: {credentials['AccessKeyId']}")
 print(f"SecretAccessKey: {credentials['SecretAccessKey']}")
 print(f"SessionToken: {credentials['SessionToken']}")`}
-    ],
-    explanation:"Users are for people (developers, analysts). Roles are for services (Lambda, EC2). Policies are JSON documents that specify permissions. Always use least-privilege principle: grant minimum permissions needed.",
-    inputOutput:{
-      input:"IAM Policy grants s3:GetObject on arn:aws:s3:::bucket/*",
-      output:"User/Role can call s3.get_object() for any key in bucket"
-    },
-    realWorld:"Data engineer: IAM user with S3 read + Athena query permissions. Lambda function: IAM role with S3 read + DynamoDB write. Cross-account access: Role in account B assumable by role in account A."
-  },
-  4:{
-    title:"IAM — Policies, Roles & Best Practices",
-    def:"Advanced IAM includes policy evaluation logic, resource-based policies, session policies, permission boundaries, and multi-account architectures. Security requires careful policy design.",
-    badges:["Security","Advanced IAM","Best Practices"],
-    examples:[
-      {title:"Advanced Policy Structure",code:`# Policy with multiple conditions
+        ],
+        explanation: "Users are for people (developers, analysts). Roles are for services (Lambda, EC2). Policies are JSON documents that specify permissions. Always use least-privilege principle: grant minimum permissions needed.",
+        inputOutput: {
+          input: "IAM Policy grants s3:GetObject on arn:aws:s3:::bucket/*",
+          output: "User/Role can call s3.get_object() for any key in bucket"
+        },
+        realWorld: "Data engineer: IAM user with S3 read + Athena query permissions. Lambda function: IAM role with S3 read + DynamoDB write. Cross-account access: Role in account B assumable by role in account A."
+      },
+      4: {
+        title: "IAM — Policies, Roles & Best Practices",
+        def: "Advanced IAM includes policy evaluation logic, resource-based policies, session policies, permission boundaries, and multi-account architectures. Security requires careful policy design.",
+        badges: ["Security", "Advanced IAM", "Best Practices"],
+        examples: [
+          {
+            title: "Advanced Policy Structure", code: `# Policy with multiple conditions
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -402,7 +863,8 @@ print(f"SessionToken: {credentials['SessionToken']}")`}
         }
     ]
 }`},
-      {title:"Role Assumption & Cross-Account Access",code:`# Account A: Role that can be assumed by Account B
+          {
+            title: "Role Assumption & Cross-Account Access", code: `# Account A: Role that can be assumed by Account B
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -432,20 +894,21 @@ print(f"SessionToken: {credentials['SessionToken']}")`}
         }
     ]
 }`}
-    ],
-    explanation:"Policy evaluation: Explicit Deny always wins. If no Explicit Allow, result is Deny. Resource-based policies (bucket policies, role trust policies) control who can access resources. Use permission boundaries to prevent privilege escalation.",
-    inputOutput:{
-      input:"sts.assume_role(RoleArn='arn:aws:iam::ACCOUNT-B:role/CrossAccountRole')",
-      output:"Returns temporary credentials to access Account B resources"
-    },
-    realWorld:"Multi-account strategy: DevOps account deploys infrastructure, Data account runs analytics, Security account logs audit events. Cross-account roles enable delegated access. MFA requirement for sensitive operations."
-  },
-  5:{
-    title:"Lambda — Serverless Computing",
-    def:"AWS Lambda executes code without managing servers. Pay only for execution time. Scales automatically from zero to thousands of concurrent executions. Triggered by events (S3, DynamoDB, API Gateway, etc).",
-    badges:["Compute","Serverless","Lambda Core"],
-    examples:[
-      {title:"Creating Lambda Function",code:`import json
+        ],
+        explanation: "Policy evaluation: Explicit Deny always wins. If no Explicit Allow, result is Deny. Resource-based policies (bucket policies, role trust policies) control who can access resources. Use permission boundaries to prevent privilege escalation.",
+        inputOutput: {
+          input: "sts.assume_role(RoleArn='arn:aws:iam::ACCOUNT-B:role/CrossAccountRole')",
+          output: "Returns temporary credentials to access Account B resources"
+        },
+        realWorld: "Multi-account strategy: DevOps account deploys infrastructure, Data account runs analytics, Security account logs audit events. Cross-account roles enable delegated access. MFA requirement for sensitive operations."
+      },
+      5: {
+        title: "Lambda — Serverless Computing",
+        def: "AWS Lambda executes code without managing servers. Pay only for execution time. Scales automatically from zero to thousands of concurrent executions. Triggered by events (S3, DynamoDB, API Gateway, etc).",
+        badges: ["Compute", "Serverless", "Lambda Core"],
+        examples: [
+          {
+            title: "Creating Lambda Function", code: `import json
 
 def lambda_handler(event, context):
     """Process S3 event"""
@@ -475,7 +938,8 @@ def lambda_handler(event, context):
 #   --role arn:aws:iam::ACCOUNT:role/lambda-role \\
 #   --handler lambda_function.lambda_handler \\
 #   --zip-file fileb://function.zip`},
-      {title:"Lambda with External Triggers",code:`import boto3
+          {
+            title: "Lambda with External Triggers", code: `import boto3
 import json
 
 s3 = boto3.client('s3')
@@ -517,20 +981,21 @@ def lambda_handler(event, context):
                 Key=f'processed/{key}',
                 Body=json.dumps(result)
             )`}
-    ],
-    explanation:"Lambda is ideal for event-driven workloads: file processing, real-time data transformation, API backends. Limitations: 15-minute timeout, 10GB memory max, /tmp storage 10GB. Use SQS for longer jobs.",
-    inputOutput:{
-      input:"Event from S3: new file uploaded",
-      output:"Lambda triggered automatically, processes file, stores result"
-    },
-    realWorld:"Image processing: Upload image → Lambda triggers → thumbnail generation → store result. Data pipeline: File arrives in S3 → Lambda extracts → validates → loads to database. Real-time analytics: API call → Lambda → query database → return result."
-  },
-  6:{
-    title:"Lambda — Advanced Patterns & Optimization",
-    def:"Advanced Lambda includes concurrency control, layers for code reuse, environment variables for config, provisioned concurrency for consistent performance, and integration with step functions.",
-    badges:["Optimization","Advanced Lambda","Patterns"],
-    examples:[
-      {title:"Lambda Layers & Concurrency",code:`# Layer structure (third-party libraries)
+        ],
+        explanation: "Lambda is ideal for event-driven workloads: file processing, real-time data transformation, API backends. Limitations: 15-minute timeout, 10GB memory max, /tmp storage 10GB. Use SQS for longer jobs.",
+        inputOutput: {
+          input: "Event from S3: new file uploaded",
+          output: "Lambda triggered automatically, processes file, stores result"
+        },
+        realWorld: "Image processing: Upload image → Lambda triggers → thumbnail generation → store result. Data pipeline: File arrives in S3 → Lambda extracts → validates → loads to database. Real-time analytics: API call → Lambda → query database → return result."
+      },
+      6: {
+        title: "Lambda — Advanced Patterns & Optimization",
+        def: "Advanced Lambda includes concurrency control, layers for code reuse, environment variables for config, provisioned concurrency for consistent performance, and integration with step functions.",
+        badges: ["Optimization", "Advanced Lambda", "Patterns"],
+        examples: [
+          {
+            title: "Lambda Layers & Concurrency", code: `# Layer structure (third-party libraries)
 layer/
   python/lib/python3.11/site-packages/
     requests/
@@ -560,7 +1025,8 @@ aws lambda put-provisioned-concurrency-config \\
   --function-name my-function \\
   --provisioned-concurrent-executions 50 \\
   --qualifier LIVE`},
-      {title:"Step Functions for Complex Workflows",code:`# Step Functions state machine
+          {
+            title: "Step Functions for Complex Workflows", code: `# Step Functions state machine
 import json
 
 definition = {
@@ -601,20 +1067,21 @@ definition = {
         }
     }
 }`}
-    ],
-    explanation:"Layers eliminate code duplication across functions. Concurrency controls prevent cascading failures. Step Functions orchestrate multi-step workflows with error handling and retries. Provisioned concurrency eliminates cold starts.",
-    inputOutput:{
-      input:"Event → Lambda 1 (validate) → Lambda 2 (process) → Lambda 3 (store)",
-      output:"Result stored with full error handling and retry logic"
-    },
-    realWorld:"Data pipeline: Validate → Deduplicate → Transform → Load with automatic retries. Image processing: Resize → Watermark → Upload → Update DB, handle failures gracefully. Recommendation engine: Fetch user data → Calculate scores → Cache results."
-  },
-  7:{
-    title:"ECS — Container Orchestration",
-    def:"AWS ECS (Elastic Container Service) orchestrates Docker containers. Manages deployment, scaling, and monitoring. Supports EC2 launch type (you manage servers) and Fargate (serverless containers).",
-    badges:["Container","Orchestration","ECS"],
-    examples:[
-      {title:"ECS Task Definition & Service",code:`# ECS Task Definition (docker-compose equivalent)
+        ],
+        explanation: "Layers eliminate code duplication across functions. Concurrency controls prevent cascading failures. Step Functions orchestrate multi-step workflows with error handling and retries. Provisioned concurrency eliminates cold starts.",
+        inputOutput: {
+          input: "Event → Lambda 1 (validate) → Lambda 2 (process) → Lambda 3 (store)",
+          output: "Result stored with full error handling and retry logic"
+        },
+        realWorld: "Data pipeline: Validate → Deduplicate → Transform → Load with automatic retries. Image processing: Resize → Watermark → Upload → Update DB, handle failures gracefully. Recommendation engine: Fetch user data → Calculate scores → Cache results."
+      },
+      7: {
+        title: "ECS — Container Orchestration",
+        def: "AWS ECS (Elastic Container Service) orchestrates Docker containers. Manages deployment, scaling, and monitoring. Supports EC2 launch type (you manage servers) and Fargate (serverless containers).",
+        badges: ["Container", "Orchestration", "ECS"],
+        examples: [
+          {
+            title: "ECS Task Definition & Service", code: `# ECS Task Definition (docker-compose equivalent)
 {
     "family": "web-app",
     "networkMode": "awsvpc",
@@ -658,7 +1125,8 @@ aws ecs create-service \\
   --desired-count 3 \\
   --launch-type FARGATE \\
   --network-configuration "awsvpcConfiguration={subnets=[subnet-xxx],securityGroups=[sg-xxx]}"`},
-      {title:"Auto Scaling & Updates",code:`# Auto-scaling policy
+          {
+            title: "Auto Scaling & Updates", code: `# Auto-scaling policy
 aws application-autoscaling register-scalable-target \\
   --service-namespace ecs \\
   --resource-id service/production/web-app \\
@@ -681,20 +1149,21 @@ aws ecs update-service \\
   --service web-app \\
   --task-definition web-app:2 \\
   --force-new-deployment`}
-    ],
-    explanation:"ECS Fargate is simpler than EC2 (no server management) but you pay per task. ECS EC2 gives more control and can be cheaper with reserved instances. Task definitions are like docker-compose but in JSON.",
-    inputOutput:{
-      input:"Update task definition to new image version",
-      output:"Rolling deployment: old tasks drain, new tasks start, zero downtime"
-    },
-    realWorld:"Microservices: Each service is a separate ECS service. Scaling: CloudWatch metrics trigger auto-scaling to handle traffic spikes. Deployments: New versions deployed with zero-downtime rolling updates."
-  },
-  8:{
-    title:"EKS — Kubernetes on AWS",
-    def:"EKS is AWS managed Kubernetes. You define workloads in YAML, EKS handles orchestration. Better than ECS for complex deployments, multi-cloud strategies, and teams familiar with Kubernetes.",
-    badges:["Container","Kubernetes","Advanced"],
-    examples:[
-      {title:"EKS Cluster Setup",code:`# Create EKS cluster
+        ],
+        explanation: "ECS Fargate is simpler than EC2 (no server management) but you pay per task. ECS EC2 gives more control and can be cheaper with reserved instances. Task definitions are like docker-compose but in JSON.",
+        inputOutput: {
+          input: "Update task definition to new image version",
+          output: "Rolling deployment: old tasks drain, new tasks start, zero downtime"
+        },
+        realWorld: "Microservices: Each service is a separate ECS service. Scaling: CloudWatch metrics trigger auto-scaling to handle traffic spikes. Deployments: New versions deployed with zero-downtime rolling updates."
+      },
+      8: {
+        title: "EKS — Kubernetes on AWS",
+        def: "EKS is AWS managed Kubernetes. You define workloads in YAML, EKS handles orchestration. Better than ECS for complex deployments, multi-cloud strategies, and teams familiar with Kubernetes.",
+        badges: ["Container", "Kubernetes", "Advanced"],
+        examples: [
+          {
+            title: "EKS Cluster Setup", code: `# Create EKS cluster
 aws eks create-cluster \\
   --name my-cluster \\
   --version 1.28 \\
@@ -743,7 +1212,8 @@ spec:
             cpu: 500m
             memory: 512Mi
 EOF`},
-      {title:"Service & Ingress",code:`# Expose service
+          {
+            title: "Service & Ingress", code: `# Expose service
 kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Service
@@ -783,20 +1253,21 @@ EOF
 kubectl get deployments
 kubectl get pods
 kubectl logs nginx-xyz`}
-    ],
-    explanation:"EKS provides managed control plane while you manage nodes (or use Fargate for serverless). Benefits: multi-cloud portability, sophisticated networking, stateful applications, batch jobs.",
-    inputOutput:{
-      input:"kubectl apply deployment.yaml",
-      output:"Kubernetes schedules pods on nodes, manages updates, handles failures"
-    },
-    realWorld:"Microservices architecture: Multiple services deployed as separate pods. Auto-scaling: Pod Autoscaler scales pods, Cluster Autoscaler adds nodes. GitOps: Desired state in Git, Kubernetes reconciles."
-  },
-  9:{
-    title:"Aurora PostgreSQL — Database",
-    def:"Aurora is AWS's distributed SQL database compatible with PostgreSQL. 5x faster than standard PostgreSQL, multi-AZ replication, read replicas, automatic failover, and pay-per-second billing.",
-    badges:["Database","PostgreSQL","Aurora Core"],
-    examples:[
-      {title:"Aurora Cluster Setup & Connection",code:`import boto3
+        ],
+        explanation: "EKS provides managed control plane while you manage nodes (or use Fargate for serverless). Benefits: multi-cloud portability, sophisticated networking, stateful applications, batch jobs.",
+        inputOutput: {
+          input: "kubectl apply deployment.yaml",
+          output: "Kubernetes schedules pods on nodes, manages updates, handles failures"
+        },
+        realWorld: "Microservices architecture: Multiple services deployed as separate pods. Auto-scaling: Pod Autoscaler scales pods, Cluster Autoscaler adds nodes. GitOps: Desired state in Git, Kubernetes reconciles."
+      },
+      9: {
+        title: "Aurora PostgreSQL — Database",
+        def: "Aurora is AWS's distributed SQL database compatible with PostgreSQL. 5x faster than standard PostgreSQL, multi-AZ replication, read replicas, automatic failover, and pay-per-second billing.",
+        badges: ["Database", "PostgreSQL", "Aurora Core"],
+        examples: [
+          {
+            title: "Aurora Cluster Setup & Connection", code: `import boto3
 
 rds = boto3.client('rds')
 
@@ -836,7 +1307,8 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 cur.execute("SELECT version();")
 print(cur.fetchone())`},
-      {title:"Querying & Performance",code:`import psycopg2
+          {
+            title: "Querying & Performance", code: `import psycopg2
 import psycopg2.extras
 
 conn = psycopg2.connect(...)
@@ -875,20 +1347,21 @@ cur.execute("""
 
 results = cur.fetchall()
 conn.commit()`}
-    ],
-    explanation:"Aurora scales writes automatically within a cluster, reads scale via read replicas in different AZs. Automatic failover if primary goes down. Storage auto-scales up to 128TB. Perfect for OLTP and analytics.",
-    inputOutput:{
-      input:"INSERT 1 million rows into Aurora",
-      output:"Completes in seconds, replicated to standby AZ automatically"
-    },
-    realWorld:"SaaS application: Multi-tenant database with read replicas for reporting. E-commerce: Order data + inventory + customer profiles. Analytics: ETL pipeline loads data from S3 into Aurora, then query."
-  },
-  10:{
-    title:"Aurora — Advanced Features & Replication",
-    def:"Aurora Global Database enables read-only replicas across regions (RPO=0, ~1s RTO). Aurora Serverless auto-scales with zero-management. Parameter groups tune performance.",
-    badges:["Advanced Aurora","Replication","High Availability"],
-    examples:[
-      {title:"Global Database & Replication",code:`import boto3
+        ],
+        explanation: "Aurora scales writes automatically within a cluster, reads scale via read replicas in different AZs. Automatic failover if primary goes down. Storage auto-scales up to 128TB. Perfect for OLTP and analytics.",
+        inputOutput: {
+          input: "INSERT 1 million rows into Aurora",
+          output: "Completes in seconds, replicated to standby AZ automatically"
+        },
+        realWorld: "SaaS application: Multi-tenant database with read replicas for reporting. E-commerce: Order data + inventory + customer profiles. Analytics: ETL pipeline loads data from S3 into Aurora, then query."
+      },
+      10: {
+        title: "Aurora — Advanced Features & Replication",
+        def: "Aurora Global Database enables read-only replicas across regions (RPO=0, ~1s RTO). Aurora Serverless auto-scales with zero-management. Parameter groups tune performance.",
+        badges: ["Advanced Aurora", "Replication", "High Availability"],
+        examples: [
+          {
+            title: "Global Database & Replication", code: `import boto3
 
 rds = boto3.client('rds')
 
@@ -920,7 +1393,8 @@ response = rds.describe_db_clusters(
     DBClusterIdentifier='analytics-secondary'
 )
 print(f"Replication lag: {response['DBClusters'][0].get('GlobalWriteForwardingStatus')}")`},
-      {title:"Aurora Serverless Configuration",code:`# Create Serverless cluster
+          {
+            title: "Aurora Serverless Configuration", code: `# Create Serverless cluster
 rds.create_db_cluster(
     DBClusterIdentifier='serverless-analytics',
     Engine='aurora-postgresql',
@@ -942,20 +1416,21 @@ rds.create_db_cluster(
     Engine='aurora-postgresql',
     EngineMode='provisioned'
 )`}
-    ],
-    explanation:"Global Database replicates data across regions with <1s latency. Perfect for multi-region disaster recovery. Serverless is ideal for unpredictable workloads (auto-scales from 2-16 ACUs). Provisioned is for consistent performance.",
-    inputOutput:{
-      input:"Global DB: us-east-1 (write), eu-west-1 (read-only), replicated continuously",
-      output:"RPO=0 (no data loss), ~1s RTO (read replica in EU available immediately)"
-    },
-    realWorld:"Disaster recovery: Primary in us-east-1 fails, automatic failover promotes eu-west-1 replica. Multi-region analytics: Query data from nearest region. Development: Serverless cluster auto-pauses to save costs."
-  },
-  11:{
-    title:"VPC, Networking & Security Groups",
-    def:"VPCs isolate resources with private networks. Subnets divide VPCs. Security groups act as stateful firewalls (allow/deny rules). Network ACLs are stateless rules at subnet level.",
-    badges:["Networking","Security","Infrastructure"],
-    examples:[
-      {title:"VPC & Subnet Setup",code:`import boto3
+        ],
+        explanation: "Global Database replicates data across regions with <1s latency. Perfect for multi-region disaster recovery. Serverless is ideal for unpredictable workloads (auto-scales from 2-16 ACUs). Provisioned is for consistent performance.",
+        inputOutput: {
+          input: "Global DB: us-east-1 (write), eu-west-1 (read-only), replicated continuously",
+          output: "RPO=0 (no data loss), ~1s RTO (read replica in EU available immediately)"
+        },
+        realWorld: "Disaster recovery: Primary in us-east-1 fails, automatic failover promotes eu-west-1 replica. Multi-region analytics: Query data from nearest region. Development: Serverless cluster auto-pauses to save costs."
+      },
+      11: {
+        title: "VPC, Networking & Security Groups",
+        def: "VPCs isolate resources with private networks. Subnets divide VPCs. Security groups act as stateful firewalls (allow/deny rules). Network ACLs are stateless rules at subnet level.",
+        badges: ["Networking", "Security", "Infrastructure"],
+        examples: [
+          {
+            title: "VPC & Subnet Setup", code: `import boto3
 
 ec2 = boto3.client('ec2')
 
@@ -994,7 +1469,8 @@ ec2.associate_route_table(
     RouteTableId=rt_id,
     SubnetId=pub_subnet['Subnet']['SubnetId']
 )`},
-      {title:"Security Groups",code:`# Create security group
+          {
+            title: "Security Groups", code: `# Create security group
 sg = ec2.create_security_group(
     GroupName='web-sg',
     Description='Web tier security group',
@@ -1048,20 +1524,21 @@ ec2.authorize_security_group_ingress(
         }
     ]
 )`}
-    ],
-    explanation:"Security groups are stateful: allow inbound = allow outbound reply. Layer security: ALB in public subnet → app servers in private → database in isolated private. Use Network ACLs for additional filtering.",
-    inputOutput:{
-      input:"Security group: allow HTTP (80) from 0.0.0.0/0",
-      output:"Traffic on port 80 permitted, response allowed back automatically"
-    },
-    realWorld:"Three-tier: web (public, http/https) → app (private, from web only) → db (isolated, from app only). Bastion host in public subnet for SSH access to private resources."
-  },
-  12:{
-    title:"CloudWatch, Monitoring & Logging",
-    def:"CloudWatch collects metrics, logs, and events. Create alarms based on metrics. Send logs to CloudWatch from Lambda, ECS, applications. Use dashboards for visualization.",
-    badges:["Monitoring","Observability","DevOps"],
-    examples:[
-      {title:"CloudWatch Logs & Alarms",code:`import boto3
+        ],
+        explanation: "Security groups are stateful: allow inbound = allow outbound reply. Layer security: ALB in public subnet → app servers in private → database in isolated private. Use Network ACLs for additional filtering.",
+        inputOutput: {
+          input: "Security group: allow HTTP (80) from 0.0.0.0/0",
+          output: "Traffic on port 80 permitted, response allowed back automatically"
+        },
+        realWorld: "Three-tier: web (public, http/https) → app (private, from web only) → db (isolated, from app only). Bastion host in public subnet for SSH access to private resources."
+      },
+      12: {
+        title: "CloudWatch, Monitoring & Logging",
+        def: "CloudWatch collects metrics, logs, and events. Create alarms based on metrics. Send logs to CloudWatch from Lambda, ECS, applications. Use dashboards for visualization.",
+        badges: ["Monitoring", "Observability", "DevOps"],
+        examples: [
+          {
+            title: "CloudWatch Logs & Alarms", code: `import boto3
 
 logs = boto3.client('logs')
 cloudwatch = boto3.client('cloudwatch')
@@ -1101,7 +1578,8 @@ cloudwatch.put_metric_alarm(
     ComparisonOperator='GreaterThanThreshold',
     AlarmActions=['arn:aws:sns:us-east-1:account:alerts']
 )`},
-      {title:"Custom Metrics",code:`import time
+          {
+            title: "Custom Metrics", code: `import time
 import boto3
 
 cloudwatch = boto3.client('cloudwatch')
@@ -1136,20 +1614,21 @@ def lambda_handler(event, context):
     publish_metric('SuccessfulProcesses', 1, 'Count')
     
     return result`}
-    ],
-    explanation:"CloudWatch is essential for observability. Metrics drive alarms. Logs help debug. Custom metrics track business KPIs. Dashboards visualize operational health. Set up alerts for critical failures.",
-    inputOutput:{
-      input:"Lambda publishes ProcessingTime metric",
-      output:"Visible in CloudWatch console, can create alarm if threshold exceeded"
-    },
-    realWorld:"Production monitoring: Lambda errors → alarm → SMS/email. API latency → dashboard shows trends. Database connections → alarm if exceeding threshold. Custom metrics: request count, business transactions."
-  },
-  13:{
-    title:"Real-World: Serverless Data Pipeline",
-    def:"End-to-end example: S3 upload → Lambda validates → transforms → loads to Aurora → notifies. Demonstrates integration of S3, Lambda, Aurora, SNS, CloudWatch.",
-    badges:["Real-World","Pipeline","Project"],
-    examples:[
-      {title:"Serverless ETL Pipeline",code:`import json
+        ],
+        explanation: "CloudWatch is essential for observability. Metrics drive alarms. Logs help debug. Custom metrics track business KPIs. Dashboards visualize operational health. Set up alerts for critical failures.",
+        inputOutput: {
+          input: "Lambda publishes ProcessingTime metric",
+          output: "Visible in CloudWatch console, can create alarm if threshold exceeded"
+        },
+        realWorld: "Production monitoring: Lambda errors → alarm → SMS/email. API latency → dashboard shows trends. Database connections → alarm if exceeding threshold. Custom metrics: request count, business transactions."
+      },
+      13: {
+        title: "Real-World: Serverless Data Pipeline",
+        def: "End-to-end example: S3 upload → Lambda validates → transforms → loads to Aurora → notifies. Demonstrates integration of S3, Lambda, Aurora, SNS, CloudWatch.",
+        badges: ["Real-World", "Pipeline", "Project"],
+        examples: [
+          {
+            title: "Serverless ETL Pipeline", code: `import json
 import boto3
 import logging
 import psycopg2
@@ -1222,7 +1701,8 @@ def lambda_handler(event, context):
             Message=f'Error processing {key}: {str(e)}'
         )
         raise`},
-      {title:"Infrastructure as Code (Terraform)",code:`# Infrastructure definition
+          {
+            title: "Infrastructure as Code (Terraform)", code: `# Infrastructure definition
 resource "aws_s3_bucket" "data_input" {
   bucket = "data-input-pipeline"
 }
@@ -1258,20 +1738,21 @@ resource "aws_lambda_function" "etl" {
 resource "aws_sns_topic" "alerts" {
   name = "pipeline-alerts"
 }`}
-    ],
-    explanation:"Serverless is ideal for event-driven pipelines: no servers to manage, pay per invocation, scales automatically. Combine services: S3 triggers Lambda, Lambda loads to Aurora, SNS sends notifications.",
-    inputOutput:{
-      input:"CSV file uploaded to S3",
-      output:"Lambda validates → transforms → loads to Aurora → email confirmation sent"
-    },
-    realWorld:"Data ingestion: Partner uploads daily CSV → automated ETL → available for analytics within minutes. Real-time processing: IoT device data → Lambda processes → stored in Aurora → dashboard updates."
-  },
-  14:{
-    title:"Real-World: Kubernetes on AWS",
-    def:"Production Kubernetes cluster on EKS with multi-tier application, auto-scaling, monitoring, and zero-downtime deployments. Demonstrates DevOps best practices.",
-    badges:["Real-World","Kubernetes","DevOps"],
-    examples:[
-      {title:"Production EKS Setup",code:`# Deploy multi-tier application
+        ],
+        explanation: "Serverless is ideal for event-driven pipelines: no servers to manage, pay per invocation, scales automatically. Combine services: S3 triggers Lambda, Lambda loads to Aurora, SNS sends notifications.",
+        inputOutput: {
+          input: "CSV file uploaded to S3",
+          output: "Lambda validates → transforms → loads to Aurora → email confirmation sent"
+        },
+        realWorld: "Data ingestion: Partner uploads daily CSV → automated ETL → available for analytics within minutes. Real-time processing: IoT device data → Lambda processes → stored in Aurora → dashboard updates."
+      },
+      14: {
+        title: "Real-World: Kubernetes on AWS",
+        def: "Production Kubernetes cluster on EKS with multi-tier application, auto-scaling, monitoring, and zero-downtime deployments. Demonstrates DevOps best practices.",
+        badges: ["Real-World", "Kubernetes", "DevOps"],
+        examples: [
+          {
+            title: "Production EKS Setup", code: `# Deploy multi-tier application
 kubectl apply -f - <<EOF
 apiVersion: v1
 kind: Namespace
@@ -1380,7 +1861,8 @@ spec:
         type: Utilization
         averageUtilization: 80
 EOF`},
-      {title:"Monitoring & GitOps",code:`# Install Prometheus for monitoring
+          {
+            title: "Monitoring & GitOps", code: `# Install Prometheus for monitoring
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm install prometheus prometheus-community/kube-prometheus-stack \\
   --namespace monitoring --create-namespace
@@ -1410,118 +1892,339 @@ spec:
       selfHeal: true
     syncOptions:
     - CreateNamespace=true`}
+        ],
+        explanation: "EKS in production requires: multi-tier deployments, resource limits, health checks, auto-scaling, anti-affinity rules, monitoring. GitOps keeps desired state in Git, Kubernetes reconciles automatically.",
+        inputOutput: {
+          input: "Developer: git push new code",
+          output: "ArgoCD detects change, pulls new image, rolling deployment starts, old pods drain, new pods replace"
+        },
+        realWorld: "Production cluster runs 50+ microservices. Developers define desired state in YAML. ArgoCD continuously syncs Git → cluster. Prometheus scrapes metrics, Grafana shows dashboards. Auto-scaling handles traffic surges."
+      },
+      15: {
+        title: "EC2 — Virtual Servers in the Cloud",
+        def: "Amazon Elastic Compute Cloud (EC2) provides resizable compute capacity. You have full control over the OS, instance types (Compute, Memory, GPU optimized), and network configuration.",
+        badges: ["Compute", "Virtual Machines", "AWS Core"],
+        examples: [
+          {
+            title: "Launching an EC2 Instance with Boto3", code: `import boto3
+
+ec2 = boto3.client('ec2')
+
+# User data script to bootstrap the server on launch
+user_data = '''#!/bin/bash
+apt-get update -y
+apt-get install -y nodejs npm
+'''
+
+response = ec2.run_instances(
+    ImageId='ami-0c55b159cbfafe1f0', # Ubuntu AMI
+    InstanceType='t3.medium',
+    MinCount=1,
+    MaxCount=1,
+    KeyName='my-ssh-key',
+    SecurityGroupIds=['sg-0a1b2c3d4e5f6g7h8'],
+    SubnetId='subnet-0bb1c79de3EXAMPLE',
+    UserData=user_data,
+    TagSpecifications=[{
+        'ResourceType': 'instance',
+        'Tags': [{'Key': 'Name', 'Value': 'AppServer'}]
+    }]
+)
+print(f"Launched instance: {response['Instances'][0]['InstanceId']}")`},
+        ],
+        explanation: "While serverless (Lambda) and containers (ECS/EKS) are popular, EC2 is essential for workloads requiring custom OS-level tuning, persistent local storage, or specialized hardware like GPUs.",
+        inputOutput: {
+          input: "Launch t3.medium instance with specific AMI and UserData script",
+          output: "A fully booted, customized virtual server ready for SSH or application traffic in minutes"
+        },
+        realWorld: "Hosting custom execution engines for live algorithmic trading that require long-running, highly tuned environments with persistent web-socket connections not suited for Lambda's 15-minute timeout."
+      },
+      16: {
+        title: "DynamoDB — NoSQL Database",
+        def: "A fully managed, serverless, key-value and document database that delivers single-digit millisecond performance at any scale. It features built-in security, continuous backups, and multi-Region replication.",
+        badges: ["Database", "NoSQL", "Serverless"],
+        examples: [
+          {
+            title: "Table Creation & Data Operations", code: `import boto3
+
+dynamodb = boto3.resource('dynamodb')
+
+# Create a table
+table = dynamodb.create_table(
+    TableName='TenantConfigurations',
+    KeySchema=[
+        {'AttributeName': 'tenant_id', 'KeyType': 'HASH'},  # Partition key
+        {'AttributeName': 'config_type', 'KeyType': 'RANGE'} # Sort key
     ],
-    explanation:"EKS in production requires: multi-tier deployments, resource limits, health checks, auto-scaling, anti-affinity rules, monitoring. GitOps keeps desired state in Git, Kubernetes reconciles automatically.",
-    inputOutput:{
-      input:"Developer: git push new code",
-      output:"ArgoCD detects change, pulls new image, rolling deployment starts, old pods drain, new pods replace"
-    },
-    realWorld:"Production cluster runs 50+ microservices. Developers define desired state in YAML. ArgoCD continuously syncs Git → cluster. Prometheus scrapes metrics, Grafana shows dashboards. Auto-scaling handles traffic surges."
-  }
-};
+    AttributeDefinitions=[
+        {'AttributeName': 'tenant_id', 'AttributeType': 'S'},
+        {'AttributeName': 'config_type', 'AttributeType': 'S'}
+    ],
+    BillingMode='PAY_PER_REQUEST' # Serverless billing
+)
+table.meta.client.get_waiter('table_exists').wait(TableName='TenantConfigurations')
 
-function showQ(id) {
-  const question = content[id];
-  if (!question) return;
+# Insert data
+table.put_item(
+    Item={
+        'tenant_id': 'TENANT-001',
+        'config_type': 'GST_SETTINGS',
+        'tax_rate': 18,
+        'state_code': 'KA'
+    }
+)
 
-  let html = `<div style="animation:fadeIn 0.3s;"><div class="qhead">
-    <span class="qnum">${id.toString().padStart(2,'0')}</span>
+# Query data
+from boto3.dynamodb.conditions import Key
+response = table.query(
+    KeyConditionExpression=Key('tenant_id').eq('TENANT-001')
+)
+print(response['Items'])`}
+        ],
+        explanation: "Unlike SQL databases (like Aurora), DynamoDB requires you to model your data based on access patterns. Use Partition and Sort keys strategically to avoid 'hot partitions'. Global Secondary Indexes (GSIs) allow querying on non-primary key attributes.",
+        inputOutput: {
+          input: "put_item() with tenant JSON payload",
+          output: "Item stored with multi-AZ redundancy and sub-10ms write latency"
+        },
+        realWorld: "High-throughput state tracking for multi-tenant SaaS platforms, such as rapid read/write of tenant-specific application settings, or storing user session state securely."
+      },
+      17: {
+        title: "API Gateway — API Management",
+        def: "A fully managed service for creating, publishing, maintaining, monitoring, and securing REST, HTTP, and WebSocket APIs at any scale. It acts as the 'front door' for applications to access data and business logic.",
+        badges: ["Compute", "API", "Serverless"],
+        examples: [
+          {
+            title: "API Gateway Integration via AWS CLI", code: `# 1. Create the REST API
+aws apigateway create-rest-api \\
+  --name "BillingAPI" \\
+  --description "API for SaaS Billing Application"
+
+# 2. Create a resource (e.g., /invoices)
+aws apigateway create-resource \\
+  --rest-api-id abcdef123 \\
+  --parent-id root456 \\
+  --path-part "invoices"
+
+# 3. Setup a POST method mapped to a Lambda function
+aws apigateway put-method \\
+  --rest-api-id abcdef123 \\
+  --resource-id res789 \\
+  --http-method POST \\
+  --authorization-type "NONE"
+
+# 4. Integrate method with Lambda
+aws apigateway put-integration \\
+  --rest-api-id abcdef123 \\
+  --resource-id res789 \\
+  --http-method POST \\
+  --type AWS_PROXY \\
+  --integration-http-method POST \\
+  --uri arn:aws:apigateway:region:lambda:path/2015-03-31/functions/arn:aws:lambda:region:account:function:CreateInvoice/invocations`},
+        ],
+        explanation: "API Gateway handles all the heavy lifting of API management: traffic management, CORS, authorization/access control (via Cognito or Lambda Authorizers), throttling, and API versioning.",
+        inputOutput: {
+          input: "Client POSTs JSON to https://api.endpoint.com/invoices",
+          output: "API Gateway validates a JWT token, applies rate limits, and proxies the payload to a backend microservice."
+        },
+        realWorld: "Acting as the central routing hub for a MERN stack application, routing requests securely to various microservices (like a Node/Express backend or independent Lambda functions)."
+      },
+      18: {
+        title: "SQS & SNS — Decoupling & Messaging",
+        def: "SNS (Simple Notification Service) is a pub/sub messaging service for fan-out. SQS (Simple Queue Service) is a highly durable message queue for buffering tasks. Used together, they decouple distributed architectures.",
+        badges: ["Integration", "Messaging", "Architecture"],
+        examples: [
+          {
+            title: "Fan-out Architecture (SNS to SQS)", code: `import boto3
+import json
+
+sns = boto3.client('sns')
+sqs = boto3.client('sqs')
+
+# Publish an event to SNS (The "Publisher")
+event_payload = {
+    "order_id": "PO-9945",
+    "vendor_id": "V-102",
+    "status": "APPROVED"
+}
+
+sns.publish(
+    TopicArn='arn:aws:sns:us-east-1:123456789012:PurchaseOrders',
+    Message=json.dumps(event_payload),
+    MessageAttributes={
+        'event_type': {'DataType': 'String', 'StringValue': 'PO_APPROVED'}
+    }
+)
+
+# Consume from SQS (The "Subscriber")
+response = sqs.receive_message(
+    QueueUrl='https://sqs.us-east-1.amazonaws.com/123456789012/InventorySyncQueue',
+    MaxNumberOfMessages=1,
+    WaitTimeSeconds=20 # Long polling
+)
+
+if 'Messages' in response:
+    msg = response['Messages'][0]
+    body = json.loads(msg['Body'])
+    print(f"Processing Order: {body['order_id']}")
+    
+    # Delete message after successful processing
+    sqs.delete_message(
+        QueueUrl='https://sqs.us-east-1.amazonaws.com/123456789012/InventorySyncQueue',
+        ReceiptHandle=msg['ReceiptHandle']
+    )`}
+        ],
+        explanation: "Architectural best practice: Services shouldn't call each other directly if they don't need an immediate response. SNS broadcasts an event. Multiple SQS queues subscribe to that SNS topic, allowing independent backend services to process the event at their own pace.",
+        inputOutput: {
+          input: "SNS topic receives 1 message",
+          output: "Message is duplicated and delivered to 3 different SQS queues attached to different backend services."
+        },
+        realWorld: "Decoupling complex supply chain workflows. For instance, when a B2B Purchase Order is approved, an event is fired. One service syncs the PO to a Goods Receipt Note (GRN), another updates the accounting ledger, and a third sends an email notification—all running asynchronously without blocking the user interface."
+      },
+      19: {
+        title: "ElastiCache — In-Memory Data Store",
+        def: "A fully managed, Redis and Memcached-compatible in-memory caching service. It delivers sub-millisecond response times to power internet-scale, real-time applications.",
+        badges: ["Database", "Caching", "Performance"],
+        examples: [
+          {
+            title: "Redis Caching with Python", code: `import redis
+import json
+
+# Connect to ElastiCache Redis cluster
+r = redis.Redis(
+    host='my-cluster.xxxxxx.ng.0001.use1.cache.amazonaws.com',
+    port=6379,
+    decode_responses=True
+)
+
+def get_market_data(symbol):
+    # 1. Check cache first
+    cache_key = f"market_data:{symbol}"
+    cached_data = r.get(cache_key)
+    
+    if cached_data:
+        return json.loads(cached_data)
+        
+    # 2. Cache miss: Fetch from heavy backend/database
+    print("Cache miss. Fetching from database...")
+    fresh_data = fetch_from_database(symbol)
+    
+    # 3. Store in cache with an expiration (TTL) of 60 seconds
+    r.setex(cache_key, 60, json.dumps(fresh_data))
+    
+    return fresh_data`},
+        ],
+        explanation: "Relational databases (like Aurora) read from disk, which takes milliseconds. ElastiCache reads from memory, taking microseconds. Use it to cache frequent database queries, manage user sessions, or build real-time leaderboards.",
+        inputOutput: {
+          input: "r.setex('key', 60, 'data')",
+          output: "Data stored in RAM, automatically deleted after 60 seconds"
+        },
+        realWorld: "Storing rapid-fire momentum indicators and options pricing for sub-millisecond retrieval by trading algorithms, or caching frequent API responses to reduce load on a centralized database."
+      }
+    };
+
+    function showQ(id) {
+      const question = content[id];
+      if (!question) return;
+
+      let html = `<div style="animation:fadeIn 0.3s;"><div class="qhead">
+    <span class="qnum">${id.toString().padStart(2, '0')}</span>
     <div><div class="qtitle">${question.title}</div>`;
 
-  html += `<div class="badges">`;
-  (question.badges || []).forEach(badge => {
-    html += `<span class="fbadge" style="border-color:#ff9900;color:#ff9900;">${badge}</span>`;
-  });
-  html += `</div></div></div>`;
+      html += `<div class="badges">`;
+      (question.badges || []).forEach(badge => {
+        html += `<span class="fbadge" style="border-color:#ff9900;color:#ff9900;">${badge}</span>`;
+      });
+      html += `</div></div></div>`;
 
-  html += `<div class="def-section"><strong>Definition:</strong> ${question.def}</div>`;
+      html += `<div class="def-section"><strong>Definition:</strong> ${question.def}</div>`;
 
-  if (question.examples) {
-    question.examples.forEach((example, i) => {
-      html += `<div><div class="slabel">Example ${i+1}: ${example.title}</div>
+      if (question.examples) {
+        question.examples.forEach((example, i) => {
+          html += `<div><div class="slabel">Example ${i + 1}: ${example.title}</div>
         <div class="code-block"><code>${escapeHtml(example.code)}</code></div></div>`;
-    });
-  }
+        });
+      }
 
-  if (question.explanation) {
-    html += `<div class="expl-box"><strong>Explanation:</strong> ${question.explanation}</div>`;
-  }
+      if (question.explanation) {
+        html += `<div class="expl-box"><strong>Explanation:</strong> ${question.explanation}</div>`;
+      }
 
-  if (question.inputOutput) {
-    html += `<div class="io-grid">
+      if (question.inputOutput) {
+        html += `<div class="io-grid">
       <div class="io-box"><h5>Input</h5><code>${escapeHtml(question.inputOutput.input)}</code></div>
       <div class="io-box"><h5>Output</h5><code>${escapeHtml(question.inputOutput.output)}</code></div>
     </div>`;
-  }
+      }
 
-  if (question.realWorld) {
-    html += `<div class="realworld-box"><strong>🌍 Real-World Application:</strong> ${question.realWorld}</div>`;
-  }
+      if (question.realWorld) {
+        html += `<div class="realworld-box"><strong>🌍 Real-World Application:</strong> ${question.realWorld}</div>`;
+      }
 
-  html += `<div class="navrow">
-    <button class="nbtn ${id===1?'off':''}" onclick="showQ(${id-1})">← Prev</button>
-    <button class="nbtn ${id===Object.keys(content).length?'off':''}" onclick="showQ(${id+1})">Next →</button>
+      html += `<div class="navrow">
+    <button class="nbtn ${id === 1 ? 'off' : ''}" onclick="showQ(${id - 1})">← Prev</button>
+    <button class="nbtn ${id === Object.keys(content).length ? 'off' : ''}" onclick="showQ(${id + 1})">Next →</button>
   </div></div>`;
 
-  document.getElementById('content').innerHTML = html;
-  updateActiveItem(id);
-  window.scrollTo(0,0);
-}
+      document.getElementById('content').innerHTML = html;
+      updateActiveItem(id);
+      window.scrollTo(0, 0);
+    }
 
-function updateActiveItem(id) {
-  document.querySelectorAll('.qi').forEach(el=>el.classList.remove('active'));
-  document.getElementById(`si-${id}`)?.classList.add('active');
-}
+    function updateActiveItem(id) {
+      document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+      document.getElementById(`si-${id}`)?.classList.add('active');
+    }
 
-function renderTopics() {
-  let desktop='',mobile='';
-  topics.forEach(topic => {
-    const categoryColor = {storage:'#3b82f6',security:'#f472b6',compute:'#10b981',container:'#06b6d4',database:'#f59e0b'}[topic.cat]||'#6b7280';
-    const item = `<div class="qi" id="si-${topic.id}" onclick="showQ(${topic.id})">
-      <span class="qn">${topic.id.toString().padStart(2,'0')}</span>
+    function renderTopics() {
+      let desktop = '', mobile = '';
+      topics.forEach(topic => {
+        const categoryColor = { storage: '#3b82f6', security: '#f472b6', compute: '#10b981', container: '#06b6d4', database: '#f59e0b' }[topic.cat] || '#6b7280';
+        const item = `<div class="qi" id="si-${topic.id}" onclick="showQ(${topic.id})">
+      <span class="qn">${topic.id.toString().padStart(2, '0')}</span>
       <span class="qt">${topic.title}</span>
       <span class="fdot" style="background:${categoryColor}"></span>
     </div>`;
-    desktop+=item;
-    mobile+=item;
-  });
-  document.getElementById('deskqlist').innerHTML=desktop;
-  document.getElementById('moblist').innerHTML=mobile;
-  showQ(1);
-}
+        desktop += item;
+        mobile += item;
+      });
+      document.getElementById('deskqlist').innerHTML = desktop;
+      document.getElementById('moblist').innerHTML = mobile;
+      showQ(1);
+    }
 
-function toggleMobOverlay() {
-  document.getElementById('moboverlay').classList.toggle('open');
-}
+    function toggleMobOverlay() {
+      document.getElementById('moboverlay').classList.toggle('open');
+    }
 
-function toggleFilter(cat) {
-  const btns=document.querySelectorAll('.fbtn');
-  btns.forEach(btn=>btn.classList.remove('on'));
-  event.target.classList.add('on');
-  const items=document.querySelectorAll('.qi');
-  items.forEach(item => {
-    const id=parseInt(item.id.substring(3));
-    const topic=topics.find(t=>t.id===id);
-    item.classList.toggle('hidden',cat!=='all'&&topic.cat!==cat);
-  });
-}
+    function toggleFilter(cat) {
+      const btns = document.querySelectorAll('.fbtn');
+      btns.forEach(btn => btn.classList.remove('on'));
+      event.target.classList.add('on');
+      const items = document.querySelectorAll('.qi');
+      items.forEach(item => {
+        const id = parseInt(item.id.substring(3));
+        const topic = topics.find(t => t.id === id);
+        item.classList.toggle('hidden', cat !== 'all' && topic.cat !== cat);
+      });
+    }
 
-function filterQuestions() {
-  const search=(document.getElementById('searchbox-mob')?.value||document.getElementById('searchbox')?.value||'').toLowerCase();
-  document.querySelectorAll('.qi').forEach(item => {
-    const text=item.querySelector('.qt').textContent.toLowerCase();
-    item.classList.toggle('hidden',!text.includes(search));
-  });
-}
+    function filterQuestions() {
+      const search = (document.getElementById('searchbox-mob')?.value || document.getElementById('searchbox')?.value || '').toLowerCase();
+      document.querySelectorAll('.qi').forEach(item => {
+        const text = item.querySelector('.qt').textContent.toLowerCase();
+        item.classList.toggle('hidden', !text.includes(search));
+      });
+    }
 
-function escapeHtml(text) {
-  const map={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-  return text.replace(/[&<>"']/g,m=>map[m]);
-}
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
 
-document.addEventListener('DOMContentLoaded',renderTopics);
-document.getElementById('searchbox')?.addEventListener('keyup',filterQuestions);
-</script>
+    document.addEventListener('DOMContentLoaded', renderTopics);
+    document.getElementById('searchbox')?.addEventListener('keyup', filterQuestions);
+  </script>
 
 </body>
+
 </html>

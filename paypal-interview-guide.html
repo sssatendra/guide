@@ -1,0 +1,3392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayPal Senior Frontend Interview Guide — Bangalore Loop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Mermaid.js for flowcharts and tree diagrams -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: 'dark',
+      themeVariables: {
+        primaryColor: '#0079C1',
+        primaryTextColor: '#fff',
+        primaryBorderColor: '#13243d',
+        lineColor: '#0079C1',
+        secondaryColor: '#0a1424',
+        tertiaryColor: '#030a16'
+      }
+    });
+  </script>
+  <style>
+    :root {
+      --bg: #030a16;
+      --card: #0a1424;
+      --border: #13243d;
+      --accent: #0079C1;
+      --accent-light: #009cde;
+      --accent-glow: rgba(0, 121, 193, 0.15);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --code-bg: #02070f;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      
+      --basic: #10b981;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --expert: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── SCROLLBARS ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.85rem;
+      border-left: 1px solid var(--border);
+      padding-left: 0.75rem;
+    }
+    .back-hub {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .back-hub:hover {
+      background: var(--border);
+      color: var(--accent-light);
+      border-color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 57px);
+    }
+    
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 360px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sb-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .search-wrapper {
+      position: relative;
+    }
+    .search {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .q-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .cat-group {
+      margin-bottom: 2rem;
+    }
+    .cat-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cat-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+    .q-item {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.01);
+    }
+    .q-item:hover {
+      background: rgba(0, 121, 193, 0.05);
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .q-item.active {
+      background: rgba(0, 121, 193, 0.12);
+      border-color: var(--accent);
+      box-shadow: inset 3px 0 0 var(--accent-light);
+    }
+    .q-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+    .q-meta {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .level-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .level-text {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      background: radial-gradient(circle at top right, rgba(0, 121, 193, 0.04), transparent 60%);
+      position: relative;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      text-align: center;
+      padding: 15vh 1rem 5vh;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .welcome h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #fff, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .welcome p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: left;
+    }
+    .summary-card h3 {
+      font-size: 0.9rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card p {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    /* ── ANSWER CARD ── */
+    .ans-card {
+      max-width: 960px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ans-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .ans-level {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .level-medium {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--medium);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .level-hard {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--hard);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .level-expert {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--expert);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .ans-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff, #b4c6e7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ans-def {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .sec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-light);
+      margin: 3.5rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .expl-list {
+      list-style: none;
+      margin-bottom: 2.5rem;
+    }
+    .expl-item {
+      position: relative;
+      padding-left: 1.8rem;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .expl-item::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-light);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .expl-item strong {
+      color: var(--text-main);
+    }
+
+    /* ── DUAL CODE TABS ── */
+    .code-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .code-tab {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .code-tab:hover {
+      color: #fff;
+    }
+    .code-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 121, 193, 0.25);
+    }
+
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .code-header {
+      padding: 0.9rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-lang {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #e2e8f0;
+    }
+
+    /* ── CODE SYNTAX HIGHLIGHTING (CSS classes) ── */
+    .kw { color: #009cde; font-weight: 600; } /* keyword */
+    .fn { color: #f59e0b; } /* function */
+    .str { color: #10b981; } /* string */
+    .num { color: #ec4899; } /* number */
+    .com { color: #64748b; font-style: italic; } /* comment */
+    .op { color: #818cf8; } /* operator */
+    .cls { color: #a855f7; font-weight: bold; } /* class */
+
+    .output-wrap {
+      background: #010409;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 3rem;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+    }
+    .output-title {
+      font-size: 0.7rem;
+      color: var(--accent-light);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+    .output-text {
+      color: var(--success);
+      font-size: 0.88rem;
+      white-space: pre-wrap;
+    }
+
+    /* ── VISUAL WRAPPER ── */
+    .visual-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .visual-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(0,121,193,0.02), transparent 70%);
+      pointer-events: none;
+    }
+    .mermaid {
+      background: transparent !important;
+      width: 100%;
+    }
+
+    /* ── PRO TIP BOX ── */
+    .tip-box {
+      background: linear-gradient(135deg, rgba(0, 121, 193, 0.1) 0%, transparent 100%);
+      border: 1px solid rgba(0, 121, 193, 0.25);
+      border-radius: 16px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      margin-top: 3.5rem;
+      box-shadow: 0 10px 25px rgba(0, 121, 193, 0.05);
+    }
+    .tip-box::before {
+      content: 'SENIOR PERFORMANCE SPECS';
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-bottom-left-radius: 10px;
+      letter-spacing: 0.08em;
+    }
+    .tip-text {
+      font-size: 0.98rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .tip-text strong {
+      color: #fff;
+    }
+
+    /* ── MOBILE MENU BUTTON ── */
+    .mob-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--accent-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .sidebar {
+        position: fixed;
+        left: -360px;
+        top: 57px;
+        height: calc(100vh - 57px);
+        z-index: 900;
+        box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .main {
+        padding: 1.5rem;
+      }
+      .mob-menu-btn {
+        display: block;
+      }
+      .logo {
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">
+      <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+      💳 PayPal <span>Bangalore Senior hiring loop</span>
+    </div>
+    <a href="index.html" class="back-hub">← Mastery Hub</a>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="search-wrapper">
+          <input type="text" class="search" placeholder="Search round questions..." onkeyup="filterQ()">
+        </div>
+      </div>
+      <div class="q-list" id="qList"></div>
+    </div>
+
+    <div class="main" id="mainContent">
+      <div class="welcome" id="welcomeScreen">
+        <h1>PayPal Interview Guide</h1>
+        <p>A rigorous, battle-tested curriculum covering DSA, OOP, LLD, and Backend System Design for Senior Frontend Engineers at PayPal Bangalore (32 LPA Loop).</p>
+        
+        <div class="grid-summary">
+          <div class="summary-card">
+            <h3>Hiring Process</h3>
+            <p>4 Core Rounds</p>
+          </div>
+          <div class="summary-card">
+            <h3>Specialization</h3>
+            <p>React + Backend LLD</p>
+          </div>
+          <div class="summary-card">
+            <h3>High Fidelity</h3>
+            <p>JS & Python solutions</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 4rem; color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;">
+          Select a round topic in the sidebar to begin
+        </div>
+      </div>
+      
+      <div class="ans-card" id="ansCard" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+    // Selected language state
+    let currentLang = 'js';
+
+    // Highlight helper
+    function highlight(code, lang) {
+      let html = code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      const placeholders = [];
+      let placeholderCount = 0;
+
+      function savePlaceholder(text, type) {
+        const key = `__${type}_PLACEHOLDER_${placeholderCount}__`;
+        placeholders.push({ key, text });
+        placeholderCount++;
+        return key;
+      }
+
+      if (lang === 'js' || lang === 'javascript') {
+        // 1. Comments
+        html = html.replace(/(\/\/.*|\/\*[\s\S]*?\*\/)/g, (match) => {
+          const highlighted = `<span class="com">${match}</span>`;
+          return savePlaceholder(highlighted, 'COM');
+        });
+
+        // 2. Strings
+        html = html.replace(/(["'`])(?:\\.|[^\\])*?\1/g, (match) => {
+          const highlighted = `<span class="str">${match}</span>`;
+          return savePlaceholder(highlighted, 'STR');
+        });
+
+        // 3. Keywords
+        html = html.replace(/\b(const|let|var|class|constructor|extends|super|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|typeof|instanceof|import|export|from|default|async|await|yield|null|undefined|true|false)\b/g, '<span class="kw">$1</span>');
+
+        // 4. Functions
+        html = html.replace(/\b(console\.log|Math\.\w+|Array\.\w+|Object\.\w+|JSON\.\w+|Map|Set|Promise|Error|fetch)\b/g, '<span class="fn">$1</span>');
+
+        // 5. Numbers
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+
+      } else {
+        // Python
+        // 1. Comments
+        html = html.replace(/(#.*)/g, (match) => {
+          const highlighted = `<span class="com">${match}</span>`;
+          return savePlaceholder(highlighted, 'COM');
+        });
+
+        // 2. Strings
+        html = html.replace(/(r?['"])(?:\\.|[^\\])*?\1/g, (match) => {
+          const highlighted = `<span class="str">${match}</span>`;
+          return savePlaceholder(highlighted, 'STR');
+        });
+
+        // 3. Keywords
+        html = html.replace(/\b(def|class|self|import|from|return|if|elif|else|for|in|while|try|except|finally|raise|assert|with|as|lambda|pass|break|continue|global|nonlocal|and|or|not|is|None|True|False)\b/g, '<span class="kw">$1</span>');
+
+        // 4. Functions
+        html = html.replace(/\b(print|len|range|list|dict|set|tuple|str|int|float|type|object|super|abs|min|max|sum|dir|vars|map|filter|reduce|sorted|open|asyncio\.\w+|Exception)\b/g, '<span class="fn">$1</span>');
+
+        // 5. Numbers
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      }
+
+      // Restore placeholders
+      for (let i = placeholders.length - 1; i >= 0; i--) {
+        html = html.replace(placeholders[i].key, placeholders[i].text);
+      }
+
+      return html;
+    }
+
+    const questions = [
+      // ─── ROUND 1 ───
+      {
+        id: 1,
+        title: "String Decoding (LeetCode 394)",
+        level: "medium",
+        category: "Round 1 ▸ HackerRank",
+        def: "Given an encoded string of form <code>k[encoded_string]</code>, return its decoded form, where <code>k</code> is the positive repetition count.",
+        expl: [
+          "<strong>Core Mechanism:</strong> Using a stack to trace nested expressions. We parse through the string and accumulate the result.",
+          "<strong>Stack Tracking:</strong> We maintain two stacks or a unified stack storing previous counts and previous string states. When we encounter <code>[</code>, we push current progress to the stack and start fresh. When we hit <code>]</code>, we pop and construct the expanded string.",
+          "<strong>Complexity:</strong> Time Complexity is <strong>O(N)</strong> where N is the length of the decoded string, and Space Complexity is <strong>O(N)</strong> to store nested structures.",
+          "<strong>Edge Cases:</strong> Single digit counts, multi-digit counts (e.g. <code>100[a]</code>), empty nested strings (e.g. <code>2[]</code>), and complex nested formulas (e.g. <code>3[a2[c]]</code>)."
+        ],
+        mermaid: `graph TD
+  Start["Char parsed"] --> IsDigit{"Is Digit?"}
+  IsDigit -->|Yes| AccDigit["Accumulate digit: k = k * 10 + char"]
+  IsDigit -->|No| IsOpenSquare{"Char == '[' ?"}
+  IsOpenSquare -->|Yes| PushStack["Push current string & k to Stack<br>Reset k and current string"]
+  IsOpenSquare -->|No| IsCloseSquare{"Char == ']' ?"}
+  IsCloseSquare -->|Yes| PopStack["Pop prev_string and count<br>Update: current = prev_string + (current * count)"]
+  IsCloseSquare -->|No| AppendChar["Append char to current string"]
+`,
+        jsCode: `function decodeString(s) {
+  const countStack = [];
+  const strStack = [];
+  let currentStr = "";
+  let k = 0;
+
+  for (let char of s) {
+    if (!isNaN(char)) {
+      // Accumulate multi-digit numbers
+      k = k * 10 + parseInt(char);
+    } else if (char === '[') {
+      // Push current progress and multiplier to stacks
+      countStack.push(k);
+      strStack.push(currentStr);
+      // Reset for nested elements
+      currentStr = "";
+      k = 0;
+    } else if (char === ']') {
+      // Decode the deepest nested loop
+      const count = countStack.pop();
+      const prevStr = strStack.pop();
+      currentStr = prevStr + currentStr.repeat(count);
+    } else {
+      // Standard character
+      currentStr += char;
+    }
+  }
+
+  return currentStr;
+}`,
+        pyCode: `def decodeString(s: str) -> str:
+    count_stack = []
+    str_stack = []
+    current_str = ""
+    k = 0
+    
+    for char in s:
+        if char.isdigit():
+            # Accumulate multi-digit numbers
+            k = k * 10 + int(char)
+        elif char == '[':
+            # Push current progress to state stacks
+            count_stack.append(k)
+            str_stack.append(current_str)
+            # Reset state variables
+            current_str = ""
+            k = 0
+        elif char == ']':
+            # Pop and build the repeating block
+            count = count_stack.pop()
+            prev_str = str_stack.pop()
+            current_str = prev_str + (current_str * count)
+        else:
+            current_str += char
+            
+    return current_str`,
+        jsOutput: `// Input: "3[a2[c]]"
+console.log(decodeString("3[a2[c]]"));
+// Output: "accaccacc"`,
+        pyOutput: `# Input: "2[abc]3[cd]ef"
+print(decodeString("2[abc]3[cd]ef"))
+# Output: "abcabccdcdcdef"`,
+        tip: "In proctored assessments, verify you parse digits correctly! Using <code>k = k * 10 + digit</code> handles arbitrary-length multipliers seamlessly, avoiding array/string conversion bottlenecks."
+      },
+      {
+        id: 2,
+        title: "OOP: PayPal Payment Router",
+        level: "medium",
+        category: "Round 1 ▸ HackerRank",
+        def: "Design a proctored OOP-focused class spec representing a <code>PaymentRouter</code> that registers payment gateways, routes transactions dynamically based on fees, and maintains transaction history.",
+        expl: [
+          "<strong>Encapsulation:</strong> Hide private properties using private identifiers (<code>#</code> in JavaScript or <code>__</code> in Python) to prevent unauthorized mutations.",
+          "<strong>OOP Principles:</strong> Define a clear contract for gateway registration, dynamic routing based on currency/fee optimization, transaction processing, and audits.",
+          "<strong>Polymorphism:</strong> Gateways can be extended to support custom routing overrides (e.g. Card vs Wallet routing).",
+          "<strong>Robust Error Handling:</strong> Check for empty routes, duplicate gateways, currency mismatches, and negative fees."
+        ],
+        mermaid: `classDiagram
+  class PaymentRouter {
+    -gateways Map
+    -history Array
+    +registerGateway(id, currency, feePercentage) void
+    +routePayment(amount, currency) Object
+    +getHistory() Array
+    +getAverageFee(currency) Number
+  }
+  class Gateway {
+    +id String
+    +currency String
+    +feePercentage Number
+    +calculateFee(amount) Number
+  }`,
+        jsCode: `class PaymentGateway {
+  constructor(id, currency, feePercentage) {
+    if (feePercentage < 0 || feePercentage > 100) {
+      throw new Error("Invalid fee percentage");
+    }
+    this.id = id;
+    this.currency = currency;
+    this.feePercentage = feePercentage;
+  }
+
+  calculateFee(amount) {
+    return (amount * this.feePercentage) / 100;
+  }
+}
+
+class PaymentRouter {
+  #gateways = new Map();
+  #history = [];
+
+  registerGateway(id, currency, feePercentage) {
+    if (this.#gateways.has(id)) {
+      throw new Error(\`Gateway \${id} is already registered.\`);
+    }
+    const gateway = new PaymentGateway(id, currency, feePercentage);
+    this.#gateways.set(id, gateway);
+  }
+
+  routePayment(amount, currency) {
+    if (amount <= 0) throw new Error("Amount must be positive");
+
+    let optimalGateway = null;
+    let lowestFee = Infinity;
+
+    for (const [id, gateway] of this.#gateways.entries()) {
+      if (gateway.currency === currency) {
+        const fee = gateway.calculateFee(amount);
+        if (fee < lowestFee) {
+          lowestFee = fee;
+          optimalGateway = gateway;
+        }
+      }
+    }
+
+    if (!optimalGateway) {
+      throw new Error(\`No gateway found for currency \${currency}\`);
+    }
+
+    const transaction = {
+      txId: \`TX-\${Math.random().toString(36).substr(2, 9).toUpperCase()}\`,
+      gatewayId: optimalGateway.id,
+      amount,
+      currency,
+      fee: lowestFee,
+      timestamp: new Date().toISOString()
+    };
+
+    this.#history.push(transaction);
+    return transaction;
+  }
+
+  getHistory() {
+    return [...this.#history]; // Return copy to protect private history
+  }
+}`,
+        pyCode: `import uuid
+from typing import Dict, List, Any
+
+class PaymentGateway:
+    def __init__(self, gateway_id: str, currency: str, fee_percentage: float):
+        if not (0 <= fee_percentage <= 100):
+            raise ValueError("Invalid fee percentage")
+        self.gateway_id = gateway_id
+        self.currency = currency
+        self.fee_percentage = fee_percentage
+
+    def calculate_fee(self, amount: float) -> float:
+        return (amount * self.fee_percentage) / 100.0
+
+
+class PaymentRouter:
+    def __init__(self):
+        self.__gateways: Dict[str, PaymentGateway] = {}
+        self.__history: List[Dict[str, Any]] = []
+
+    def register_gateway(self, gateway_id: str, currency: str, fee_percentage: float) -> None:
+        if gateway_id in self.__gateways:
+            raise KeyError(f"Gateway {gateway_id} is already registered.")
+        gateway = PaymentGateway(gateway_id, currency, fee_percentage)
+        self.__gateways[gateway_id] = gateway
+
+    def route_payment(self, amount: float, currency: str) -> Dict[str, Any]:
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+
+        optimal_gateway = None
+        lowest_fee = float('inf')
+
+        for gateway in self.__gateways.values():
+            if gateway.currency == currency:
+                fee = gateway.calculate_fee(amount)
+                if fee < lowest_fee:
+                    lowest_fee = fee
+                    optimal_gateway = gateway
+
+        if not optimal_gateway:
+            raise ValueError(f"No gateway found for currency {currency}")
+
+        transaction = {
+            "txId": f"TX-{str(uuid.uuid4())[:8].upper()}",
+            "gatewayId": optimal_gateway.gateway_id,
+            "amount": amount,
+            "currency": currency,
+            "fee": lowest_fee,
+            "timestamp": "2026-05-19T14:38:00Z"
+        }
+
+        self.__history.append(transaction)
+        return transaction
+
+    def get_history(self) -> List[Dict[str, Any]]:
+        return self.__history.copy() # Protect integrity of raw database`,
+        jsOutput: `const router = new PaymentRouter();
+router.registerGateway("Stripe", "USD", 2.9);
+router.registerGateway("Adyen", "USD", 1.8);
+console.log(router.routePayment(100, "USD"));
+// Output: { txId: "TX-...", gatewayId: "Adyen", amount: 100, currency: "USD", fee: 1.8, timestamp: "..." }`,
+        pyOutput: `# Instantiate Python Router
+router = PaymentRouter()
+router.register_gateway("PayPalDirect", "EUR", 1.5)
+router.register_gateway("Braintree", "EUR", 2.2)
+tx = router.route_payment(200.0, "EUR")
+print(tx["gatewayId"], tx["fee"])
+# Output: PayPalDirect 3.0`,
+        tip: "Senior-level OOP interviews expect strict immutability patterns. Returning deep/shallow copies of internal history arrays, using true private properties, and validating parameter boundaries will push your rank past other candidates."
+      },
+      {
+        id: 3,
+        title: "React: Cart Management Architecture",
+        level: "medium",
+        category: "Round 1 ▸ HackerRank",
+        def: "Design a high-performance Cart Management State System with dynamic quantities, price calculation, real-time synchronization, and optimal re-render profiles.",
+        expl: [
+          "<strong>State Layout:</strong> Use structured state schemas (an array of products or an optimized map index <code>id -> item</code> for O(1) lookups).",
+          "<strong>Dynamic Re-rendering:</strong> Avoid global React state churn on every keypress. Move local cart inputs to isolated components or use standard optimized context.",
+          "<strong>Quantity Management:</strong> Synchronize cart modifications while preventing race conditions when multi-clicking standard item selectors.",
+          "<strong>Vanilla Sync implementation:</strong> Provide corresponding backend persistence models or vanilla state adapters to illustrate full-stack parity."
+        ],
+        mermaid: `graph TD
+  CartContext[Cart State Provider] -->|Dispatch Add/Remove/Update| Action[Reducer / Action Handler]
+  Action --> UpdateState[Calculate Total Qty & Price]
+  UpdateState --> Broadcast[Sync UI Components]
+  Broadcast --> ItemList[Cart Items UI Block]
+  Broadcast --> TotalCounter[Global Total Badge]
+  Broadcast --> CheckoutBox[Payment Summary Box]
+`,
+        jsCode: `// Robust Cart Reducer pattern for optimal React state synchronization
+const CART_ACTIONS = {
+  ADD_ITEM: 'ADD_ITEM',
+  REMOVE_ITEM: 'REMOVE_ITEM',
+  UPDATE_QUANTITY: 'UPDATE_QUANTITY',
+  CLEAR: 'CLEAR'
+};
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case CART_ACTIONS.ADD_ITEM: {
+      const existingItem = state.items.find(item => item.id === action.payload.id);
+      let newItems;
+      if (existingItem) {
+        newItems = state.items.map(item =>
+          item.id === action.payload.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      } else {
+        newItems = [...state.items, { ...action.payload, quantity: 1 }];
+      }
+      return calculateTotals(newItems);
+    }
+    case CART_ACTIONS.REMOVE_ITEM: {
+      const newItems = state.items.filter(item => item.id !== action.payload.id);
+      return calculateTotals(newItems);
+    }
+    case CART_ACTIONS.UPDATE_QUANTITY: {
+      const { id, quantity } = action.payload;
+      if (quantity <= 0) {
+        return calculateTotals(state.items.filter(item => item.id !== id));
+      }
+      const newItems = state.items.map(item =>
+        item.id === id ? { ...item, quantity } : item
+      );
+      return calculateTotals(newItems);
+    }
+    case CART_ACTIONS.CLEAR:
+      return { items: [], totalQuantity: 0, totalPrice: 0 };
+    default:
+      return state;
+  }
+}
+
+function calculateTotals(items) {
+  const totals = items.reduce((acc, item) => {
+    acc.totalQuantity += item.quantity;
+    acc.totalPrice += item.price * item.quantity;
+    return acc;
+  }, { totalQuantity: 0, totalPrice: 0 });
+
+  return { items, ...totals };
+}`,
+        pyCode: `class CartItem:
+    def __init__(self, item_id: str, name: str, price: float, quantity: int = 1):
+        self.item_id = item_id
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+
+    def to_dict(self):
+        return {
+            "id": self.item_id,
+            "name": self.name,
+            "price": self.price,
+            "quantity": self.quantity,
+            "subtotal": self.price * self.quantity
+        }
+
+
+class CartManager:
+    def __init__(self):
+        self.items: dict[str, CartItem] = {}
+
+    def add_item(self, item_id: str, name: str, price: float) -> dict:
+        if item_id in self.items:
+            self.items[item_id].quantity += 1
+        else:
+            self.items[item_id] = CartItem(item_id, name, price)
+        return self.get_summary()
+
+    def remove_item(self, item_id: str) -> dict:
+        if item_id in self.items:
+            del self.items[item_id]
+        return self.get_summary()
+
+    def update_quantity(self, item_id: str, quantity: int) -> dict:
+        if item_id in self.items:
+            if quantity <= 0:
+                del self.items[item_id]
+            else:
+                self.items[item_id].quantity = quantity
+        return self.get_summary()
+
+    def get_summary(self) -> dict:
+        total_quantity = sum(item.quantity for item in self.items.values())
+        total_price = sum(item.price * item.quantity for item in self.items.values())
+        return {
+            "items": [item.to_dict() for item in self.items.values()],
+            "totalQuantity": total_quantity,
+            "totalPrice": round(total_price, 2)
+        }`,
+        jsOutput: `// React initial state
+const initialState = { items: [], totalQuantity: 0, totalPrice: 0 };
+const state1 = cartReducer(initialState, { 
+  type: 'ADD_ITEM', 
+  payload: { id: "P1", name: "Checkout book", price: 29.99 } 
+});
+console.log(state1.totalQuantity, state1.totalPrice);
+// Output: 1, 29.99`,
+        pyOutput: `# Add and print Python Cart output
+cart = CartManager()
+cart.add_item("P1", "Checkout Book", 29.99)
+summary = cart.update_quantity("P1", 3)
+print(summary["totalQuantity"], summary["totalPrice"])
+# Output: 3 89.97`,
+        tip: "Avoid keeping computed total quantities and total prices in secondary React state variables. Deduce them dynamically using memoized hooks (<code>useMemo</code>) directly from the unified source-of-truth list to guarantee consistency."
+      },
+
+      // ─── ROUND 2 ───
+      {
+        id: 4,
+        title: "Triangle Min Path Sum (DP)",
+        level: "hard",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Given a triangle array, return the minimum path sum from top to bottom. In each step, you may move to adjacent numbers on the row below.",
+        expl: [
+          "<strong>DP State Transition:</strong> At any point <code>(row, col)</code>, the optimal choice depends on the sub-problems of the next row: <code>(row + 1, col)</code> and <code>(row + 1, col + 1)</code>.",
+          "<strong>Bottom-Up Space Optimization:</strong> Starting from the bottom row, we can propagate optimal values upwards. This completely eliminates extra space, allowing us to compute the minimum path sum with only a 1D DP array of size equal to the bottom row.",
+          "<strong>Formula:</strong> <code>dp[i] = triangle[row][i] + min(dp[i], dp[i+1])</code>",
+          "<strong>Complexity:</strong> Time Complexity is <strong>O(N^2)</strong> where N is the number of rows in the triangle (total elements), and Space Complexity is <strong>O(N)</strong> using our optimized 1D array."
+        ],
+        mermaid: `graph TD
+  Top[2] --> LeftBranch[3]
+  Top --> RightBranch[4]
+  LeftBranch --> L1[6]
+  LeftBranch --> L2[5]
+  RightBranch --> L2
+  RightBranch --> L3[7]
+  L1 -->|Bottom Row Choices| M1[4]
+  L1 -->|Bottom Row Choices| M2[1]
+  L2 -->|Bottom Row Choices| M2
+  L2 -->|Bottom Row Choices| M3[8]
+  L3 -->|Bottom Row Choices| M3
+  L3 -->|Bottom Row Choices| M4[3]
+`,
+        jsCode: `function minimumTotal(triangle) {
+  // Bottom-up DP: Start with a copy of the bottom row
+  const n = triangle.length;
+  const dp = [...triangle[n - 1]];
+
+  // Traverse bottom-up starting from the second-to-last row
+  for (let row = n - 2; row >= 0; row--) {
+    for (let col = 0; col <= row; col++) {
+      // Find minimum cost path recursively
+      dp[col] = triangle[row][col] + Math.min(dp[col], dp[col + 1]);
+    }
+  }
+
+  return dp[0];
+}`,
+        pyCode: `def minimumTotal(triangle: list[list[int]]) -> int:
+    # Space Optimized Bottom-Up Dynamic Programming
+    n = len(triangle)
+    dp = list(triangle[-1]) # Copy the bottom row
+    
+    # Propagate the optimal costs upwards
+    for row in range(n - 2, -1, -1):
+        for col in range(row + 1):
+            dp[col] = triangle[row][col] + min(dp[col], dp[col + 1])
+            
+    return dp[0]`,
+        jsOutput: `// Input Triangle:
+//    [2],
+//   [3,4],
+//  [6,5,7],
+// [4,1,8,3]
+console.log(minimumTotal([[2],[3,4],[6,5,7],[4,1,8,3]]));
+// Output: 11 (Path: 2 -> 3 -> 5 -> 1)`,
+        pyOutput: `# Python DP calculation
+triangle = [[2],[3,4],[6,5,7],[4,1,8,3]]
+print(minimumTotal(triangle))
+# Output: 11`,
+        tip: "Dynamic Programming questions at PayPal are strictly tested with hidden large test cases. A simple recursive DFS solution with memoization works, but the bottom-up 1D DP approach is completely iterative, guarantees zero stack overflow issues, and provides maximum performance."
+      },
+      {
+        id: 5,
+        title: "Min Stack in O(1) Time",
+        level: "medium",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Design a stack that supports <code>push</code>, <code>pop</code>, <code>top</code>, and retrieving the minimum element in constant <strong>O(1)</strong> time.",
+        expl: [
+          "<strong>Dual Stack Pattern:</strong> Maintain a main data stack and a secondary helper stack which records the minimum value present in the stack up to that height.",
+          "<strong>Helper Stack Space Optimization:</strong> When pushing, we only push onto the min-stack if the new element is less than or equal to the current minimum. When popping, we only pop from the min-stack if the popped value equals the current minimum.",
+          "<strong>Constant Time:</strong> Since we track the minimum element locally on every step, lookups are a simple top lookup on the min-stack, executing in strictly O(1) time.",
+          "<strong>Edge Cases:</strong> Popping down to empty, pushing duplicate minimums (handled by <code>val <= getMin()</code> checks)."
+        ],
+        mermaid: `graph LR
+  subgraph Stack State
+    Main[Main Stack: 5 -> 3 -> 7 -> 3]
+    MinStack[Min Stack: 5 -> 3 -> 3]
+  end
+  Push[Push 2] -->|Compare with Min Stack Top| Decide{"2 <= 3 ?"}
+  Decide -->|Yes| PushBoth[Push to Main & Min Stack]
+  Decide -->|No| PushMain[Push only to Main Stack]
+`,
+        jsCode: `class MinStack {
+  constructor() {
+    this.stack = [];
+    this.minStack = [];
+  }
+
+  push(val) {
+    this.stack.push(val);
+    // Push to minStack if empty or if val is new minimum
+    if (this.minStack.length === 0 || val <= this.getMin()) {
+      this.minStack.push(val);
+    }
+  }
+
+  pop() {
+    const val = this.stack.pop();
+    if (val === this.getMin()) {
+      this.minStack.pop();
+    }
+  }
+
+  top() {
+    return this.stack[this.stack.length - 1];
+  }
+
+  getMin() {
+    return this.minStack[this.minStack.length - 1];
+  }
+}`,
+        pyCode: `class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []
+
+    def push(self, val: int) -> None:
+        self.stack.append(val)
+        # Push to min_stack if it's the new minimum
+        if not self.min_stack or val <= self.min_stack[-1]:
+            self.min_stack.append(val)
+
+    def pop(self) -> None:
+        if self.stack.pop() == self.min_stack[-1]:
+            self.min_stack.pop()
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.min_stack[-1]`,
+        jsOutput: `const minStack = new MinStack();
+minStack.push(-2);
+minStack.push(0);
+minStack.push(-3);
+console.log(minStack.getMin()); // -3
+minStack.pop();
+console.log(minStack.top());    // 0
+console.log(minStack.getMin()); // -2`,
+        pyOutput: `# Python execution
+stack = MinStack()
+stack.push(10)
+stack.push(20)
+stack.push(5)
+print(stack.getMin()) # 5
+stack.pop()
+print(stack.getMin()) # 10`,
+        tip: "Alternative: To save stack memory, you can record the difference (offset values): <code>val - currentMin</code> in a single stack. This approach requires careful mathematical type-casting to prevent overflow (especially in languages with static limits)."
+      },
+      {
+        id: 6,
+        title: "Topological Sort using DFS",
+        level: "hard",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Given a Directed Acyclic Graph (DAG), return a linear ordering of its vertices such that for every directed edge <code>u -> v</code>, vertex <code>u</code> comes before <code>v</code>.",
+        expl: [
+          "<strong>Cycle Detection:</strong> Topological sorting is only possible if the graph contains no directed cycles. We use standard 3-state tracking: <strong>0 (Unvisited)</strong>, <strong>1 (Visiting - in current DFS recursion path)</strong>, and <strong>2 (Visited - fully processed)</strong>. If we encounter a node in state 1, a cycle exists.",
+          "<strong>DFS Propagation:</strong> For each unvisited node, we run recursive DFS. Once all neighbors are fully processed, we push the node to an ordering stack. Reversing this stack yields the topological order.",
+          "<strong>Complexity:</strong> Time Complexity is <strong>O(V + E)</strong> where V is vertices and E is edges, and Space Complexity is <strong>O(V)</strong> to store recursion state and graph adjacency lists."
+        ],
+        mermaid: `graph LR
+  5[Node 5] --> 2[Node 2]
+  5 --> 0[Node 0]
+  4[Node 4] --> 0
+  4 --> 1[Node 1]
+  2 --> 3[Node 3]
+  3 --> 1
+  style 5 fill:#0079C1,stroke:#13243d
+  style 4 fill:#0079C1,stroke:#13243d
+`,
+        jsCode: `function topologicalSort(numCourses, prerequisites) {
+  // Build adjacency list
+  const adj = Array.from({ length: numCourses }, () => []);
+  for (let [u, v] of prerequisites) {
+    adj[v].push(u); // Edge is: v -> u
+  }
+
+  const state = new Array(numCourses).fill(0); // 0=unvisited, 1=visiting, 2=visited
+  const order = [];
+
+  function hasCycle(node) {
+    state[node] = 1; // Mark as visiting
+
+    for (let neighbor of adj[node]) {
+      if (state[neighbor] === 1) return true; // Cycle detected!
+      if (state[neighbor] === 0) {
+        if (hasCycle(neighbor)) return true;
+      }
+    }
+
+    state[node] = 2; // Mark as processed
+    order.push(node); // Append to list
+    return false;
+  }
+
+  for (let i = 0; i < numCourses; i++) {
+    if (state[i] === 0) {
+      if (hasCycle(i)) return []; // Return empty if graph has cycles
+    }
+  }
+
+  return order.reverse(); // Reverse to get correct linear dependencies
+}`,
+        pyCode: `def findOrder(numCourses: int, prerequisites: list[list[int]]) -> list[int]:
+    # Build Adjacency List
+    adj = {i: [] for i in range(numCourses)}
+    for dest, src in prerequisites:
+        adj[src].append(dest)
+        
+    state = [0] * numCourses # 0=unvisited, 1=visiting, 2=visited
+    order = []
+    
+    def dfs(node: int) -> bool:
+        state[node] = 1 # Mark as visiting
+        
+        for neighbor in adj[node]:
+            if state[neighbor] == 1:
+                return True # Found cycle
+            if state[neighbor] == 0:
+                if dfs(neighbor):
+                    return True
+                    
+        state[node] = 2 # Processed
+        order.append(node)
+        return False
+
+    for i in range(numCourses):
+        if state[i] == 0:
+            if dfs(i):
+                return [] # Cycle detected, topological ordering impossible
+                
+    return order[::-1] # Reverse topological stack`,
+        jsOutput: `// 2 courses, Edge: 1 -> 0
+console.log(topologicalSort(2, [[0, 1]]));
+// Output: [1, 0]
+
+// Cyclic Graph Check
+console.log(topologicalSort(2, [[0, 1], [1, 0]]));
+// Output: [] (No valid path possible)`,
+        pyOutput: `# Python execution
+courses = findOrder(4, [[1,0],[2,0],[3,1],[3,2]])
+print(courses)
+# Output: [0, 1, 2, 3] or [0, 2, 1, 3]`,
+        tip: "Kahn's Algorithm (BFS topological sort using In-degrees) is a valuable alternative. In BFS, keep a count of incoming edges for all nodes. Process nodes with 0 in-degree and push to a queue, decrementing neighbor in-degrees on each step. It is highly iterative and elegant to implement."
+      },
+
+      // ─── ROUND 3 ───
+      {
+        id: 7,
+        title: "Payment Gateway Architecture",
+        level: "expert",
+        category: "Round 3 ▸ System Design",
+        def: "Design a high-scale, resilient Payment Gateway System processing thousands of financial transactions reliably, securely, and with strict trace consistency.",
+        expl: [
+          "<strong>System Decomposition:</strong> Break the payment system into isolated microservices: API Gateway, Merchant Directory, Routing Engine, Tokenization Core, Ledger Service, and Reconciliation engine.",
+          "<strong>Resiliency & Circuit Breaking:</strong> External bank networks (e.g. Visa/Mastercard API) have high latency and fail often. Protect internally using Circuit Breakers, Retry Queues (Exponential backoff with jitter), and Dead Letter Queues (DLQ).",
+          "<strong>Ledger Consistency:</strong> Financial networks rely on immutable ledgers. Every transaction must perform a double-entry balance update to preserve mathematical truth.",
+          "<strong>Outbox Pattern:</strong> Guarantee that database state updates and messaging system broadcasts (e.g. payment notification sent to Kafka/RabbitMQ) happen atomically to prevent data drift."
+        ],
+        mermaid: `sequenceDiagram
+  autonumber
+  actor User as Customer
+  participant App as Web Frontend
+  participant Gateway as Payment Gateway API
+  participant Redis as Redis Cache / Lock
+  participant DB as Transaction DB (RDBMS)
+  participant Ledger as Accounting Ledger
+  participant Bank as Acquirer / VISA API
+
+  User->>App: Click "Pay $100" (Check Out)
+  App->>Gateway: POST /v1/charge (Idempotency-Key: ID-9988)
+  Gateway->>Redis: SETNX lock:id-9988 (TTL 30s)
+  alt Lock already exists
+    Redis-->>Gateway: Return Conflict / In Progress
+    Gateway-->>App: HTTP 409 (Retry Later)
+  else Lock Acquired
+    Gateway->>DB: Check if TX with key ID-9988 exists
+    alt TX exists
+      DB-->>Gateway: Return existing record
+      Gateway-->>App: Return charge success (cached)
+    else First-time processing
+      Gateway->>DB: Insert Transaction: state="PENDING"
+      Gateway->>Bank: POST /charge (Authorize funds)
+      Bank-->>Gateway: Charge Success (Auth Code: 12345)
+      Gateway->>DB: Update Transaction: state="SUCCESS"
+      Gateway->>Ledger: Write Double-Entry Record (+100 Merchant, -100 User)
+      Ledger-->>Gateway: Consistent Write ACK
+      Gateway->>Redis: Release lock
+      Gateway-->>App: HTTP 200 (Success)
+      App-->>User: Show Payment Confirmed screen
+    end
+  end
+`,
+        jsCode: `// Express/Node.js Idempotency Middleware pattern using Redis
+const redis = require("redis");
+const client = redis.createClient();
+
+async function idempotencyMiddleware(req, res, next) {
+  const key = req.headers["idempotency-key"];
+  if (!key) {
+    return res.status(400).json({ error: "Missing Idempotency-Key header" });
+  }
+
+  const lockKey = \`lock:payment:\${key}\`;
+  const responseKey = \`resp:payment:\${key}\`;
+
+  // 1. Check if we already processed this request
+  const cachedResponse = await client.get(responseKey);
+  if (cachedResponse) {
+    const { status, body } = JSON.parse(cachedResponse);
+    return res.status(status).json(body);
+  }
+
+  // 2. Try to acquire lock to prevent concurrent double submissions
+  const acquired = await client.set(lockKey, "processing", {
+    NX: true,
+    EX: 30 // Lock expires in 30 seconds
+  });
+
+  if (!acquired) {
+    return res.status(409).json({ error: "Request in progress. Please retry." });
+  }
+
+  // Intercept response to cache it before sending
+  const originalJson = res.json;
+  res.json = async function (body) {
+    // Cache the response permanently (or with long TTL)
+    await client.set(responseKey, JSON.stringify({
+      status: res.statusCode,
+      body
+    }));
+    // Release the concurrency lock
+    await client.del(lockKey);
+    return originalJson.call(this, body);
+  };
+
+  next();
+}`,
+        pyCode: `import json
+import redis
+from fastapi import FastAPI, Header, HTTPException, Request
+
+app = FastAPI()
+r = redis.Redis(host="localhost", port=6379, db=0)
+
+async def check_idempotency(idempotency_key: str = Header(None)):
+    if not idempotency_key:
+        raise HTTPException(status_code=400, detail="Missing Idempotency-Key header")
+        
+    lock_key = f"lock:payment:{idempotency_key}"
+    resp_key = f"resp:payment:{idempotency_key}"
+    
+    # 1. Check if the payment response was already processed
+    cached_resp = r.get(resp_key)
+    if cached_resp:
+        data = json.loads(cached_resp)
+        raise HTTPException(status_code=data["status"], detail=data["body"])
+        
+    # 2. Acquire concurrent-lock using SETNX (SET with NX flag)
+    acquired = r.set(lock_key, "processing", ex=30, nx=True)
+    if not acquired:
+        raise HTTPException(status_code=409, detail="Request in progress. Please retry.")
+        
+    # The caller must commit the response to resp_key and release lock_key`,
+        jsOutput: `// Node.js Server Terminal
+// Initial submission
+[ID-9988] Processing new payment of $100. Saving to DB.
+[ID-9988] Success charge. Returning HTTP 200.
+
+// Fast double click submission 0.1s later
+[ID-9988] Conflict lock found in Redis. Rejecting with HTTP 409.`,
+        pyOutput: `# Python log trace
+# Client resubmits expired request (3 minutes later)
+Cached response found for resp:payment:ID-9988.
+Bypassing gateway processing. Returning cached output instantly.`,
+        tip: "When designing payment gateway APIs, never trust bank APIs to be fast or reliable. Always use asynchronous processing patterns for high value tickets. Merchant records must be audited overnight against transaction log summaries to identify data skew."
+      },
+      {
+        id: 8,
+        title: "Idempotency & Double Charge Prevention",
+        level: "expert",
+        category: "Round 3 ▸ System Design",
+        def: "Design a fail-safe distributed locking mechanism that ensures payments are executed exactly once, regardless of client retries.",
+        expl: [
+          "<strong>The Double-Charge Problem:</strong> If a customer clicks 'Pay' twice, or if a network timeout occurs after a charge is successful but before the client receives the confirmation, subsequent retries can cause multiple cards sweeps.",
+          "<strong>Unique Keys:</strong> Merchants generate a unique <code>Idempotency-Key</code> for each intent. This key is passed as an HTTP header.",
+          "<strong>Atomic Locks:</strong> In Redis, check the key status. If it's already running, immediately return HTTP 409 (Conflict). If complete, return the cached result. If new, process the transaction.",
+          "<strong>Database Isolation:</strong> Ensure unique constraints on database transaction tables using the idempotency key as a primary/unique key."
+        ],
+        mermaid: `graph TD
+  Request[POST /charge with Idempotency Key] --> CheckCache{Key processed in DB?}
+  CheckCache -->|Yes| ReturnCached[Return cached payment response]
+  CheckCache -->|No| AcquireLock{Acquire atomic Redis Lock?}
+  AcquireLock -->|Fail| Conflict[Return HTTP 409: In Progress]
+  AcquireLock -->|Success| SavePending[Save status PENDING in DB]
+  SavePending --> ProcessBank[Process external Bank transaction]
+  ProcessBank --> SaveSuccess[Update status SUCCESS in DB]
+  SaveSuccess --> CacheResp[Cache final response in Redis]
+  CacheResp --> ReleaseLock[Delete Redis Concurrency Lock]
+  ReleaseLock --> ReturnSuccess[Return charge success]
+`,
+        jsCode: `// Robust JavaScript Transaction executor protecting against double charges
+async function processPaymentSafely(dbConnection, paymentPayload) {
+  const { idempotencyKey, amount, currency, merchantId } = paymentPayload;
+  
+  // Start isolated transaction boundary
+  const transaction = await dbConnection.startTransaction();
+  
+  try {
+    // 1. Check database for existing idempotency key
+    const existingTx = await dbConnection.query(
+      "SELECT * FROM transactions WHERE idempotency_key = ? LIMIT 1",
+      [idempotencyKey],
+      { transaction }
+    );
+    
+    if (existingTx.length > 0) {
+      await transaction.rollback();
+      return { 
+        duplicate: true, 
+        transaction: existingTx[0] 
+      };
+    }
+    
+    // 2. Insert as pending immediately to mark key as occupied
+    const insertedTx = await dbConnection.query(
+      "INSERT INTO transactions (idempotency_key, amount, currency, status, merchant_id) VALUES (?, ?, ?, 'PENDING', ?)",
+      [idempotencyKey, amount, currency, merchantId],
+      { transaction }
+    );
+    
+    await transaction.commit();
+    return { duplicate: false, txId: insertedTx.insertId };
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
+}`,
+        pyCode: `import pymysql
+
+def process_payment_safely(db_connection, payment_payload: dict) -> dict:
+    key = payment_payload["idempotencyKey"]
+    amount = payment_payload["amount"]
+    currency = payment_payload["currency"]
+    merchant_id = payment_payload["merchantId"]
+    
+    cursor = db_connection.cursor()
+    
+    try:
+        # Start transaction context
+        db_connection.begin()
+        
+        # 1. Query for existing transaction with this key
+        cursor.execute(
+            "SELECT id, amount, currency, status FROM transactions WHERE idempotency_key = %s",
+            (key,)
+        )
+        existing_tx = cursor.fetchone()
+        
+        if existing_tx:
+            db_connection.rollback()
+            return {"duplicate": True, "transaction": existing_tx}
+            
+        # 2. Occupy the slot by saving PENDING transaction
+        cursor.execute(
+            "INSERT INTO transactions (idempotency_key, amount, currency, status, merchant_id) VALUES (%s, %s, %s, 'PENDING', %s)",
+            (key, amount, currency, merchant_id)
+        )
+        tx_id = cursor.lastrowid
+        db_connection.commit()
+        
+        return {"duplicate": False, "txId": tx_id}
+    except Exception as e:
+        db_connection.rollback()
+        raise e`,
+        jsOutput: `// Initial execution
+const res1 = await processPaymentSafely(db, { idempotencyKey: "KEY-123", amount: 50 });
+console.log(res1);
+// Output: { duplicate: false, txId: 1045 }
+
+// Retry with same key
+const res2 = await processPaymentSafely(db, { idempotencyKey: "KEY-123", amount: 50 });
+console.log(res2);
+// Output: { duplicate: true, transaction: { id: 1045, amount: 50, status: 'PENDING' } }`,
+        pyOutput: `# Python safe run
+res = process_payment_safely(connection, {"idempotencyKey": "KEY-123", "amount": 50.0, "currency": "USD", "merchantId": "M-99"})
+print(res)
+# Output: {'duplicate': True, 'transaction': (1045, 50.0, 'USD', 'PENDING')}`,
+        tip: "A major interview trap is not defining clear limits for the lifecycle of idempotency keys. Store locks with an exact TTL (e.g. 24-48 hours) to balance performance and persistent history verification requirements."
+      },
+      {
+        id: 9,
+        title: "Double-Entry Ledger System",
+        level: "expert",
+        category: "Round 3 ▸ System Design",
+        def: "Design a high-fidelity, append-only Double-Entry Ledger System to store transaction states with mathematical consistency.",
+        expl: [
+          "<strong>Ledger Principle:</strong> Money cannot be created or destroyed. In double-entry bookkeeping, every financial event creates a matching pair of credits and debits. The sum of all credits must equal the sum of all debits.",
+          "<strong>Append-Only Logs:</strong> Financial ledgers must be immutable. You never update an existing ledger entry. To reverse or modify a charge, you append a new correction entry.",
+          "<strong>Database Architecture:</strong> To enforce strict mathematical integrity, use relational SQL databases with ACID transactions and unique primary keys on log entries.",
+          "<strong>Performance Scaling:</strong> Group transactions in memory and write in bulk to decrease write lock contention on active account tables."
+        ],
+        mermaid: `graph TD
+  Tx[Order Paid: $100] --> Debit[Debit User Account: -$100]
+  Tx --> Credit[Credit Merchant Account: +$100]
+  Debit --> BalanceCheck{"Check balance < 0 ?"}
+  BalanceCheck -->|No| WriteLedger[Commit Double-Entry Record]
+  BalanceCheck -->|Yes| Fail[Reject Transaction: Insufficient Funds]
+  WriteLedger --> Audit[Audit Trail: Total Credit == Total Debit]
+`,
+        jsCode: `// Designing a SQL-based Double-Entry schema structure and processing record
+// Table Structure:
+// Accounts: (id, name, type)
+// Entries: (id, transaction_id, account_id, amount, direction ['DEBIT', 'CREDIT'])
+
+async function writeLedgerEntry(db, transactionId, sourceAccountId, destAccountId, amount) {
+  if (amount <= 0) throw new Error("Amount must be positive");
+
+  const tx = await db.startTransaction();
+
+  try {
+    // 1. Debit the source account (negative flow)
+    await db.query(
+      "INSERT INTO entries (transaction_id, account_id, amount, direction) VALUES (?, ?, ?, 'DEBIT')",
+      [transactionId, sourceAccountId, amount],
+      { transaction: tx }
+    );
+
+    // 2. Credit the destination account (positive flow)
+    await db.query(
+      "INSERT INTO entries (transaction_id, account_id, amount, direction) VALUES (?, ?, ?, 'CREDIT')",
+      [transactionId, destAccountId, amount],
+      { transaction: tx }
+    );
+
+    // 3. Confirm mathematical integrity of this specific transaction
+    const balanceCheck = await db.query(
+      "SELECT SUM(CASE WHEN direction = 'CREDIT' THEN amount ELSE -amount END) as diff FROM entries WHERE transaction_id = ?",
+      [transactionId],
+      { transaction: tx }
+    );
+
+    if (balanceCheck[0].diff !== 0) {
+      throw new Error("Ledger balance mismatch. Transaction rolled back.");
+    }
+
+    await tx.commit();
+    return true;
+  } catch (error) {
+    await tx.rollback();
+    throw error;
+  }
+}`,
+        pyCode: `class LedgerEntry:
+    def __init__(self, tx_id: str, account_id: str, amount: float, direction: str):
+        assert direction in ["DEBIT", "CREDIT"]
+        self.tx_id = tx_id
+        self.account_id = account_id
+        self.amount = amount
+        self.direction = direction
+
+class LedgerSystem:
+    def __init__(self):
+        self.entries: list[LedgerEntry] = []
+
+    def commit_transaction(self, tx_id: str, from_acc: str, to_acc: str, amount: float) -> bool:
+        if amount <= 0:
+            raise ValueError("Amount must be positive")
+            
+        # Write both sides of the transaction
+        debit = LedgerEntry(tx_id, from_acc, amount, "DEBIT")
+        credit = LedgerEntry(tx_id, to_acc, amount, "CREDIT")
+        
+        # Verify balance equation locally
+        balance = 0.0
+        balance -= debit.amount  # Debit decreases source balance
+        balance += credit.amount  # Credit increases dest balance
+        
+        if balance != 0.0:
+            raise ArithmeticError("Ledger imbalance detected")
+            
+        self.entries.append(debit)
+        self.entries.append(credit)
+        return True`,
+        jsOutput: `// Successful transaction commit
+await writeLedgerEntry(db, "TX-101", "USER-4", "MERCH-9", 100);
+// DB entries added:
+// 1. TX-101 | USER-4  | 100 | DEBIT
+// 2. TX-101 | MERCH-9 | 100 | CREDIT
+// Balance check returned: diff = 0. Transaction committed.`,
+        pyOutput: `# Python execution
+ledger = LedgerSystem()
+ledger.commit_transaction("TX-101", "USER-4", "MERCH-9", 100.0)
+print(len(ledger.entries))
+# Output: 2`,
+        tip: "In financial interviews, highlight that your ledger uses the DECIMAL data type for currency storage. Floating point types (like FLOAT or DOUBLE) are strictly forbidden because binary representation limitations introduce rounding errors over time."
+      },
+
+      // ─── ROUND 4 ───
+      {
+        id: 10,
+        title: "Search Rotated Sorted Array",
+        level: "medium",
+        category: "Round 4 ▸ Live Coding",
+        def: "Given a sorted array rotated at some pivot, search for a target value. Run in <strong>O(log N)</strong> time.",
+        expl: [
+          "<strong>Dividing the Array:</strong> Although the array is rotated, dividing it in half will always yield at least one sorted half.",
+          "<strong>Search Strategy:</strong> Identify which half of the array is sorted. If target lies within the boundaries of the sorted half, narrow binary search to that half. Otherwise, target must be in the opposite half.",
+          "<strong>Binary Search Rules:</strong> Maintain standard boundaries <code>left</code> and <code>right</code>. Compute <code>mid</code>, compare, and adjust ranges recursively.",
+          "<strong>Complexity:</strong> Time Complexity is strictly <strong>O(log N)</strong>, and Space Complexity is <strong>O(1)</strong> since search is performed in-place."
+        ],
+        mermaid: `graph TD
+  Start[left = 0, right = n-1] --> CalcMid[mid = left + right / 2]
+  CalcMid --> IsTarget{nums[mid] == target?}
+  IsTarget -->|Yes| Found[Return mid]
+  IsTarget -->|No| CheckSorted{"Is left half sorted?<br>nums[left] <= nums[mid]?"}
+  CheckSorted -->|Yes| TargetInLeft{"Is target in left half range?<br>nums[left] <= target < nums[mid]?"}
+  TargetInLeft -->|Yes| MoveLeft[right = mid - 1]
+  TargetInLeft -->|No| MoveRight[left = mid + 1]
+  CheckSorted -->|No| TargetInRight{"Is target in right half range?<br>nums[mid] < target <= nums[right]?"}
+  TargetInRight -->|Yes| MoveRight
+  TargetInRight -->|No| MoveLeft
+`,
+        jsCode: `function search(nums, target) {
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+
+    if (nums[mid] === target) return mid;
+
+    // 1. Check if left half is sorted
+    if (nums[left] <= nums[mid]) {
+      if (nums[left] <= target && target < nums[mid]) {
+        right = mid - 1; // Search left
+      } else {
+        left = mid + 1;  // Search right
+      }
+    } 
+    // 2. Otherwise, the right half must be sorted
+    else {
+      if (nums[mid] < target && target <= nums[right]) {
+        left = mid + 1;  // Search right
+      } else {
+        right = mid - 1; // Search left
+      }
+    }
+  }
+
+  return -1; // Target not found
+}`,
+        pyCode: `def search(nums: list[int], target: int) -> int:
+    left = 0
+    right = len(nums) - 1
+    
+    while left <= right:
+        mid = (left + right) // 2
+        
+        if nums[mid] == target:
+            return mid
+            
+        # 1. Determine if the left portion is sorted
+        if nums[left] <= nums[mid]:
+            if nums[left] <= target < nums[mid]:
+                right = mid - 1  # Target is inside left half
+            else:
+                left = mid + 1   # Target is in right half
+        # 2. Right portion is sorted
+        else:
+            if nums[mid] < target <= nums[right]:
+                left = mid + 1   # Target is inside right half
+            else:
+                right = mid - 1  # Target is in left half
+                
+    return -1`,
+        jsOutput: `// Input: nums = [4,5,6,7,0,1,2], target = 0
+console.log(search([4,5,6,7,0,1,2], 0));
+// Output: 4 (Index of element 0)`,
+        pyOutput: `# Python execution
+print(search([4,5,6,7,0,1,2], 3))
+# Output: -1 (Target 3 is not in array)`,
+        tip: "In binary search, avoid overflow by computing mid using <code>left + Math.floor((right - left) / 2)</code>. This is a crucial edge-case check in proctored systems and highly appreciated by senior interviewers."
+      },
+      {
+        id: 11,
+        title: "React Virtual DOM & Fiber",
+        level: "expert",
+        category: "Round 4 ▸ Live Coding",
+        def: "Explain React's Virtual DOM, reconciliation, and the mechanics of the Fiber architecture under the hood.",
+        expl: [
+          "<strong>Virtual DOM:</strong> A lightweight in-memory representation of the real DOM nodes. Updates are fast because they bypass browser painting.",
+          "<strong>Reconciliation:</strong> The process of sync-matching the Virtual DOM with the real browser DOM. React creates two virtual trees and compares them using a heuristic diffing algorithm.",
+          "<strong>Fiber Architecture:</strong> Introduced in React 16. Fiber represents a complete rewrite of React's reconciliation core. Instead of recursive, synchronous rendering, Fiber breaks updates into micro-tasks, allowing React to pause, resume, or abort work.",
+          "<strong>Concurrency:</strong> Fiber schedules work over browser frames using standard API features like <code>requestIdleCallback</code> (or React's Scheduler polyfill), keeping the main thread free for fluid UI interaction."
+        ],
+        mermaid: `graph TD
+  VTree[Old Virtual DOM Tree] --> Diff[Reconciliation Engine]
+  NTree[New Virtual DOM Tree] --> Diff
+  Diff -->|1. Element Diffing| RealDOM[Update Target DOM Node]
+  Diff -->|2. Key Optimization| RealDOM
+  Diff -->|3. Component Diffing| RealDOM
+`,
+        jsCode: `// Conceptual JavaScript Representation of a React Fiber Node
+class FiberNode {
+  constructor(tag, pendingProps, key) {
+    this.tag = tag;               // Type of component (Function, Class, HostElement)
+    this.key = key;               // React key for optimal diffing
+    this.elementType = null;      // Actual constructor (e.g. App, div)
+    
+    // Fiber Tree Connections
+    this.child = null;            // Point to first child
+    this.sibling = null;          // Point to adjacent sibling
+    this.return = null;           // Point to parent node
+    
+    // State Tracking
+    this.pendingProps = pendingProps;
+    this.memoizedProps = null;
+    this.memoizedState = null;    // Linked list of React hooks state
+    this.updateQueue = null;      // Queue of state changes
+    
+    // Side Effects
+    this.flags = 0;               // Placement, Update, Deletion flags
+    this.alternate = null;        // Point to corresponding node in working tree
+  }
+}
+
+// How React schedules updates inside the Work Loop
+function workLoopConcurrent(deadline) {
+  // Yield thread if frame time is running out (under 16ms window)
+  while (nextUnitOfWork !== null && !deadline.didTimeout) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+  }
+}`,
+        pyCode: `# Python simulation of React's Concurrent Work Scheduler
+import time
+
+class WorkUnit:
+    def __init__(self, name: str, complexity: int):
+        self.name = name
+        self.complexity = complexity
+        self.next = None
+
+class FiberScheduler:
+    def __init__(self):
+        self.current_work = None
+
+    def schedule(self, root_unit: WorkUnit):
+        self.current_work = root_unit
+
+    def run_loop(self, time_slice_ms: float):
+        start_time = time.time() * 1000.0
+        
+        while self.current_work and (time.time() * 1000.0 - start_time) < time_slice_ms:
+            print(f"Processing fiber node: {self.current_work.name}")
+            # Simulate CPU workload
+            time.sleep(self.current_work.complexity / 100.0)
+            self.current_work = self.current_work.next
+            
+        if self.current_work:
+            print("Yielding thread... Frame window expired. Will resume next frame.")
+            return True # More work remains
+        print("Work loop complete. All virtual nodes committed.")
+        return False`,
+        jsOutput: `// Conceptual Work loop running
+// Processing fiber node: Div
+// Processing fiber node: Text
+// Yielding thread... Frame window expired. Will resume next frame.`,
+        pyOutput: `# Run Python Fiber simulation
+scheduler = FiberScheduler()
+u1 = WorkUnit("Header", 2)
+u2 = WorkUnit("Sidebar", 5)
+u1.next = u2
+scheduler.schedule(u1)
+scheduler.run_loop(1.0) # Slice time is extremely short`,
+        tip: "A key senior differentiator is explaining the two phases of rendering: the **Render Phase** (which is asynchronous, recalculating the virtual tree, and can yield) and the **Commit Phase** (which is synchronous, updating the actual browser DOM nodes, and cannot be paused)."
+      },
+      {
+        id: 12,
+        title: "React Diffing Algorithm",
+        level: "expert",
+        category: "Round 4 ▸ Live Coding",
+        def: "Explain and write clean pseudocode for the standard <strong>O(N)</strong> heuristic React Diffing Algorithm.",
+        expl: [
+          "<strong>O(N) Optimization:</strong> A full tree-to-tree comparison takes O(N^3) time. React uses a heuristic O(N) algorithm based on two simple rules: (1) Elements of different types produce different trees, and (2) Developers can hint at stable lists using <code>key</code> props.",
+          "<strong>Diffing Elements:</strong> If elements have different tags, React destroys the old element tree and mounts the new one from scratch.",
+          "<strong>Diffing Attributes:</strong> If tags match, React updates changed attributes in place (e.g. style, className) without rebuilding the actual node.",
+          "<strong>Diffing Lists with Keys:</strong> Keys must be stable, unique, and predictable. React uses keys to match existing nodes, preventing costly DOM re-orders and component re-mounts."
+        ],
+        mermaid: `graph TD
+  Nodes[Compare Nodes] --> TypeCheck{Same Tag / Component Type?}
+  TypeCheck -->|No| DestroyOld[Destroy old component tree<br>Mount new component tree]
+  TypeCheck -->|Yes| UpdateProps[Update properties & attributes in-place]
+  UpdateProps --> DiffChildren[Process Children list recursively]
+`,
+        jsCode: `// High-Fidelity JavaScript Pseudocode for React's diffing process
+function diff(oldVNode, newVNode, domNode) {
+  // 1. Handle element deletion
+  if (!newVNode) {
+    domNode.remove();
+    return null;
+  }
+
+  // 2. Handle element replacement (Different type/tags)
+  if (oldVNode.type !== newVNode.type) {
+    const newDomNode = createRealDOMNode(newVNode);
+    domNode.replaceWith(newDomNode);
+    return newDomNode;
+  }
+
+  // 3. Handle identical type (Update attributes)
+  updateAttributes(domNode, oldVNode.props, newVNode.props);
+
+  // 4. Diff children lists (Simulating key-based matches)
+  const oldChildren = oldVNode.children || [];
+  const newChildren = newVNode.children || [];
+  const oldKeyMap = {};
+  
+  // Index old children by keys
+  oldChildren.forEach((child, index) => {
+    const key = child.key !== undefined ? child.key : index;
+    oldKeyMap[key] = { child, dom: domNode.childNodes[index] };
+  });
+
+  newChildren.forEach((newChild, index) => {
+    const key = newChild.key !== undefined ? newChild.key : index;
+    const matched = oldKeyMap[key];
+    
+    if (matched) {
+      // Reuse DOM node and diff recursively
+      diff(matched.child, newChild, matched.dom);
+      // Re-order if needed
+      if (domNode.childNodes[index] !== matched.dom) {
+        domNode.insertBefore(matched.dom, domNode.childNodes[index]);
+      }
+    } else {
+      // Create new child node
+      const newChildDom = createRealDOMNode(newChild);
+      domNode.insertBefore(newChildDom, domNode.childNodes[index]);
+    }
+  });
+
+  return domNode;
+}`,
+        pyCode: `# Python representation of React key-based element matching and diffing
+class VNode:
+    def __init__(self, node_type: str, props: dict, children=None, key=None):
+        self.node_type = node_type
+        self.props = props
+        self.children = children or []
+        self.key = key
+
+def diff_children_with_keys(old_children: list[VNode], new_children: list[VNode]) -> list[str]:
+    # Tracks structural updates: 'REUSE', 'CREATE', or 'DELETE'
+    operations = []
+    old_key_map = {child.key: child for child in old_children if child.key is not None}
+    
+    for index, new_child in enumerate(new_children):
+        key = new_child.key
+        
+        # Look up old child using the stable key
+        if key in old_key_map:
+            old_child = old_key_map[key]
+            if old_child.node_type == new_child.node_type:
+                operations.append(f"REUSE [Key: {key}]")
+            else:
+                operations.append(f"REPLACE [Key: {key}]")
+            del old_key_map[key]
+        else:
+            operations.append(f"CREATE [Key: {key}]")
+            
+    # Remaining keys in the map must be deleted
+    for deleted_key in old_key_map:
+        operations.append(f"DELETE [Key: {deleted_key}]")
+        
+    return operations`,
+        jsOutput: `// Run virtual diff engine on updated list:
+// Old keys: [A, B, C]
+// New keys: [A, C, D]
+// Output actions:
+// - Keep A (REUSE)
+// - Delete B (DELETE)
+// - Keep C (REUSE)
+// - Create D (CREATE)`,
+        pyOutput: `# Python execution output
+old_nodes = [VNode("div", {}, key="A"), VNode("div", {}, key="B")]
+new_nodes = [VNode("div", {}, key="A"), VNode("div", {}, key="C")]
+print(diff_children_with_keys(old_nodes, new_nodes))
+# Output: ['REUSE [Key: A]', 'CREATE [Key: C]', 'DELETE [Key: B]']`,
+        tip: "Explain that indexing keys using array indices (<code>key={index}</code>) is a major React anti-pattern. If you re-order, prepend, or delete array items, array indices shift. This makes React match wrong nodes, destroying component state and causing performance lags."
+      },
+      {
+        id: 13,
+        title: "Real-Time Currency Converter",
+        level: "medium",
+        category: "Round 4 ▸ Live Coding",
+        def: "Design a complete React-based Currency Converter App with optimal state caching, loading indicators, and dynamic currency conversions.",
+        expl: [
+          "<strong>State Architecture:</strong> Track four main inputs: amount, source currency, target currency, and raw conversion rates list.",
+          "<strong>API Fetching & Caching:</strong> Fetch exchange rates inside a standard React effect. To prevent duplicate API requests, cache rates in-memory using an object map.",
+          "<strong>Memoized Calculations:</strong> Avoid redundant mathematical recalculations on every keypress. Wrap calculation formulas in <code>useMemo</code> hook.",
+          "<strong>Python Backend Integration:</strong> Support dynamic conversions using corresponding robust Python APIs."
+        ],
+        mermaid: `graph LR
+  User[Amount / Currency selection] --> State[Component State]
+  State -->|Trigger API fetch| Hook[React useEffect]
+  Hook -->|Rates cache check| Cache{Rates cached?}
+  Cache -->|Yes| Calc[Memoized Calculation]
+  Cache -->|No| Fetch[HTTP API Request]
+  Fetch --> SaveCache[Save to Rate Cache]
+  SaveCache --> Calc
+  Calc --> UI[Display converted amount]
+`,
+        jsCode: `// Complete cached React currency hook and component logic
+import React, { useState, useEffect, useMemo } from 'react';
+
+// Rates cache object to prevent redundant API calls
+const ratesCache = {};
+
+export function useCurrencyRates(baseCurrency) {
+  const [rates, setRates] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!baseCurrency) return;
+
+    if (ratesCache[baseCurrency]) {
+      setRates(ratesCache[baseCurrency]);
+      return;
+    }
+
+    let isMounted = true;
+    setLoading(true);
+
+    fetch(\`https://api.exchangerate-api.com/v4/latest/\${baseCurrency}\`)
+      .then(res => res.json())
+      .then(data => {
+        if (isMounted) {
+          ratesCache[baseCurrency] = data.rates;
+          setRates(data.rates);
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        if (isMounted) {
+          setError("Failed to fetch rates");
+          setLoading(false);
+        }
+      });
+
+    return () => { isMounted = false; };
+  }, [baseCurrency]);
+
+  return { rates, loading, error };
+}
+
+export function CurrencyConverter() {
+  const [amount, setAmount] = useState(1);
+  const [fromCurrency, setFromCurrency] = useState('USD');
+  const [toCurrency, setToCurrency] = useState('INR');
+  
+  const { rates, loading } = useCurrencyRates(fromCurrency);
+
+  // Memoized converted total
+  const convertedAmount = useMemo(() => {
+    if (!rates || !rates[toCurrency]) return 0;
+    return (amount * rates[toCurrency]).toFixed(2);
+  }, [amount, rates, toCurrency]);
+
+  return (
+    <div className="converter-card">
+      <input 
+        type="number" 
+        value={amount} 
+        onChange={(e) => setAmount(parseFloat(e.target.value) || 0)} 
+      />
+      <select value={fromCurrency} onChange={(e) => setFromCurrency(e.target.value)}>
+        <option value="USD">USD</option>
+        <option value="INR">INR</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <span>to</span>
+      <select value={toCurrency} onChange={(e) => setToCurrency(e.target.value)}>
+        <option value="INR">INR</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <h3>Result: {loading ? 'Loading...' : \`\${convertedAmount} \${toCurrency}\`}</h3>
+    </div>
+  );
+}`,
+        pyCode: `# Python Backend service caching and converting currencies using FastAPIs
+import httpx
+from fastapi import FastAPI, HTTPException
+
+app = FastAPI()
+rates_cache = {}
+
+@app.get("/api/convert")
+async def convert_currency(amount: float, from_curr: str, to_curr: str):
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be positive")
+        
+    # Check if currency rates are in memory cache
+    if from_curr in rates_cache:
+        rates = rates_cache[from_curr]
+    else:
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(f"https://api.exchangerate-api.com/v4/latest/{from_curr}")
+                data = resp.json()
+                rates = data["rates"]
+                rates_cache[from_curr] = rates # Cache rates
+        except Exception:
+            raise HTTPException(status_code=502, detail="Failed to fetch external exchange rates")
+            
+    if to_curr not in rates:
+        raise HTTPException(status_code=400, detail="Target currency unsupported")
+        
+    converted = amount * rates[to_curr]
+    return {
+        "amount": amount,
+        "fromCurrency": from_curr,
+        "toCurrency": to_curr,
+        "result": round(converted, 2)
+    }`,
+        jsOutput: `// User changes select option: EUR -> USD with amount 100
+// HTTP Fetch called: /EUR rates
+// EUR rates loaded. Cached.
+// Memoized output returned: 108.50 USD`,
+        pyOutput: `# Python API log
+# Converted EUR to INR
+# Request: GET /api/convert?amount=10&from_curr=EUR&to_curr=INR
+# Output: {"amount": 10.0, "fromCurrency": "EUR", "toCurrency": "INR", "result": 890.5}`,
+        tip: "In custom currency hooks, always clean up side effects using <code>isMounted</code> flags or <code>AbortController</code> to prevent state updates on unmounted component hierarchies during delayed network responses."
+      },
+      // ─── NEW EXPANDED QUESTIONS (ROUNDS 1-6) ───
+      {
+        id: 14,
+        title: "Deep Copy with Custom Transformation",
+        level: "medium",
+        category: "Round 1 ▸ HackerRank",
+        def: "Implement a robust deep clone utility that handles cyclic references, standard JS types (Date, Map, Set, Regex), and accepts a custom mapper function to transform arrays during cloning.",
+        expl: [
+          "<strong>Cyclic Reference Tracking:</strong> Use a <code>WeakMap</code> in JavaScript (or <code>dict</code> tracking object IDs in Python) to keep track of already cloned objects to prevent infinite recursion loops.",
+          "<strong>Complex Type Coverage:</strong> Handle <code>Date</code>, <code>RegExp</code>, <code>Map</code>, and <code>Set</code> collections by instantiating new objects of the same class rather than doing simple shallow copies.",
+          "<strong>Custom Mapper Hook:</strong> If a custom array transformer is provided, invoke it on every array encountered to perform selective transformations (such as doubling elements, filtering, or mapping schemas)."
+        ],
+        mermaid: `graph TD
+  Start["Clone Request"] --> IsObj{"Is Object?"}
+  IsObj -->|No| ReturnVal["Return primitive value"]
+  IsObj -->|Yes| CheckVisited{"Visited Map?"}
+  CheckVisited -->|Yes| ReturnVisited["Return visited reference"]
+  CheckVisited -->|No| IsArray{"Is Array?"}
+  IsArray -->|Yes| HasMapper{"Has custom mapper?"}
+  HasMapper -->|Yes| ApplyMapper["Apply custom transformation"]
+  HasMapper -->|No| MapChildren["Clone elements recursively"]
+  IsArray -->|No| SpecialTypes{"Is Date/RegExp/Map/Set?"}
+  SpecialTypes -->|Yes| InstNew["Instantiate new specialized object"]
+  SpecialTypes -->|No| CloneProps["Clone keys recursively"]`,
+        jsCode: `function deepClone(val, mapper = null, visited = new WeakMap()) {
+  if (val === null || typeof val !== 'object') {
+    return val;
+  }
+
+  if (visited.has(val)) {
+    return visited.get(val);
+  }
+
+  if (val instanceof Date) {
+    return new Date(val.getTime());
+  }
+
+  if (val instanceof RegExp) {
+    return new RegExp(val.source, val.flags);
+  }
+
+  if (val instanceof Set) {
+    const clonedSet = new Set();
+    visited.set(val, clonedSet);
+    for (const item of val) {
+      clonedSet.add(deepClone(item, mapper, visited));
+    }
+    return clonedSet;
+  }
+
+  if (val instanceof Map) {
+    const clonedMap = new Map();
+    visited.set(val, clonedMap);
+    for (const [k, v] of val.entries()) {
+      clonedMap.set(deepClone(k, mapper, visited), deepClone(v, mapper, visited));
+    }
+    return clonedMap;
+  }
+
+  if (Array.isArray(val)) {
+    const clonedArray = [];
+    visited.set(val, clonedArray);
+    
+    const sourceCloned = val.map(item => deepClone(item, mapper, visited));
+    if (mapper) {
+      return mapper(sourceCloned);
+    }
+    
+    sourceCloned.forEach(item => clonedArray.push(item));
+    return clonedArray;
+  }
+
+  const clonedObj = Object.create(Object.getPrototypeOf(val));
+  visited.set(val, clonedObj);
+
+  for (const key of Reflect.ownKeys(val)) {
+    clonedObj[key] = deepClone(val[key], mapper, visited);
+  }
+
+  return clonedObj;
+}`,
+        pyCode: `import re
+from datetime import datetime
+
+def deep_clone(val, mapper=None, visited=None):
+    if visited is None:
+        visited = {}
+
+    # Handle primitives
+    if val is None or not isinstance(val, (dict, list, set, datetime, re.Pattern)):
+        return val
+
+    val_id = id(val)
+    if val_id in visited:
+        return visited[val_id]
+
+    if isinstance(val, datetime):
+        return datetime.fromtimestamp(val.timestamp())
+
+    if isinstance(val, re.Pattern):
+        return re.compile(val.pattern, val.flags)
+
+    if isinstance(val, set):
+        cloned_set = set()
+        visited[val_id] = cloned_set
+        for item in val:
+            cloned_set.add(deep_clone(item, mapper, visited))
+        return cloned_set
+
+    if isinstance(val, list):
+        cloned_list = []
+        visited[val_id] = cloned_list
+        
+        temp_cloned = [deep_clone(item, mapper, visited) for item in val]
+        if mapper:
+            res = mapper(temp_cloned)
+            cloned_list.extend(res)
+            return res
+            
+        cloned_list.extend(temp_cloned)
+        return cloned_list
+
+    if isinstance(val, dict):
+        cloned_dict = {}
+        visited[val_id] = cloned_dict
+        for k, v in val.items():
+            cloned_dict[deep_clone(k, mapper, visited)] = deep_clone(v, mapper, visited)
+        return cloned_dict`,
+        jsOutput: `const obj = { arr: [1, 2, 3], date: new Date() };
+obj.self = obj;
+const doubleMapper = (arr) => arr.map(x => x * 2);
+const cloned = deepClone(obj, doubleMapper);
+console.log(cloned.arr); // [2, 4, 6]
+console.log(cloned.self === cloned); // true`,
+        pyOutput: `d = {"arr": [1, 2, 3]}
+d["self"] = d
+cloned = deep_clone(d, mapper=lambda arr: [x * 2 for x in arr])
+print(cloned["arr"]) # [2, 4, 6]
+print(cloned["self"] is cloned) # True`,
+        tip: "In frontend assessments, using standard JSON serialization fails on complex objects. circular tracking with a WeakMap is mandatory for senior level evaluations."
+      },
+      {
+        id: 15,
+        title: "Flattening a Nested Array",
+        level: "basic",
+        category: "Round 1 ▸ HackerRank",
+        def: "Write a recursive and iterative utility to flatten a multi-dimensional array to a single-dimensional array, with optional depth control.",
+        expl: [
+          "<strong>Recursive Strategy:</strong> Loop through each element. If the element is an array and current depth is greater than zero, recursively flatten it and concatenate; else, append as-is.",
+          "<strong>Iterative Stack Strategy:</strong> Use a stack initialized with the input elements. Pop from the stack. If the popped item is an array, push its elements back to the stack. Otherwise, push it to our result array."
+        ],
+        mermaid: `graph TD
+  Start["[1, [2, [3]], 4]"] --> PopStack["Pop from Stack"]
+  PopStack --> IsArr{"Is Array & Depth > 0?"}
+  IsArr -->|Yes| PushChildren["Push children to Stack<br>Decrement depth"]
+  IsArr -->|No| PushResult["Push element to Result"]`,
+        jsCode: `function flattenRecursive(arr, depth = 1) {
+  if (depth <= 0) return [...arr];
+  
+  return arr.reduce((acc, val) => {
+    if (Array.isArray(val)) {
+      acc.push(...flattenRecursive(val, depth - 1));
+    } else {
+      acc.push(val);
+    }
+    return acc;
+  }, []);
+}
+
+function flattenIterative(arr) {
+  const stack = [...arr];
+  const result = [];
+  
+  while (stack.length > 0) {
+    const next = stack.pop();
+    if (Array.isArray(next)) {
+      stack.push(...next);
+    } else {
+      result.push(next);
+    }
+  }
+  
+  return result.reverse();
+}`,
+        pyCode: `def flatten_recursive(arr: list, depth: int = 1) -> list:
+    if depth <= 0:
+        return list(arr)
+    
+    result = []
+    for val in arr:
+        if isinstance(val, list):
+            result.extend(flatten_recursive(val, depth - 1))
+        else:
+            result.append(val)
+    return result
+
+def flatten_iterative(arr: list) -> list:
+    stack = list(arr)
+    result = []
+    
+    while stack:
+        next_item = stack.pop()
+        if isinstance(next_item, list):
+            stack.extend(next_item)
+        else:
+            result.append(next_item)
+            
+    return result[::-1]`,
+        jsOutput: `const nested = [1, [2, [3, [4]], 5]];
+console.log(flattenRecursive(nested, 1)); // [1, 2, [3, [4]], 5]
+console.log(flattenRecursive(nested, Infinity)); // [1, 2, 3, 4, 5]`,
+        pyOutput: `nested = [1, [2, [3, [4]], 5]]
+print(flatten_recursive(nested, 1)) # [1, 2, [3, [4]], 5]
+print(flatten_recursive(nested, 99)) # [1, 2, 3, 4, 5]`,
+        tip: "Avoid hardcoding flat operations. Demonstrate knowledge of depth control and iterative stack structures to show performance optimization."
+      },
+      {
+        id: 16,
+        title: "Resilient GET Client with Retries",
+        level: "medium",
+        category: "Round 1 ▸ HackerRank",
+        def: "Write a robust HTTP fetch wrapper that executes a GET request, supports a configurable request timeout, and performs automatic retries with exponential backoff if the network fails or times out.",
+        expl: [
+          "<strong>AbortController API:</strong> Use AbortController in JS to terminate hanging network requests exactly when the timeout period expires.",
+          "<strong>Exponential Backoff:</strong> Calculate delays dynamically on retry attempts using delay = base * 2^attempt to avoid overloading the service.",
+          "<strong>Timeout Interception:</strong> Wrap fetch in a Promise.race with a timeout promise or clear signals to provide precise cancellation control."
+        ],
+        mermaid: `sequenceDiagram
+  autonumber
+  participant Client as Fetch Client
+  participant API as Backend Service
+  
+  Client->>API: Attempt 1 (HTTP GET)
+  Note over Client,API: Request times out after 2000ms
+  Client->>Client: Abort Request & calculate delay (500ms)
+  Note over Client: Wait 500ms
+  Client->>API: Attempt 2 (HTTP GET)
+  API-->>Client: Returns HTTP 500 Internal Error
+  Client->>Client: Calculate delay (1000ms)
+  Note over Client: Wait 1000ms
+  Client->>API: Attempt 3 (HTTP GET)
+  API-->>Client: Returns HTTP 200 OK (Success)`,
+        jsCode: `async function fetchWithRetry(url, options = {}) {
+  const { retries = 3, timeout = 3000, delay = 500 } = options;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      clearTimeout(id);
+
+      if (!response.ok) {
+        throw new Error(\`HTTP Error Status: \${response.status}\`);
+      }
+
+      return await response.json();
+    } catch (err) {
+      clearTimeout(id);
+      const isLastAttempt = attempt === retries - 1;
+      
+      if (isLastAttempt) {
+        throw new Error(\`Request failed after \${retries} attempts. Last error: \${err.message}\`);
+      }
+
+      const backoffDelay = delay * Math.pow(2, attempt);
+      console.warn(\`Attempt \${attempt + 1} failed. Retrying in \${backoffDelay}ms...\`);
+      await new Promise(resolve => setTimeout(resolve, backoffDelay));
+    }
+  }
+}`,
+        pyCode: `import time
+import httpx
+
+async def fetch_with_retry(url: str, retries: int = 3, timeout: float = 3.0, delay: float = 0.5) -> dict:
+    async with httpx.AsyncClient() as client:
+        for attempt in range(retries):
+            try:
+                response = await client.get(url, timeout=timeout)
+                response.raise_for_status()
+                return response.json()
+            except (httpx.HTTPError, httpx.TimeoutException) as err:
+                is_last = attempt == retries - 1
+                if is_last:
+                    raise RuntimeError(f"Request failed after {retries} attempts: {err}")
+                
+                backoff = delay * (2 ** attempt)
+                print(f"Attempt {attempt + 1} failed. Retrying in {backoff}s...")
+                time.sleep(backoff)`,
+        jsOutput: `fetchWithRetry("https://api.github.com/users/octocat", { retries: 3, timeout: 2000 })
+  .then(data => console.log(data.login))
+  .catch(err => console.error(err));`,
+        pyOutput: `# Async run:
+# import asyncio
+# data = asyncio.run(fetch_with_retry("https://api.github.com/users/octocat"))
+# print(data["login"])`,
+        tip: "Standard fetch does not have a native timeout parameter, so demonstrating elegant AbortController usage shows deep modern runtime expertise."
+      },
+      {
+        id: 17,
+        title: "JavaScript: useMemo vs useCallback",
+        level: "basic",
+        category: "Round 1 ▸ HackerRank",
+        def: "Contrast useMemo and useCallback inside React, and write a full conceptual, custom JavaScript hook implementation of each from scratch to show their internal structure.",
+        expl: [
+          "<strong>useMemo:</strong> Invokes the provided calculation function on render and caches (memoizes) the computed result value as long as dependency values are unchanged.",
+          "<strong>useCallback:</strong> Caches the function definition itself instead of executing it, preventing child components from re-rendering due to changed function references.",
+          "<strong>Under the Hood:</strong> Internally, React maintains a linked list of Hook states. Each memo/callback hook stores an array of its dependencies and the cached value or function."
+        ],
+        mermaid: `graph TD
+  Render["Hook Rendered"] --> CheckDeps{"Are dependencies identical?"}
+  CheckDeps -->|Yes| ReturnCached["Return cached value (useMemo) or cached function (useCallback)"]
+  CheckDeps -->|No| Recalculate{"Recalculate"}
+  Recalculate -->|useMemo| ExecVal["Run function & cache new returned value"]
+  Recalculate -->|useCallback| SaveFunc["Cache new function reference directly"]`,
+        jsCode: `// Pure Conceptual JavaScript Implementation of React's useMemo & useCallback
+let currentHookIndex = 0;
+const hookStates = [];
+
+function resetHookIndex() {
+  currentHookIndex = 0;
+}
+
+function useMemo(factory, deps) {
+  const hasNoDeps = !deps;
+  const currentHook = hookStates[currentHookIndex];
+
+  if (currentHook) {
+    const hasChanged = hasNoDeps || !deps.every((dep, i) => dep === currentHook.deps[i]);
+    if (!hasChanged) {
+      currentHookIndex++;
+      return currentHook.value;
+    }
+  }
+
+  const value = factory();
+  hookStates[currentHookIndex] = { value, deps };
+  currentHookIndex++;
+  return value;
+}
+
+function useCallback(callback, deps) {
+  return useMemo(() => callback, deps);
+}`,
+        pyCode: `class HookState:
+    def __init__(self, value, deps):
+        self.value = value
+        self.deps = deps
+
+class ReactComponentSimulation:
+    def __init__(self):
+        self.hook_states = []
+        self.index = 0
+
+    def reset_render(self):
+        self.index = 0
+
+    def use_memo(self, factory, deps):
+        if self.index < len(self.hook_states):
+            existing = self.hook_states[self.index]
+            changed = len(deps) != len(existing.deps) or any(
+                d1 != d2 for d1, d2 in zip(deps, existing.deps)
+            )
+            if not changed:
+                self.index += 1
+                return existing.value
+        
+        val = factory()
+        state = HookState(val, deps)
+        if self.index < len(self.hook_states):
+            self.hook_states[self.index] = state
+        else:
+            self.hook_states.append(state)
+            
+        self.index += 1
+        return val
+
+    def use_callback(self, callback, deps):
+        return self.use_memo(lambda: callback, deps)`,
+        jsOutput: `const sim = () => {
+  resetHookIndex();
+  const sum = useMemo(() => {
+    console.log("Expensive computation...");
+    return 10 + 20;
+  }, [1]);
+  return sum;
+};
+sim(); // "Expensive computation..."
+sim(); // Returns 30 (cached, no log!)`,
+        pyOutput: `comp = ReactComponentSimulation()
+# Render 1
+comp.reset_render()
+fn = comp.use_callback(lambda x: x * 2, [1])
+
+# Render 2 (Same deps)
+comp.reset_render()
+fn_cached = comp.use_callback(lambda x: x * 2, [1])
+print(fn is fn_cached) # True`,
+        tip: "useCallback(fn, deps) is equivalent to useMemo(() => fn, deps). Always mention this conceptual link during frontend design discussions."
+      },
+      {
+        id: 18,
+        title: "Merge Sort Algorithm Deep Dive",
+        level: "medium",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Implement Merge Sort iteratively or recursively, and analyze its stability, space complexity, and optimal pivot selections.",
+        expl: [
+          "<strong>Divide and Conquer:</strong> Divide the array recursively into two equal halves until each subarray has size 1.",
+          "<strong>Merging Subarrays:</strong> Merge the sorted halves back together in linear time, maintaining stability (relative order of identical elements) by preferring the left index element on ties.",
+          "<strong>Time and Space:</strong> Executes in strictly guaranteed O(N log N) time under all cases (best, average, worst), but requires O(N) extra space to hold temp arrays during merging."
+        ],
+        mermaid: `graph TD
+  Start["[38, 27, 43, 3]"] --> Divide["Divide in Halves"]
+  Divide --> L["[38, 27]"]
+  Divide --> R["[43, 3]"]
+  L --> L_Divide["Divide"]
+  L_Divide --> L1["[38]"]
+  L_Divide --> L2["[27]"]
+  R --> R_Divide["Divide"]
+  R_Divide --> R1["[43]"]
+  R_Divide --> R2["[3]"]
+  L1 & L2 --> MergeL["Merge: [27, 38]"]
+  R1 & R2 --> MergeR["Merge: [3, 43]"]
+  MergeL & MergeR --> Final["Final Merge: [3, 27, 38, 43]"]`,
+        jsCode: `function mergeSort(arr) {
+  if (arr.length <= 1) return arr;
+
+  const mid = Math.floor(arr.length / 2);
+  const left = mergeSort(arr.slice(0, mid));
+  const right = mergeSort(arr.slice(mid));
+
+  return merge(left, right);
+}
+
+function merge(left, right) {
+  const result = [];
+  let i = 0, j = 0;
+
+  while (i < left.length && j < right.length) {
+    if (left[i] <= right[j]) {
+      result.push(left[i++]);
+    } else {
+      result.push(right[j++]);
+    }
+  }
+
+  return result.concat(left.slice(i)).concat(right.slice(j));
+}`,
+        pyCode: `def merge_sort(arr: list) -> list:
+    if len(arr) <= 1:
+        return arr
+        
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    
+    return merge(left, right)
+
+def merge(left: list, right: list) -> list:
+    result = []
+    i = j = 0
+    
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+            
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result`,
+        jsOutput: `console.log(mergeSort([38, 27, 43, 3, 9, 82, 10]));
+// Output: [3, 9, 10, 27, 38, 43, 82]`,
+        pyOutput: `print(merge_sort([38, 27, 43, 3, 9, 82, 10]))
+# Output: [3, 9, 10, 27, 38, 43, 82]`,
+        tip: "Unlike Quick Sort, Merge Sort is highly stable, making it ideal for sorting complex datasets where secondary sort order needs preservation."
+      },
+      {
+        id: 19,
+        title: "Find Kth Largest Element in Array",
+        level: "medium",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Find the kth largest element in an unsorted array in O(N) average time using the Quickselect algorithm or Heap sorting.",
+        expl: [
+          "<strong>Quickselect Strategy:</strong> An optimization of Quicksort. Instead of sorting both sides after partitioning around a pivot, recursively descend only into the partition containing index n - k.",
+          "<strong>Partitioning:</strong> Choose a pivot, move all elements smaller than pivot to its left, and larger elements to its right. Pivot lands in its final sorted index.",
+          "<strong>Complexity:</strong> Time Complexity is O(N) on average (since partition sizes shrink by half at each step: N + N/2 + N/4...), and Space Complexity is O(1) when implemented iteratively."
+        ],
+        mermaid: `graph TD
+  Start["Unsorted Array & k"] --> ChoosePivot["Select Pivot"]
+  ChoosePivot --> Partition["Partition array around pivot"]
+  Partition --> PivotIndex{"Pivot index == n - k ?"}
+  PivotIndex -->|Yes| Found["Return element at index"]
+  PivotIndex -->|Less| Right["Recurse on Right partition"]
+  PivotIndex -->|More| Left["Recurse on Left partition"]`,
+        jsCode: `function findKthLargest(nums, k) {
+  const targetIdx = nums.length - k;
+  let left = 0;
+  let right = nums.length - 1;
+
+  while (left <= right) {
+    const pivotIdx = partition(nums, left, right);
+    if (pivotIdx === targetIdx) {
+      return nums[pivotIdx];
+    } else if (pivotIdx < targetIdx) {
+      left = pivotIdx + 1;
+    } else {
+      right = pivotIdx - 1;
+    }
+  }
+  return -1;
+}
+
+function partition(nums, left, right) {
+  const randIdx = left + Math.floor(Math.random() * (right - left + 1));
+  swap(nums, randIdx, right);
+
+  const pivot = nums[right];
+  let i = left;
+
+  for (let j = left; j < right; j++) {
+    if (nums[j] <= pivot) {
+      swap(nums, i++, j);
+    }
+  }
+  swap(nums, i, right);
+  return i;
+}
+
+function swap(arr, i, j) {
+  const temp = arr[i];
+  arr[i] = arr[j];
+  arr[j] = temp;
+}`,
+        pyCode: `import random
+
+def findKthLargest(nums: list[int], k: int) -> int:
+    target_idx = len(nums) - k
+    left, right = 0, len(nums) - 1
+    
+    while left <= right:
+        pivot_idx = partition(nums, left, right)
+        if pivot_idx == target_idx:
+            return nums[pivot_idx]
+        elif pivot_idx < target_idx:
+            left = pivot_idx + 1
+        else:
+            right = pivot_idx - 1
+    return -1
+
+def partition(nums: list[int], left: int, right: int) -> int:
+    rand_idx = random.randint(left, right)
+    nums[rand_idx], nums[right] = nums[right], nums[rand_idx]
+    
+    pivot = nums[right]
+    i = left
+    for j in range(left, right):
+        if nums[j] <= pivot:
+            nums[i], nums[j] = nums[j], nums[i]
+            i += 1
+    nums[i], nums[right] = nums[right], nums[i]
+    return i`,
+        jsOutput: `console.log(findKthLargest([3,2,1,5,6,4], 2));
+// Output: 5 (2nd largest element)`,
+        pyOutput: `print(findKthLargest([3,2,3,1,2,4,5,5,6], 4))
+# Output: 4`,
+        tip: "Randomizing your pivot choice prevents the O(N^2) worst-case performance on sorted arrays and guarantees O(N) average time complexity."
+      },
+      {
+        id: 20,
+        title: "Remove Min Substring for Unique Chars",
+        level: "hard",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Find the minimum length of a contiguous substring to remove from a string so that all remaining characters are unique.",
+        expl: [
+          "<strong>Two-Pointer Window:</strong> We want to keep a prefix and a suffix that do not overlap and contain zero duplicate characters combined.",
+          "<strong>Suffix Setup:</strong> Move a pointer from right to left as long as the suffix has unique characters. This gives our starting unique suffix boundary.",
+          "<strong>Prefix Expansion:</strong> Move a left pointer from 0 upwards. For each character, add it to the unique prefix. Keep moving the right suffix pointer forward to discard duplicates."
+        ],
+        mermaid: `graph TD
+  Start["String: s"] --> SetupSuffix["Find longest unique suffix [right...n-1]"]
+  SetupSuffix --> ExpandPrefix["Loop left pointer from 0 to n-1"]
+  ExpandPrefix --> CheckDup{"Is char already in unique set?"}
+  CheckDup -->|Yes| End["Stop (Prefix contains duplicate)"]
+  CheckDup -->|No| SlideRight["Advance right pointer until no duplicates with prefix exist"]
+  SlideRight --> UpdateMin["Min Length = min(Min Length, right - left - 1)"]
+  UpdateMin --> ExpandPrefix`,
+        jsCode: `function minSubstringToRemove(s) {
+  const n = s.length;
+  if (n <= 1) return 0;
+
+  let right = n - 1;
+  const seenSuffix = new Set();
+
+  while (right >= 0 && !seenSuffix.has(s[right])) {
+    seenSuffix.add(s[right]);
+    right--;
+  }
+  right++;
+
+  if (right === 0) return 0;
+
+  let minLen = right;
+  const seenPrefix = new Set();
+  
+  for (let left = 0; left < n; left++) {
+    if (seenPrefix.has(s[left])) {
+      break;
+    }
+
+    while (right < n && (s[right] === s[left] || seenPrefix.has(s[right]))) {
+      seenSuffix.delete(s[right]);
+      right++;
+    }
+
+    seenPrefix.add(s[left]);
+    minLen = Math.min(minLen, right - left - 1);
+  }
+
+  return minLen;
+}`,
+        pyCode: `def min_substring_to_remove(s: str) -> int:
+    n = len(s)
+    if n <= 1:
+        return 0
+        
+    right = n - 1
+    seen_suffix = set()
+    
+    while right >= 0 and s[right] not in seen_suffix:
+        seen_suffix.add(s[right])
+        right -= 1
+    right += 1
+    
+    if right == 0:
+        return 0
+        
+    min_len = right
+    seen_prefix = set()
+    
+    for left in range(n):
+        if s[left] in seen_prefix:
+            break
+            
+        while right < n and (s[right] == s[left] or s[right] in seen_prefix):
+            if s[right] in seen_suffix:
+                seen_suffix.remove(s[right])
+            right += 1
+            
+        seen_prefix.add(s[left])
+        min_len = min(min_len, right - left - 1)
+        
+    return min_len`,
+        jsOutput: `console.log(minSubstringToRemove("abacaba")); // Output: 4`,
+        pyOutput: `print(min_substring_to_remove("daabbcc")) # Output: 5`,
+        tip: "This is a common sliding window problem on arrays/strings. Be sure to carefully update the suffix set as the left pointer moves forward."
+      },
+      {
+        id: 21,
+        title: "Decentralized UI Feature Flagging",
+        level: "expert",
+        category: "Round 3 ▸ System Design",
+        def: "Design a client-side feature flagging engine with zero latency, local caching, real-time sync via WebSockets or SSE, and consistent hashing user targeting capabilities.",
+        expl: [
+          "<strong>Zero Latency Reads:</strong> Flag evaluations must not block UI rendering. Bootstrap the client SDK with cached flags in localStorage, and evaluate rules locally in memory.",
+          "<strong>Server Push / Sync:</strong> Use Server-Sent Events (SSE) or WebSockets to broadcast changes from administrative panels instantly, trigger a state update, and alert context listeners.",
+          "<strong>Targeting Engine:</strong> Use consistent hash rules (e.g. MurmurHash3) on user IDs to perform bucket partitioning (e.g., enable a feature for exactly 15% of users without stateful database checks)."
+        ],
+        mermaid: `sequenceDiagram
+  autonumber
+  participant App as React App
+  participant SDK as SDK Local Evaluator
+  participant Cache as Local Storage
+  participant CDN as Edge Flag Configuration
+  
+  App->>SDK: Initialize(apiKey, userId: "USR-44")
+  SDK->>Cache: Load cached flags
+  Cache-->>SDK: Return cached settings
+  SDK-->>App: SDK Ready (immediate fallback active)
+  CDN-->>SDK: Server-Sent Event (SSE) flags updated
+  SDK->>SDK: Parse rules & verify USR-44 bucket (15% roll)
+  SDK->>Cache: Save updated rules
+  SDK->>App: Trigger Context Update (re-evaluate UI state)`,
+        jsCode: `class FeatureFlagClient {
+  constructor(userId, initialFlags = {}) {
+    this.userId = userId;
+    this.flags = new Map(Object.entries(initialFlags));
+  }
+
+  setFlags(newFlags) {
+    this.flags = new Map(Object.entries(newFlags));
+  }
+
+  isEnabled(flagName) {
+    if (!this.flags.has(flagName)) return false;
+    const rule = this.flags.get(flagName);
+
+    if (typeof rule === 'boolean') return rule;
+
+    if (rule.percentage !== undefined) {
+      const hash = this._hashString(this.userId + flagName);
+      const userBucket = hash % 100;
+      return userBucket < rule.percentage;
+    }
+
+    if (Array.isArray(rule.enabledUsers)) {
+      return rule.enabledUsers.includes(this.userId);
+    }
+
+    return false;
+  }
+
+  _hashString(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  }
+}`,
+        pyCode: `import hashlib
+
+class FeatureFlagClient:
+    def __init__(self, user_id: str, initial_flags: dict = None):
+        self.user_id = user_id
+        self.flags = initial_flags or {}
+
+    def is_enabled(self, flag_name: str) -> bool:
+        if flag_name not in self.flags:
+            return False
+            
+        rule = self.flags[flag_name]
+        
+        if isinstance(rule, bool):
+            return rule
+            
+        if isinstance(rule, dict):
+            if "enabledUsers" in rule:
+                return self.user_id in rule["enabledUsers"]
+                
+            if "percentage" in rule:
+                key = f"{self.user_id}{flag_name}".encode('utf-8')
+                hash_val = int(hashlib.md5(key).hexdigest(), 16)
+                user_bucket = hash_val % 100
+                return user_bucket < rule["percentage"]
+                
+        return False`,
+        jsOutput: `const client = new FeatureFlagClient("USR-44", {
+  "new-checkout-flow": { percentage: 15 }
+});
+console.log(client.isEnabled("new-checkout-flow")); // true or false`,
+        pyOutput: `client = FeatureFlagClient("USR-44", {
+    "new-checkout-flow": {"percentage": 15}
+})
+print(client.is_enabled("new-checkout-flow")) # True or False`,
+        tip: "Using client-side hashing allows zero-network-call instant evaluations of multi-variant feature rollouts, scaling to millions of concurrent active users instantly."
+      },
+      {
+        id: 22,
+        title: "Microfrontends Architectural Patterns",
+        level: "expert",
+        category: "Round 3 ▸ System Design",
+        def: "Design a Microfrontend (MFE) architecture utilizing Webpack/Vite Module Federation, custom elements, or iframe-based containers.",
+        expl: [
+          "<strong>Webpack Module Federation:</strong> The industry standard for run-time code sharing. Allows a container application to dynamically load compiled entry bundles from remote sub-apps without monorepo dependencies.",
+          "<strong>Custom Elements (Web Components):</strong> A framework-agnostic approach where each sub-app registers a custom HTML element (e.g., &lt;cart-mfe&gt;). This provides strong styling encapsulation via Shadow DOM.",
+          "<strong>Container Routing:</strong> The shell application acts as the conductor, managing shared layout, central authentication context, navigation, and cross-app communication via dynamic CustomEvents."
+        ],
+        mermaid: `graph TD
+  Shell["Shell Container (Host Application)"] -->|Loads dynamic scripts| Fed["Module Federation Runtime"]
+  Fed --> MFE1["Cart Sub-App (Port 3001)"]
+  Fed --> MFE2["Product Sub-App (Port 3002)"]
+  Fed --> MFE3["Checkout Sub-App (Port 3003)"]
+  MFE1 & MFE2 & MFE3 -->|Encapsulated styles| DOM["Host DOM Tree"]`,
+        jsCode: `// Webpack dynamic Module Federation container loader pattern
+async function loadRemoteModule(remoteUrl, scope, module) {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = remoteUrl;
+    script.type = 'text/javascript';
+    script.async = true;
+
+    script.onload = async () => {
+      await __webpack_init_sharing__('default');
+      const container = window[scope];
+      await container.init(__webpack_share_scopes__.default);
+      
+      const factory = await container.get(module);
+      resolve(factory());
+    };
+
+    script.onerror = () => reject(new Error(\`Failed to load remote: \${remoteUrl}\`));
+    document.head.appendChild(script);
+  });
+}`,
+        pyCode: `class MFEMap:
+    def __init__(self):
+        self.registry = {}
+
+    def register_mfe(self, name: str, host: str, entry_path: str):
+        self.registry[name] = {
+            "host": host,
+            "entry": f"{host}/{entry_path}",
+            "status": "HEALTHY"
+        }
+
+    def get_mfe_config(self) -> dict:
+        return {
+            "imports": {
+                f"@{name}": mfe["entry"] for name, mfe in self.registry.items()
+            }
+        }`,
+        jsOutput: `loadRemoteModule("http://localhost:3001/remoteEntry.js", "cart", "./CartComponent")
+  .then(Cart => {
+    console.log("Cart MFE mounted successfully!");
+  });`,
+        pyOutput: `manager = MFEMap()
+manager.register_mfe("cart", "https://cdn.paypal.com/cart", "remoteEntry.js")
+print(manager.get_mfe_config())
+# Output: {'imports': {'@cart': 'https://cdn.paypal.com/cart/remoteEntry.js'}}`,
+        tip: "In modern banking platforms, Webpack/Vite Module Federation is favored over iframes due to shared runtimes, custom event performance, and seamless styling integrations."
+      },
+      {
+        id: 23,
+        title: "React: useEffect vs useLayoutEffect",
+        level: "basic",
+        category: "Round 4 ▸ Live Coding",
+        def: "Contrast the operational execution pathways of useEffect and useLayoutEffect hooks inside React, and explain the browser render cycle.",
+        expl: [
+          "<strong>useEffect:</strong> Runs asynchronously after the browser paints the updated layout elements. It is ideal for side effects that do not affect layout visual structure (e.g. data fetching, logging).",
+          "<strong>useLayoutEffect:</strong> Runs synchronously after React mutates the virtual tree but before the browser paints the elements. Ideal for reading layouts and adjusting elements to prevent visual flickers.",
+          "<strong>Paint Blocking:</strong> Since useLayoutEffect runs on the main thread before printing, expensive calculations here will block screen paints and degrade user frame rates."
+        ],
+        mermaid: `sequenceDiagram
+  autonumber
+  participant React as React Reconciliation
+  participant Layout as useLayoutEffect (Sync)
+  participant DOM as Browser paint
+  participant Effect as useEffect (Async)
+  
+  React->>Layout: Execute Layout hook (Read/Write DOM)
+  Note over Layout: Mutates layout properties (No flicker!)
+  Layout->>DOM: Paint Frame
+  DOM->>Effect: Execute standard Effect hook (Data fetch, logs)`,
+        jsCode: `import React, { useState, useLayoutEffect, useEffect, useRef } from 'react';
+
+export function VisualFeedbackComponent() {
+  const [width, setWidth] = useState(0);
+  const boxRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (boxRef.current) {
+      const rect = boxRef.current.getBoundingClientRect();
+      setWidth(rect.width);
+    }
+  }, []);
+
+  useEffect(() => {
+    console.log("Async effect triggered after screen painted.");
+  }, []);
+
+  return (
+    <div>
+      <div ref={boxRef} style={{ width: '50%' }}>Dynamic Box</div>
+      <p>Box Width computed pre-paint is: {width}px</p>
+    </div>
+  );
+}`,
+        pyCode: `class ReactRenderLoopSimulation:
+    def __init__(self):
+        self.layout_effects = []
+        self.effects = []
+
+    def register_layout_effect(self, callback):
+        self.layout_effects.append(callback)
+
+    def register_effect(self, callback):
+        self.effects.append(callback)
+
+    def commit_phase(self):
+        print("1. Mutate Virtual DOM structures.")
+        print("2. Triggering useLayoutEffect synchronously...")
+        for le in self.layout_effects:
+            le()
+        print("3. Browser Paint Frame to screen.")
+        print("4. Triggering useEffect asynchronously...")
+        for e in self.effects:
+            e()`,
+        jsOutput: `// Execution Order Logs:
+// 1. Mutate Virtual DOM structures.
+// 2. Triggering useLayoutEffect synchronously...
+// 3. Browser Paint Frame to screen.
+// 4. Triggering useEffect asynchronously...`,
+        pyOutput: `sim = ReactRenderLoopSimulation()
+sim.register_layout_effect(lambda: print("Layout effect: read element width"))
+sim.register_effect(lambda: print("Standard effect: log metrics"))
+sim.commit_phase()`,
+        tip: "Use useLayoutEffect only when performing measurements that lead directly to synchronous re-rendering to prevent UI jitter. Default to useEffect."
+      },
+      {
+        id: 24,
+        title: "Elevator / Lift System LLD",
+        level: "expert",
+        category: "Round 2 ▸ DSA Pure",
+        def: "Design a high-fidelity Low-Level Design (LLD) class structure and algorithm for an Elevator/Lift scheduling system serving N floors and M elevator cabins.",
+        expl: [
+          "<strong>Scheduling Algorithm (SCAN):</strong> Elevators travel in one direction (e.g. UP) serving all requests along the way until there are no further requests in that direction, then reverse.",
+          "<strong>State Encapsulation:</strong> Model elevator cabins with properties: currentFloor, direction (UP/DOWN/IDLE), and prioritized request collections.",
+          "<strong>Allocation Controller:</strong> Evaluates which lift is closest to a request floor, travels in the correct direction, or is currently idle, to minimize passenger wait times."
+        ],
+        mermaid: `classDiagram
+  class ElevatorController {
+    -elevators List~Elevator~
+    +requestElevator(floor, direction) void
+    +step() void
+  }
+  class Elevator {
+    +id int
+    +currentFloor int
+    +direction String
+    -upRequests set
+    -downRequests set
+    +addRequest(floor) void
+    +move() void
+  }
+  ElevatorController --> Elevator`,
+        jsCode: `class Elevator {
+  constructor(id) {
+    this.id = id;
+    this.currentFloor = 0;
+    this.direction = "IDLE";
+    this.upRequests = new Set();
+    this.downRequests = new Set();
+  }
+
+  addRequest(floor) {
+    if (floor > this.currentFloor) {
+      this.upRequests.add(floor);
+    } else if (floor < this.currentFloor) {
+      this.downRequests.add(floor);
+    }
+    
+    if (this.direction === "IDLE") {
+      this.direction = floor > this.currentFloor ? "UP" : "DOWN";
+    }
+  }
+
+  move() {
+    if (this.direction === "IDLE") return;
+
+    if (this.direction === "UP") {
+      this.currentFloor++;
+      if (this.upRequests.has(this.currentFloor)) {
+        this.upRequests.delete(this.currentFloor);
+        console.log(\`Elevator \${this.id} stopped at floor \${this.currentFloor} (UP)\`);
+      }
+      
+      if (this.upRequests.size === 0) {
+        this.direction = this.downRequests.size > 0 ? "DOWN" : "IDLE";
+      }
+    } else if (this.direction === "DOWN") {
+      this.currentFloor--;
+      if (this.downRequests.has(this.currentFloor)) {
+        this.downRequests.delete(this.currentFloor);
+        console.log(\`Elevator \${this.id} stopped at floor \${this.currentFloor} (DOWN)\`);
+      }
+
+      if (this.downRequests.size === 0) {
+        this.direction = this.upRequests.size > 0 ? "UP" : "IDLE";
+      }
+    }
+  }
+}
+
+class ElevatorController {
+  constructor(numElevators) {
+    this.elevators = Array.from({ length: numElevators }, (_, i) => new Elevator(i));
+  }
+
+  requestElevator(floor, direction) {
+    let optimal = null;
+    let minDistance = Infinity;
+
+    for (const lift of this.elevators) {
+      let distance = Math.abs(lift.currentFloor - floor);
+      if (lift.direction === "IDLE" || lift.direction === direction) {
+        if (distance < minDistance) {
+          minDistance = distance;
+          optimal = lift;
+        }
+      }
+    }
+
+    optimal = optimal || this.elevators[0];
+    optimal.addRequest(floor);
+    console.log(\`Assigned Elevator \${optimal.id} to floor \${floor}\`);
+  }
+}`,
+        pyCode: `class Elevator:
+    def __init__(self, id_num: int):
+        self.id_num = id_num
+        self.current_floor = 0
+        self.direction = "IDLE"
+        self.up_requests = set()
+        self.down_requests = set()
+
+    def add_request(self, floor: int):
+        if floor > self.current_floor:
+            self.up_requests.add(floor)
+        elif floor < self.current_floor:
+            self.down_requests.add(floor)
+        
+        if self.direction == "IDLE":
+            self.direction = "UP" if floor > self.current_floor else "DOWN"
+
+    def move(self):
+        if self.direction == "IDLE":
+            return
+            
+        if self.direction == "UP":
+            self.current_floor += 1
+            if self.current_floor in self.up_requests:
+                self.up_requests.remove(self.current_floor)
+                print(f"Elevator {self.id_num} stopped at floor {self.current_floor} (UP)")
+            if not self.up_requests:
+                self.direction = "DOWN" if self.down_requests else "IDLE"
+                
+        elif self.direction == "DOWN":
+            self.current_floor -= 1
+            if self.current_floor in self.down_requests:
+                self.down_requests.remove(self.current_floor)
+                print(f"Elevator {self.id_num} stopped at floor {self.current_floor} (DOWN)")
+            if not self.down_requests:
+                self.direction = "UP" if self.up_requests else "IDLE"`,
+        jsOutput: `const controller = new ElevatorController(2);
+controller.requestElevator(5, "UP"); // Assigned to Elevator 0
+controller.elevators[0].move();`,
+        pyOutput: `lift = Elevator(1)
+lift.current_floor = 2
+lift.add_request(5)
+lift.move()`,
+        tip: "Demonstrate solid knowledge of SCAN (Elevator Algorithm) versus First-Come-First-Serve (FCFS) to prove high-level system architectural ability."
+      },
+      {
+        id: 25,
+        title: "Bar Raiser: Leadership & Mentorship",
+        level: "expert",
+        category: "Round 5 ▸ Bar Raiser",
+        def: "A comprehensive senior-level behavioral guide detailing response patterns for ownership, team conflicts, system trade-offs, and engineer mentorship.",
+        expl: [
+          "<strong>Ownership (The 'Buck Stops Here' mindset):</strong> Walk through past engineering issues (production outages, library migrations) where you identified a problem outside your scope, built a fix plan, and led the integration.",
+          "<strong>Team Conflicts (STAR Method):</strong> Present concrete instances of standard architecture disputes (e.g. GraphQL vs REST, Monorepo setups). Emphasize empathy, technical evidence over ego, building isolated prototype experiments, and aligned final decisions.",
+          "<strong>Mentorship & Decision-making:</strong> Outline your strategy for scaling the engineering team: setting up clear RFC processes, conducting empathetic peer reviews, leading pairing labs, and establishing high standards for clean code."
+        ],
+        mermaid: `graph TD
+  Conflict["Conflict Identified"] --> Empathy["1. Seek Empathy & Understand Context"]
+  Empathy --> Prototype["2. Build Isolated Prototypes & Collect Metrics"]
+  Prototype --> RFC["3. Structured RFC/Design Proposal Review"]
+  RFC --> Decision["4. Make Data-Driven Decisions & Move Fast"]
+  Decision --> Mentorship["5. Scale Learnings via Pairing & Engineering Hubs"]`,
+        jsCode: `const MENTORSHIP_CHECKLIST = {
+  codeQuality: [
+    "Are public API inputs explicitly validated?",
+    "Are error boundaries configured?",
+    "Is state mutated immutably?"
+  ],
+  performance: [
+    "Are network lookups or calculations cached?",
+    "Are DOM styles updated efficiently without layout thrashing?"
+  ],
+  empathyRules: [
+    "Prefer encouraging, direct questions over blunt negative critiques.",
+    "Always highlight positive implementations."
+  ]
+};`,
+        pyCode: `class RFCProposal:
+    def __init__(self, title: str, pros: list[str], cons: list[str]):
+        self.title = title
+        self.pros = pros
+        self.cons = cons
+        self.approvals = set()
+
+    def add_alignment(self, engineer: str, comments: str):
+        print(f"Alignment review by {engineer}: {comments}")
+        self.approvals.add(engineer)
+
+    def is_ready(self) -> bool:
+        return len(self.approvals) >= 2`,
+        jsOutput: `// Empathetic Code Review Analyzer ready
+// Mentoring system loaded. All checks passing.`,
+        pyOutput: `rfc = RFCProposal("GraphQL Gateway Migration", ["Flexible UI requests"], ["Gateway overhead"])
+rfc.add_alignment("Lead Architect", "Looks good, let's prototype first")`,
+        tip: "Bar Raiser rounds do not evaluate technical correctness, they evaluate influence, organizational scaling, and engineering maturity. Focus on how you empowered others."
+      }
+    ];
+
+
+    // Sidebar rendering
+    function renderQList(data) {
+      const list = document.getElementById('qList');
+      const cats = [...new Set(data.map(q => q.category))];
+      
+      list.innerHTML = cats.map(cat => {
+        const catQs = data.filter(q => q.category === cat);
+        return `
+          <div class="cat-group">
+            <div class="cat-title">${cat}</div>
+            ${catQs.map(q => `
+              <div class="q-item" onclick="showAns(${q.id})" id="q-${q.id}">
+                <div class="q-title">${q.title}</div>
+                <div class="q-meta">
+                  <div class="level-dot" style="background: var(--${q.level})"></div>
+                  <span class="level-text" style="color: var(--${q.level})">${q.level}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle specific question view
+    function showAns(id) {
+      const q = questions.find(x => x.id === id);
+      const welcome = document.getElementById('welcomeScreen');
+      const card = document.getElementById('ansCard');
+      
+      welcome.style.display = 'none';
+      card.style.display = 'block';
+      card.innerHTML = '';
+
+      // Set active sidebar item
+      document.querySelectorAll('.q-item').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('q-' + id);
+      if (target) target.classList.add('active');
+
+      // Create Header
+      const header = document.createElement('div');
+      header.className = 'ans-header';
+      header.innerHTML = `
+        <div class="ans-level level-${q.level}">${q.level}</div>
+        <h2 class="ans-title">${q.title}</h2>
+        <p class="ans-def">${q.def}</p>
+      `;
+      card.appendChild(header);
+
+      // Create Logic diagram if available
+      if (q.mermaid) {
+        const vTitle = document.createElement('div');
+        vTitle.className = 'sec-title';
+        vTitle.innerText = 'Logic Visualization';
+        card.appendChild(vTitle);
+
+        const mWrap = document.createElement('div');
+        mWrap.className = 'visual-wrap';
+        mWrap.innerHTML = `<div class="mermaid">${q.mermaid}</div>`;
+        card.appendChild(mWrap);
+      }
+
+      // Create Explanations
+      const eTitle = document.createElement('div');
+      eTitle.className = 'sec-title';
+      eTitle.innerText = 'Technical Deep Dive';
+      card.appendChild(eTitle);
+
+      const eList = document.createElement('ul');
+      eList.className = 'expl-list';
+      eList.innerHTML = q.expl.map(e => `<li class="expl-item">${e}</li>`).join('');
+      card.appendChild(eList);
+
+      // Create Dual-Language Code Block
+      const cTitle = document.createElement('div');
+      cTitle.className = 'sec-title';
+      cTitle.innerText = 'Production Implementation';
+      card.appendChild(cTitle);
+
+      const cControl = document.createElement('div');
+      cControl.className = 'code-control';
+      cControl.innerHTML = `
+        <div class="code-tabs">
+          <button class="code-tab ${currentLang === 'js' ? 'active' : ''}" onclick="switchLang('js', ${q.id})">JavaScript</button>
+          <button class="code-tab ${currentLang === 'py' ? 'active' : ''}" onclick="switchLang('py', ${q.id})">Python</button>
+        </div>
+      `;
+      card.appendChild(cControl);
+
+      const cWrap = document.createElement('div');
+      cWrap.className = 'code-wrap';
+      const activeCode = currentLang === 'js' ? q.jsCode : q.pyCode;
+      const langName = currentLang === 'js' ? 'javascript' : 'python';
+      cWrap.innerHTML = `
+        <div class="code-header"><span class="code-lang">${langName}</span></div>
+        <pre class="code-body"><code>${highlight(activeCode, langName)}</code></pre>
+      `;
+      card.appendChild(cWrap);
+
+      // Create Output Snapshot
+      const oWrap = document.createElement('div');
+      oWrap.className = 'output-wrap';
+      const activeOutput = currentLang === 'js' ? q.jsOutput : q.pyOutput;
+      oWrap.innerHTML = `
+        <div class="output-title">Sample Execution Trace</div>
+        <div class="output-text">${activeOutput}</div>
+      `;
+      card.appendChild(oWrap);
+
+      // Create Senior Pro Tip Box
+      const tBox = document.createElement('div');
+      tBox.className = 'tip-box';
+      tBox.innerHTML = `<div class="tip-text"><strong>Senior Developer Insights:</strong> ${q.tip}</div>`;
+      card.appendChild(tBox);
+
+      // Initialize Mermaid
+      if (q.mermaid) {
+        try {
+          mermaid.init(undefined, card.querySelectorAll('.mermaid'));
+        } catch (e) {
+          console.error("Mermaid initialization failed", e);
+        }
+      }
+
+      // Close mobile sidebar if clicked
+      if (window.innerWidth <= 960) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    // Switch active programming language tabs
+    function switchLang(lang, qId) {
+      currentLang = lang;
+      showAns(qId);
+    }
+
+    // Search and filter sidebar topics
+    function filterQ() {
+      const term = document.querySelector('.search').value.toLowerCase();
+      const filtered = questions.filter(q => 
+        q.title.toLowerCase().includes(term) || 
+        q.category.toLowerCase().includes(term) ||
+        q.expl.some(e => e.toLowerCase().includes(term))
+      );
+      renderQList(filtered);
+    }
+
+    // Toggle navigation sidebar on mobile devices
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Initial render
+    renderQList(questions);
+  </script>
+</body>
+</html>
