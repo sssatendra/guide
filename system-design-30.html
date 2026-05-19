@@ -1,0 +1,4444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>System Design — 30 Concepts Interview Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Prism.js Dark Theme for Premium Syntax Highlighting -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<style>
+:root {
+  --bg: #0f1117;
+  --card-bg: #161b27;
+  --border: #2a3348;
+  --accent: #10b981;
+  --accent-glow: rgba(16, 185, 129, 0.15);
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: #ffffff;
+  font-family: 'Syne', sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+.topbar {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: .65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  height: 60px;
+}
+.logo {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+}
+.logo span {
+  color: #ffffff;
+  font-weight: 400;
+  font-size: .8rem;
+  margin-left: 0.4rem;
+}
+.topbar-right {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+.srch {
+  background: #1e2535;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .45rem .75rem;
+  color: #ffffff;
+  font-family: 'Syne', sans-serif;
+  font-size: .8rem;
+  width: 240px;
+  outline: none;
+  transition: all 0.2s;
+}
+.srch:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+.srch::placeholder { color: #8b949e; }
+.fbtn {
+  background: #1e2535;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .45rem .85rem;
+  color: #ffffff;
+  font-size: .75rem;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all .15s;
+  white-space: nowrap;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.fbtn:hover, .fbtn.on {
+  background: #252d40;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.mob-toggle {
+  display: none;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  padding: .45rem .85rem;
+  color: #000;
+  font-size: .75rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.layout {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+.sidebar {
+  width: 320px;
+  min-width: 320px;
+  background: var(--card-bg);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  height: 100%;
+}
+.sb-inner { padding: .75rem .5rem; }
+
+.sidebar-category-header {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #8b949e;
+  padding: 0.6rem 0.6rem 0.3rem;
+  font-weight: 700;
+}
+
+.main {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.wrap {
+  padding: 1.5rem 2rem 3rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.mob-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 400;
+  flex-direction: column;
+}
+.mob-overlay.open { display: flex; }
+.mob-header {
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+  padding: .65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mob-title { font-size: .95rem; font-weight: 700; color: #ffffff; }
+.mob-close {
+  background: #1e2535;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .35rem .75rem;
+  color: #ffffff;
+  font-size: .75rem;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+}
+.mob-search { padding: .6rem .75rem; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+.mob-search input {
+  width: 100%;
+  background: #1e2535;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  color: #ffffff;
+  font-family: 'Syne', sans-serif;
+  font-size: .85rem;
+  outline: none;
+}
+.mob-list { flex: 1; overflow-y: auto; padding: .5rem; }
+
+.qi {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .55rem .75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .15s;
+  margin-bottom: 3px;
+}
+.qi:hover {
+  background: #1e2535;
+  border-color: var(--border);
+}
+.qi.active {
+  background: #1e2535;
+  border-left: 3px solid var(--accent);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+.qi.hidden { display: none; }
+.qn {
+  min-width: 24px;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #8b949e;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.qi.active .qn { color: var(--accent); }
+.qt {
+  font-size: .8rem;
+  color: #e5e7eb;
+  line-height: 1.4;
+  flex: 1;
+  font-weight: 600;
+}
+.qi.active .qt { color: #ffffff; }
+.fdot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+.welcome { text-align: center; padding: 4rem 1.5rem; }
+.welcome h2 { font-size: 2.2rem; font-weight: 800; color: #ffffff; margin-bottom: .8rem; letter-spacing: -0.02em; }
+.welcome h2 span { color: var(--accent); }
+.welcome p { font-size: .95rem; color: #a1a1aa; line-height: 1.8; max-width: 600px; margin: 0 auto 2.5rem; }
+.wgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: left; }
+.wcard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s;
+}
+.wcard:hover { border-color: var(--accent); transform: translateY(-2px); }
+.wcard h4 { font-size: .85rem; font-weight: 700; color: var(--accent); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.wcard p { font-size: .8rem; color: #d1d5db; line-height: 1.6; }
+
+.prog-strip { background: #1e2535; border-radius: 4px; height: 4px; margin-bottom: 1.5rem; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--blue)); border-radius: 4px; transition: width .4s; }
+
+.qhead { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
+.qnum {
+  background: var(--accent);
+  color: #000;
+  font-size: .75rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0;
+}
+.qtitle { font-size: 1.6rem; font-weight: 800; color: #ffffff; line-height: 1.3; flex: 1; letter-spacing: -0.01em; }
+
+.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.25rem; align-items: center; }
+.fbadge { font-size: .68rem; padding: 3px 10px; border-radius: 12px; border: 1px solid; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.tldr {
+  background: #1e2535;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 1.25rem;
+  font-size: .9rem;
+  line-height: 1.7;
+  color: #e5e7eb;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.tldr strong { color: #ffffff; font-weight: 700; }
+
+.slabel {
+  font-size: .75rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  color: #8b949e;
+  text-transform: uppercase;
+  margin: 2.2rem 0 .75rem;
+  padding-bottom: .4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.rgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.rcard { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem; }
+.rcard h4 { font-size: .75rem; font-weight: 800; color: var(--blue); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; }
+.rcard.nf h4 { color: var(--amber); }
+.rcard ul { list-style: none; }
+.rcard li { font-size: .8rem; color: #d1d5db; padding: 3px 0 3px 15px; position: relative; line-height: 1.6; }
+.rcard li::before { content: '→'; position: absolute; left: 0; color: var(--blue); font-size: .7rem; top: 4px; }
+.rcard.nf li::before { color: var(--amber); }
+
+.cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-bottom: 1.5rem; }
+.ccard { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 1rem; }
+.cname { font-size: .85rem; font-weight: 700; color: var(--amber); margin-bottom: .35rem; font-family: 'JetBrains Mono', monospace; }
+.cdesc { font-size: .78rem; color: #d1d5db; line-height: 1.6; }
+
+.dlist { margin-bottom: 1.5rem; }
+.drow {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .85rem 1.1rem;
+  margin-bottom: .5rem;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.dq { font-size: .8rem; font-weight: 700; color: #ffffff; line-height: 1.5; }
+.da { font-size: .8rem; color: #d1d5db; line-height: 1.6; }
+
+.mermaid-container {
+  background: #11141d;
+  padding: 2rem 1rem;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+}
+.mermaid-container pre { margin: 0; width: 100%; display: flex; justify-content: center; }
+.mermaid-container svg { max-width: 100%; height: auto !important; }
+
+/* Language Sync Controls */
+.lang-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+.lang-toggle { display: flex; gap: .4rem; }
+.btn-lang {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: .4rem 1rem;
+  color: #8b949e;
+  font-size: .72rem;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+.btn-lang:hover { border-color: var(--accent); color: #fff; }
+.btn-lang.active { background: var(--accent); color: #000000; border-color: var(--accent); }
+
+/* Code Wrap styles */
+.code-wrap {
+  background: #181c26 !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .8rem !important;
+  margin-bottom: 1.5rem;
+}
+.code-wrap pre { margin: 0 !important; }
+.code-block { display: none; }
+
+.code-explanation {
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid var(--blue);
+  padding: 1.1rem;
+  border-radius: 0 10px 10px 0;
+  font-size: .82rem;
+  line-height: 1.7;
+  color: #d1d5db;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+.code-explanation h5 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--blue);
+  margin-bottom: 0.4rem;
+  font-weight: 800;
+}
+
+.navrow { display: flex; gap: .75rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.nbtn {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  color: #ffffff;
+  font-size: .8rem;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: all .15s;
+  flex: 1;
+  text-align: center;
+  line-height: 1.45;
+  font-weight: 700;
+}
+.nbtn:hover { background: #252d40; border-color: #ffffff; }
+.nbtn.off { opacity: .25; pointer-events: none; }
+
+@media(max-width: 820px) {
+  .sidebar { display: none; }
+  .mob-toggle { display: flex; }
+  .srch { display: none; }
+  .wgrid, .rgrid, .cgrid { grid-template-columns: 1fr; }
+  .drow { grid-template-columns: 1fr; gap: 0.4rem; }
+  .layout { height: auto; flex-direction: column; }
+  .main { overflow-y: visible; }
+  .wrap { padding: 1.25rem 1rem 3rem; }
+  .welcome { padding: 2rem .5rem; }
+  .welcome h2 { font-size: 1.75rem; }
+  .logo span { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Concepts</button>
+    <div class="logo">System Design<span> · 30 Core Concepts</span></div>
+  </div>
+  <div class="topbar-right">
+    <a href="index.html" class="fbtn">🏠 Home</a>
+    <input class="srch" id="dsrch" type="text" placeholder="Search concepts…" oninput="doSearch(this.value,'desk')">
+    <button class="fbtn" id="fnet" onclick="toggleFilterCategory('Networking')">🌐 Networking</button>
+    <button class="fbtn" id="fapi" onclick="toggleFilterCategory('APIs')">🔌 APIs</button>
+    <button class="fbtn" id="fdata" onclick="toggleFilterCategory('Data')">💾 Data</button>
+    <button class="fbtn" id="fscale" onclick="toggleFilterCategory('Scale')">⚡ Scale</button>
+  </div>
+</div>
+
+<div class="mob-overlay" id="moboverlay">
+  <div class="mob-header">
+    <div class="mob-title">📋 30 Core Concepts</div>
+    <button class="mob-close" onclick="closeMob()">✕ Close</button>
+  </div>
+  <div class="mob-search">
+    <input type="text" id="msrch" placeholder="Search concepts…" oninput="doSearch(this.value,'mob')">
+  </div>
+  <div class="mob-list" id="moblist"></div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="sb-inner" id="deskqlist"></div>
+  </div>
+  <div class="main">
+    <div class="wrap" id="mainwrap">
+      <div id="welcome">
+        <div class="welcome">
+          <h2>System Design: <span>30 Core Concepts</span></h2>
+          <p>Master the exact building blocks required for highly scalable, reliable, and fault-tolerant distributed applications. Persisted dual-language implementations in Python & JS.</p>
+          <div class="wgrid">
+            <div class="wcard">
+              <h4>🌐 Networking & Protocols</h4>
+              <p>Understand socket layers, ports, load balancing strategies, proxy types, HTTP/S boundaries, and full duplex transport channels.</p>
+            </div>
+            <div class="wcard">
+              <h4>💾 Storage & Database Internals</h4>
+              <p>Demystify replication, sharding mechanisms, indexing algorithms (B-Trees), denormalization, blob caches, and PACELC theory.</p>
+            </div>
+            <div class="wcard">
+              <h4>⚡ Scale & Reliability</h4>
+              <p>Implement real consistent hashing rings, token bucket rate limiters, Kafka log offset buffers, microservice circuit breakers, and idempotency states.</p>
+            </div>
+          </div>
+          
+          <div style="margin-top: 3rem; text-align: left; background: var(--card-bg); padding: 1.75rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+            <h3 style="color: var(--accent); font-size: 1.05rem; margin-bottom: 1.1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05rem;">The Distributed System Cheat Sheet</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+              <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">1. Decouple via Queues:</strong> Never call heavy downstream tasks synchronously. Use async broker buffers to survive massive traffic spikes.</div>
+              <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">2. Index Wisely:</strong> B-Trees accelerate sorting and range searches, but slow down writes. Point reads are accelerated via Hash Tables.</div>
+              <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">3. Partition Everywhere:</strong> Distribute dataset rows using consistent hash rings to support infinite horizontal growth without high migration overhead.</div>
+              <div style="font-size: 0.8rem; line-height: 1.6;"><strong style="color: #fff">4. Fail Gracefully:</strong> Wrap microservice HTTP clients in robust circuit breakers with timeouts to prevent cascading network locks.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="qcontent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// The 30 Core Concepts Database
+const QS = [
+  {
+    id: 1,
+    title: "Client-Server Architecture",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "The primary operational blueprint of distributed computing, dividing tasks between service requesters (clients) and centralized providers (servers).",
+    reqs: [
+      "Define standard interaction request/response flow",
+      "Support multiple clients concurrently accessing a shared cluster",
+      "Stateless session management capability"
+    ],
+    nfreqs: [
+      "Horizontally scalable server topology",
+      "Low connection overhead (Keep-Alive pipelines)"
+    ],
+    components: [
+      ["Client Application", "Initiates connections, formats presentation, and handles local validation before egress."],
+      ["Server Daemon", "Binds to network sockets, listens on defined ports, decodes client envelopes, and runs transactional rules."],
+      ["Network Fabric", "Routing packets, switches, and transit protocols (typically TCP/IP) facilitating communication."]
+    ],
+    decisions: [
+      ["State Location", "Stateless servers enable instant scalability. Session state belongs in cache tiers (Redis) rather than server memory."],
+      ["Coupling Level", "Enforce strict interface separation. Changes to backend internal logic must not break legacy client request schemas."]
+    ],
+    diagram: `flowchart LR
+    Client1["Mobile Client"]
+    Client2["Browser Client"]
+    Network["Network Interface (TCP)"]
+    Server["Server Process (Stateless)"]
+    DB[("Database State")]
+
+    Client1 ==> Network
+    Client2 ==> Network
+    Network ==> Server
+    Server ==> DB
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import socket
+import threading
+
+# A Production-Grade Socket Server representing Client-Server communication
+class CoreServer:
+    def __init__(self, host="127.0.0.1", port=8080):
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.server.bind((host, port))
+        self.server.listen(5)
+        print(f"[SERVER] Listening on {host}:{port}")
+
+    def handle_client(self, conn, addr):
+        print(f"[SERVER] Connected securely to client: {addr}")
+        try:
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                # Echo server response
+                conn.sendall(b"RECEIVED: " + data)
+        except ConnectionResetError:
+            pass
+        finally:
+            conn.close()
+            print(f"[SERVER] Connection with {addr} closed.")
+
+    def run(self):
+        try:
+            while True:
+                conn, addr = self.server.accept()
+                thread = threading.Thread(target=self.handle_client, args=(conn, addr), daemon=True)
+                thread.start()
+        except KeyboardInterrupt:
+            self.server.close()
+
+# client invocation:
+# s = socket.socket()
+# s.connect(("127.0.0.1", 8080))
+# s.sendall(b"Hello Server")`,
+    js_code: `const net = require('net');
+
+// Production-ready TCP Socket Server representing the server node
+const server = net.createServer((socket) => {
+  console.log(\`[SERVER] Client connected: \${socket.remoteAddress}:\${socket.remotePort}\`);
+
+  socket.on('data', (data) => {
+    // Process input data and send back standard response
+    socket.write(\`RECEIVED: \${data.toString()}\`);
+  });
+
+  socket.on('end', () => {
+    console.log('[SERVER] Client disconnected');
+  });
+
+  socket.on('error', (err) => {
+    console.error('[SERVER] Socket error:', err.message);
+  });
+});
+
+server.listen(8080, '127.0.0.1', () => {
+  console.log('[SERVER] TCP Server listening on 127.0.0.1:8080');
+});`,
+    py_explanation: "This Python implementation creates a multi-threaded TCP server binding directly to low-level sockets. Each incoming connection is offloaded to an independent execution thread, ensuring the main socket listener is never blocked from accepting new requests.",
+    js_explanation: "The Node.js implementation leverages the asynchronous, non-blocking I/O event loop. The Net module registers a callback for data frames, allowing a single thread to handle thousands of concurrent TCP sockets without spawning expensive OS threads."
+  },
+  {
+    id: 2,
+    title: "IP Address & Ports",
+    category: "Networking",
+    est: "5 min read",
+    tldr: "The addressing system of the internet. IP addresses target a specific node (machine), while ports target a specific process (application) on that node.",
+    reqs: [
+      "Resolve hostname to IP address dynamically",
+      "Bind process listener to specific port ranges",
+      "Manage address families (IPv4 vs IPv6)"
+    ],
+    nfreqs: [
+      "Avoid port collisions on high-scale servers",
+      "Fast local lookup of interface addresses"
+    ],
+    components: [
+      ["IP Address", "A 32-bit (IPv4) or 128-bit (IPv6) numerical label assigned to each device on a network."],
+      ["Port Identifier", "A 16-bit unsigned integer (0-65535) allocating logical boundaries to applications."],
+      ["Sockets", "The logical endpoints forming a bi-directional data flow channel between nodes."]
+    ],
+    decisions: [
+      ["Port Range Allocation", "Use standard reserved ports (<1024) for system daemons (80 HTTP, 443 HTTPS), and ephemeral ranges (>49152) for outbound connections."],
+      ["Dual-Stack Binding", "Bind servers to wildcard IPv6 addresses (::) to capture IPv4 and IPv6 traffic under a single socket."]
+    ],
+    diagram: `flowchart TD
+    Packets["Incoming Network Packet"]
+    IPv4["IP Filter (192.168.1.5)"]
+    Port80["Port 80 (Web Server)"]
+    Port22["Port 22 (SSH Server)"]
+
+    Packets ==> IPv4
+    IPv4 ==> |To Web Application| Port80
+    IPv4 ==> |To Terminal Daemon| Port22
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import socket
+
+# Perform Hostname IP lookup and simulate port binding verification
+def inspect_network_endpoint(hostname, test_port):
+    try:
+        # Resolve Hostname to IP Address (DNS Layer)
+        resolved_ip = socket.gethostbyname(hostname)
+        print(f"[RESOLVER] DNS: '{hostname}' resolved to '{resolved_ip}'")
+        
+        # Test if the socket port is open/listening on the target IP
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(1.5)
+        result = sock.connect_ex((resolved_ip, test_port))
+        
+        if result == 0:
+            print(f"[PORT CHECK] Port {test_port} is ACTIVE on {resolved_ip}")
+        else:
+            print(f"[PORT CHECK] Port {test_port} is UNREACHABLE (Code: {result})")
+        sock.close()
+    except Exception as e:
+        print(f"[ERROR] Failed inspecting network: {e}")
+
+inspect_network_endpoint("google.com", 80)`,
+    js_code: `const dns = require('dns');
+const net = require('net');
+
+// Async Hostname IP lookup & port reachability client
+function inspectNetworkEndpoint(hostname, testPort) {
+  dns.lookup(hostname, (err, address, family) => {
+    if (err) {
+      console.error(\`[RESOLVER] DNS lookup failed for \${hostname}: \`, err.message);
+      return;
+    }
+    console.log(\`[RESOLVER] DNS: '\${hostname}' resolved to '\${address}' (IPv\${family})\`);
+
+    // Probe port binding
+    const socket = new net.Socket();
+    socket.setTimeout(1500);
+
+    socket.connect(testPort, address, () => {
+      console.log(\`[PORT CHECK] Port \${testPort} is ACTIVE on \${address}\`);
+      socket.destroy();
+    });
+
+    socket.on('error', (e) => {
+      console.log(\`[PORT CHECK] Port \${testPort} is UNREACHABLE on \${address} (\${e.message})\`);
+    });
+
+    socket.on('timeout', () => {
+      console.log(\`[PORT CHECK] Port \${testPort} connection TIMED OUT on \${address}\`);
+      socket.destroy();
+    });
+  });
+}
+
+inspectNetworkEndpoint("google.com", 80);`,
+    py_explanation: "Utilizes Python's socket interface to execute DNS standard system level lookups, returning the matching IPv4 address, and connects synchronously to test port reachability with a explicit socket connection timeout handler.",
+    js_explanation: "Employs the non-blocking Node.js core 'dns' module to resolve hostnames, and creates an event-driven Socket connection to asynchronously probe port accessibility without stalling other execution contexts."
+  },
+  {
+    id: 3,
+    title: "Domain Name System (DNS)",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "The decentralized phonebook of the internet. It maps human-readable domain names (e.g. google.com) to machine IP addresses.",
+    reqs: [
+      "Implement local cache recursive lookup lookup",
+      "Manage Record TTLs (Time-to-Live)",
+      "Support A, AAAA, and CNAME records"
+    ],
+    nfreqs: [
+      "Zero-latency resolution for hot paths",
+      "Highly concurrent lookup capabilities"
+    ],
+    components: [
+      ["Recursive Resolver", "ISP-provided server that queries other name servers on behalf of the client."],
+      ["Root Name Server", "Directs queries to appropriate TLD (Top Level Domain) servers (.com, .org)."],
+      ["Authoritative Server", "The final source of truth containing the actual DNS record configurations."]
+    ],
+    decisions: [
+      ["Caching Policy", "Cache records client-side and at resolver levels strictly respected by record TTL, reducing planetary network traversal."],
+      ["Failover Layout", "Use Anycast routing for authoritative DNS to direct traffic to the geographically nearest healthy node."]
+    ],
+    diagram: `flowchart TD
+    Client["Client PC"]
+    Resolver["Recursive Resolver (Cache)"]
+    Root["Root Server"]
+    TLD["TLD Server (.com)"]
+    Auth["Authoritative Server"]
+
+    Client ==> Resolver
+    Resolver -.-> |Query 1| Root
+    Resolver -.-> |Query 2| TLD
+    Resolver ==> |Query 3 - Resolve| Auth
+    Auth ==> Resolver
+    Resolver ==> Client
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import time
+
+# A highly accurate local DNS Resolver Cache simulation with TTL eviction
+class LocalDNSResolver:
+    def __init__(self):
+        # schema: { domain: (ip, record_type, expires_at) }
+        self.cache = {}
+        # Simulated upstream authoritative servers
+        self.upstream = {
+            "example.com": ("93.184.216.34", "A", 5), # 5 sec TTL
+            "api.example.com": ("example.com", "CNAME", 10)
+        }
+
+    def resolve(self, domain):
+        now = time.time()
+        
+        # 1. Check local cache first
+        if domain in self.cache:
+            ip, r_type, expires_at = self.cache[domain]
+            if now < expires_at:
+                print(f"[CACHE HIT] '{domain}' resolved to '{ip}'")
+                return self._follow_cname_if_needed(ip, r_type)
+            else:
+                print(f"[CACHE EXPIRED] Evicting outdated TTL entry: '{domain}'")
+                del self.cache[domain]
+
+        # 2. Query upstream server (simulating recursive DNS)
+        if domain in self.upstream:
+            ip, r_type, ttl = self.upstream[domain]
+            self.cache[domain] = (ip, r_type, now + ttl)
+            print(f"[RESOLVED UPSTREAM] '{domain}' -> '{ip}' (TTL: {ttl}s)")
+            return self._follow_cname_if_needed(ip, r_type)
+        
+        raise ValueError(f"Domain NXDOMAIN: '{domain}' could not be resolved.")
+
+    def _follow_cname_if_needed(self, val, r_type):
+        if r_type == "CNAME":
+            print(f"[CNAME] Redirecting query to target domain: '{val}'")
+            return self.resolve(val)
+        return val
+
+dns = LocalDNSResolver()
+dns.resolve("example.com")
+dns.resolve("api.example.com")`,
+    js_code: `// A DNS cache simulation featuring dynamic TTL validation and CNAME recursion
+class DNSResolverCache {
+  constructor() {
+    this.cache = new Map();
+    this.upstream = {
+      'example.com': { ip: '93.184.216.34', type: 'A', ttl: 5 },
+      'api.example.com': { ip: 'example.com', type: 'CNAME', ttl: 10 }
+    };
+  }
+
+  resolve(domain) {
+    const now = Date.now();
+
+    // 1. Check local Cache Memory
+    if (this.cache.has(domain)) {
+      const entry = this.cache.get(domain);
+      if (now < entry.expiresAt) {
+        console.log(\`[CACHE HIT] '\${domain}' resolved to '\${entry.ip}'\`);
+        return this._followCname(entry.ip, entry.type);
+      } else {
+        console.log(\`[CACHE EXPIRED] Purging record: '\${domain}'\`);
+        this.cache.delete(domain);
+      }
+    }
+
+    // 2. Query Upstream
+    if (domain in this.upstream) {
+      const record = this.upstream[domain];
+      const expiresAt = now + (record.ttl * 1000);
+      this.cache.set(domain, { ip: record.ip, type: record.type, expiresAt });
+      console.log(\`[UPSTREAM] Resolved '\${domain}' -> '\${record.ip}' (TTL: \${record.ttl}s)\`);
+      return this._followCname(record.ip, record.type);
+    }
+
+    throw new Error(\`NXDOMAIN: Unable to resolve '\${domain}'\`);
+  }
+
+  _followCname(ip, type) {
+    if (type === 'CNAME') {
+      console.log(\`[CNAME] Traversing redirect to alias target: '\${ip}'\`);
+      return this.resolve(ip);
+    }
+    return ip;
+  }
+}
+
+const dns = new DNSResolverCache();
+dns.resolve('example.com');
+dns.resolve('api.example.com');`,
+    py_explanation: "Implements a custom in-memory DNS database mapping hostnames to IPs. Features recursive CNAME resolution logic (where a host maps to an alias hostname) and strictly tracks expiration timestamps to emulate standard client-side DNS caching behavior.",
+    js_explanation: "Leverages a JavaScript Map object to implement low-latency cache matching. The module implements a recursive CNAME path crawler and dynamically purges expired cache keys on lookup checks."
+  },
+  {
+    id: 4,
+    title: "Proxies (Forward vs. Reverse)",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "A Forward Proxy acts on behalf of clients to mask identity and bypass blocks. A Reverse Proxy acts on behalf of servers to manage traffic, SSL termination, and caching.",
+    reqs: [
+      "Implement routing headers mapping request to backend nodes",
+      "Support client ip tracking (X-Forwarded-For headers)",
+      "Dynamic load balancing integration"
+    ],
+    nfreqs: [
+      "Ultra-low request routing overhead",
+      "Secure connection pooling to backend pools"
+    ],
+    components: [
+      ["Forward Proxy", "Intercepts outbound client traffic, hides client IPs, and filters egress rules."],
+      ["Reverse Proxy", "Acts as the public gateway facing clients, hiding behind private network servers."],
+      ["Origin Servers", "The protected backend nodes doing the raw computational processing."]
+    ],
+    decisions: [
+      ["Header Append Rules", "Always append client IP to 'X-Forwarded-For' so backends can identify the actual caller instead of seeing the proxy's IP."],
+      ["Bypass Mode", "Implement pass-through stream piping rather than fully parsing payload into memory buffers, maximizing memory efficiency."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Context"]
+    Proxy["Reverse Proxy (Nginx)"]
+    S1["Backend Node 1"]
+    S2["Backend Node 2"]
+
+    Client ==> |Public HTTP| Proxy
+    Proxy ==> |X-Forwarded-For / Route 1| S1
+    Proxy ==> |X-Forwarded-For / Route 2| S2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import http.server
+import http.client
+import socketserver
+
+# A fully functional single-threaded Reverse Proxy demonstrating request redirection and header injection
+class ReverseProxy(http.server.SimpleHTTPRequestHandler):
+    BACKEND_PORT = 9000  # Target origin backend server
+
+    def do_GET(self):
+        # 1. Inject origin client identity headers for audit
+        client_ip = self.client_address[0]
+        print(f"[REVERSE PROXY] Intercepted connection from client {client_ip} seeking {self.path}")
+
+        # 2. Open connection directly to designated backend server
+        conn = http.client.HTTPConnection("127.0.0.1", self.BACKEND_PORT)
+        
+        # Translate request headers and append proxies audit traces
+        headers = {key: val for key, val in self.headers.items()}
+        headers["X-Forwarded-For"] = client_ip
+        headers["X-Proxy-Agent"] = "CustomPythonReverseProxy"
+
+        try:
+            conn.request("GET", self.path, headers=headers)
+            backend_resp = conn.getresponse()
+
+            # 3. Read and write backend response back to client
+            self.send_response(backend_resp.status)
+            for header, val in backend_resp.getheaders():
+                self.send_header(header, val)
+            self.end_headers()
+            self.wfile.write(backend_resp.read())
+        except ConnectionRefusedError:
+            self.send_error(502, "Bad Gateway: Backend server offline.")
+        finally:
+            conn.close()
+
+# Start proxy: socketserver.TCPServer(("", 80), ReverseProxy).serve_forever()`,
+    js_code: `const http = require('http');
+
+const BACKEND_PORT = 9000;
+
+// A simple HTTP reverse proxy implementing client IP forwarding
+const proxy = http.createServer((clientReq, clientRes) => {
+  const clientIP = clientReq.socket.remoteAddress;
+  console.log(\`[PROXY] Routing request for \${clientReq.url} from \${clientIP}\`);
+
+  // Define backend destination payload options
+  const options = {
+    hostname: '127.0.0.1',
+    port: BACKEND_PORT,
+    path: clientReq.url,
+    method: clientReq.method,
+    headers: {
+      ...clientReq.headers,
+      'X-Forwarded-For': clientIP,
+      'X-Proxy-Agent': 'CustomJSProxy'
+    }
+  };
+
+  // Dispatch proxy request downstream
+  const proxyReq = http.request(options, (backendRes) => {
+    clientRes.writeHead(backendRes.statusCode, backendRes.headers);
+    backendRes.pipe(clientRes); // Stream bytes back directly to save memory
+  });
+
+  proxyReq.on('error', (err) => {
+    console.error('[PROXY] Forwarding error:', err.message);
+    clientRes.writeHead(502, { 'Content-Type': 'text/plain' });
+    clientRes.end('Bad Gateway: Upstream server unavailable.');
+  });
+
+  clientReq.pipe(proxyReq); // Stream incoming client request body
+});
+
+proxy.listen(8080, () => {
+  console.log('[PROXY] Reverse Proxy active on port 8080');
+});`,
+    py_explanation: "Creates an HTTP proxy server that intercepts requests, extracts the caller's IP, appends custom forwarding telemetry headers ('X-Forwarded-For'), queries the backend origin web server directly, and streams raw bytes back to the socket.",
+    js_explanation: "Implements a streaming proxy using Node's native stream piping. Request streams are piped directly to the downstream connection, preventing massive memory allocations for large request bodies."
+  },
+  {
+    id: 5,
+    title: "Latency vs. Throughput",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "The twin pillars of system performance metrics. Latency is the time a single request takes. Throughput is the volume of requests completed per unit of time.",
+    reqs: [
+      "Measure performance latency in high-precision durations",
+      "Process jobs concurrently to optimize network pipe throughput",
+      "Define SLA boundaries and request timeout limits"
+    ],
+    nfreqs: [
+      "Consistent low latency under standard stress loads",
+      "Efficient processing thread pools for maximal throughput"
+    ],
+    components: [
+      ["Latency Metrics", "Measured in ms (milliseconds) or µs (microseconds); critical to target p99 percentiles."],
+      ["Throughput Counter", "Measured in RPS (Requests Per Second) or QPS (Queries Per Second)."],
+      ["Concurrency Pool", "Threads, processes, or asynchronous event structures to keep pipes loaded."]
+    ],
+    decisions: [
+      ["Optimizing Latency", "Use local RAM caches (Redis) and optimal database indexes to shave off query processing milliseconds."],
+      ["Optimizing Throughput", "Introduce asynchronous processing pipelines, non-blocking network streams, and load balancers to distribute workload volume."]
+    ],
+    diagram: `flowchart LR
+    Ingress["High Volume Ingress"]
+    Queue["Async Ingest Queue"]
+    Workers["Parallel Workers (Throughput Focus)"]
+    DB[("Data Sink")]
+
+    Ingress ==> Queue
+    Queue ==> Workers
+    Workers ==> DB
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import time
+import concurrent.futures
+
+# Simulate a network task with variable processing duration
+def mock_network_transaction(task_id):
+    start = time.perf_counter()
+    # Simulate network processing wait delay (e.g. 50ms)
+    time.sleep(0.05)
+    latency = time.perf_counter() - start
+    return task_id, latency
+
+# Process a massive backlog of tasks and evaluate Latency vs Throughput performance
+def run_stress_test(total_tasks=20, max_threads=4):
+    start_test = time.perf_counter()
+    latencies = []
+    
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        futures = [executor.submit(mock_network_transaction, i) for i in range(total_tasks)]
+        for fut in concurrent.futures.as_completed(futures):
+            _, latency = fut.result()
+            latencies.append(latency)
+
+    total_duration = time.perf_counter() - start_test
+    avg_latency = sum(latencies) / len(latencies)
+    throughput = total_tasks / total_duration
+
+    print(f"[PERF RESULTS] Total Tasks Completed: {total_tasks}")
+    print(f"[PERF RESULTS] Total Execution Duration: {total_duration:.4f} seconds")
+    print(f"[PERF RESULTS] Mean Request Latency: {avg_latency * 1000:.2f} milliseconds")
+    print(f"[PERF RESULTS] System Throughput: {throughput:.2f} Transactions per Second")
+
+run_stress_test()`,
+    js_code: `const { promisify } = require('util');
+const sleep = promisify(setTimeout);
+
+// Mock a network task with a simulated latency delay
+async function mockNetworkTransaction(taskId) {
+  const start = process.hrtime();
+  await sleep(50); // 50ms simulated DB network latency
+  const [sec, nano] = process.hrtime(start);
+  const latencyMs = (sec * 1000) + (nano / 1000000);
+  return latencyMs;
+}
+
+// Execute parallel requests to calculate net throughput and latency
+async function runPerformanceProfiler(totalTasks = 20, concurrencyLimit = 4) {
+  const startTest = process.hrtime();
+  let completed = 0;
+  const latencies = [];
+
+  // Worker task queue
+  const taskIds = Array.from({ length: totalTasks }, (_, i) => i);
+  
+  async function worker() {
+    while (taskIds.length > 0) {
+      const id = taskIds.shift();
+      const latency = await mockNetworkTransaction(id);
+      latencies.push(latency);
+      completed++;
+    }
+  }
+
+  // Spawn parallel asynchronous workers
+  const workers = Array.from({ length: concurrencyLimit }, () => worker());
+  await Promise.all(workers);
+
+  const [sec, nano] = process.hrtime(startTest);
+  const totalDurationSec = sec + (nano / 1000000000);
+  const avgLatency = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+  const throughput = totalTasks / totalDurationSec;
+
+  console.log(\`[PERF RESULTS] Total Tasks Completed: \${completed}\`);
+  console.log(\`[PERF RESULTS] Total Execution Duration: \${totalDurationSec.toFixed(4)} seconds\`);
+  console.log(\`[PERF RESULTS] Mean Request Latency: \${avgLatency.toFixed(2)} milliseconds\`);
+  console.log(\`[PERF RESULTS] System Throughput: \${throughput.toFixed(2)} Transactions per Second\`);
+}
+
+runPerformanceProfiler();`,
+    py_explanation: "Utilizes Python's concurrent futures pool to spawn multithreaded workers. Calculates individual worker latency using high-precision performance timers, and determines net system throughput based on total completed tasks divided by the wall-clock time.",
+    js_explanation: "Leverages Node's non-blocking runtime with custom worker streams to run asynchronous loops. Uses process.hrtime() for high-resolution sub-millisecond latency profile auditing under concurrent loads."
+  },
+  {
+    id: 6,
+    title: "HTTP & HTTPS",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "HTTP transfers raw plaintext across sockets. HTTPS integrates TLS/SSL encryption to secure communications, verify server identities, and ensure message integrity.",
+    reqs: [
+      "Initiate secure handshake routines",
+      "Verify server certificate validity on calls",
+      "Process HTTP framing (headers, status codes, payload)"
+    ],
+    nfreqs: [
+      "Protection against packet sniffing attacks",
+      "Fast TLS session resumption caches"
+    ],
+    components: [
+      ["Plaintext HTTP", "Communicates across port 80; packets are raw and vulnerable to Man-in-the-Middle (MitM) attacks."],
+      ["TLS/SSL Layer", "Performs cryptographic handshakes, exchanging keys and validating server certificate chains."],
+      ["Certificate Authority (CA)", "Trusted third parties that cryptographically sign server identity certificates."]
+    ],
+    decisions: [
+      ["TLS Version Enforcement", "Deprecate TLS 1.0/1.1 entirely. Enforce TLS 1.2 or TLS 1.3 to leverage advanced secure cipher suites."],
+      ["ALPN Configuration", "Integrate Application-Layer Protocol Negotiation (ALPN) to allow seamless HTTP/2 negotiation over secure sockets."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Node"]
+    TLS["TLS Handshake (Cert Exchange)"]
+    Encrypt["Symmetric Key Encryption"]
+    Server["Protected Web Server"]
+
+    Client ==> |1. Connect (Port 443)| TLS
+    TLS ==> |2. Validate Identity| Client
+    Client ==> |3. Agree Session Key| Encrypt
+    Encrypt ==> |4. Encrypted Payload Flow| Server
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import urllib.request
+import ssl
+
+# Fetch data via secure HTTPS with explicit TLS certificate chain enforcement
+def execute_secure_request(target_url):
+    try:
+        # Enforce strict TLS certificate verification (fails on bad/self-signed certs)
+        context = ssl.create_default_context()
+        context.minimum_version = ssl.TLSVersion.TLSv1_2  # Enforce TLS 1.2+ minimum
+        
+        print(f"[HTTPS] Sending secure GET request to: {target_url}")
+        with urllib.request.urlopen(target_url, context=context) as response:
+            status_code = response.getcode()
+            headers = response.info()
+            content = response.read(200) # Read initial bytes
+            
+            print(f"[HTTPS] Secure Handshake Success!")
+            print(f"[HTTPS] HTTP Status Code: {status_code}")
+            print(f"[HTTPS] Server Response Sample: {content[:80]}")
+    except ssl.SSLError as e:
+        print(f"[SECURITY ALERT] TLS/SSL Certificate Verification FAILED: {e}")
+    except Exception as e:
+        print(f"[ERROR] Request failed: {e}")
+
+execute_secure_request("https://www.google.com")`,
+    js_code: `const https = require('https');
+
+const targetUrl = 'https://www.google.com';
+
+console.log(\`[HTTPS] Sending secure GET request to: \${targetUrl}\`);
+
+// Build options to enforce secure TLS settings
+const options = {
+  minVersion: 'TLSv1.2', // Enforce TLS 1.2+ minimum
+  rejectUnauthorized: true // Fail on invalid/unauthorized certificates
+};
+
+// Dispatch secure network transaction
+const req = https.get(targetUrl, options, (res) => {
+  console.log('[HTTPS] Secure Handshake Success!');
+  console.log(\`[HTTPS] HTTP Status Code: \${res.statusCode}\`);
+  
+  let rawData = '';
+  res.on('data', (chunk) => { rawData += chunk; });
+  res.on('end', () => {
+    console.log(\`[HTTPS] Server Response Sample: \${rawData.substring(0, 80)}\`);
+  });
+});
+
+req.on('error', (e) => {
+  if (e.message.includes('CERT_')) {
+    console.error('[SECURITY ALERT] TLS/SSL Certificate Verification FAILED:', e.message);
+  } else {
+    console.error('[ERROR] Request failed:', e.message);
+  }
+});`,
+    py_explanation: "Uses Python's standard ssl package to configure a secure default context. Enforces TLS 1.2+ minimum, checks CA signature validity, and aborts securely with an SSLError on self-signed or compromised certificates.",
+    js_explanation: "Uses Node's 'https' module, configuring minVersion security flags and asserting 'rejectUnauthorized' to guarantee the server's cert chain strictly matches trusted root CAs."
+  },
+  {
+    id: 7,
+    title: "REST APIs",
+    category: "APIs",
+    est: "6 min read",
+    tldr: "A stateless, architectural design pattern for APIs. It organizes systems around logical resources using standard HTTP verbs (GET, POST, PUT, DELETE).",
+    reqs: [
+      "Map operations to clean HTTP verbs (GET/POST/PUT/DELETE)",
+      "Return semantic HTTP status codes",
+      "Stateless design (no session state in memory)"
+    ],
+    nfreqs: [
+      "Cacheable endpoints with appropriate HTTP cache-control headers",
+      "Standardized payload structures (typically JSON)"
+    ],
+    components: [
+      ["Resource URIs", "Plural nouns uniquely identifying the model resource (e.g., /api/v1/users)."],
+      ["HTTP Methods", "CRUD maps: POST (Create), GET (Read), PUT/PATCH (Update), DELETE (Destroy)."],
+      ["Representation", "The transfer state format, standardizing inputs and outputs as JSON metadata envelopes."]
+    ],
+    decisions: [
+      ["Idempotent HTTP Verbs", "Ensure GET, PUT, and DELETE are strictly idempotent. Calling them multiple times must not cause unintended database mutations."],
+      ["API Versioning", "Version via URL path (e.g., /v1/users) or custom headers (Accept: application/vnd.company.v1+json) to prevent breaking legacy client integrations."]
+    ],
+    diagram: `flowchart TD
+    Client["Client API Caller"]
+    Gateway["API Route Parser"]
+    GET["GET /users (Read List)"]
+    POST["POST /users (Create New)"]
+    PUT["PUT /users/:id (Replace Item)"]
+
+    Client ==> |HTTP request| Gateway
+    Gateway ==> GET
+    Gateway ==> POST
+    Gateway ==> PUT
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import json
+import http.server
+
+# Standard Mock DB store
+USER_DATABASE = {
+    1: {"name": "Alice", "role": "Senior Engineer"},
+    2: {"name": "Bob", "role": "Site Reliability Lead"}
+}
+
+# A pure HTTP REST Controller executing stateless CRUD mapping with semantic status codes
+class UsersRestController(http.server.BaseHTTPRequestHandler):
+    def _set_headers(self, status=200):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+
+    def do_GET(self):
+        # GET /api/v1/users - Retrieve resource collection
+        if self.path == "/api/v1/users":
+            self._set_headers(200)
+            self.wfile.write(json.dumps(list(USER_DATABASE.values())).encode())
+        else:
+            self._set_headers(404)
+            self.wfile.write(json.dumps({"error": "Resource path not found"}).encode())
+
+    def do_POST(self):
+        # POST /api/v1/users - Create new database resource record
+        if self.path == "/api/v1/users":
+            content_length = int(self.headers["Content-Length"])
+            post_body = self.rfile.read(content_length)
+            payload = json.loads(post_body)
+            
+            # Basic validation
+            if "name" not in payload or "role" not in payload:
+                self._set_headers(400)
+                self.wfile.write(json.dumps({"error": "Bad Request: Missing required parameters"}).encode())
+                return
+
+            new_id = max(USER_DATABASE.keys()) + 1
+            USER_DATABASE[new_id] = payload
+            
+            self._set_headers(201) # 210 CREATED
+            self.wfile.write(json.dumps({"id": new_id, "status": "Created Successfully"}).encode())
+        else:
+            self._set_headers(404)
+            self.wfile.write(json.dumps({"error": "Path invalid"}).encode())
+
+# Start REST: http.server.HTTPServer(("", 8080), UsersRestController).serve_forever()`,
+    js_code: `const http = require('http');
+
+const USER_DATABASE = {
+  1: { name: 'Alice', role: 'Senior Engineer' },
+  2: { name: 'Bob', role: 'Site Reliability Lead' }
+};
+
+// Stateless HTTP API Router matching HTTP verbs to database modifications
+const server = http.createServer((req, res) => {
+  const setResponse = (status, payload) => {
+    res.writeHead(status, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(payload));
+  };
+
+  // Route matches GET /api/v1/users
+  if (req.method === 'GET' && req.url === '/api/v1/users') {
+    setResponse(200, Object.values(USER_DATABASE));
+  } 
+  // Route matches POST /api/v1/users
+  else if (req.method === 'POST' && req.url === '/api/v1/users') {
+    let body = '';
+    req.on('data', chunk => { body += chunk; });
+    req.on('end', () => {
+      try {
+        const payload = JSON.parse(body);
+        if (!payload.name || !payload.role) {
+          return setResponse(400, { error: 'Bad Request: missing required properties.' });
+        }
+        const nextId = Math.max(...Object.keys(USER_DATABASE).map(Number)) + 1;
+        USER_DATABASE[nextId] = payload;
+
+        setResponse(201, { id: nextId, status: 'Created Successfully' });
+      } catch (err) {
+        setResponse(400, { error: 'Bad Request: Malformed JSON payload.' });
+      }
+    });
+  } 
+  else {
+    setResponse(404, { error: 'Resource path not found' });
+  }
+});
+
+server.listen(8080, () => {
+  console.log('[REST API] Controller bound and running on port 8080');
+});`,
+    py_explanation: "Demonstrates a stateless HTTP REST controller mapping endpoints to CRUD actions. Employs appropriate response codes like 201 (Created) for database mutations and returns standard JSON payload wrappers.",
+    js_explanation: "Implements an asynchronous Node.js HTTP router. It parses request buffer streams on demand, validates payload parameters, updates the in-memory store, and handles error states with correct HTTP codes."
+  },
+  {
+    id: 8,
+    title: "GraphQL",
+    category: "APIs",
+    est: "6 min read",
+    tldr: "A query language for APIs and runtime engine. Enables clients to define exactly what data they want, solving resource over-fetching and under-fetching.",
+    reqs: [
+      "Define schemas with typed fields",
+      "Process query inputs and select fields recursively",
+      "Execute independent resolver functions"
+    ],
+    nfreqs: [
+      "Avoid N+1 resolver database query loops",
+      "Fast parsing of dynamic query syntax graphs"
+    ],
+    components: [
+      ["Schema Definition", "Defines the exact structure of data, relationships, and queries using SDL (Schema Definition Language)."],
+      ["Resolvers", "Functions that fetch the actual data for individual fields in the query tree."],
+      ["Query AST", "The parsed Abstract Syntax Tree used by the engine to map output JSON arrays."]
+    ],
+    decisions: [
+      ["N+1 Query Prevention", "Use DataLoader utility patterns (batching and caching) to group database requests in parent-child resolvers."],
+      ["Depth Limiting", "Enforce query depth analysis gates on incoming requests to prevent malicious users from crashing the server with nested circular queries."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Query: { user { name, posts { title } } }"]
+    Engine["GraphQL Parser Engine"]
+    ResUser["User Resolver"]
+    ResPost["Posts Resolver"]
+
+    Client ==> |Single Endpoint POST| Engine
+    Engine ==> ResUser
+    Engine ==> ResPost
+    ResUser & ResPost ==> |Combined JSON Output| Client
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Simplified model representing DB tables
+USERS_DB = {1: {"id": 1, "name": "Eve", "role": "Principal Security Architect"}}
+POSTS_DB = {1: [{"id": 101, "title": "Securing APIs"}, {"id": 102, "title": "Zero Trust Architectures"}]}
+
+# A highly accurate GraphQL resolver engine mock demonstrating dynamic field projection
+class GraphQLQueryEngine:
+    def resolve_fields(self, query_fields):
+        # Client query simulation requesting specific properties (e.g. ['name', 'posts'])
+        output = {}
+        
+        # Simulating Root Resolver
+        user_entity = USERS_DB[1]
+        
+        for field in query_fields:
+            if field == "id":
+                output["id"] = user_entity["id"]
+            elif field == "name":
+                output["name"] = user_entity["name"]
+            elif field == "role":
+                output["role"] = user_entity["role"]
+            elif field == "posts":
+                # Child resolver maps posts dynamically (Only called if client query requests it!)
+                print("[RESOLVER] posts nested query triggered!")
+                output["posts"] = [{"title": post["title"]} for post in POSTS_DB[user_entity["id"]]]
+
+        return {"data": {"user": output}}
+
+engine = GraphQLQueryEngine()
+# Example 1: Requesting only profile properties (Zero over-fetching!)
+print(engine.resolve_fields(["name", "role"]))
+# Example 2: Requesting profile AND child resources
+print(engine.resolve_fields(["name", "posts"]))`,
+    js_code: `const USERS_DB = { 1: { id: 1, name: 'Eve', role: 'Principal Security Architect' } };
+const POSTS_DB = { 1: [{ id: 101, title: 'Securing APIs' }, { id: 102, title: 'Zero Trust Architectures' }] };
+
+// Lightweight GraphQL server emulation showing nested property evaluation
+class GraphQLQueryEngine {
+  resolveFields(queryFields) {
+    const output = {};
+    const user = USERS_DB[1]; // Simulate primary fetch
+
+    // Iterating fields to select only requested columns
+    queryFields.forEach(field => {
+      if (field === 'id') output.id = user.id;
+      if (field === 'name') output.name = user.name;
+      if (field === 'role') output.role = user.role;
+      if (field === 'posts') {
+        // Nested post resolver logic triggered conditionally
+        console.log('[RESOLVER] posts nested query triggered!');
+        output.posts = POSTS_DB[user.id].map(p => ({ title: p.title }));
+      }
+    });
+
+    return { data: { user } };
+  }
+}
+
+const engine = new GraphQLQueryEngine();
+console.log(engine.resolveFields(['name', 'role']));
+console.log(engine.resolveFields(['name', 'posts']));`,
+    py_explanation: "Simulates a GraphQL field projection system. Iterates through client-selected property maps, dynamically triggering deep child resolvers only when requested, saving processing and network bandwidth.",
+    js_explanation: "Demonstrates conditional resolution of nested resource relationships, preventing DB over-fetching. Fields are projected from incoming requests, and parent-child loops are calculated on demand."
+  },
+  {
+    id: 9,
+    title: "gRPC",
+    category: "APIs",
+    est: "6 min read",
+    tldr: "A high-performance RPC framework developed by Google. Uses HTTP/2 for bi-directional streaming and Protocol Buffers for fast binary serialization.",
+    reqs: [
+      "Define services and messages in Proto schemas",
+      "Process binary serialization streams",
+      "Establish multiplexed HTTP/2 pipes"
+    ],
+    nfreqs: [
+      "Sub-millisecond serialization benchmarks",
+      "Extremely minimal packet transport footprints"
+    ],
+    components: [
+      ["Protocol Buffers", "IDL defining contract boundaries and compiling down to highly optimized binary codecs."],
+      ["HTTP/2 Transport", "Allows multiple concurrent requests multiplexed over a single TCP socket stream."],
+      ["Client Stub", "Generated client code mapping local method calls directly to network remote operations."]
+    ],
+    decisions: [
+      ["Binary vs JSON", "JSON payloads are heavy text strings. gRPC Protocol Buffers pack fields as compressed binary tags, reducing payload sizes up to 80%."],
+      ["Streaming Modes", "Leverage HTTP/2 pipelines to deploy server streaming, client streaming, or full bi-directional streams for real-time telemetry updates."]
+    ],
+    diagram: `flowchart LR
+    Client["gRPC Client Stub"]
+    Bytes["Binary Stream (Protobuf)"]
+    Server["gRPC Server Handler"]
+
+    Client ==> |1. Serialize User Request| Bytes
+    Bytes ==> |2. Transport HTTP/2 Stream| Server
+    Server ==> |3. Deserialize & Execute| Server
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import struct
+
+# Emulate Protocol Buffer binary serialization to show size reduction vs JSON
+class ProtobufUserMessageMock:
+    def __init__(self, user_id, age):
+        self.user_id = user_id  # Field tag 1 (int32)
+        self.age = age          # Field tag 2 (int32)
+
+    def serialize(self):
+        # Protobuf binary packing style: [WireType/Tag][Value]
+        # In actual Protobuf, varints are used. Here we pack values into binary bytes
+        # Tag 1 (user_id): format 'i' (4 bytes)
+        # Tag 2 (age): format 'B' (1 byte unsigned char)
+        return struct.pack("!iB", self.user_id, self.age)
+
+    @staticmethod
+    def deserialize(binary_data):
+        user_id, age = struct.unpack("!iB", binary_data)
+        return {"user_id": user_id, "age": age}
+
+# Test data footprint comparison:
+msg = ProtobufUserMessageMock(user_id=8429, age=30)
+binary_payload = msg.serialize()
+
+print(f"[PROTOBUF] Binary Packet Bytes: {list(binary_payload)} (Size: {len(binary_payload)} bytes)")
+# Equivalent JSON string: '{"user_id":8429,"age":30}' takes 26 bytes (more than 5x the binary size!)
+print(f"[DESERIALIZED] Output: {ProtobufUserMessageMock.deserialize(binary_payload)}")`,
+    js_code: `// Emulate Protobuf binary buffer encoding and decoding
+class ProtobufMessageMock {
+  constructor(userId, age) {
+    this.userId = userId; // Field tag 1
+    this.age = age;       // Field tag 2
+  }
+
+  serialize() {
+    // Allocate exact buffer size: 4 bytes (int32) + 1 byte (uint8) = 5 bytes
+    const buffer = Buffer.alloc(5);
+    buffer.writeInt32BE(this.userId, 0);
+    buffer.writeUInt8(this.age, 4);
+    return buffer;
+  }
+
+  static deserialize(buffer) {
+    const userId = buffer.readInt32BE(0);
+    const age = buffer.readUInt8(4);
+    return { userId, age };
+  }
+}
+
+const msg = new ProtobufMessageMock(8429, 30);
+const binaryPayload = msg.serialize();
+
+console.log(\`[PROTOBUF] Binary Packet Bytes: \`, [...binaryPayload], \`(Size: \${binaryPayload.length} bytes)\`);
+console.log(\`[DESERIALIZED] Output:\`, ProtobufMessageMock.deserialize(binaryPayload));`,
+    py_explanation: "Uses Python's struct library to pack fields into a tight binary sequence, emulating Protobuf field packing. Highlights how binary serialization eliminates key text markers and spaces, drastically shrinking network transit packages compared to JSON.",
+    js_explanation: "Uses Node's core Buffer API to write primitive numeric datatypes directly into binary streams, yielding a highly compact 5-byte payload representing structured dataset properties."
+  },
+  {
+    id: 10,
+    title: "Relational vs. Non-Relational Databases",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Relational databases (SQL) offer tabular structures with strict schemas and absolute ACID transactional integrity. Non-Relational databases (NoSQL) provide dynamic schemas (JSON documents, graph, columnar) built for high horizontal scalability.",
+    reqs: [
+      "Define relational schema boundaries",
+      "Process transactions with strict isolation levels",
+      "Handle dynamic, un-structured data inputs"
+    ],
+    nfreqs: [
+      "Strict data consistency guarantees (ACID)",
+      "High write horizontal scale (partitioning)"
+    ],
+    components: [
+      ["Relational Model (RDBMS)", "Stores data in tables with explicit relations, requiring pre-defined schemas and foreign key integrity."],
+      ["Document Store (NoSQL)", "Stores datasets in flexible, self-describing JSON-like documents (e.g. MongoDB)."],
+      ["Transaction Manager", "Ensures ACID properties: Atomicity, Consistency, Isolation, Durability."]
+    ],
+    decisions: [
+      ["RDBMS Choice", "Deploy Postgres or MySQL for business-critical transaction workloads (ledger, checkouts) requiring strict relational consistency."],
+      ["NoSQL Choice", "Deploy MongoDB or DynamoDB for catalogs, streaming telemetry, or rapid-growth datasets with dynamic metadata schema requirements."]
+    ],
+    diagram: `flowchart TD
+    Data["Data Input"]
+    SQL["SQL Table (Strict Schema)"]
+    NoSQL["NoSQL Document Store (Flexible JSON)"]
+    SQL_Row["[User_ID: 1, Name: 'Alice', Role_ID: 10]"]
+    NoSQL_Doc["{ 'id': 1, 'name': 'Alice', 'role': 'Lead', 'meta': { 'hobbies': ['chess'] } }"]
+
+    Data ==> |Format RDBMS| SQL
+    Data ==> |Format NoSQL| NoSQL
+    SQL ==> SQL_Row
+    NoSQL ==> NoSQL_Doc
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import json
+
+# Representing an RDBMS relational record vs a NoSQL flexible JSON document store
+class DatabaseComparisonEngine:
+    def __init__(self):
+        # SQL Table mock (Strict schema constraints, joined values require reference IDs)
+        self.sql_users_table = {}
+        self.sql_roles_table = {101: "Administrator", 102: "Billing User"}
+
+        # NoSQL Document Collection mock (Flexible document store)
+        self.nosql_users_collection = {}
+
+    def insert_sql_row(self, user_id, name, role_id):
+        # Strict validation
+        if role_id not in self.sql_roles_table:
+            raise ValueError(f"[SQL ERROR] ForeignKeyViolation: Role ID {role_id} not found.")
+        self.sql_users_table[user_id] = {"id": user_id, "name": name, "role_id": role_id}
+        print(f"[SQL INSERT] Stored relational record: {self.sql_users_table[user_id]}")
+
+    def insert_nosql_document(self, user_id, document_json):
+        # No strict schema. Document can contain arbitrary sub-properties.
+        doc = json.loads(document_json)
+        doc["_id"] = user_id
+        self.nosql_users_collection[user_id] = doc
+        print(f"[NOSQL INSERT] Stored flexible document: {self.nosql_users_collection[user_id]}")
+
+db = DatabaseComparisonEngine()
+db.insert_sql_row(user_id=1, name="Bob", role_id=101)
+db.insert_nosql_document(user_id=1, document_json='{"name": "Bob", "metadata": {"dark_mode": true, "preferences": ["billing"]}}')`,
+    js_code: `// Engine showcasing SQL relational structure constraints vs NoSQL flexible schemas
+class DatabaseComparisonEngine {
+  constructor() {
+    this.sqlUsersTable = new Map();
+    this.sqlRolesTable = { 101: 'Administrator', 102: 'Billing User' };
+    this.nosqlCollection = new Map();
+  }
+
+  insertSqlRow(userId, name, roleId) {
+    if (!(roleId in this.sqlRolesTable)) {
+      throw new Error(\`[SQL ERROR] ForeignKeyConstraintViolation: Role ID \${roleId} invalid.\`);
+    }
+    this.sqlUsersTable.set(userId, { id: userId, name, roleId });
+    console.log('[SQL INSERT] Stored Row:', this.sqlUsersTable.get(userId));
+  }
+
+  insertNosqlDocument(userId, documentPayload) {
+    // Dynamic schema validation (No structural dependency restrictions)
+    this.nosqlCollection.set(userId, { _id: userId, ...documentPayload });
+    console.log('[NOSQL INSERT] Stored Doc:', this.nosqlCollection.get(userId));
+  }
+}
+
+const db = new DatabaseComparisonEngine();
+db.insertSqlRow(1, 'Bob', 101);
+db.insertNosqlDocument(1, { name: 'Bob', metadata: { darkMode: true, tags: ['billing'] } });`,
+    py_explanation: "Models an RDBMS constraint router that enforces strict data types and foreign key relationships, contrasted with a flexible NoSQL document collection storing arbitrary JSON schema structures.",
+    js_explanation: "Demonstrates relational validation rules (throwing on key mismatches) versus a schema-agnostic NoSQL store accepting rich hierarchical structures dynamically."
+  },
+  {
+    id: 11,
+    title: "SQL vs. NoSQL (Architectural Tradeoffs)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Deciding between transactional consistency (SQL) and horizontal scalability (NoSQL). SQL targets consistency and relational integrity; NoSQL scales by partitioning data across nodes.",
+    reqs: [
+      "Optimize data structure for low-latency joins",
+      "Implement denormalized representations for read speed",
+      "Process high-volume operational updates"
+    ],
+    nfreqs: [
+      "Scale writes horizontally without standard locking",
+      "Strong ACID vs Eventual Consistency configurations"
+    ],
+    components: [
+      ["Structured Query Layout", "Fully normalized database layouts designed to eliminate operational data redundancy (SQL)."],
+      ["Denormalized Collections", "Highly optimized documents containing duplicated context blocks for instant O(1) single-key lookup reads (NoSQL)."],
+      ["Distributed Partitioning", "Spreading the document set horizontally across dynamic cluster nodes based on sharding key hashes."]
+    ],
+    decisions: [
+      ["Consistency Level", "Use RDBMS (SQL) when you need ACID guarantees (e.g. banking ledgers). Use NoSQL when you need high-volume writes and eventual consistency is acceptable (e.g. social feeds)."],
+      ["Relational Overhead", "Enforcing joins in high-volume RDBMS leads to system bottlenecks. In NoSQL, data is pre-joined (denormalized) inside single document arrays, trade-off is complex multi-row write operations."]
+    ],
+    diagram: `flowchart TD
+    Query["Search User + Post Title"]
+    SQL_Join["SQL: JOIN users ON users.id = posts.user_id (Normalized Tables)"]
+    NoSQL_Query["NoSQL: GET User Document (Denormalized Posts Embedded)"]
+
+    Query ==> SQL_Join
+    Query ==> NoSQL_Query
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Comparing normalized SQL schemas (requiring joins) vs denormalized NoSQL layouts
+class DataModelingProfiler:
+    def __init__(self):
+        # 1. SQL Normalized Storage Structure
+        self.sql_users = {1: "UserAlice"}
+        self.sql_orders = [
+            {"order_id": 901, "user_id": 1, "product": "Cloud Architecture Guide"},
+            {"order_id": 902, "user_id": 1, "product": "Consistent Hashing Deep-Dive"}
+        ]
+
+        # 2. NoSQL Denormalized Document Layout
+        self.nosql_collection = {
+            1: {
+                "user_id": 1,
+                "name": "UserAlice",
+                "orders": [
+                    {"order_id": 901, "product": "Cloud Architecture Guide"},
+                    {"order_id": 902, "product": "Consistent Hashing Deep-Dive"}
+                ]
+            }
+        }
+
+    def fetch_user_orders_sql(self, user_id):
+        # Emulate JOIN users ON users.id = orders.user_id (Higher processing overhead)
+        user_name = self.sql_users.get(user_id)
+        user_orders = [order for order in self.sql_orders if order["user_id"] == user_id]
+        print(f"[SQL JOIN] Found User: {user_name} with orders: {user_orders}")
+
+    def fetch_user_orders_nosql(self, user_id):
+        # Single O(1) key fetch - zero joins required!
+        document = self.nosql_collection.get(user_id)
+        print(f"[NOSQL READ] Retrieved complete profile document: {document}")
+
+profiler = DataModelingProfiler()
+profiler.fetch_user_orders_sql(1)
+profiler.fetch_user_orders_nosql(1)`,
+    js_code: `// Compare SQL Normalized Joins vs NoSQL Denormalized Single-Doc Fetches
+class DataModelingProfiler {
+  constructor() {
+    this.sqlUsers = { 1: 'UserAlice' };
+    this.sqlOrders = [
+      { orderId: 901, userId: 1, product: 'Cloud Architecture Guide' },
+      { orderId: 902, userId: 1, product: 'Consistent Hashing Deep-Dive' }
+    ];
+
+    this.nosqlCollection = {
+      1: {
+        userId: 1,
+        name: 'UserAlice',
+        orders: [
+          { orderId: 901, product: 'Cloud Architecture Guide' },
+          { orderId: 902, product: 'Consistent Hashing Deep-Dive' }
+        ]
+      }
+    };
+  }
+
+  fetchUserOrdersSql(userId) {
+    // Relational Join simulation
+    const name = this.sqlUsers[userId];
+    const orders = this.sqlOrders.filter(o => o.userId === userId);
+    console.log(\`[SQL JOIN] Found User: \${name} with orders:\`, orders);
+  }
+
+  fetchUserOrdersNosql(userId) {
+    // Single key lookup
+    const doc = this.nosqlCollection[userId];
+    console.log('[NOSQL READ] Retrieved document:', doc);
+  }
+}
+
+const profiler = new DataModelingProfiler();
+profiler.fetchUserOrdersSql(1);
+profiler.fetchUserOrdersNosql(1);`,
+    py_explanation: "Compares normalized SQL joins against denormalized NoSQL layouts. Normalized structures save storage and prevent write anomalies, but NoSQL scales reads easily by eliminating multi-table relationships.",
+    js_explanation: "Models dynamic join evaluation vs single-document retrieval. Emphasizes the read latency advantages of denormalized schemas in high-volume, globally distributed services."
+  },
+  {
+    id: 12,
+    title: "Vertical vs. Horizontal Scaling",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "Vertical scaling (scaling up) means adding more power (CPU, RAM) to a single machine. Horizontal scaling (scaling out) means adding more machines to the cluster.",
+    reqs: [
+      "Demonstrate resource exhaustion on single nodes",
+      "Dynamically route requests across a cluster",
+      "Stateless session distribution"
+    ],
+    nfreqs: [
+      "Infinite cluster scaling capability",
+      "High system resilience and fault tolerance"
+    ],
+    components: [
+      ["Scale-Up Node", "A single machine whose resources (threads, RAM, storage) are restricted by hardware boundaries."],
+      ["Scale-Out Cluster", "A dynamic pool of identical servers connected via a load balancer."],
+      ["Cluster Router", "Intelligent gateway that routes client packets to healthy servers in the pool."]
+    ],
+    decisions: [
+      ["Scaling Strategy Choice", "Choose Horizontal Scaling for high-availability systems. Spreading nodes across availability zones ensures that if a single machine crashes, the system remains operational."],
+      ["State Offloading", "To enable horizontal scaling, remove all session state from individual servers. Offload state to specialized caching layers (Redis Cluster)."]
+    ],
+    diagram: `flowchart TD
+    Ingress["High Traffic Ingress"]
+    LB["Load Balancer"]
+    Server1["Server Node 1"]
+    Server2["Server Node 2"]
+    Server3["Server Node 3"]
+
+    Ingress ==> LB
+    LB ==> Server1
+    LB ==> Server2
+    LB ==> Server3
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Simulation showing CPU vertical exhaustion limits vs horizontal cluster balancing
+class ScalingSimulationEngine:
+    def __init__(self, single_node_capacity=100):
+        self.single_node_capacity = single_node_capacity
+        self.single_node_usage = 0
+        
+        # Horizontal Cluster Nodes
+        self.cluster = [{"id": 1, "load": 0}, {"id": 2, "load": 0}, {"id": 3, "load": 0}]
+
+    def scale_up_ingest(self, req_load):
+        print(f"[SCALE-UP] Directing {req_load} units of load to Single server...")
+        if self.single_node_usage + req_load > self.single_node_capacity:
+            overflow = (self.single_node_usage + req_load) - self.single_node_capacity
+            self.single_node_usage = self.single_node_capacity
+            print(f"[FATAL ALERT] Server CRASHED! Vertical resource limits hit. Overflowed: {overflow} units.")
+        else:
+            self.single_node_usage += req_load
+            print(f"[SCALE-UP] Current CPU usage: {self.single_node_usage}%")
+
+    def scale_out_ingest(self, req_load):
+        print(f"[SCALE-OUT] Distributing {req_load} load across horizontal cluster...")
+        # Simple load balancer algorithm (Least Connected / Least Loaded Node routing)
+        for _ in range(req_load):
+            least_loaded_node = min(self.cluster, key=lambda x: x["load"])
+            least_loaded_node["load"] += 1
+        
+        print(f"[SCALE-OUT] Node Load Matrix: {self.cluster}")
+
+engine = ScalingSimulationEngine(single_node_capacity=100)
+# Trigger single node resource exhaustion
+engine.scale_up_ingest(120)
+# Handle even larger load by distributing across horizontal cluster nodes
+engine.scale_out_ingest(120)`,
+    js_code: `// Simulation demonstrating Vertical Scale resource ceilings vs Horizontal load routing
+class ScalingSimulationEngine {
+  constructor(singleNodeCapacity = 100) {
+    this.singleNodeCapacity = singleNodeCapacity;
+    this.singleNodeUsage = 0;
+    this.cluster = [
+      { id: 1, load: 0 },
+      { id: 2, load: 0 },
+      { id: 3, load: 0 }
+    ];
+  }
+
+  scaleUpIngest(reqLoad) {
+    console.log(\`[SCALE-UP] Directing \${reqLoad} load to Single Node...\`);
+    if (this.singleNodeUsage + reqLoad > this.singleNodeCapacity) {
+      const overflow = (this.singleNodeUsage + reqLoad) - this.singleNodeCapacity;
+      this.singleNodeUsage = this.singleNodeCapacity;
+      console.error(\`[CRASH ALERT] Vertical Limit reached! Out of Memory. Rejected: \${overflow} load.\`);
+    } else {
+      this.singleNodeUsage += reqLoad;
+      console.log(\`[SCALE-UP] Node usage: \${this.singleNodeUsage}%\`);
+    }
+  }
+
+  scaleOutIngest(reqLoad) {
+    console.log(\`[SCALE-OUT] Distributing \${reqLoad} load across cluster...\`);
+    for (let i = 0; i < reqLoad; i++) {
+      // Load balancer: find least-loaded node
+      const leastLoaded = this.cluster.reduce((prev, curr) => prev.load < curr.load ? prev : curr);
+      leastLoaded.load++;
+    }
+    console.log('[SCALE-OUT] Node load matrix:', this.cluster);
+  }
+}
+
+const engine = new ScalingSimulationEngine(100);
+engine.scaleUpIngest(120);
+engine.scaleOutIngest(120);`,
+    py_explanation: "Simulates hardware failure when load exceeds a single server's vertical capacity, contrasted with a horizontal cluster router that distributes incoming traffic using a least-load algorithm.",
+    js_explanation: "Models vertical resource exhaustion versus horizontal load routing. Demonstrates how scaling out dynamically routes packets to maintain system availability during traffic spikes."
+  },
+  {
+    id: 13,
+    title: "Load Balancers (Algorithms & Placement)",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "The critical traffic controllers of distributed systems. Load Balancers sit between clients and servers, distributing incoming requests across a cluster.",
+    reqs: [
+      "Implement Round-Robin routing algorithms",
+      "Process IP-Hash sticky session distribution",
+      "Monitor cluster node health status maps"
+    ],
+    nfreqs: [
+      "High performance request routing latency (<1ms)",
+      "Instant failover routing for dead cluster nodes"
+    ],
+    components: [
+      ["Round-Robin", "Sequentially routes incoming requests down the server list, assuming all nodes have equal capacity."],
+      ["Weighted Round-Robin", "Adjusts traffic distribution ratios based on each server's assigned resource weight."],
+      ["Consistent IP Hash", "Hashes the client's IP to route their requests to the same server, enabling sticky sessions."]
+    ],
+    decisions: [
+      ["LB Layer Placement", "Deploy Layer 4 (TCP-level routing based on IP/Port, extremely fast) for raw bandwidth. Deploy Layer 7 (HTTP-level routing based on headers, cookies, URL paths) for intelligent application-layer routing."],
+      ["Sticky Sessions", "Use IP hashing or cookie injection to route a client to the same server, but ensure backends still replicate critical session states to prevent data loss if a node crashes."]
+    ],
+    diagram: `flowchart TD
+    Client1["Client 192.168.1.1"]
+    Client2["Client 192.168.1.2"]
+    LB["Load Balancer"]
+    S1["Server A (Healthy)"]
+    S2["Server B (Healthy)"]
+
+    Client1 & Client2 ==> LB
+    LB ==> |Round Robin / Hash| S1
+    LB ==> |Round Robin / Hash| S2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hashlib
+
+# Production-ready Load Balancer router implementing Round-Robin, Weighted, and IP Hash algorithms
+class NetworkLoadBalancer:
+    def __init__(self, backend_servers):
+        # schema: [{"ip": "10.0.0.1", "weight": 3, "healthy": True}, ...]
+        self.servers = backend_servers
+        self.rr_index = 0
+
+    def route_round_robin(self):
+        # Standard Round-Robin skipping dead/unhealthy servers
+        active_servers = [s for s in self.servers if s["healthy"]]
+        if not active_servers:
+            raise RuntimeError("503: Service Unavailable (All backends offline)")
+        
+        selected = active_servers[self.rr_index % len(active_servers)]
+        self.rr_index += 1
+        return selected["ip"]
+
+    def route_weighted(self):
+        # Weighted Round-Robin routing
+        active_servers = [s for s in self.servers if s["healthy"]]
+        pool = []
+        for s in active_servers:
+            pool.extend([s["ip"]] * s["weight"])
+        
+        if not pool:
+            raise RuntimeError("503 Service Unavailable")
+        
+        selected = pool[self.rr_index % len(pool)]
+        self.rr_index += 1
+        return selected
+
+    def route_ip_hash(self, client_ip):
+        # Consistent routing based on client IP hash (Sticky sessions)
+        active_servers = [s for s in self.servers if s["healthy"]]
+        if not active_servers:
+            raise RuntimeError("503 Service Unavailable")
+            
+        hash_val = int(hashlib.md5(client_ip.encode()).hexdigest(), 16)
+        index = hash_val % len(active_servers)
+        return active_servers[index]["ip"]
+
+# Setup mock cluster
+cluster = [
+    {"ip": "192.168.1.101", "weight": 3, "healthy": True},
+    {"ip": "192.168.1.102", "weight": 1, "healthy": True},
+    {"ip": "192.168.1.103", "weight": 2, "healthy": False} # Offline server
+]
+lb = NetworkLoadBalancer(cluster)
+print("[ROUND-ROBIN ROUTING]", [lb.route_round_robin() for _ in range(4)])
+print("[STICKY IP ROUTING]", lb.route_ip_hash("192.168.10.50"))`,
+    js_code: `const crypto = require('crypto');
+
+// Load Balancer router supporting Round-Robin, Weighted, and IP-Hash routing
+class NetworkLoadBalancer {
+  constructor(servers) {
+    this.servers = servers; // [{ ip, weight, healthy: true }]
+    this.rrIndex = 0;
+  }
+
+  routeRoundRobin() {
+    const active = this.servers.filter(s => s.healthy);
+    if (active.length === 0) {
+      throw new Error('503 Service Unavailable: All backends offline.');
+    }
+    const selected = active[this.rrIndex % active.length];
+    this.rrIndex++;
+    return selected.ip;
+  }
+
+  routeWeighted() {
+    const active = this.servers.filter(s => s.healthy);
+    const pool = [];
+    active.forEach(s => {
+      for (let i = 0; i < s.weight; i++) {
+        pool.push(s.ip);
+      }
+    });
+
+    if (pool.length === 0) {
+      throw new Error('503 Service Unavailable');
+    }
+    const selected = pool[this.rrIndex % pool.length];
+    this.rrIndex++;
+    return selected;
+  }
+
+  routeIpHash(clientIp) {
+    const active = this.servers.filter(s => s.healthy);
+    if (active.length === 0) {
+      throw new Error('503 Service Unavailable');
+    }
+    const hash = crypto.createHash('md5').update(clientIp).digest('hex');
+    const index = parseInt(hash.substring(0, 8), 16) % active.length;
+    return active[index].ip;
+  }
+}
+
+const cluster = [
+  { ip: '192.168.1.101', weight: 3, healthy: true },
+  { ip: '192.168.1.102', weight: 1, healthy: true },
+  { ip: '192.168.1.103', weight: 2, healthy: false }
+];
+
+const lb = new NetworkLoadBalancer(cluster);
+console.log('[ROUND-ROBIN ROUTING]', [lb.routeRoundRobin(), lb.routeRoundRobin(), lb.routeRoundRobin()]);
+console.log('[STICKY IP ROUTING]', lb.routeIpHash('192.168.10.50'));`,
+    py_explanation: "Implements a Layer 7/Layer 4 software load balancer simulator. Dynamically filters out unhealthy cluster nodes and supports classic Round Robin, Weighted distribution, and deterministic IP hashing algorithms.",
+    js_explanation: "Uses an index pointer to implement Round Robin loops. Uses MD5 hashing to consistently map a client's IP to the same target server, keeping session connections stable."
+  },
+  {
+    id: 14,
+    title: "Database Indexing (B-Trees & Hash Indexes)",
+    category: "Data",
+    est: "7 min read",
+    tldr: "Data structures that speed up read queries at the cost of slower writes and additional storage. B-Trees support range queries; Hash indexes support O(1) point lookups.",
+    reqs: [
+      "Simulate B-Tree structure range query lookups",
+      "Process O(1) exact point lookups via Hash indexes",
+      "Track index write performance overhead costs"
+    ],
+    nfreqs: [
+      "Sub-millisecond query evaluation on millions of rows",
+      "Balanced tree configurations with minimal rebalancing overhead"
+    ],
+    components: [
+      ["B-Tree Index", "A self-balancing search tree data structure where nodes can have multiple children, supporting fast logarithmic range lookups."],
+      ["Hash Index", "Uses a hash table to map exact values to row pointers, delivering O(1) point lookups but zero range support."],
+      ["Data Heap", "The physical disk location where raw, unsorted row data is stored."]
+    ],
+    decisions: [
+      ["Index Type Choice", "Use B-Trees (standard in Postgres/MySQL) for queries using comparison operators (e.g. BETWEEN, >, <). Use Hash indexes only for exact equality matches (=)."],
+      ["Indexing Overhead", "Avoid indexing every table column. Each index forces the database to write to both the data heap and the index tree, slowing down INSERT, UPDATE, and DELETE operations."]
+    ],
+    diagram: `flowchart TD
+    Root["B-Tree Root [Key 50]"]
+    Left["Left Child [Keys < 50]"]
+    Right["Right Child [Keys >= 50]"]
+    Leaf1["Leaf Node [Row Pointer 10, 20]"]
+    Leaf2["Leaf Node [Row Pointer 60, 80]"]
+
+    Root ==> |Less than 50| Left
+    Root ==> |Greater/Equal| Right
+    Left ==> Leaf1
+    Right ==> Leaf2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Simulate B-Tree range index lookup vs Hash point index lookups
+class DatabaseIndexerMock:
+    def __init__(self, raw_rows):
+        # raw_rows: [{"id": 15, "name": "Alice"}, ...]
+        self.heap = raw_rows
+        self.hash_index = {}
+        self.btree_index = [] # Mocked as sorted list for range simulation
+        
+        self.build_indexes()
+
+    def build_indexes(self):
+        # 1. Build Hash Index for O(1) point lookups
+        for i, row in enumerate(self.heap):
+            self.hash_index[row["id"]] = i
+        
+        # 2. Build B-Tree Index (Simulated as sorted (key, pointer) tuples)
+        self.btree_index = sorted([(row["id"], i) for i, row in enumerate(self.heap)])
+        print(f"[INDEX BUILT] Built Hash Index and B-Tree Index on {len(self.heap)} rows.")
+
+    def query_by_id_hash(self, target_id):
+        # Exact Point Lookup: O(1) complexity
+        if target_id in self.hash_index:
+            heap_index = self.hash_index[target_id]
+            return self.heap[heap_index]
+        return None
+
+    def query_range_btree(self, min_id, max_id):
+        # Range Lookup using simulated B-Tree traversal
+        results = []
+        # Leverage sorted index order to find slice boundary: O(log N)
+        for key, pointer in self.btree_index:
+            if min_id <= key <= max_id:
+                results.append(self.heap[pointer])
+            elif key > max_id:
+                break
+        return results
+
+# Database heap state
+heap_records = [{"id": 45, "name": "Alice"}, {"id": 12, "name": "Bob"}, {"id": 89, "name": "Charlie"}]
+indexer = DatabaseIndexerMock(heap_records)
+print("[HASH SEARCH ID=12]:", indexer.query_by_id_hash(12))
+print("[BTREE RANGE 10-50]:", indexer.query_range_btree(10, 50))`,
+    js_code: `// Simulate B-Tree range query and Hash point index lookups
+class DatabaseIndexer {
+  constructor(heapRows) {
+    this.heap = heapRows;
+    this.hashIndex = new Map();
+    this.btreeIndex = []; // Simulated as sorted pointer map
+    
+    this.buildIndexes();
+  }
+
+  buildIndexes() {
+    // 1. Build Hash Index: O(1) point search
+    this.heap.forEach((row, i) => {
+      this.hashIndex.set(row.id, i);
+    });
+
+    // 2. Build B-Tree: Simulated sorted pointer list supporting range scans
+    this.btreeIndex = this.heap
+      .map((row, i) => ({ id: row.id, pointer: i }))
+      .sort((a, b) => a.id - b.id);
+  }
+
+  queryByIdHash(targetId) {
+    if (this.hashIndex.has(targetId)) {
+      const idx = this.hashIndex.get(targetId);
+      return this.heap[idx];
+    }
+    return null;
+  }
+
+  queryRangeBTree(minId, maxId) {
+    // Range query leveraging sorted layout
+    const results = [];
+    for (let entry of this.btreeIndex) {
+      if (entry.id >= minId && entry.id <= maxId) {
+        results.push(this.heap[entry.pointer]);
+      } else if (entry.id > maxId) {
+        break;
+      }
+    }
+    return results;
+  }
+}
+
+const heap = [{ id: 45, name: 'Alice' }, { id: 12, name: 'Bob' }, { id: 89, name: 'Charlie' }];
+const indexer = new DatabaseIndexer(heap);
+console.log('[HASH SEARCH ID=12]:', indexer.queryByIdHash(12));
+console.log('[BTREE RANGE 10-50]:', indexer.queryRangeBTree(10, 50));`,
+    py_explanation: "Models how a database index points to physical disk address rows. Implements an O(1) hash map lookup for exact key matches and a sorted binary search representation for range query scans.",
+    js_explanation: "Demonstrates indexing structures. Contrast Map-based point searches with sorted array ranges, illustrating why range operators cannot leverage hash-based index tables."
+  },
+  {
+    id: 15,
+    title: "Database Replication (Leader-Follower, Leaderless)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "The technique of storing data copies on multiple database servers to guarantee high availability, durability, and read scale.",
+    reqs: [
+      "Implement Leader-Follower async updates",
+      "Process Leaderless write quorums (W + R > N)",
+      "Detect stale database read anomalies"
+    ],
+    nfreqs: [
+      "Consistent reads across all replica nodes",
+      "Fast consensus checks for write commits"
+    ],
+    components: [
+      ["Leader Node", "The primary instance handling writes, replicating updates downstream to followers."],
+      ["Follower Nodes", "Read-only replicas that process replication streams to serve read queries."],
+      ["Quorum Configurator", "Calculates voting nodes in leaderless topologies to guarantee read-write consistency."]
+    ],
+    decisions: [
+      ["Replication Lag", "Enforcing strict synchronous replication slows down writes to the speed of the slowest node. Use asynchronous replication, but handle replication lag anomalies (like read-after-write consistency issues) in the application layer."],
+      ["Quorum Consistency", "In leaderless databases (e.g. Cassandra), configure Quorum: W + R > N (Write nodes + Read nodes > Total nodes) to guarantee that reads always fetch the latest write version."]
+    ],
+    diagram: `flowchart TD
+    Client["Client App"]
+    Leader["Leader DB (Writes)"]
+    Follower1["Follower A (Reads)"]
+    Follower2["Follower B (Reads)"]
+
+    Client ==> |Write Transaction| Leader
+    Leader -.-> |Async Replication Log| Follower1
+    Leader -.-> |Async Replication Log| Follower2
+    Client ==> |Read Query| Follower1
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import time
+
+# A highly accurate database cluster replication simulator (Leader-Follower and Leaderless Quorum)
+class ReplicationCluster:
+    def __init__(self, total_nodes=3):
+        self.total_nodes = total_nodes
+        # Leader-Follower representation
+        self.leader = {"data": None}
+        self.followers = [{"id": i, "data": None, "lag_sec": i * 0.1} for i in range(total_nodes - 1)]
+
+    # 1. Leader-Follower Replication Model
+    def write_leader(self, data):
+        print(f"[REPLICATION] Write committed to Leader node: '{data}'")
+        self.leader["data"] = data
+        self._replicate_to_followers_async(data)
+
+    def _replicate_to_followers_async(self, data):
+        # Simulate async background replication lag
+        for f in self.followers:
+            f["data"] = data
+            print(f"[REPLICATION] Follower {f['id']} updated asynchronously (Lag: {f['lag_sec']}s)")
+
+    # 2. Leaderless Quorum Model (Dynamo-style)
+    # Target: W (Write Quorum) = 2, R (Read Quorum) = 2, N (Total Nodes) = 3
+    def write_leaderless_quorum(self, data, write_nodes=2):
+        print(f"[QUORUM WRITE] Attempting write to {write_nodes} of {self.total_nodes} nodes...")
+        success_count = 0
+        timestamp = time.time()
+        
+        # Simulating writing to N independent nodes with timestamps
+        node_responses = [{"id": i, "success": True, "ts": timestamp} for i in range(self.total_nodes)]
+        
+        for r in node_responses:
+            if r["success"]:
+                success_count += 1
+                if success_count >= write_nodes:
+                    print(f"[QUORUM WRITE] Consensus reached! {success_count} writes SUCCESSFUL.")
+                    return True
+        return False
+
+cluster = ReplicationCluster()
+cluster.write_leader("UserChangeValue")
+cluster.write_leaderless_quorum("QuorumLogUpdate", write_nodes=2)`,
+    js_code: `// Database replication simulator for Leader-Follower and Leaderless Quorums
+class ReplicationCluster {
+  constructor(totalNodes = 3) {
+    this.totalNodes = totalNodes;
+    this.leader = { data: null };
+    this.followers = [
+      { id: 1, data: null, lag: 100 }, // 100ms lag
+      { id: 2, data: null, lag: 200 }
+    ];
+  }
+
+  // 1. Leader-Follower write pipeline
+  writeLeader(data) {
+    console.log(\`[LEADER] Write committed: '\${data}'\`);
+    this.leader.data = data;
+    
+    // Asynchronous replication mock
+    this.followers.forEach(f => {
+      setTimeout(() => {
+        f.data = data;
+        console.log(\`[REPLICATION] Follower \${f.id} synchronized after \${f.lag}ms\`);
+      }, f.lag);
+    });
+  }
+
+  // 2. Leaderless Quorum (Dynamo-style: W + R > N)
+  writeLeaderlessQuorum(data, writeQuorum = 2) {
+    console.log(\`[QUORUM] Writing '\${data}' across \${this.totalNodes} independent nodes...\`);
+    let successes = 0;
+    const now = Date.now();
+    
+    const nodes = Array.from({ length: this.totalNodes }, (_, i) => ({ id: i, data: null, ts: 0 }));
+    
+    nodes.forEach(n => {
+      n.data = data;
+      n.ts = now;
+      successes++;
+    });
+
+    if (successes >= writeQuorum) {
+      console.log(\`[QUORUM] Write quorum met: \${successes}/\${this.totalNodes} nodes ACKed.\`);
+      return true;
+    }
+    return false;
+  }
+}
+
+const cluster = new ReplicationCluster();
+cluster.writeLeader('UserChangeValue');
+cluster.writeLeaderlessQuorum('QuorumLogUpdate', 2);`,
+    py_explanation: "Models transactional updates within an asymmetric Leader-Follower hierarchy. It also simulates Dynamo-style leaderless replication where reads/writes rely on Quorum Consensus.",
+    js_explanation: "Employs setTimeout intervals to emulate asynchronous replication lags on follower replicas, and calculates leaderless write success ratios dynamically."
+  },
+  {
+    id: 16,
+    title: "Database Sharding (Horizontal Partitioning across Nodes)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Splitting a single massive database horizontally into smaller, faster, independent chunks called shards, distributed across separate hardware nodes.",
+    reqs: [
+      "Implement Hash-based partition sharding routers",
+      "Enforce consistent range-based routing boundaries",
+      "Minimize sharded re-balancing migrations"
+    ],
+    nfreqs: [
+      "Evenly balanced dataset loads across shards",
+      "Point-routing latency minimalization (<1ms)"
+    ],
+    components: [
+      ["Sharding Key", "The partitioning column (e.g. user_id) used to determine which database node stores a given row."],
+      ["Shard Router", "Gateway service that parses the sharding key and maps the query to the correct physical database instance."],
+      ["Database Shards", "Independent database instances containing a slice of the overall dataset."]
+    ],
+    decisions: [
+      ["Sharding Key Selection", "Choose a high-cardinality column with uniform access patterns. Poor key choices lead to uneven data distributions and hot spot shards."],
+      ["Resharding Overhead", "Standard modulo sharding (hash(key) % N) triggers a catastrophic data migration cascade if node counts (N) change. Deploy Consistent Hashing algorithms to prevent resharding bottlenecks."]
+    ],
+    diagram: `flowchart TD
+    Router["Shard Router (Hash: User_ID)"]
+    Shard1[("Shard A (IDs 0-999)")]
+    Shard2[("Shard B (IDs 1000-1999)")]
+
+    Router ==> |user_id = 450| Shard1
+    Router ==> |user_id = 1500| Shard2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hashlib
+
+# A complete Sharding Router demonstrating Hash-based routing across multiple physical database instances
+class ShardRouterEngine:
+    def __init__(self, shards_count=3):
+        self.shards_count = shards_count
+        # Simulated isolated databases
+        self.shards = {i: {} for i in range(shards_count)}
+
+    def get_shard_id(self, shard_key):
+        # Hash-based sharding: hash(key) % total_shards
+        hashed = int(hashlib.sha256(shard_key.encode()).hexdigest(), 16)
+        return hashed % self.shards_count
+
+    def insert_row(self, user_id, user_data):
+        target_shard = self.get_shard_id(user_id)
+        # Store securely within isolated target shard database
+        self.shards[target_shard][user_id] = user_data
+        print(f"[SHARD ROUTER] Routed user '{user_id}' to Shard Instance: {target_shard}")
+
+    def fetch_row(self, user_id):
+        target_shard = self.get_shard_id(user_id)
+        return self.shards[target_shard].get(user_id)
+
+router = ShardRouterEngine(shards_count=3)
+router.insert_row("usr_84920", {"email": "alice@gmail.com", "balance": 1500})
+router.insert_row("usr_10283", {"email": "bob@gmail.com", "balance": 40})
+print("[FETCH usr_84920]:", router.fetch_row("usr_84920"))`,
+    js_code: `const crypto = require('crypto');
+
+// Shard Router implementing hash-based horizontal database partitioning
+class ShardRouter {
+  constructor(shardsCount = 3) {
+    this.shardsCount = shardsCount;
+    this.shards = {};
+    for (let i = 0; i < shardsCount; i++) {
+      this.shards[i] = new Map();
+    }
+  }
+
+  getShardId(shardKey) {
+    // SHA-256 hash modulo logic
+    const hash = crypto.createHash('sha256').update(shardKey).digest('hex');
+    const decimalVal = parseInt(hash.substring(0, 8), 16);
+    return decimalVal % this.shardsCount;
+  }
+
+  insertRow(userId, rowData) {
+    const shardId = this.getShardId(userId);
+    this.shards[shardId].set(userId, rowData);
+    console.log(\`[SHARD ROUTER] Routed user '\${userId}' to Shard Instance: \${shardId}\`);
+  }
+
+  fetchRow(userId) {
+    const shardId = this.getShardId(userId);
+    return this.shards[shardId].get(userId) || null;
+  }
+}
+
+const router = new ShardRouter(3);
+router.insertRow('usr_84920', { email: 'alice@gmail.com', balance: 1500 });
+router.insertRow('usr_10283', { email: 'bob@gmail.com', balance: 40 });
+console.log('[FETCH usr_84920]:', router.fetchRow('usr_84920'));`,
+    py_explanation: "Uses cryptographic hashing (SHA-256) to distribute user rows across simulated shard clusters. This provides an even distribution of data, eliminating read/write hot spots.",
+    js_explanation: "Implements deterministic hashing to partition rows. The router routes inserts and reads to independent Map shard nodes based on the sharding key."
+  },
+  {
+    id: 17,
+    title: "Database Partitioning (Vertical vs. Horizontal on Single Nodes)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Organizing a large table on a single database server. Horizontal partitioning splits rows by values (e.g. ranges of dates). Vertical partitioning splits columns by usage or sizes.",
+    reqs: [
+      "Isolate high-volume metadata columns (vertical)",
+      "Segment tables based on ranges of time (horizontal)",
+      "Optimize query scopes using partition pruning"
+    ],
+    nfreqs: [
+      "Accelerated indexes via localized sub-tables",
+      "Zero global table scan locks during heavy audits"
+    ],
+    components: [
+      ["Horizontal Partitioning", "Stores rows in distinct table slices based on criteria, though the application queries a single logical table."],
+      ["Vertical Partitioning", "Splits wide table columns into separate tables (e.g., placing heavy image blobs in a separate profile table)."],
+      ["Partition Pruning", "A query optimization where the database engine skips searching irrelevant partitions based on query parameters."]
+    ],
+    decisions: [
+      ["Partitioning Strategy", "Use Horizontal range partitioning (e.g. by Year/Month) for time-series datasets or audit logs. It allows fast range queries and makes purging old data as simple as dropping a partition."],
+      ["Normalized Split", "Deploy vertical partitioning on columns with massive, rarely accessed blobs to keep primary tables slim, maximizing cache memory efficiency."]
+    ],
+    diagram: `flowchart TD
+    Table["Large User Table"]
+    Vert1["Table A: Users (ID, Username, PassHash)"]
+    Vert2["Table B: Blobs (User_ID, LargeProfileImage)"]
+    Horiz1["Partition 2026: Order logs Jan-Dec"]
+    Horiz2["Partition 2027: Order logs Future"]
+
+    Table ==> |Vertical Columns Split| Vert1 & Vert2
+    Table ==> |Horizontal Rows Split| Horiz1 & Horiz2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Simulation showing Horizontal range partitioning (Date ranges) and Vertical column segregation
+class SingleNodePartitioner:
+    def __init__(self):
+        # 1. Vertical Partitioning: Keep core table slim, isolate heavy blobs
+        self.table_user_auth = {} # {user_id: (username, hash)} - slim, fits in memory
+        self.table_user_heavy_blobs = {} # {user_id: binary_avatar_blob}
+
+        # 2. Horizontal Partitioning: Segment row logs by Year boundaries (Range Partitioning)
+        self.partitions = {
+            2025: [],
+            2026: []
+        }
+
+    def write_vertical_user(self, user_id, username, password_hash, avatar_blob):
+        self.table_user_auth[user_id] = (username, password_hash)
+        self.table_user_heavy_blobs[user_id] = avatar_blob
+        print(f"[VERTICAL PARTITION] Split columns. Core Auth table size: {len(self.table_user_auth)} records.")
+
+    def write_horizontal_log(self, log_year, log_text):
+        if log_year in self.partitions:
+            self.partitions[log_year].append(log_text)
+            print(f"[HORIZONTAL PARTITION] Routed row to {log_year} partition sub-table.")
+        else:
+            print(f"[PARTITION ERROR] Unknown partition boundary for year: {log_year}")
+
+part = SingleNodePartitioner()
+part.write_vertical_user(user_id=1, username="alice", password_hash="hash_val_abc", avatar_blob=b"IMAGE_BYTES_0x00FF")
+part.write_horizontal_log(2025, "System startup executed successfully.")`,
+    js_code: `// Partitioning engine illustrating Vertical column splitting and Horizontal range segments
+class SingleNodePartitioner {
+  constructor() {
+    this.userAuthTable = new Map();
+    this.userBlobsTable = new Map();
+
+    this.horizontalPartitions = {
+      2025: [],
+      2026: []
+    };
+  }
+
+  writeVerticalUser(userId, username, passwordHash, avatarBlob) {
+    this.userAuthTable.set(userId, { username, passwordHash });
+    this.userBlobsTable.set(userId, avatarBlob);
+    console.log(\`[VERTICAL] Split columns. Core table records: \${this.userAuthTable.size}\`);
+  }
+
+  writeHorizontalLog(logYear, logText) {
+    if (logYear in this.horizontalPartitions) {
+      this.horizontalPartitions[logYear].push(logText);
+      console.log(\`[HORIZONTAL] Routed row to \${logYear} partition table\`);
+    } else {
+      console.error(\`[ERROR] Partition boundary missing for: \${logYear}\`);
+    }
+  }
+}
+
+const part = new SingleNodePartitioner();
+part.writeVerticalUser(1, 'alice', 'hash_val_abc', 'IMAGE_BYTES_0x00FF');
+part.writeHorizontalLog(2025, 'System startup executed successfully.');`,
+    py_explanation: "Demonstrates vertical column splitting to optimize memory cache space, paired with horizontal range routing that assigns time-series logs to separate tables.",
+    js_explanation: "Models single-node partitioning. Keeps primary indices small by separating wide columns, and uses range rules to direct time-series rows to separate arrays."
+  },
+  {
+    id: 18,
+    title: "Caching Strategies & Eviction (LRU, LFU, Write-Through, Write-Back)",
+    category: "Scale",
+    est: "8 min read",
+    tldr: "Caching stores hot datasets in fast RAM. Cache strategies govern read/write routes (write-through, write-back), while eviction cleans old keys when memory runs out.",
+    reqs: [
+      "Implement fully operational LRU O(1) Cache eviction",
+      "Process Write-Through database synchronization",
+      "Process Write-Back async queue updates"
+    ],
+    nfreqs: [
+      "Strict O(1) time complexity for reads and updates",
+      "Highly concurrent, low-overhead memory models"
+    ],
+    components: [
+      ["LRU (Least Recently Used)", "Evicts the least recently accessed keys first. Typically uses a HashMap combined with a Doubly Linked List."],
+      ["Write-Through Cache", "Synchronously updates both the cache and the backing database, ensuring high data consistency."],
+      ["Write-Back Cache", "Updates only the cache immediately, asynchronously syncing mutations to the database in background batches."]
+    ],
+    decisions: [
+      ["Eviction Selection", "Deploy LRU as a default. Choose LFU (Least Frequently Used) when access patterns are strictly popularity-based (e.g. hot search terms)."],
+      ["Write Strategy", "Use Write-Through when data must match the database exactly (e.g. bank balances). Use Write-Back for high-frequency write paths (e.g. video views counters) where loss of transient updates is acceptable."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Request"]
+    Cache["Fast Cache Memory"]
+    DB["Backing SQL Database"]
+
+    Client ==> |Read Key| Cache
+    Cache -.-> |Cache Miss - Read Upstream| DB
+    Cache ==> |Synchronous Write Update| DB
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Double Linked List Node for LRU implementation
+class DLLNode:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.prev = None
+        self.next = None
+
+# A production-ready, fully functional O(1) LRU Cache with a Write-Through mock database driver
+class LRUCache:
+    def __init__(self, capacity=2):
+        self.capacity = capacity
+        self.cache_map = {} # key -> DLLNode
+        
+        # Guard head and tail nodes
+        self.head = DLLNode(0, 0)
+        self.tail = DLLNode(0, 0)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+        
+        # Mock Backing Database
+        self.backing_db = {}
+
+    def _remove(self, node):
+        prev_node = node.prev
+        next_node = node.next
+        prev_node.next = next_node
+        next_node.prev = prev_node
+
+    def _add_to_head(self, node):
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+
+    def get(self, key):
+        if key in self.cache_map:
+            node = self.cache_map[key]
+            self._remove(node)
+            self._add_to_head(node) # Shift to most-recently used
+            return node.value
+        return None
+
+    def put_write_through(self, key, value):
+        # 1. Update backing database synchronously (Write-Through)
+        self.backing_db[key] = value
+        print(f"[WRITE-THROUGH] Synchronized to DB: {key} -> {value}")
+
+        # 2. Update Cache memory
+        if key in self.cache_map:
+            node = self.cache_map[key]
+            self._remove(node)
+            node.value = value
+            self._add_to_head(node)
+        else:
+            if len(self.cache_map) >= self.capacity:
+                # Evict tail (Least Recently Used)
+                lru_node = self.tail.prev
+                print(f"[CACHE EVICTION] Cache full. Evicting LRU key: {lru_node.key}")
+                self._remove(lru_node)
+                del self.cache_map[lru_node.key]
+            
+            new_node = DLLNode(key, value)
+            self.cache_map[key] = new_node
+            self._add_to_head(new_node)
+
+cache = LRUCache(capacity=2)
+cache.put_write_through("session_A", "token_123")
+cache.put_write_through("session_B", "token_456")
+cache.get("session_A") # accessing makes session_A MRU
+cache.put_write_through("session_C", "token_789") # Evicts session_B!`,
+    js_code: `class DLLNode {
+  constructor(key, value) {
+    this.key = key;
+    this.value = value;
+    this.prev = null;
+    this.next = null;
+  }
+}
+
+// Complete O(1) LRU Cache featuring Write-Through synchronizations
+class LRUCache {
+  constructor(capacity = 2) {
+    this.capacity = capacity;
+    this.map = new Map();
+    
+    this.head = new DLLNode(0, 0);
+    this.tail = new DLLNode(0, 0);
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+    
+    this.backingDb = {};
+  }
+
+  _remove(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+  }
+
+  _addToHead(node) {
+    node.next = this.head.next;
+    node.prev = this.head;
+    this.head.next.prev = node;
+    this.head.next = node;
+  }
+
+  get(key) {
+    if (this.map.has(key)) {
+      const node = this.map.get(key);
+      this._remove(node);
+      this._addToHead(node);
+      return node.value;
+    }
+    return null;
+  }
+
+  putWriteThrough(key, value) {
+    // Sync Write-Through to Database
+    this.backingDb[key] = value;
+    console.log(\`[WRITE-THROUGH] Synchronized to DB: \${key} -> \${value}\`);
+
+    if (this.map.has(key)) {
+      const node = this.map.get(key);
+      this._remove(node);
+      node.value = value;
+      this._addToHead(node);
+    } else {
+      if (this.map.size >= this.capacity) {
+        const lru = this.tail.prev;
+        console.log(\`[EVICTION] Evicting LRU key: \${lru.key}\`);
+        this._remove(lru);
+        this.map.delete(lru.key);
+      }
+      const newNode = new DLLNode(key, value);
+      this.map.set(key, newNode);
+      this._addToHead(newNode);
+    }
+  }
+}
+
+const cache = new LRUCache(2);
+cache.putWriteThrough('session_A', 'token_123');
+cache.putWriteThrough('session_B', 'token_456');
+cache.get('session_A');
+cache.putWriteThrough('session_C', 'token_789');`,
+    py_explanation: "Implements a classic O(1) LRU eviction algorithm using a custom doubly linked list and a hash map. Updates are synchronized directly to a simulated SQL database to emulate a write-through caching model.",
+    js_explanation: "Models an active memory cache that manages node pointers inside a Map to achieve O(1) read/write lookups, evicting the oldest referenced tail node when full."
+  },
+  {
+    id: 19,
+    title: "Denormalization (Read Optimization vs. Write Complexity)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Strategically storing redundant or pre-computed data to optimize read speeds, trading off faster reads for more complex writes and eventual consistency risks.",
+    reqs: [
+      "Implement high-performance denormalized profile document",
+      "Process relational user updates cascading downward",
+      "Enforce eventual consistency balance gates"
+    ],
+    nfreqs: [
+      "Sub-millisecond query fetches under heavy loads",
+      "Audit logs of data replication streams"
+    ],
+    components: [
+      ["Normalized Database Schema", "Eradicates duplicate properties by splitting them across distinct parent tables (3NF)."],
+      ["Denormalized Collections", "Pre-computes and embeds relational values directly within a single target document collection."],
+      ["Reconciliation Workers", "Background batch workers that process async log updates to reconcile duplicated fields when parent data changes."]
+    ],
+    decisions: [
+      ["Read-to-Write Ratio", "Normalize data when the system is write-heavy (e.g. order processors). Denormalize when read volume is significantly higher than write volume (e.g. movie directories)."],
+      ["Cascade Updates", "When denormalizing, expect complex updates. Updating a user's name requires writing to both the user table and cascading the change to all duplicated locations."]
+    ],
+    diagram: `flowchart TD
+    UserChange["User changes profile name"]
+    AuthDb[("Primary Auth DB")]
+    JobQueue["Reconciliation Worker Queue"]
+    CommentsDb[("Denormalized Comments DB")]
+
+    UserChange ==> |1. Update| AuthDb
+    AuthDb ==> |2. Trigger Event| JobQueue
+    JobQueue ==> |3. Async Cascade update 'name'| CommentsDb
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# Simulation showing why Denormalization simplifies reads but increases write updates complexity
+class DenormalizedBlogSystem:
+    def __init__(self):
+        # 1. Denormalized Database collections
+        # Comments store 'author_name' directly, saving a SQL join on read!
+        self.comments_collection = [
+            {"comment_id": 1, "post_id": 99, "author_id": 10, "author_name": "Alice", "body": "First comment!"},
+            {"comment_id": 2, "post_id": 99, "author_id": 10, "author_name": "Alice", "body": "Insightful read."}
+        ]
+
+    def read_comments(self, post_id):
+        # Read: Zero Joins! Extremely high throughput.
+        results = [c for c in self.comments_collection if c["post_id"] == post_id]
+        print(f"[FAST READ] Fetched {len(results)} comments directly: {results}")
+
+    def update_user_profile_name(self, author_id, new_name):
+        # Write Complexity: Must cascade-update the author name across all comments!
+        print(f"[WRITE UPDATE] Cascading name change for author {author_id} to '{new_name}'...")
+        updates_count = 0
+        for c in self.comments_collection:
+            if c["author_id"] == author_id:
+                c["author_name"] = new_name
+                updates_count += 1
+        print(f"[WRITE UPDATE] Completed cascading updates across {updates_count} comment rows.")
+
+blog = DenormalizedBlogSystem()
+blog.read_comments(99)
+blog.update_user_profile_name(10, "Alice (Senior SRE)")
+blog.read_comments(99)`,
+    js_code: `// Simulation demonstrating high read efficiency vs cascading write complexity
+class DenormalizedBlogSystem {
+  constructor() {
+    this.commentsCollection = [
+      { commentId: 1, postId: 99, authorId: 10, authorName: 'Alice', body: 'First comment!' },
+      { commentId: 2, postId: 99, authorId: 10, authorName: 'Alice', body: 'Insightful read.' }
+    ];
+  }
+
+  readComments(postId) {
+    // O(1) single-table read without joining users
+    const results = this.commentsCollection.filter(c => c.postId === postId);
+    console.log(\`[READ] Fetched \${results.length} comments directly:\`, results);
+  }
+
+  updateUserProfileName(authorId, newName) {
+    // High write complexity cascade update
+    console.log(\`[WRITE] Cascading name change for author \${authorId} to '\${newName}'...\`);
+    let count = 0;
+    this.commentsCollection.forEach(c => {
+      if (c.authorId === authorId) {
+        c.authorName = newName;
+        count++;
+      }
+    });
+    console.log(\`[WRITE] Completed cascading updates across \${count} rows.\`);
+  }
+}
+
+const blog = new DenormalizedBlogSystem();
+blog.readComments(99);
+blog.updateUserProfileName(10, 'Alice (Senior SRE)');
+blog.readComments(99);`,
+    py_explanation: "Models an embedded document collection that duplicates user properties to optimize read speeds, illustrating how writing to denormalized databases requires cascading updates across multiple document locations.",
+    js_explanation: "Demonstrates read-write tradeoffs in denormalized databases. Optimizes read speeds by removing joins, but introduces the complexity of propagating updates to redundant data locations."
+  },
+  {
+    id: 20,
+    title: "CAP Theorem (PACELC Extension details)",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "CAP states: In a Network Partition (P), choose Availability (A) or Consistency (C). PACELC extends this: Else (E), choose Latency (L) or Consistency (C).",
+    reqs: [
+      "Process operations under network partition isolation states",
+      "Route between Low Latency vs Strict Consistency lanes",
+      "Configure dynamic timeout gates"
+    ],
+    nfreqs: [
+      "Predictable node behaviors during cluster partitions",
+      "Optimal latency routing configurations for normal paths"
+    ],
+    components: [
+      ["Consistency (C)", "Every read fetches the absolute latest committed write, or returns an error."],
+      ["Availability (A)", "Every non-failing node returns a non-error response immediately, without guaranteeing it has the latest write."],
+      ["Partition Tolerance (P)", "The cluster continues to operate even if a network partition drops messages between nodes."]
+    ],
+    decisions: [
+      ["PACELC System Profile", "Deploy PA/EL databases (e.g. Cassandra) for high-availability systems (social media likes) to maximize speed. Deploy PC/EC databases (e.g. CockroachDB) for financial ledgers where consistency cannot be compromised."],
+      ["Network Partition Strategy", "When a network partition strikes, choose C (fail/block updates to protect state accuracy) or A (allow updates on isolated nodes, resolving inconsistencies later via vector clocks)."]
+    ],
+    diagram: `flowchart TD
+    Partition{"Network Partition Active?"}
+    PA["PA / EL (Available & Low Latency - Stale OK)"]
+    PC["PC / EC (Consistent - Block Writes if Isolated)"]
+
+    Partition ==> |Yes| PA
+    Partition ==> |No| PC
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# A storage engine demonstrating the PACELC extension variables (PA/EL vs PC/EC)
+class PACELCStorageEngine:
+    def __init__(self, mode="PA_EL"):
+        self.mode = mode  # Modes: "PA_EL" (Available/Latency) or "PC_EC" (Consistent/Consistent)
+        self.leader_data = "OriginalValue"
+        self.replica_data = "OriginalValue"
+        self.partition_active = False
+
+    def trigger_partition(self, active=True):
+        self.partition_active = active
+        print(f"[CLUSTER STATE] Network Partition Active: {active}")
+
+    def write(self, data):
+        if self.partition_active:
+            if self.mode == "PC_EC":
+                # Strict Consistency: Reject writes if replicas cannot be reached!
+                print("[PC WRITE FAIL] Rejected write to enforce consistency during partition.")
+                raise ConnectionError("PC Mode Active: Replicas offline.")
+            else:
+                # Available: Accept write locally on leader anyway
+                self.leader_data = data
+                print(f"[PA WRITE SUCCESS] Partition active, local write allowed: {data}")
+        else:
+            self.leader_data = data
+            self.replica_data = data # Sync update
+            print(f"[NORMAL WRITE] Synced data across cluster: {data}")
+
+    def read_replica(self):
+        if self.partition_active and self.mode == "PA_EL":
+            # Latency/Available: Return stale replica data immediately!
+            print(f"[PA_EL READ] Stale read returned instantly: {self.replica_data}")
+            return self.replica_data
+        elif self.partition_active and self.mode == "PC_EC":
+            # Consistent: Reject read if replication consistency cannot be verified
+            print("[PC_EC READ FAIL] Stale read blocked. Consistency unverified.")
+            return None
+        return self.leader_data
+
+engine = PACELCStorageEngine(mode="PC_EC")
+engine.write("FirstUpdate")
+engine.trigger_partition(True)
+try:
+    engine.write("SecondUpdate")
+except ConnectionError:
+    pass # Caught security block
+    
+engine_avail = PACELCStorageEngine(mode="PA_EL")
+engine_avail.trigger_partition(True)
+engine_avail.write("SecondUpdate") # Accepted locally!
+engine_avail.read_replica() # Returns stale value`,
+    js_code: `// Storage engine demonstrating PACELC properties: PA/EL vs PC/EC
+class PACELCStorageEngine {
+  constructor(mode = 'PA_EL') {
+    this.mode = mode; // 'PA_EL' or 'PC_EC'
+    this.leaderData = 'OriginalValue';
+    this.replicaData = 'OriginalValue';
+    this.partitionActive = false;
+  }
+
+  setPartition(active) {
+    this.partitionActive = active;
+    console.log(\`[CLUSTER] Network Partition Active: \${active}\`);
+  }
+
+  write(data) {
+    if (this.partitionActive) {
+      if (this.mode === 'PC_EC') {
+        console.error('[PC WRITE FAIL] Write rejected. Replica unreachable.');
+        throw new Error('Consistency Violation: Replicas offline.');
+      } else {
+        this.leaderData = data;
+        console.log(\`[PA WRITE SUCCESS] Write allowed on leader node: \${data}\`);
+      }
+    } else {
+      this.leaderData = data;
+      this.replicaData = data;
+      console.log(\`[NORMAL WRITE] Data synced across cluster: \${data}\`);
+    }
+  }
+
+  readReplica() {
+    if (this.partitionActive && this.mode === 'PA_EL') {
+      console.log(\`[PA_EL READ] Stale read returned: \${this.replicaData}\`);
+      return this.replicaData;
+    } else if (this.partitionActive && this.mode === 'PC_EC') {
+      console.error('[PC_EC READ FAIL] Read blocked. Consistency unverified.');
+      return null;
+    }
+    return this.leaderData;
+  }
+}
+
+const engine = new PACELCStorageEngine('PC_EC');
+engine.write('FirstUpdate');
+engine.setPartition(true);
+try { engine.write('SecondUpdate'); } catch (e) {}`,
+    py_explanation: "Simulates cluster operational behaviors under a network partition. Demonstrates how PC/EC nodes block updates during partitions, while PA/EL nodes prioritize speed, serving stale read data and local writes.",
+    js_explanation: "Models dynamic PACELC runtime configurations. Illustrates how different database systems prioritize latency and availability or consistency under varying network conditions."
+  },
+  {
+    id: 21,
+    title: "Blob Storage (Object stores like S3)",
+    category: "Data",
+    est: "6 min read",
+    tldr: "Specialized, highly scalable storage systems designed to store massive volumes of unstructured flat files (images, video, logs) via simple HTTP APIs.",
+    reqs: [
+      "Implement multi-part content upload pipelines",
+      "Process pre-signed download token signatures",
+      "Store metadata tags alongside files"
+    ],
+    nfreqs: [
+      "High durability (99.999999999% '11 nines')",
+      "Global availability with low-latency edge retrieval"
+    ],
+    components: [
+      ["Bucket Partition", "A logical root namespace containing stored flat file objects (e.g. s3://my-bucket)."],
+      ["Metadata Database", "Stores index lookups, file sizes, creation timestamps, and customized metadata tag maps."],
+      ["Data Server Pool", "Large array of cheap, redundant hard disk servers storing raw byte blocks (WORM)."]
+    ],
+    decisions: [
+      ["Storage Architecture Choice", "Never store massive files (images, videos) directly in relational databases. Databases are optimized for structured rows; store heavy files in blob storage and save the resulting file path URLs in your database."],
+      ["Pre-signed URL Access", "Keep buckets private by default. Generate time-limited pre-signed URLs to grant secure, temporary read/write access to clients, bypassing application server transit overhead."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Browser"]
+    AppServer["Application Server API"]
+    BlobStore["Object Store (S3 Bucket)"]
+
+    Client ==> |1. Request upload signature| AppServer
+    AppServer ==> |2. Generate pre-signed URL| Client
+    Client ==> |3. Upload raw binary bytes directly| BlobStore
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hmac
+import hashlib
+import time
+
+# A complete Object Store simulator featuring pre-signed URL signature generation and validation
+class LocalBlobStore:
+    def __init__(self, private_api_key="s3_super_secret_signing_key"):
+        self.signing_key = private_api_key
+        # Memory storage: bucket_name -> object_key -> binary_data
+        self.buckets = {"public-assets": {}}
+
+    def generate_presigned_url(self, bucket, object_key, expires_in=5):
+        # Create a secure, time-limited signature for S3 upload/download
+        expires_at = int(time.time()) + expires_in
+        payload = f"{bucket}/{object_key}/{expires_at}"
+        
+        # Cryptographic HMAC signature
+        signature = hmac.new(self.signing_key.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        return f"https://localblob.com/{bucket}/{object_key}?expires={expires_at}&sig={signature}"
+
+    def upload_with_presigned_url(self, url, raw_bytes):
+        # Validate time signature before accepting upload
+        # Parsing: localblob.com/bucket/key?expires=123&sig=abc
+        try:
+            parts = url.split("?")[0].split("/")
+            bucket, object_key = parts[-2], parts[-1]
+            
+            query = url.split("?")[1]
+            params = dict(p.split("=") for p in query.split("&"))
+            expires_at = int(params["expires"])
+            sig = params["sig"]
+
+            if time.time() > expires_at:
+                print("[UPLOAD DENIED] Access expired! Signature is no longer valid.")
+                return False
+
+            # Verify integrity signature using private HMAC key
+            expected_payload = f"{bucket}/{object_key}/{expires_at}"
+            expected_sig = hmac.new(self.signing_key.encode(), expected_payload.encode(), hashlib.sha256).hexdigest()
+            
+            if not hmac.compare_digest(sig, expected_sig):
+                print("[UPLOAD DENIED] Cryptographic Signature Mismatch!")
+                return False
+
+            # Store payload
+            self.buckets[bucket][object_key] = raw_bytes
+            print(f"[UPLOAD SUCCESS] Saved object '{object_key}' in bucket '{bucket}'")
+            return True
+        except Exception as e:
+            print(f"[UPLOAD ERROR] Invalid URL framing: {e}")
+            return False
+
+store = LocalBlobStore()
+url = store.generate_presigned_url("public-assets", "avatar_1.png", expires_in=2)
+print("[GENERATED PRE-SIGNED URL]:", url)
+store.upload_with_presigned_url(url, b"RAW_BINARY_DATA_OF_PNG")`,
+    js_code: `const crypto = require('crypto');
+
+// Object Store simulator validating time-limited cryptographically signed upload URLs
+class LocalBlobStore {
+  constructor(privateApiKey = 's3_super_secret_signing_key') {
+    this.signingKey = privateApiKey;
+    this.buckets = { 'public-assets': new Map() };
+  }
+
+  generatePresignedUrl(bucket, objectKey, expiresInSec = 5) {
+    const expiresAt = Math.floor(Date.now() / 1000) + expiresInSec;
+    const payload = \`\${bucket}/\${objectKey}/\${expiresAt}\`;
+    
+    const signature = crypto
+      .createHmac('sha256', this.signingKey)
+      .update(payload)
+      .digest('hex');
+
+    return \`https://localblob.com/\${bucket}/\${objectKey}?expires=\${expiresAt}&sig=\${signature}\`;
+  }
+
+  uploadWithPresignedUrl(url, rawBytes) {
+    try {
+      const urlObj = new URL(url);
+      const parts = urlObj.pathname.split('/');
+      const bucket = parts[parts.length - 2];
+      const objectKey = parts[parts.length - 1];
+
+      const expiresAt = parseInt(urlObj.searchParams.get('expires'));
+      const sig = urlObj.searchParams.get('sig');
+
+      if (Math.floor(Date.now() / 1000) > expiresAt) {
+        console.error('[UPLOAD DENIED] Signature Expired!');
+        return false;
+      }
+
+      const expectedPayload = \`\${bucket}/\${objectKey}/\${expiresAt}\`;
+      const expectedSig = crypto
+        .createHmac('sha256', this.signingKey)
+        .update(expectedPayload)
+        .digest('hex');
+
+      if (sig !== expectedSig) {
+        console.error('[UPLOAD DENIED] Cryptographic Signature Mismatch!');
+        return false;
+      }
+
+      this.buckets[bucket].set(objectKey, rawBytes);
+      console.log(\`[UPLOAD SUCCESS] Saved object '\${objectKey}' inside '\${bucket}'\`);
+      return true;
+    } catch (e) {
+      console.error('[UPLOAD ERROR] Malformed URL parser trigger:', e.message);
+      return false;
+    }
+  }
+}
+
+const store = new LocalBlobStore();
+const url = store.generatePresignedUrl('public-assets', 'avatar_1.png', 2);
+console.log('[GENERATED URL]:', url);
+store.uploadWithPresignedUrl(url, 'RAW_BINARY_DATA_OF_PNG');`,
+    py_explanation: "Implements time-limited, cryptographically signed pre-signed URLs using HMAC-SHA256, protecting storage buckets from unauthorized uploads without routing heavy raw file byte flows through app servers.",
+    js_explanation: "Uses Node's crypto library to generate and validate temporal HMAC keys, rejecting expired or forged upload requests to protect S3-style storage buckets.",
+  },
+  {
+    id: 22,
+    title: "Content Delivery Networks (CDN)",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "A globally distributed network of proxy servers that cache static assets (images, JS, CSS) closer to users, reducing network latency and origin load.",
+    reqs: [
+      "Route queries dynamically to closest edge nodes",
+      "Process cache-control headers and TTL invalidations",
+      "Serve hot paths from memory caches"
+    ],
+    nfreqs: [
+      "Sub-millisecond page delivery times",
+      "Seamless origin bypass load thresholds"
+    ],
+    components: [
+      ["Origin Server", "The primary server hosting the source of truth code, database records, and fresh static files."],
+      ["Edge Server (Point of Presence - PoP)", "Geographically dispersed servers running high-speed caches to intercept client traffic nearby."],
+      ["GeoDNS Routing", "DNS resolution logic that resolves hostnames to the IP address of the geographically closest edge cache server."]
+    ],
+    decisions: [
+      ["Cache Invalidation Strategy", "Invalidating cached edge files via wildcard API purges is expensive. Deploy versioned asset naming (e.g. main.a83f1c.js) to force CDN edge nodes to fetch the latest files instantly on code deployments."],
+      ["Query Parameter Caching", "CDNs treat queries as distinct URLs. Strip unnecessary tracking variables (utm_source) from incoming request paths to prevent cache-busting duplication anomalies at edge layers."]
+    ],
+    diagram: `flowchart TD
+    UserUS["User in USA"]
+    UserIN["User in India"]
+    EdgeUS["CDN Edge USA (Cache Hit)"]
+    EdgeIN["CDN Edge India (Cache Miss)"]
+    Origin["Origin Server (Dublin)"]
+
+    UserUS ==> EdgeUS
+    UserIN ==> EdgeIN
+    EdgeIN -.-> |Fetch Original File| Origin
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import math
+
+# A CDN routing network simulating geographical proximity calculations and local cache resolutions
+class CDNNetworkDistribution:
+    def __init__(self):
+        # Geolocation points of edge caches: {Name: (Latitude, Longitude)}
+        self.edge_servers = {
+            "Edge_US_East": {"lat": 38.9, "lon": -77.0, "cache": {}},
+            "Edge_India_West": {"lat": 19.0, "lon": 72.8, "cache": {}}
+        }
+        self.origin_server = {"main.js": "console.log('Production Application Bundle')"}
+
+    def _calculate_distance(self, p1, p2):
+        # Simple Euclidean approximation for geographical coordinates
+        return math.sqrt((p1[0] - p2[0])**2 + (p1[1] - p2[1])**2)
+
+    def route_request(self, client_geo, file_key):
+        # 1. GeoDNS: Find geographically nearest Edge Server
+        nearest_edge_name = None
+        min_dist = float("inf")
+        
+        for name, data in self.edge_servers.items():
+            dist = self._calculate_distance(client_geo, (data["lat"], data["lon"]))
+            if dist < min_dist:
+                min_dist = dist
+                nearest_edge_name = name
+
+        edge = self.edge_servers[nearest_edge_name]
+        print(f"[GEODNS ROUTER] Client at {client_geo} routed to: '{nearest_edge_name}' (Dist: {min_dist:.2f})")
+
+        # 2. Edge Cache Lookup
+        if file_key in edge["cache"]:
+            print(f"[EDGE CACHE HIT] Served '{file_key}' instantly from edge RAM.")
+            return edge["cache"][file_key]
+        
+        # 3. Cache Miss: Fetch from remote origin server
+        print(f"[EDGE CACHE MISS] Pulling '{file_key}' from distant Origin server...")
+        origin_file = self.origin_server[file_key]
+        # Store in edge cache for subsequent users
+        edge["cache"][file_key] = origin_file
+        return origin_file
+
+cdn = CDNNetworkDistribution()
+# Indian client requests file (Triggers initial cache miss from India edge)
+cdn.route_request(client_geo=(18.9, 72.8), file_key="main.js")
+# Subsequent request from another nearby client hits cache instantly
+cdn.route_request(client_geo=(20.0, 74.0), file_key="main.js")`,
+    js_code: `// CDN routing simulating geo-distance algorithms and edge caching
+class CDNNetworkDistribution {
+  constructor() {
+    this.edgeServers = {
+      Edge_US_East: { lat: 38.9, lon: -77.0, cache: new Map() },
+      Edge_India_West: { lat: 19.0, lon: 72.8, cache: new Map() }
+    };
+    this.originServer = { 'main.js': "console.log('Production Application Bundle')" };
+  }
+
+  _getDistance(lat1, lon1, lat2, lon2) {
+    return Math.sqrt(Math.pow(lat1 - lat2, 2) + Math.pow(lon1 - lon2, 2));
+  }
+
+  routeRequest(clientLat, clientLon, fileKey) {
+    // 1. GeoDNS routing mapping
+    let nearestEdgeName = null;
+    let minDist = Infinity;
+
+    for (let [name, data] of Object.entries(this.edgeServers)) {
+      const dist = this._getDistance(clientLat, clientLon, data.lat, data.lon);
+      if (dist < minDist) {
+        minDist = dist;
+        nearestEdgeName = name;
+      }
+    }
+
+    const edge = this.edgeServers[nearestEdgeName];
+    console.log(\`[GEODNS] Client routed to: '\${nearestEdgeName}' (Dist: \${minDist.toFixed(2)})\`);
+
+    // 2. Edge Cache fetch
+    if (edge.cache.has(fileKey)) {
+      console.log(\`[EDGE CACHE HIT] Served '\${fileKey}' from edge RAM.\`);
+      return edge.cache.get(fileKey);
+    }
+
+    // 3. Cache Miss
+    console.log(\`[EDGE CACHE MISS] Fetching '\${fileKey}' from Origin...\`);
+    const file = this.originServer[fileKey];
+    edge.cache.set(fileKey, file);
+    return file;
+  }
+}
+
+const cdn = new CDNNetworkDistribution();
+cdn.routeRequest(18.9, 72.8, 'main.js'); // India Client: Miss
+cdn.routeRequest(20.0, 74.0, 'main.js'); // Nearby India Client: Hit!`,
+    py_explanation: "Emulates GeoDNS lookup mechanisms by running coordinate distance computations. Routes users to the nearest regional edge node and manages edge cache misses by pulling from a simulated origin.",
+    js_explanation: "Models CDN edge routing and caching. Uses simple coordinate calculations to select the closest regional cache node, demonstrating significant read-latency savings."
+  },
+  {
+    id: 23,
+    title: "WebSockets (Duplex TCP communication)",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "A persistent, bi-directional, full-duplex communication protocol operating over a single TCP connection, initiated via an HTTP Upgrade handshake.",
+    reqs: [
+      "Perform HTTP WebSocket Protocol Upgrade handshakes",
+      "Process bi-directional full-duplex communication frames",
+      "Manage persistent connection pools"
+    ],
+    nfreqs: [
+      "Sub-millisecond data transport latency",
+      "Low connection overhead (no header re-transmissions)"
+    ],
+    components: [
+      ["Protocol Upgrade Handshake", "Client issues standard GET HTTP upgrade headers (Connection: Upgrade) to establish the persistent socket connection."],
+      ["Frame Layer", "Lightweight framing protocol transmitting raw text or binary data blocks with minimal overhead."],
+      ["Connection Registry", "Server memory state tracking active sockets to broadcast events concurrently."]
+    ],
+    decisions: [
+      ["Polling vs WebSockets", "Use AJAX short/long polling for low-frequency updates. Deploy WebSockets when you need low-latency, real-time bi-directional streaming (e.g. multiplayer gaming, trading dashboards)."],
+      ["WebSocket Scalability", "Persistent socket connections require servers to maintain open file descriptors. Deploy Redis Pub/Sub channels to sync and broadcast messages across horizontally scaled backend servers."]
+    ],
+    diagram: `flowchart LR
+    Client["Client Browser"]
+    Handshake["HTTP GET (Upgrade: websocket)"]
+    WSStream["Persistent Web Socket TCP Channel"]
+    Server["WebSocket Daemon"]
+
+    Client ==> |1. Initiate| Handshake
+    Handshake ==> |2. Accept (101 Switching Protocols)| Server
+    Client <=> |3. Full Duplex Data Stream| WSStream
+    WSStream <=> Server
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hashlib
+import base64
+
+# Simulate the physical WebSocket Protocol Upgrade handshake mapping
+class WebSocketHandshakeHandler:
+    def __init__(self):
+        # RFC 6455 standardized magic key string UUID
+        self.WS_MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+
+    def process_handshake(self, incoming_http_headers):
+        # Extract the security challenge key from client upgrade request
+        sec_key = incoming_http_headers.get("Sec-WebSocket-Key")
+        if not sec_key:
+            raise ValueError("[HANDSHAKE ERROR] Missing security challenge key.")
+            
+        print(f"[HANDSHAKE] Extracted challenge key from HTTP request: '{sec_key}'")
+
+        # Create the cryptographic response key required by RFC 6455
+        combined = sec_key + self.WS_MAGIC_STRING
+        sha1_hash = hashlib.sha1(combined.encode()).digest()
+        accept_key = base64.b64encode(sha1_hash).decode()
+
+        # Build response headers to switch protocols
+        upgrade_response = (
+            "HTTP/1.1 101 Switching Protocols\\r\\n"
+            "Upgrade: websocket\\r\\n"
+            "Connection: Upgrade\\r\\n"
+            f"Sec-WebSocket-Accept: {accept_key}\\r\\n\\r\\n"
+        )
+        print("[HANDSHAKE SUCCESS] Switched protocol to WebSocket frame pipeline.")
+        return upgrade_response
+
+handler = WebSocketHandshakeHandler()
+# Simulate mock client request headers
+client_headers = {"Sec-WebSocket-Key": "dGhlIHNhbXBsZSBub25jZQ=="}
+print(handler.process_handshake(client_headers))`,
+    js_code: `const crypto = require('crypto');
+
+// Simulate the cryptographic upgrade handshake for WebSockets (RFC 6455)
+class WebSocketHandshakeHandler {
+  constructor() {
+    this.WS_MAGIC_STRING = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+  }
+
+  processHandshake(clientHeaders) {
+    const secKey = clientHeaders['sec-websocket-key'];
+    if (!secKey) {
+      throw new Error('Handshake Failed: Missing sec-websocket-key.');
+    }
+    console.log(\`[HANDSHAKE] Challenge Key: '\${secKey}'\`);
+
+    // Cryptographic signature build
+    const combined = secKey + this.WS_MAGIC_STRING;
+    const acceptKey = crypto
+      .createHash('sha1')
+      .update(combined)
+      .digest('base64');
+
+    const upgradeResponse = [
+      'HTTP/1.1 101 Switching Protocols',
+      'Upgrade: websocket',
+      'Connection: Upgrade',
+      \`Sec-WebSocket-Accept: \${acceptKey}\`,
+      '\\r\\n'
+    ].join('\\r\\n');
+
+    console.log('[HANDSHAKE SUCCESS] Upgraded HTTP stream to persistent TCP Frame stream.');
+    return upgradeResponse;
+  }
+}
+
+const handler = new WebSocketHandshakeHandler();
+console.log(handler.processHandshake({ 'sec-websocket-key': 'dGhlIHNhbXBsZSBub25jZQ==' }));`,
+    py_explanation: "Demonstrates the cryptographic handshake signature required by RFC 6455 to establish WebSockets. Appends a standardized magic string UUID to the client's challenge key, hashes the result via SHA-1, and returns Base64 encoded headers.",
+    js_explanation: "Models the security handshake protocol using Node's crypto module. Generates the Sec-WebSocket-Accept token to seamlessly switch connections from HTTP to full-duplex TCP framing."
+  },
+  {
+    id: 24,
+    title: "Webhooks (HTTP event callbacks)",
+    category: "Networking",
+    est: "6 min read",
+    tldr: "A push-based system where a server sends real-time HTTP POST payloads to external client URLs immediately when event triggers occur.",
+    reqs: [
+      "Register external client subscription endpoints",
+      "Process asynchronous dispatch queue worker loops",
+      "Sign outgoing payloads cryptographically using HMAC"
+    ],
+    nfreqs: [
+      "Guaranteed event delivery via retries and backoffs",
+      "Secure event payload validation pipelines"
+    ],
+    components: [
+      ["Webhook Registry", "Database mapping customer registration keys to their defined URL listener endpoints."],
+      ["Event Publisher", "Trigger service that monitors state updates and puts payload events onto queues."],
+      ["Asynchronous Worker", "Consumes event queues, signs payloads, posts them to subscriber URLs, and handles retries."]
+    ],
+    decisions: [
+      ["Webhook Security", "Always sign payload bodies using a SHA-256 HMAC signature. Clients use this signature to verify that the webhook came from your server, preventing spoofing attacks."],
+      ["Retry Backoff Configuration", "Client servers go offline frequently. Implement exponential backoff retry algorithms to retry failed deliveries, moving persistently failing hooks to a dead-letter queue (DLQ) after 5 attempts."]
+    ],
+    diagram: `flowchart TD
+    Event["Internal Event: Order Paid"]
+    Queue["Async Delivery Queue"]
+    Worker["Delivery Worker (HMAC signing)"]
+    ClientUrl["Client URL (HTTPS POST)"]
+
+    Event ==> Queue
+    Queue ==> Worker
+    Worker ==> |HMAC Header + JSON payload| ClientUrl
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hmac
+import hashlib
+import json
+import time
+
+# A highly robust Webhook Dispatcher executing async-style queues and HMAC packet verification
+class WebhookPublisherEngine:
+    def __init__(self):
+        # Database: client_id -> (webhook_endpoint, secret_key)
+        self.subscribers = {}
+
+    def register_webhook(self, client_id, target_url, secret_key):
+        self.subscribers[client_id] = (target_url, secret_key)
+        print(f"[REGISTRY] Client '{client_id}' registered listener URL: '{target_url}'")
+
+    def dispatch_event(self, client_id, event_type, data):
+        # 1. Fetch client registry settings
+        if client_id not in self.subscribers:
+            return
+        url, secret = self.subscribers[client_id]
+
+        # 2. Package payload with timestamp to prevent replay attacks
+        payload = {
+            "event": event_type,
+            "timestamp": int(time.time()),
+            "data": data
+        }
+        payload_bytes = json.dumps(payload).encode()
+
+        # 3. Generate cryptographic HMAC signature
+        signature = hmac.new(secret.encode(), payload_bytes, hashlib.sha256).hexdigest()
+        
+        print(f"[DISPATCH WORKER] Posting to: '{url}'")
+        print(f"[SIGNATURE HEADER] X-Webhook-Signature: {signature}")
+        
+        # Simulate local client verification logic
+        return self._simulate_client_receive_verification(url, payload_bytes, signature, secret)
+
+    def _simulate_client_receive_verification(self, url, body_bytes, signature, secret):
+        # Client-side verification process
+        expected_sig = hmac.new(secret.encode(), body_bytes, hashlib.sha256).hexdigest()
+        
+        if hmac.compare_digest(signature, expected_sig):
+            print("[CLIENT PARSER SUCCESS] Signature authentic! Payload accepted securely.")
+            return True
+        else:
+            print("[CLIENT PARSER ALERT] Signature check failed! Rejecting payload.")
+            return False
+
+publisher = WebhookPublisherEngine()
+publisher.register_webhook("client_90", "https://api.client.com/webhooks", "my_shared_webhook_secret")
+publisher.dispatch_event("client_90", "charge.succeeded", {"amount": 500, "currency": "usd"})`,
+    js_code: `const crypto = require('crypto');
+
+// Webhook publisher executing cryptographical payload signature verification
+class WebhookPublisher {
+  constructor() {
+    this.subscribers = new Map();
+  }
+
+  registerWebhook(clientId, targetUrl, secretKey) {
+    this.subscribers.set(clientId, { targetUrl, secretKey });
+    console.log(\`[REGISTRY] Client '\${clientId}' registered: \${targetUrl}\`);
+  }
+
+  dispatchEvent(clientId, eventType, data) {
+    if (!this.subscribers.has(clientId)) return;
+    const { targetUrl, secretKey } = this.subscribers.get(clientId);
+
+    // Build payload
+    const payload = {
+      event: eventType,
+      timestamp: Math.floor(Date.now() / 1000),
+      data
+    };
+    const bodyString = JSON.stringify(payload);
+
+    // Cryptographical HMAC SHA-256 signature
+    const signature = crypto
+      .createHmac('sha256', secretKey)
+      .update(bodyString)
+      .digest('hex');
+
+    console.log(\`[DISPATCH] Posting payload to \${targetUrl}\`);
+    console.log(\`[HMAC HEADER] X-Webhook-Signature: \${signature}\`);
+
+    return this._simulateClientReceive(bodyString, signature, secretKey);
+  }
+
+  _simulateClientReceive(bodyStr, incomingSignature, secretKey) {
+    // Client-side verification
+    const expectedSig = crypto
+      .createHmac('sha256', secretKey)
+      .update(bodyStr)
+      .digest('hex');
+
+    if (incomingSignature === expectedSig) {
+      console.log('[CLIENT] Signature matches. Payload processed successfully.');
+      return true;
+    }
+    console.error('[CLIENT] Signature mismatch! Rejecting request.');
+    return false;
+  }
+}
+
+const publisher = new WebhookPublisher();
+publisher.registerWebhook('client_90', 'https://api.client.com/webhooks', 'my_shared_webhook_secret');
+publisher.dispatchEvent('client_90', 'charge.succeeded', { amount: 500, currency: 'usd' });`,
+    py_explanation: "Implements Webhook event patterns. Uses HMAC-SHA256 signatures to secure communications, allowing receiving clients to verify packet authenticity by hashing the raw body with a shared secret.",
+    js_explanation: "Models asynchronous push webhooks, cryptographically signing payloads via hmac streams to prevent spoofing and MitM replay attacks."
+  },
+  {
+    id: 25,
+    title: "Microservices Architecture",
+    category: "Scale",
+    est: "7 min read",
+    tldr: "An architectural style structuring an app as a collection of small, loosely coupled, independently deployable services communicating via lightweight APIs.",
+    reqs: [
+      "Implement client-side service registries",
+      "Process fault-tolerant circuit breaking thresholds",
+      "Handle dynamic server discovery routing"
+    ],
+    nfreqs: [
+      "Zero cascading service failure propagation",
+      "Highly dynamic node pool auto-discovery"
+    ],
+    components: [
+      ["Service Registry", "A central database tracking the IP addresses of all healthy service instances (e.g. Consul)."],
+      ["Circuit Breaker", "A design pattern that blocks outbound calls to a failing service to prevent system resource exhaustion."],
+      ["API Gateway", "The single entry point routing requests, handling authentication, and consolidating payloads."]
+    ],
+    decisions: [
+      ["Communication Style", "Use asynchronous messaging (Message Queues) for most inter-service communications to decouple systems. Use synchronous HTTP/gRPC only when immediate responses are required."],
+      ["Fault Isolation", "Isolate service failures. Integrate resilient circuit breakers to instantly fall back to default values if a downstream service begins failing, saving connection threads."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Request"]
+    Gateway["API Gateway"]
+    Auth["Auth Service"]
+    Orders["Orders Service (Downstream Offline)"]
+    CB["Circuit Breaker (Open)"]
+
+    Client ==> Gateway
+    Gateway ==> Auth
+    Gateway ==> CB
+    CB -.-> |Instantly fail back (Safe mode)| Orders
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import time
+
+# A highly educational Microservices Circuit Breaker pattern simulating network fault isolation
+class ServiceCircuitBreaker:
+    def __init__(self, failure_threshold=2, recovery_time_sec=2):
+        self.failure_threshold = failure_threshold
+        self.recovery_time_sec = recovery_time_sec
+        self.state = "CLOSED" # States: CLOSED (Normal), OPEN (Failing), HALF-OPEN (Testing)
+        self.failure_count = 0
+        self.last_state_change = time.time()
+
+    def call_downstream_service(self, simulated_downstream_healthy=True):
+        now = time.time()
+        
+        # 1. Evaluate open state cooldown limits
+        if self.state == "OPEN":
+            if now - self.last_state_change > self.recovery_time_sec:
+                self.state = "HALF-OPEN"
+                print("[CIRCUIT BREAKER] Cooldown met. Testing network state (HALF-OPEN)...")
+            else:
+                print("[CIRCUIT BREAKER] Blocked! Downstream service offline. Returning fallback data.")
+                return "FALLBACK_DATA_CACHED"
+
+        # 2. Execute network query
+        if not simulated_downstream_healthy:
+            self.failure_count += 1
+            print(f"[DOWNSTREAM FAIL] Network timeout recorded. Failures: {self.failure_count}")
+            if self.failure_count >= self.failure_threshold:
+                self.state = "OPEN"
+                self.last_state_change = now
+                print("[CIRCUIT STATE CHANGED] >>> OPEN! Routing blocked to protect thread pools.")
+            return "ERROR_HTTP_504"
+        else:
+            # Downstream service healthy
+            self.failure_count = 0
+            self.state = "CLOSED"
+            return "SUCCESS_DATA"
+
+cb = ServiceCircuitBreaker(failure_threshold=2, recovery_time_sec=2)
+# Simulate downstream outages
+cb.call_downstream_service(simulated_downstream_healthy=False)
+cb.call_downstream_service(simulated_downstream_healthy=False) # Triggers state OPEN!
+cb.call_downstream_service(simulated_downstream_healthy=True)  # Instantly blocked, returns fallback!`,
+    js_code: `// Resilient Circuit Breaker protecting services from cascading timeouts
+class ServiceCircuitBreaker {
+  constructor(failureThreshold = 2, recoveryTimeMs = 2000) {
+    this.failureThreshold = failureThreshold;
+    this.recoveryTimeMs = recoveryTimeMs;
+    this.state = 'CLOSED'; // 'CLOSED', 'OPEN', 'HALF-OPEN'
+    this.failures = 0;
+    this.lastStateChange = Date.now();
+  }
+
+  callDownstream(simulatedHealthy = true) {
+    const now = Date.now();
+
+    // 1. Evaluate open state
+    if (this.state === 'OPEN') {
+      if (now - this.lastStateChange > this.recoveryTimeMs) {
+        this.state = 'HALF-OPEN';
+        console.log('[CIRCUIT] Cooldown met. Testing connection (HALF-OPEN)...');
+      } else {
+        console.warn('[CIRCUIT] Blocked! Downstream service offline. Returning fallback.');
+        return 'FALLBACK_DATA_CACHED';
+      }
+    }
+
+    // 2. Query downstream
+    if (!simulatedHealthy) {
+      this.failures++;
+      console.log(\`[DOWNSTREAM ERROR] Timeout recorded. Failures: \${this.failures}\`);
+      if (this.failures >= this.failureThreshold) {
+        this.state = 'OPEN';
+        this.lastStateChange = now;
+        console.error('[CIRCUIT STATE CHANGED] >>> OPEN! Blocking subsequent calls.');
+      }
+      return 'ERROR_504';
+    } else {
+      this.failures = 0;
+      this.state = 'CLOSED';
+      return 'SUCCESS_DATA';
+    }
+  }
+}
+
+const cb = new ServiceCircuitBreaker(2, 2000);
+cb.callDownstream(false);
+cb.callDownstream(false); // Triggers OPEN state
+cb.callDownstream(true);  // Blocked! Returns fallback`,
+    py_explanation: "Implements a custom stateful Circuit Breaker. Tracks failures and opens the circuit when thresholds are hit, protecting systems from wasting thread resources on dead services.",
+    js_explanation: "Models a microservice circuit breaker. Tracks connection failures and dynamically transitions states (CLOSED, OPEN, HALF-OPEN) to safeguard system resources."
+  },
+  {
+    id: 26,
+    title: "Message Queues & Event Streaming (Kafka / RabbitMQ)",
+    category: "Scale",
+    est: "8 min read",
+    tldr: "Decoupling systems using messaging. Message Queues (RabbitMQ) delete messages after delivery to a single consumer. Event Streams (Kafka) write ordered logs, enabling multiple consumers to replay events.",
+    reqs: [
+      "Implement consumer group offset tracking (Kafka)",
+      "Process RabbitMQ-style direct queue broker routings",
+      "Process high-volume log appends"
+    ],
+    nfreqs: [
+      "High write append throughput",
+      "No lost messages (guaranteed durability)"
+    ],
+    components: [
+      ["Publish-Subscribe (Pub/Sub)", "Publisher sends messages once, and the broker distributes copies to all registered subscriber queues."],
+      ["Offset Pointer", "A sequential index tracking each consumer's read position in an immutable event stream log."],
+      ["Dead Letter Queue (DLQ)", "Special queue holding corrupted or persistently failing messages for manual audit."]
+    ],
+    decisions: [
+      ["Queue vs Stream Choice", "Use Message Queues (RabbitMQ) for task orchestration, where each job is processed once by a single worker. Use Event Streams (Kafka) for tracking clickstreams, metrics, or events that multiple systems need to read independently."],
+      ["Ordering Guarantees", "To maintain order in high-volume event streams, group messages using a partition key (e.g. user_id). This guarantees that all events for a specific user go to the same partition, preserving execution order."]
+    ],
+    diagram: `flowchart TD
+    Producer["Producer App"]
+    Topic["Kafka Stream (Partition 0)"]
+    Offset1["Consumer Group A (Offset 14)"]
+    Offset2["Consumer Group B (Offset 22)"]
+
+    Producer ==> |Append log| Topic
+    Topic -.-> Offset1
+    Topic -.-> Offset2
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# A complete Event Stream (Kafka-style) and Message Queue (RabbitMQ-style) simulator
+class MessagingBrokerMock:
+    def __init__(self):
+        # 1. Kafka-style Stream (Immutable log, multiple consumers read via offsets)
+        self.kafka_log = [] # List of events
+        self.kafka_offsets = {"consumer_group_billing": 0, "consumer_group_search": 0}
+
+        # 2. RabbitMQ-style Queue (Consume-and-delete task queue)
+        self.rabbitmq_queue = []
+
+    # --- KAFKA STREAM MODE ---
+    def publish_to_stream(self, event):
+        self.kafka_log.append(event)
+        print(f"[KAFKA] Appended event to immutable log: '{event}' (Total size: {len(self.kafka_log)})")
+
+    def consume_stream(self, group_name):
+        offset = self.kafka_offsets.get(group_name, 0)
+        if offset < len(self.kafka_log):
+            event = self.kafka_log[offset]
+            self.kafka_offsets[group_name] += 1 # Progress offset pointer
+            print(f"[KAFKA] Group '{group_name}' consumed event: '{event}' (Advanced offset to: {self.kafka_offsets[group_name]})")
+            return event
+        return None
+
+    # --- RABBITMQ QUEUE MODE ---
+    def publish_to_queue(self, task):
+        self.rabbitmq_queue.append(task)
+        print(f"[RABBITMQ] Enqueued task: '{task}'")
+
+    def consume_queue(self):
+        # Pop from queue: Message is permanently deleted on consumption!
+        if self.rabbitmq_queue:
+            task = self.rabbitmq_queue.pop(0)
+            print(f"[RABBITMQ] Worker popped and consumed task: '{task}' (Permanently deleted)")
+            return task
+        return None
+
+broker = MessagingBrokerMock()
+broker.publish_to_stream("Order #100 Paid")
+broker.publish_to_stream("Order #101 Shipped")
+broker.consume_stream("consumer_group_billing")
+broker.consume_stream("consumer_group_billing") # Advanced to next
+broker.consume_stream("consumer_group_search")  # Reads from start, offset independent!
+
+broker.publish_to_queue("Process PDF generation")
+broker.consume_queue()`,
+    js_code: `// Message broker simulating Kafka-style offset logs and RabbitMQ-style queues
+class MessagingBrokerMock {
+  constructor() {
+    this.kafkaLog = [];
+    this.kafkaOffsets = { billingGroup: 0, searchGroup: 0 };
+    this.rabbitmqQueue = [];
+  }
+
+  // --- KAFKA STREAM MODE ---
+  publishToStream(event) {
+    this.kafkaLog.push(event);
+    console.log(\`[KAFKA] Appended event to log: '\${event}' (Total logs: \${this.kafkaLog.length})\`);
+  }
+
+  consumeStream(groupName) {
+    const offset = this.kafkaOffsets[groupName] || 0;
+    if (offset < this.kafkaLog.length) {
+      const event = this.kafkaLog[offset];
+      this.kafkaOffsets[groupName] = offset + 1;
+      console.log(\`[KAFKA] Group '\${groupName}' read '\${event}' (New Offset: \${this.kafkaOffsets[groupName]})\`);
+      return event;
+    }
+    return null;
+  }
+
+  // --- RABBITMQ QUEUE MODE ---
+  publishToQueue(task) {
+    this.rabbitmqQueue.push(task);
+    console.log(\`[RABBITMQ] Enqueued task: '\${task}'\`);
+  }
+
+  consumeQueue() {
+    if (this.rabbitmqQueue.length > 0) {
+      const task = this.rabbitmqQueue.shift(); // Remove permanently
+      console.log(\`[RABBITMQ] Consumed task: '\${task}' (Deleted from queue)\`);
+      return task;
+    }
+    return null;
+  }
+}
+
+const broker = new MessagingBrokerMock();
+broker.publishToStream('Order #100 Paid');
+broker.publishToStream('Order #101 Shipped');
+broker.consumeStream('billingGroup');
+broker.consumeStream('billingGroup');
+broker.consumeStream('searchGroup'); // Independent offset reads from start!
+
+broker.publishToQueue('Process PDF generation');
+broker.consumeQueue();`,
+    py_explanation: "Contrasts a Kafka-style partition log (which tracks reader progress using offset pointers) with a standard RabbitMQ-style task queue that pops and deletes messages on consumption.",
+    js_explanation: "Models message delivery architectures, illustrating how event streams preserve transaction history for multiple readers while task queues focus on single-consumer load distribution."
+  },
+  {
+    id: 27,
+    title: "Rate Limiter (Token Bucket, Leaky Bucket, Sliding Window)",
+    category: "Scale",
+    est: "8 min read",
+    tldr: "A security service that restricts user traffic, protecting backend databases from crashing under DDoS attacks or API abuse.",
+    reqs: [
+      "Implement fully operational Token Bucket rate limiting",
+      "Process Sliding Window log precision tracking",
+      "Block traffic exceeding defined quota limits"
+    ],
+    nfreqs: [
+      "Minimal rate limit verification latency (<1ms)",
+      "Strict thread safety under high concurrency"
+    ],
+    components: [
+      ["Token Bucket", "Refills tokens at a constant rate. Requests consume a token; if the bucket is empty, the request is dropped. Handles traffic bursts gracefully."],
+      ["Leaky Bucket", "Maintains a queue that drains at a constant rate, smoothing out traffic bursts into a steady flow."],
+      ["Sliding Window Log", "Saves high-precision request timestamps to verify access limits, preventing traffic spikes at window boundaries."]
+    ],
+    decisions: [
+      ["Algorithm Choice", "Use Token Bucket for APIs that need to handle legitimate micro-bursts of traffic. Use Sliding Window when limits must be strictly enforced over precise rolling windows."],
+      ["Distributed Limiting", "Implement the rate limiter in Redis using Lua scripts to perform read-and-decrement actions atomically, avoiding race conditions in clustered API gateways."]
+    ],
+    diagram: `flowchart TD
+    Client["Client HTTP Request"]
+    Bucket{"Tokens Available in Bucket?"}
+    Process["Process Request (Consume 1 Token)"]
+    Reject["Reject 429: Too Many Requests"]
+
+    Client ==> Bucket
+    Bucket ==> |Yes| Process
+    Bucket ==> |No| Reject
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import time
+
+# A production-ready, fully functional Token Bucket Rate Limiter with automatic token replenishment
+class TokenBucketRateLimiter:
+    def __init__(self, capacity=5, refill_rate_per_sec=1):
+        self.capacity = capacity
+        self.refill_rate = refill_rate_per_sec
+        self.tokens = capacity
+        self.last_refill_timestamp = time.time()
+
+    def _refill(self):
+        now = time.time()
+        elapsed = now - self.last_refill_timestamp
+        # Calculate how many tokens should be added based on elapsed duration
+        refill_tokens = elapsed * self.refill_rate
+        
+        if refill_tokens > 0:
+            self.tokens = min(self.capacity, self.tokens + refill_tokens)
+            self.last_refill_timestamp = now
+
+    def allow_request(self):
+        self._refill()
+        if self.tokens >= 1:
+            self.tokens -= 1
+            print(f"[RATE LIMITER] Request ALLOWED. Tokens remaining: {self.tokens:.2f}")
+            return True
+        else:
+            print("[RATE LIMITER] Request DENIED! HTTP 429 Too Many Requests.")
+            return False
+
+limiter = TokenBucketRateLimiter(capacity=3, refill_rate_per_sec=1)
+print(limiter.allow_request()) # 1
+print(limiter.allow_request()) # 2
+print(limiter.allow_request()) # 3
+print(limiter.allow_request()) # Denied! (Tokens empty)
+time.sleep(1.1)
+print(limiter.allow_request()) # Allowed! (Token refilled)`,
+    js_code: `// Production-ready Token Bucket Rate Limiter with dynamic token replenishment
+class TokenBucketRateLimiter {
+  constructor(capacity = 5, refillRatePerSec = 1) {
+    this.capacity = capacity;
+    this.refillRate = refillRatePerSec;
+    this.tokens = capacity;
+    this.lastRefillTime = Date.now();
+  }
+
+  _refill() {
+    const now = Date.now();
+    const elapsedSec = (now - this.lastRefillTime) / 1000;
+    const addTokens = elapsedSec * this.refillRate;
+
+    if (addTokens > 0) {
+      this.tokens = Math.min(this.capacity, this.tokens + addTokens);
+      this.lastRefillTime = now;
+    }
+  }
+
+  allowRequest() {
+    this._refill();
+    if (this.tokens >= 1) {
+      this.tokens -= 1;
+      console.log(\`[RATE LIMITER] Request ALLOWED. Tokens remaining: \${this.tokens.toFixed(2)}\`);
+      return true;
+    }
+    console.error('[RATE LIMITER] Request DENIED! HTTP 429 Too Many Requests.');
+    return false;
+  }
+}
+
+const limiter = new TokenBucketRateLimiter(3, 1);
+limiter.allowRequest();
+limiter.allowRequest();
+limiter.allowRequest();
+limiter.allowRequest(); // Denied!
+setTimeout(() => limiter.allowRequest(), 1100); // Refilled: Allowed!`,
+    py_explanation: "Implements the industry-standard Token Bucket algorithm. replenished tokens dynamically on each check using elapsed timestamps to avoid resource-intensive background timer loops.",
+    js_explanation: "Models an on-demand token replenishment system. Calculates fractional token refills dynamically, avoiding expensive background intervals to maximize speed."
+  },
+  {
+    id: 28,
+    title: "API Gateways",
+    category: "APIs",
+    est: "6 min read",
+    tldr: "A reverse proxy that acts as the single entry point for all clients. Routes requests, handles authentication, runs rate limiters, and aggregates payloads.",
+    reqs: [
+      "Route requests dynamically based on URL path parameters",
+      "Process JWT authentication header validations",
+      "Integrate rate limiter verification checks"
+    ],
+    nfreqs: [
+      "Ultra-low request routing overhead (<1ms)",
+      "Zero connection leaks under heavy request loads"
+    ],
+    components: [
+      ["Reverse Proxy Router", "Inspects request paths and forwards TCP packets directly to downstream service pools."],
+      ["Auth Validator", "Validates JWT signatures before passing requests downstream, protecting backends from security checks."],
+      ["Payload Aggregator", "Combines responses from multiple microservices into a single JSON body to minimize client network calls."]
+    ],
+    decisions: [
+      ["Gateway Offloading", "Move authentication, SSL termination, and rate-limiting to the gateway. This simplifies backends, allowing them to focus entirely on core business logic."],
+      ["Gateway Bottlenecks", "Avoid writing heavy CPU logic (like image processing) in the gateway. The gateway sits in front of all services; keeping it lightweight prevents it from becoming a system bottleneck."]
+    ],
+    diagram: `flowchart TD
+    Client["Client Request"]
+    Gateway["API Gateway (Auth + Rate Limit)"]
+    AuthService["Auth Microservice"]
+    PaymentService["Payment Microservice"]
+
+    Client ==> Gateway
+    Gateway ==> |Passed Auth Check| AuthService
+    Gateway ==> |Passed Auth Check| PaymentService
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `# A complete API Gateway simulator featuring dynamic routing, authentication checks, and rate-limiting
+class APIGatewayMock:
+    def __init__(self):
+        # Service routing registry map
+        self.routes = {
+            "/api/v1/auth": "AuthMicroserviceNode",
+            "/api/v1/payments": "PaymentsMicroserviceNode"
+        }
+        # Simulation keys
+        self.valid_tokens = {"jwt_signed_key_101": "user_alice"}
+        self.banned_ips = ["192.168.1.99"]
+
+    def process_incoming_request(self, path, auth_token, client_ip):
+        print(f"\\n[GATEWAY] Intercepted request for {path} from IP {client_ip}")
+
+        # 1. Security Check: Block banned IPs
+        if client_ip in self.banned_ips:
+            print("[GATEWAY ALERT] HTTP 403 Forbidden: IP address blacklisted.")
+            return "HTTP 403 Forbidden"
+
+        # 2. Authentication Check
+        if not auth_token or auth_token not in self.valid_tokens:
+            print("[GATEWAY ALERT] HTTP 401 Unauthorized: Invalid JWT signature.")
+            return "HTTP 401 Unauthorized"
+
+        # 3. Request Routing
+        if path in self.routes:
+            target_service = self.routes[path]
+            print(f"[GATEWAY SUCCESS] Request verified! Routing directly to service: '{target_service}'")
+            return f"Routed to {target_service} -> OK"
+        else:
+            print("[GATEWAY ALERT] HTTP 404: Route path not registered.")
+            return "HTTP 404 Not Found"
+
+gateway = APIGatewayMock()
+# Unauthorized request:
+gateway.process_incoming_request("/api/v1/payments", auth_token="forged_token", client_ip="192.168.1.5")
+# Authorized request:
+gateway.process_incoming_request("/api/v1/payments", auth_token="jwt_signed_key_101", client_ip="192.168.1.5")`,
+    js_code: `// API Gateway simulator validating security gates and routing requests
+class APIGatewayMock {
+  constructor() {
+    this.routes = {
+      '/api/v1/auth': 'AuthMicroserviceNode',
+      '/api/v1/payments': 'PaymentsMicroserviceNode'
+    };
+    this.validTokens = { jwt_signed_key_101: 'user_alice' };
+    this.bannedIps = ['192.168.1.99'];
+  }
+
+  processRequest(path, authToken, clientIp) {
+    console.log(\`\\n[GATEWAY] Intercepted request: \${path} from \${clientIp}\`);
+
+    // 1. IP blacklist filter
+    if (this.bannedIps.includes(clientIp)) {
+      console.error('[GATEWAY ALERT] HTTP 403 Forbidden: IP is blocked.');
+      return 'HTTP 403 Forbidden';
+    }
+
+    // 2. Auth verification
+    if (!authToken || !this.validTokens[authToken]) {
+      console.error('[GATEWAY ALERT] HTTP 401 Unauthorized: Invalid JWT.');
+      return 'HTTP 401 Unauthorized';
+    }
+
+    // 3. Routing resolution
+    if (path in this.routes) {
+      const service = this.routes[path];
+      console.log(\`[GATEWAY] Success! Routing to service: '\${service}'\`);
+      return \`Routed to \${service} -> OK\`;
+    }
+
+    console.error('[GATEWAY ALERT] HTTP 404 Route not found.');
+    return 'HTTP 404 Not Found';
+  }
+}
+
+const gateway = new APIGatewayMock();
+gateway.processRequest('/api/v1/payments', 'forged_token', '192.168.1.5');
+gateway.processRequest('/api/v1/payments', 'jwt_signed_key_101', '192.168.1.5');`,
+    py_explanation: "Models an API Gateway that runs security checks (IP filtering, token validation) and routes requests dynamically to backend microservices, keeping individual services clean.",
+    js_explanation: "Implements critical API Gateway patterns: authentication verification, IP blacklisting, and route distribution, acting as the system's public entry point."
+  },
+  {
+    id: 29,
+    title: "Idempotency (API keys, deduplication)",
+    category: "Scale",
+    est: "6 min read",
+    tldr: "Guaranteeing that an operation produces the same result even if executed multiple times with the same inputs, preventing duplicate database writes on client retries.",
+    reqs: [
+      "Implement idempotency key cache structures",
+      "Process request fingerprinting checksum generation",
+      "Serve cached responses for duplicate transactions"
+    ],
+    nfreqs: [
+      "Ultra-low latency key matching (<1ms)",
+      "Reliable lock transitions under concurrent attempts"
+    ],
+    components: [
+      ["Idempotency Key", "A unique client-generated UUID sent in headers (e.g. Idempotency-Key: key_123) to identify a specific transaction."],
+      ["Key Database Cache", "Fast, short-term storage (Redis) that maps idempotency keys to their corresponding API responses."],
+      ["Deduplication Lock", "A lock that prevents concurrent duplicate requests from running at the same time while the first write finishes."]
+    ],
+    decisions: [
+      ["Key Expiration (TTL)", "Store idempotency keys in Redis with a 24-hour TTL. This protects the system from duplicate calls during payment retries without consuming storage permanently."],
+      ["Verification Scope", "Verify request fingerprints. If a client retries a request with an existing Idempotency Key but alters the payload body, reject the call (HTTP 422 Unprocessable Entity) to flag potential fraud."]
+    ],
+    diagram: `flowchart TD
+    Request["POST /charge (Key: X)"]
+    CacheCheck{"Key X in Redis?"}
+    Execute["Execute DB Write & Cache Response"]
+    ReturnCached["Return Cached Original Response"]
+
+    Request ==> CacheCheck
+    CacheCheck ==> |No| Execute
+    CacheCheck ==> |Yes| ReturnCached
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hashlib
+
+# An Idempotency Middleware engine that prevents duplicate transactions using request fingerprint checks
+class IdempotentTransactionManager:
+    def __init__(self):
+        # Redis-style memory cache: idempotency_key -> (request_hash, saved_response)
+        self.key_store = {}
+
+    def _generate_fingerprint(self, body_payload):
+        # Generate hash of request body to detect payload modifications
+        return hashlib.md5(body_payload.encode()).hexdigest()
+
+    def process_transaction(self, idempotency_key, body_payload, execute_write_func):
+        req_hash = self._generate_fingerprint(body_payload)
+
+        # 1. Check if the idempotency key was already processed
+        if idempotency_key in self.key_store:
+            saved_hash, saved_response = self.key_store[idempotency_key]
+            
+            # Check for payload tampering
+            if req_hash != saved_hash:
+                print("[IDEMPOTENCY ALERT] Rejected! Reused key with modified payload.")
+                return "HTTP 422: Idempotency Key payload mismatch."
+            
+            print(f"[DEDUPLICATION] Duplicate request detected! Serving original cached response.")
+            return saved_response
+
+        # 2. Key is unique. Execute database write safely
+        response = execute_write_func(body_payload)
+        
+        # Cache key, request hash, and resulting response
+        self.key_store[idempotency_key] = (req_hash, response)
+        return response
+
+# Database write execution mock
+def db_charge_user(payload):
+    print(f"[DATABASE WRITE] Successfully charged user payment: {payload}")
+    return "CHARGED_200_OK"
+
+manager = IdempotentTransactionManager()
+payload_data = '{"user": "Alice", "charge": 500}'
+
+# First Transaction attempt: Executes DB write
+resp1 = manager.process_transaction("idemp_uuid_101", payload_data, db_charge_user)
+# Second Transaction attempt (identical payload): Deduplicated, returns cached response
+resp2 = manager.process_transaction("idemp_uuid_101", payload_data, db_charge_user)
+# Tampered Transaction attempt (reused key, altered body): Rejected!
+resp3 = manager.process_transaction("idemp_uuid_101", '{"user": "Alice", "charge": 900}', db_charge_user)`,
+    js_code: `const crypto = require('crypto');
+
+// Idempotency Middleware engine ensuring transaction execution safety
+class IdempotencyManager {
+  constructor() {
+    this.keyStore = new Map(); // key -> { hash, response }
+  }
+
+  _getHash(bodyStr) {
+    return crypto.createHash('md5').update(bodyStr).digest('hex');
+  }
+
+  processTransaction(idempotencyKey, bodyStr, executeWriteCallback) {
+    const currentHash = this._getHash(bodyStr);
+
+    // 1. Deduplication match check
+    if (this.keyStore.has(idempotencyKey)) {
+      const entry = this.keyStore.get(idempotencyKey);
+      if (entry.hash !== currentHash) {
+        console.error('[IDEMPOTENCY ALERT] Rejected: Payload modified for existing key.');
+        return 'HTTP 422 Payload Mismatch';
+      }
+      console.log('[DEDUPLICATION] Duplicate request detected. Serving cached response.');
+      return entry.response;
+    }
+
+    // 2. Unique transaction: run database write
+    const response = executeWriteCallback(bodyStr);
+    this.keyStore.set(idempotencyKey, { hash: currentHash, response });
+    return response;
+  }
+}
+
+const dbWrite = (body) => {
+  console.log(\`[DB WRITE] Executing charge for: \${body}\`);
+  return 'CHARGED_200_OK';
+};
+
+const manager = new IdempotencyManager();
+const payload = '{"user":"Alice","amount":500}';
+
+manager.processTransaction('idemp_key_001', payload, dbWrite);
+manager.processTransaction('idemp_key_001', payload, dbWrite); // Deduplicated!
+manager.processTransaction('idemp_key_001', '{"user":"Alice","amount":900}', dbWrite); // Blocked!`,
+    py_explanation: "Demonstrates payment idempotency. Uses request hashing to prevent double-charging during network retries, and rejects calls if the payload changes under an existing key.",
+    js_explanation: "Models an idempotency middleware system. Uses request fingerprints and MD5 hashing to filter duplicates, returning the original response instantly and safely."
+  },
+  {
+    id: 30,
+    title: "Consistent Hashing & Leader Election (Raft/Paxos concepts)",
+    category: "Scale",
+    est: "8 min read",
+    tldr: "Consistent Hashing maps keys to a ring, minimizing data migrations when nodes scale. Consensus algorithms (Raft) ensure that a single coordinator is elected via majority voting.",
+    reqs: [
+      "Implement operational Consistent Hashing Ring with virtual nodes",
+      "Simulate Raft voting consensus structures",
+      "Minimize data migrations on node scaling events"
+    ],
+    nfreqs: [
+      "Logarithmic routing scale under huge node pools",
+      "Fast consensus stabilization times (<100ms)"
+    ],
+    components: [
+      ["Consistent Hash Ring", "A logical ring where both database nodes and user keys are hashed, distributing keys to the next node in clockwise order."],
+      ["Virtual Nodes (VNodes)", "Sub-hashes of physical nodes placed across the ring to ensure a highly uniform data distribution."],
+      ["Consensus Election Term", "A voting interval in Raft where cluster nodes vote to select a single, consistent leader node."]
+    ],
+    decisions: [
+      ["Consistent Hashing ring scale", "Always deploy Virtual Nodes. Placing 100+ virtual nodes per physical instance prevents uneven clustering, distributing keys uniformly."],
+      ["Quorum Majority", "In Raft election logic, a leader must receive votes from a strict majority (N/2 + 1) of nodes, protecting the system from split-brain scenarios if the network partitions."]
+    ],
+    diagram: `flowchart TD
+    Key["User Key Hash"]
+    Ring{"Consistent Hash Ring"}
+    NodeA["Node A (Virtual Node)"]
+    NodeB["Node B (Virtual Node)"]
+
+    Key ==> Ring
+    Ring ==> |Clockwise search| NodeA
+    Ring ==> |Clockwise search| NodeB
+    classDef default fill:#161b27,stroke:#2a3348,stroke-width:1.5px,color:#ffffff,rx:6,ry:6,font-family:JetBrains Mono,font-weight:600;
+    linkStyle default stroke:#3b82f6,stroke-width:2px,fill:none;`,
+    py_code: `import hashlib
+import bisect
+
+# A highly accurate Consistent Hashing Ring featuring Virtual Nodes for uniform data distribution
+class ConsistentHashRing:
+    def __init__(self, replicas=3):
+        self.replicas = replicas  # Number of virtual nodes per physical node
+        self.ring = []            # Sorted list of virtual node hashes
+        self.node_map = {}        # hash -> physical_node_ip
+
+    def _hash(self, key):
+        # Secure SHA-256 binary hash returned as integer
+        return int(hashlib.sha256(key.encode()).hexdigest(), 16)
+
+    def add_node(self, node_ip):
+        # Create virtual nodes to ensure a balanced ring distribution
+        for i in range(self.replicas):
+            vnode_name = f"{node_ip}-vnode-{i}"
+            vnode_hash = self._hash(vnode_name)
+            
+            # Insert into sorted ring list
+            bisect.insort(self.ring, vnode_hash)
+            self.node_map[vnode_hash] = node_ip
+        print(f"[HASH RING] Registered Node '{node_ip}' with {self.replicas} VNodes.")
+
+    def get_node(self, key):
+        if not self.ring:
+            return None
+        key_hash = self._hash(key)
+        
+        # Binary search: find the first vnode hash >= key_hash (clockwise search)
+        idx = bisect.bisect_right(self.ring, key_hash)
+        # Wrap around to index 0 if key hash is larger than all vnodes
+        if idx == len(self.ring):
+            idx = 0
+            
+        vnode_hash = self.ring[idx]
+        return self.node_map[vnode_hash]
+
+ring = ConsistentHashRing(replicas=3)
+ring.add_node("10.0.0.1")
+ring.add_node("10.0.0.2")
+print("[ROUTE key_920]:", ring.get_node("key_920"))
+print("[ROUTE key_10]:", ring.get_node("key_10"))`,
+    js_code: `const crypto = require('crypto');
+
+// A complete Consistent Hashing Ring utilizing virtual nodes
+class ConsistentHashRing {
+  constructor(replicas = 3) {
+    this.replicas = replicas;
+    this.ring = []; // Sorted list of hashes
+    this.nodeMap = new Map(); // hash -> physical_node_ip
+  }
+
+  _hash(key) {
+    const hash = crypto.createHash('sha256').update(key).digest('hex');
+    return parseInt(hash.substring(0, 8), 16);
+  }
+
+  addNode(nodeIp) {
+    for (let i = 0; i < this.replicas; i++) {
+      const vnodeName = \`\${nodeIp}-vnode-\${i}\`;
+      const vnodeHash = this._hash(vnodeName);
+      
+      this.ring.push(vnodeHash);
+      this.nodeMap.set(vnodeHash, nodeIp);
+    }
+    // Maintain ring in sorted order
+    this.ring.sort((a, b) => a - b);
+    console.log(\`[HASH RING] Registered '\${nodeIp}' with \${this.replicas} VNodes.\`);
+  }
+
+  getNode(key) {
+    if (this.ring.length === 0) return null;
+    const keyHash = this._hash(key);
+
+    // Clockwise scan: find the first vnode >= keyHash
+    for (let i = 0; i < this.ring.length; i++) {
+      if (this.ring[i] >= keyHash) {
+        return this.nodeMap.get(this.ring[i]);
+      }
+    }
+    // Wrap around to the start of the ring
+    return this.nodeMap.get(this.ring[0]);
+  }
+}
+
+const ring = new ConsistentHashRing(3);
+ring.addNode('10.0.0.1');
+ring.addNode('10.0.0.2');
+console.log('[ROUTE key_920]:', ring.getNode('key_920'));
+console.log('[ROUTE key_10]:', ring.getNode('key_10'));`,
+    py_explanation: "Implements a consistent hashing ring using binary search (bisect). Placing virtual nodes across the ring ensures a balanced distribution of keys, minimizing data migrations when nodes scale.",
+    js_explanation: "Models consistent hashing. Uses sorted key arrays and clockwise scanning to resolve nodes, mimicking the hashing rings of distributed database engines."
+  }
+];
+
+let curQ = 0;
+let fstate = '';
+let activeLang = localStorage.getItem('sd_30_lang') || 'js';
+
+function initList() {
+  const ml = document.getElementById('moblist');
+  const dl = document.getElementById('deskqlist');
+  ml.innerHTML = ''; dl.innerHTML = '';
+  
+  // Group concepts by category
+  const categories = ["Networking", "APIs", "Data", "Scale"];
+  
+  categories.forEach(cat => {
+    const filtered = QS.filter(q => q.category === cat);
+    if (filtered.length > 0) {
+      // Add Sidebar Category Headers
+      const headerHtml = `<div class="sidebar-category-header" data-cat="${cat}">${cat}</div>`;
+      dl.innerHTML += headerHtml;
+      
+      filtered.forEach(q => {
+        const qn = q.id < 10 ? '0'+q.id : q.id;
+        const catColor = getCategoryColor(q.category);
+        
+        const html = `<div class="qi" id="qi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+          <span class="qn">${qn}</span>
+          <span class="qt">${q.title}</span>
+          <span class="fdot" style="background:${catColor}"></span>
+        </div>`;
+        dl.innerHTML += html;
+        
+        const mhtml = `<div class="qi mob-qi" id="mqi-${q.id}" onclick="showQ(${q.id})" data-cat="${q.category}">
+          <span class="qn">${qn}</span>
+          <span class="qt">${q.title}</span>
+          <span class="fdot" style="background:${catColor}"></span>
+        </div>`;
+        ml.innerHTML += mhtml;
+      });
+    }
+  });
+}
+
+function getCategoryColor(cat) {
+  switch(cat) {
+    case 'Networking': return '#3b82f6';
+    case 'APIs': return '#10b981';
+    case 'Data': return '#f59e0b';
+    case 'Scale': return '#ec4899';
+    default: return '#ffffff';
+  }
+}
+
+function showQ(id) {
+  curQ = id;
+  const q = QS.find(x => x.id === id);
+  if (!q) return;
+  
+  closeMob();
+  document.getElementById('welcome').style.display = 'none';
+  
+  document.querySelectorAll('.qi').forEach(el => el.classList.remove('active'));
+  const dqi = document.getElementById('qi-'+id);
+  const mqi = document.getElementById('mqi-'+id);
+  if(dqi) dqi.classList.add('add', 'active');
+  if(mqi) mqi.classList.add('add', 'active');
+  
+  const qn = q.id < 10 ? '0'+q.id : q.id;
+  const pct = Math.round((q.id / QS.length) * 100);
+  
+  let badgesHTML = `<span class="fbadge" style="color:${getCategoryColor(q.category)};border-color:${getCategoryColor(q.category)}33;background:${getCategoryColor(q.category)}15">${q.category}</span>`;
+  badgesHTML += `<span class="fbadge" style="color:#e2e8f0;border-color:#2a3348;background:#1e2535">${q.est}</span>`;
+  
+  let reqsHTML = '';
+  q.reqs.forEach(r => { reqsHTML += `<li>${r}</li>`; });
+  
+  let nfreqsHTML = '';
+  q.nfreqs.forEach(r => { nfreqsHTML += `<li>${r}</li>`; });
+  
+  let compHTML = '';
+  q.components.forEach(c => {
+    compHTML += `<div class="ccard">
+      <div class="cname">${c[0]}</div>
+      <div class="cdesc">${c[1]}</div>
+    </div>`;
+  });
+  
+  let decHTML = '';
+  q.decisions.forEach(d => {
+    decHTML += `<div class="drow">
+      <div class="dq">${d[0]}</div>
+      <div class="da">${d[1]}</div>
+    </div>`;
+  });
+  
+  let navHTML = '';
+  if (id > 1) {
+    const prev = QS.find(x => x.id === id - 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id-1})">← Previous<br><span style="color:#8b949e;font-size:0.65rem">${prev.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">← Previous</button>`;
+  }
+  
+  if (id < QS.length) {
+    const next = QS.find(x => x.id === id + 1);
+    navHTML += `<button class="nbtn" onclick="showQ(${id+1})">Next →<br><span style="color:#8b949e;font-size:0.65rem">${next.title}</span></button>`;
+  } else {
+    navHTML += `<button class="nbtn off">Next →</button>`;
+  }
+  
+  let mermaidHtml = `<div class="slabel">System Flowchart / Logical Diagram</div>
+    <div class="mermaid-container"><pre class="mermaid" id="mermaid-canvas-${q.id}">${q.diagram}</pre></div>`;
+  
+  const content = `
+    <div class="prog-strip"><div class="prog-fill" style="width:${pct}%"></div></div>
+    <div class="badges">${badgesHTML}</div>
+    <div class="qhead">
+      <div class="qnum">${qn}</div>
+      <div class="qtitle">${q.title}</div>
+    </div>
+    
+    <div class="tldr"><strong>Architectural Overview:</strong> ${q.tldr}</div>
+    
+    <div class="slabel">Design Requirements</div>
+    <div class="rgrid">
+      <div class="rcard"><h4>Functional Specs</h4><ul>${reqsHTML}</ul></div>
+      <div class="rcard nf"><h4>Non-Functional Scale Specs</h4><ul>${nfreqsHTML}</ul></div>
+    </div>
+    
+    ${mermaidHtml}
+    
+    <div class="slabel">Core Architectural Entities</div>
+    <div class="cgrid">${compHTML}</div>
+    
+    <div class="slabel">Critical Tradeoffs & Design Decisions</div>
+    <div class="dlist">${decHTML}</div>
+
+    <div class="slabel">Production-Grade Code Walkthrough</div>
+    <div class="lang-header">
+      <span style="font-size:0.8rem;color:#8b949e;font-weight:700;">Implementation Snippet</span>
+      <div class="lang-toggle">
+        <button class="btn-lang \${activeLang === 'py' ? 'active' : ''}" data-lang="py" onclick="setLanguage('py')">Python</button>
+        <button class="btn-lang \${activeLang === 'js' ? 'active' : ''}" data-lang="js" onclick="setLanguage('js')">JavaScript</button>
+      </div>
+    </div>
+
+    <!-- Python Code Block -->
+    <div class="code-block py">
+      <pre class="code-wrap"><code class="language-python">${escapeHtml(q.py_code)}</code></pre>
+      <div class="code-explanation">
+        <h5>Python Implementation Notes</h5>
+        \${q.py_explanation}
+      </div>
+    </div>
+
+    <!-- JS Code Block -->
+    <div class="code-block js">
+      <pre class="code-wrap"><code class="language-javascript">${escapeHtml(q.js_code)}</code></pre>
+      <div class="code-explanation">
+        <h5>JavaScript Implementation Notes</h5>
+        \${q.js_explanation}
+      </div>
+    </div>
+    
+    <div class="navrow">${navHTML}</div>
+  `;
+  
+  document.getElementById('qcontent').innerHTML = content;
+  document.getElementById('mainwrap').scrollTop = 0;
+  
+  // Apply Syntax highlighting via Prism
+  Prism.highlightAll();
+
+  // Apply Language toggle visibility
+  setLanguage(activeLang);
+
+  if (window.renderMermaid) {
+    setTimeout(() => window.renderMermaid(`mermaid-canvas-${q.id}`), 50);
+  }
+  
+  if(dqi) {
+    const sb = document.querySelector('.sidebar');
+    const offset = dqi.offsetTop - sb.offsetTop;
+    if (offset < sb.scrollTop || offset > sb.scrollTop + sb.clientHeight - 40) {
+      sb.scrollTop = offset - 100;
+    }
+  }
+}
+
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function setLanguage(lang) {
+  activeLang = lang;
+  localStorage.setItem('sd_30_lang', lang);
+  document.querySelectorAll('.btn-lang').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  document.querySelectorAll('.code-block').forEach(block => {
+    block.style.display = 'none';
+  });
+  document.querySelectorAll('.code-block.' + lang).forEach(block => {
+    block.style.display = 'block';
+  });
+}
+
+function openMob() {
+  document.getElementById('moboverlay').classList.add('open');
+}
+function closeMob() {
+  document.getElementById('moboverlay').classList.remove('open');
+}
+
+function toggleFilterCategory(f) {
+  const btnId = 'f' + f.toLowerCase().substring(0, 4);
+  const activeBtn = document.getElementById(btnId);
+  
+  if(fstate === f) {
+    fstate = '';
+    activeBtn.classList.remove('on');
+  } else {
+    // Reset all filter buttons
+    document.querySelectorAll('.topbar-right .fbtn').forEach(btn => {
+      if (btn.id !== 'fhome') btn.classList.remove('on');
+    });
+    fstate = f;
+    activeBtn.classList.add('on');
+  }
+  applyFilters();
+}
+
+function doSearch(val, source) {
+  if (source === 'desk') {
+    document.getElementById('msrch').value = val;
+  } else {
+    document.getElementById('dsrch').value = val;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const val = document.getElementById('dsrch').value.toLowerCase();
+  
+  document.querySelectorAll('.qi').forEach(el => {
+    const qid = parseInt(el.id.replace('qi-','').replace('mqi-',''));
+    const q = QS.find(x => x.id === qid);
+    if(!q) return;
+    
+    let matchF = true;
+    if (fstate && q.category !== fstate) matchF = false;
+    
+    let matchS = true;
+    if (val && !q.title.toLowerCase().includes(val) && !q.tldr.toLowerCase().includes(val)) {
+      matchS = false;
+    }
+    
+    if (matchF && matchS) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
+  // Hide category headers if no visible items inside them
+  document.querySelectorAll('.sidebar-category-header').forEach(header => {
+    const cat = header.dataset.cat;
+    const itemsInCat = document.querySelectorAll(`.qi[data-cat="\${cat}"]:not(.hidden)`);
+    if (itemsInCat.length === 0) {
+      header.style.display = 'none';
+    } else {
+      header.style.display = 'block';
+    }
+  });
+}
+
+document.addEventListener('keydown', (e) => {
+  if (curQ > 0) {
+    if (e.key === 'ArrowDown' || e.key === 'j') {
+      if (curQ < QS.length) { showQ(curQ + 1); e.preventDefault(); }
+    } else if (e.key === 'ArrowUp' || e.key === 'k') {
+      if (curQ > 1) { showQ(curQ - 1); e.preventDefault(); }
+    }
+  }
+});
+
+initList();
+</script>
+
+<!-- Prism JS Core and Language Compilers for Dynamic Highlighting -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ 
+    startOnLoad: false, 
+    theme: 'base',
+    themeVariables: {
+      background: 'transparent',
+      primaryColor: '#161b27',
+      primaryTextColor: '#ffffff',
+      primaryBorderColor: '#10b981',
+      lineColor: '#3b82f6',
+      secondaryColor: '#1e2535',
+      tertiaryColor: '#1e2535',
+      fontFamily: '"JetBrains Mono", monospace'
+    },
+    flowchart: {
+      curve: 'basis',
+      padding: 20
+    }
+  });
+  window.renderMermaid = async function(id) {
+    try {
+      await mermaid.run({
+        querySelector: '#' + id
+      });
+    } catch(e) {
+      console.error(e);
+    }
+  };
+</script>
+</body>
+</html>
