@@ -1,0 +1,1665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kafka & RabbitMQ Mastery — Complete Architecture & Integration Guide</title>
+  <meta name="description" content="Senior-level mastery guide to Apache Kafka and RabbitMQ. Distributed system patterns, high-throughput event streaming, message broker topologies, and production code.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root {
+      --bg: #07070a;
+      --bg-sec: #111116;
+      --bg-card: #151522;
+      --bg-card-hover: #1b1b2d;
+      --border: #222235;
+      --border-accent: rgba(167, 139, 250, 0.4);
+      --text: #f0f0f4;
+      --text-dim: #9ea0b6;
+      --muted: #62647a;
+      --accent: #a78bfa;
+      --accent-glow: rgba(167, 139, 250, 0.15);
+      --cyan: #22d3ee;
+      --cyan-glow: rgba(34, 211, 238, 0.1);
+      --green: #10b981;
+      --green-glow: rgba(16, 185, 129, 0.1);
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --font-syne: 'Syne', sans-serif;
+      --font-inter: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-inter);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── GLOW BACKGROUND ── */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--bg-sec);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .back-btn {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+      transition: all 0.2s;
+    }
+
+    .back-btn:hover {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .logo {
+      font-family: var(--font-syne);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(to right, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo span {
+      font-family: var(--font-inter);
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    .search-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      color: var(--text);
+      font-family: var(--font-inter);
+      font-size: 0.85rem;
+      width: 250px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(167, 139, 250, 0.25);
+    }
+
+    .search-box::placeholder {
+      color: var(--muted);
+    }
+
+    /* ── TAB NAVIGATION ── */
+    .tab-nav {
+      background: var(--bg-sec);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 54px;
+      z-index: 199;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-nav-inner {
+      display: flex;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      min-width: max-content;
+    }
+
+    .tab-btn {
+      padding: 1rem 1.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--font-syne);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── MAIN CONTAINER ── */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 5rem;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROGRESS WRAPPER ── */
+    .prog-wrap {
+      background: var(--bg-sec);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .prog-info {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .prog-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .prog-track {
+      background: rgba(0,0,0,0.3);
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.02);
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+
+    .prog-count {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      white-space: nowrap;
+      background: var(--accent-glow);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    /* ── SECTION LABELS ── */
+    .sec-label {
+      font-family: var(--font-syne);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin: 2rem 0 0.75rem;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sec-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .sec-label:first-of-type {
+      margin-top: 0;
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 8px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    .badge-critical {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .badge-important {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .badge-advanced {
+      background: rgba(167, 139, 250, 0.12);
+      color: #c4b5fd;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+    }
+
+    .badge-new {
+      background: rgba(34, 211, 238, 0.12);
+      color: #67e8f9;
+      border: 1px solid rgba(34, 211, 238, 0.2);
+    }
+
+    /* ── ACCORDIONS ── */
+    .acc {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      background: var(--bg-sec);
+      transition: all 0.2s;
+    }
+
+    .acc:hover {
+      border-color: rgba(167, 139, 250, 0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .acc.open {
+      border-color: var(--border-accent);
+      box-shadow: 0 4px 25px rgba(167, 139, 250, 0.05);
+    }
+
+    .acc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 1.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .acc-header:hover {
+      background: rgba(255,255,255,0.01);
+    }
+
+    .acc-title {
+      font-family: var(--font-syne);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .acc-arrow {
+      color: var(--muted);
+      font-size: 0.7rem;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .acc.open .acc-arrow {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+
+    .acc-body {
+      display: none;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+    }
+
+    .acc.open .acc-body {
+      display: block;
+    }
+
+    .acc-content {
+      padding: 1.75rem;
+    }
+
+    /* ── CONTENT FORMATTING ── */
+    .def-box {
+      background: rgba(167, 139, 250, 0.03);
+      border-left: 4px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text-dim);
+    }
+
+    .def-box strong {
+      color: #fff;
+    }
+
+    .theory {
+      font-size: 0.9rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+      margin-bottom: 1.25rem;
+    }
+
+    .theory strong {
+      color: #fff;
+    }
+
+    .theory ul, .theory ol {
+      margin: 0.6rem 0 0.8rem 1.4rem;
+    }
+
+    .theory li {
+      margin-bottom: 0.4rem;
+    }
+
+    .theory code {
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--cyan);
+    }
+
+    .code-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin: 1.25rem 0 0.4rem;
+      font-family: var(--font-syne);
+    }
+
+    pre {
+      border-radius: 10px;
+      overflow: auto;
+      margin-bottom: 1.25rem;
+      border: 1px solid var(--border);
+    }
+
+    code.hljs {
+      font-family: var(--font-mono) !important;
+      font-size: 0.82rem !important;
+      line-height: 1.7 !important;
+      padding: 1.25rem !important;
+      background: #0f1015 !important;
+    }
+
+    .explanation {
+      background: var(--bg-sec);
+      border-radius: 10px;
+      padding: 1rem 1.4rem;
+      margin-top: 0.85rem;
+      border: 1px solid var(--border);
+    }
+
+    .explanation h4 {
+      font-family: var(--font-syne);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.6rem;
+    }
+
+    .explanation ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .explanation li {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      padding: 4px 0 4px 16px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .explanation li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.75rem;
+      top: 4px;
+    }
+
+    .tip {
+      background: var(--green-glow);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.85rem;
+      color: #34d399;
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+
+    .tip::before {
+      content: '💡 ';
+      font-size: 1rem;
+    }
+
+    .warn {
+      background: rgba(245, 158, 11, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 10px;
+      padding: 0.85rem 1.2rem;
+      font-size: 0.85rem;
+      color: #fbbf24;
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+
+    .warn::before {
+      content: '⚠️ ';
+      font-size: 1rem;
+    }
+
+    /* ── DIAGRAMS (ASCII/SVG/FANCY LAYOUTS) ── */
+    .diagram-container {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 1rem 0 1.25rem;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    .ascii-art {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: var(--cyan);
+      white-space: pre;
+      display: inline-block;
+      text-align: left;
+      margin: 0 auto;
+    }
+
+    .flex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .flex-card {
+      background: var(--bg-sec);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+
+    .flex-card h4 {
+      font-family: var(--font-syne);
+      font-size: 0.85rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.4rem;
+    }
+
+    /* ── COMPARISON TABLE ── */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+
+    th {
+      background: var(--bg-sec);
+      font-family: var(--font-syne);
+      color: #fff;
+      font-weight: 700;
+      padding: 1rem 1.25rem;
+      border-bottom: 2px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      vertical-align: top;
+      line-height: 1.6;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: rgba(255,255,255,0.01);
+      color: #fff;
+    }
+
+    .table-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      display: inline-block;
+      margin-top: 4px;
+    }
+
+    .tag-purple { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(167, 139, 250, 0.2); }
+    .tag-cyan { background: var(--cyan-glow); color: var(--cyan); border: 1px solid rgba(34, 211, 238, 0.2); }
+
+    /* Search highlight state */
+    .search-hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .topbar {
+        padding: 0.85rem 1rem;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-box {
+        width: 100%;
+      }
+      .tab-nav-inner {
+        padding: 0 1rem;
+      }
+      .main {
+        padding: 1.5rem 1rem;
+      }
+      .acc-content {
+        padding: 1rem;
+      }
+      .acc-title .badge {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="index.html" class="back-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 14L4 8L10 2"/>
+        </svg>
+        Mastery Hub
+      </a>
+      <div class="logo">Message Broker Mastery<span> · Kafka & RabbitMQ Deep Dive</span></div>
+    </div>
+    <input class="search-box" type="text" placeholder="Search topics..." id="searchInput" oninput="handleSearch(this.value)">
+  </div>
+
+  <!-- TAB NAVIGATION -->
+  <div class="tab-nav">
+    <div class="tab-nav-inner" id="tabNav">
+      <button class="tab-btn active" onclick="switchTab('foundations', this)">Broker Foundations</button>
+      <button class="tab-btn" onclick="switchTab('kafka', this)">Apache Kafka Deep Dive</button>
+      <button class="tab-btn" onclick="switchTab('rabbitmq', this)">RabbitMQ Deep Dive</button>
+      <button class="tab-btn" onclick="switchTab('patterns', this)">Distributed Patterns</button>
+      <button class="tab-btn" onclick="switchTab('compare', this)">Architectural Decision Matrix</button>
+    </div>
+  </div>
+
+  <!-- MAIN CURRICULUM -->
+  <div class="main" id="mainContent">
+
+    <!-- ── TAB: FOUNDATIONS ── -->
+    <div id="tab-foundations" class="tab-content active">
+      <div class="prog-wrap">
+        <div class="prog-info">
+          <div class="prog-title">Broker Foundations — Course Progress</div>
+          <div class="prog-track"><div class="prog-fill" id="prog-foundations"></div></div>
+        </div>
+        <div class="prog-count" id="progc-foundations">0 / 4 read</div>
+      </div>
+
+      <div class="sec-label">Foundational Architectural Concepts</div>
+
+      <!-- TOPIC 1 -->
+      <div class="acc" id="acc-foundations-0">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'foundations')">
+          <div class="acc-title">1. Why Asynchronous Messaging? <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="def-box">
+              <strong>Asynchronous Messaging: </strong>A communication model where systems exchange data without requiring both systems to be active, responsive, or connected concurrently. Messages are stored in a buffer (broker) until the receiver processes them.
+            </div>
+            <div class="theory">
+              In modern microservice architectures, tight coupling via synchronous protocols (like HTTP/REST) creates brittle systems. If Service A makes a synchronous request to Service B, and Service B is down, Service A fails too (Cascading Failures).
+              <br><br>
+              <strong>Key Architectural Benefits:</strong>
+              <ul>
+                <li><strong>Decoupling:</strong> Producers need zero knowledge of who consumes the message, how many consumers exist, or where they reside.</li>
+                <li><strong>Temporal Decoupling:</strong> The producer and consumer do not need to run at the same time. Messages queue up if the consumer is offline.</li>
+                <li><strong>Backpressure Management & Load Leveling:</strong> High traffic spikes can overwhelm downstream databases or services. A broker buffers the load, allowing consumers to pull and process messages at their own sustainable pace.</li>
+                <li><strong>Fault Tolerance:</strong> If a consumer crashes, state is maintained in the queue/topic. Processing resumes precisely from where it stalled once the service recovers.</li>
+              </ul>
+            </div>
+            
+            <div class="diagram-container">
+              <div class="ascii-art">
++---------------+      Sync HTTP Request (Tight Coupling)       +---------------+
+|   Producer    |---------------------------------------------->|   Consumer    |
++---------------+                                               +---------------+
+   (Wait/Block)                                                   (Must be online)
+
+=================================================================================
+
++---------------+       Async Publish        +---------+       Async Pull       +---------------+
+|   Producer    |--------------------------->| Message |----------------------->|   Consumer    |
++---------------+                            | Broker  |                        +---------------+
+  (Fire & Forget)                            +---------+                          (Pace Control)
+                                           (Buffered & Saved)</div>
+            </div>
+
+            <div class="explanation">
+              <h4>Key Takeaway</h4>
+              <ul>
+                <li>Synchronous REST: Perfect for immediate, query-style responses (e.g., retrieving a user profile page).</li>
+                <li>Asynchronous Messaging: Imperative for high-throughput, eventual consistency, integrations, and heavy computations (e.g., email notification systems, order checkout pipelines, analytics ingestion).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 2 -->
+      <div class="acc" id="acc-foundations-1">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'foundations')">
+          <div class="acc-title">2. Push vs. Pull Models <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Distributed message queues and streaming brokers distribute messages to consumers in one of two ways: **Push** (Broker-driven) or **Pull** (Consumer-driven). Understanding these models is critical when designing for high-throughput versus low-latency.
+            </div>
+
+            <div class="flex-grid">
+              <div class="flex-card">
+                <h4>Push Model (e.g., RabbitMQ)</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  The broker actively pushes messages to registered consumers as soon as they arrive in the queue.
+                  <br><br>
+                  <strong>Pros:</strong>
+                  <br>• Extremely low latency (near real-time delivery).
+                  <br>• Simple client code—no polling loops required.
+                  <br><br>
+                  <strong>Cons:</strong>
+                  <br>• Risk of overwhelming the consumer if inflow exceeds consumption capacity.
+                  <br>• Requires complex backpressure protocols (like <code>basic.qos prefetch</code>) to limit how many unacknowledged messages are pushed.
+                </p>
+              </div>
+              <div class="flex-card">
+                <h4>Pull Model (e.g., Apache Kafka)</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  Consumers actively poll the broker for batches of messages, specifying the maximum size and batch parameters.
+                  <br><br>
+                  <strong>Pros:</strong>
+                  <br>• Consumers have absolute control over their consumption rate (built-in backpressure safety).
+                  <br>• Excellent for high-volume batch processing and analytics.
+                  <br><br>
+                  <strong>Cons:</strong>
+                  <br>• Can introduce a minor delay (latency) while waiting for the next polling cycle.
+                  <br>• Consumers must run a continuous event/polling loop.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 3 -->
+      <div class="acc" id="acc-foundations-2">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'foundations')">
+          <div class="acc-title">3. Message Queues vs. Distributed Commit Logs <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="def-box">
+              <strong>Message Queue (RabbitMQ): </strong>Transient message storage. The primary objective is to route messages to consumers safely. Once a message is consumed and acknowledged, it is deleted from the broker.
+              <br><br>
+              <strong>Distributed Commit Log (Kafka): </strong>Append-only immutable record store. Messages are written sequentially to a physical disk file (log). Multiple consumers can read the same log at different offsets independently. Messages persist regardless of consumption status, adhering to a defined retention policy (e.g., 7 days).
+            </div>
+            <div class="theory">
+              This structural difference dictates their scale and behavior:
+              <ul>
+                <li><strong>Transient Queues:</strong> Scalability is restricted because tracking individual message acknowledgments (ACKs) and dynamic routing overheads requires memory and coordination inside the broker. Highly dynamic, complex routing topologies are native here.</li>
+                <li><strong>Sequential Logs:</strong> Scalability is highly scalable. The broker doesn't maintain state on which messages are read; instead, the **consumer** keeps track of its own position (Offset). Because reads/writes are sequential, they utilize OS page caches and disk capabilities efficiently.</li>
+              </ul>
+            </div>
+            <div class="tip">
+              Think of RabbitMQ as a **Postal Service** (delivers the mail, once read and discarded it's gone) and Kafka as a **Security Video Recorder** (writes everything to tape; you can watch it live, rewind it, skip ahead, or replay it 3 days later).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 4 -->
+      <div class="acc" id="acc-foundations-3">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'foundations')">
+          <div class="acc-title">4. AMQP vs. Kafka Custom Protocol <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              The underlying wire-protocols dictate how clients communicate with brokers:
+              <ul>
+                <li><strong>AMQP (Advanced Message Queuing Protocol):</strong> An open standard protocol utilized by RabbitMQ. It defines not just the network format, but a highly structured model of exchanges, queues, bindings, and channels. It supports rich routing topologies right out of the box.</li>
+                <li><strong>Kafka Binary TCP Protocol:</strong> A highly optimized, custom binary protocol designed specifically for high-throughput operations. It supports batching queries, compression, and direct zero-copy file system reads to maximize performance.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: APACHE KAFKA ── -->
+    <div id="tab-kafka" class="tab-content">
+      <div class="prog-wrap">
+        <div class="prog-info">
+          <div class="prog-title">Apache Kafka — Course Progress</div>
+          <div class="prog-track"><div class="prog-fill" id="prog-kafka"></div></div>
+        </div>
+        <div class="prog-count" id="progc-kafka">0 / 5 read</div>
+      </div>
+
+      <div class="sec-label">Deep Dive: Distributed Append-Only Event Log</div>
+
+      <!-- TOPIC 1 -->
+      <div class="acc" id="acc-kafka-0">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'kafka')">
+          <div class="acc-title">1. Kafka Cluster & Log Anatomy <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Apache Kafka runs as a cluster of one or more servers (called **Brokers**). In a traditional setup, Kafka uses **Apache ZooKeeper** to manage cluster metadata, coordinate leaders, and discover brokers. In modern Kafka (v3.0+), ZooKeeper is replaced by **KRaft** (Kafka Raft Metadata Mode), which runs within the brokers themselves, scaling to millions of partitions with near-instant controller recovery times.
+              <br><br>
+              <strong>Topics & Partitions:</strong>
+              <br>A **Topic** is a logical stream of events (e.g., <code>user-clicks</code>). To handle scale, topics are split into physical **Partitions** spread across the brokers. 
+              <ul>
+                <li>Every partition is an ordered, immutable sequence of messages.</li>
+                <li>Each message in a partition is assigned a sequential ID called an **Offset**.</li>
+                <li><strong>Message Order:</strong> Guarantees strict ordering *only* within a single partition, not across the entire topic!</li>
+              </ul>
+            </div>
+
+            <div class="diagram-container">
+              <div class="ascii-art">
+TOPIC: "user-signups"
+Partition 0: [Offset 0] -> [Offset 1] -> [Offset 2] -> [Offset 3] -> (Write Head)
+Partition 1: [Offset 0] -> [Offset 1] -> (Write Head)
+Partition 2: [Offset 0] -> [Offset 1] -> [Offset 2] -> (Write Head)
+
+* Partitions can be hosted on different Brokers (horizontal scalability!)
+* A replica factor of 3 means each Partition resides on 3 separate Brokers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 2 -->
+      <div class="acc" id="acc-kafka-1">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'kafka')">
+          <div class="acc-title">2. Producers, Partitioning, & ACKs <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Producers write data to topics. How a producer decides *which* partition to write to is critical:
+              <ul>
+                <li><strong>Round-Robin:</strong> If no message key is provided, writes are distributed round-robin (or using batch optimizations) across partitions.</li>
+                <li><strong>Key-Based Hash:</strong> If a key is provided (e.g., <code>userId: "123"</code>), Kafka hashes the key to assign the partition: <code>MurmurHash2(key) % totalPartitions</code>. This guarantees that all messages with the **same key** land in the **same partition**, maintaining strict sequential ordering of events for that entity.</li>
+              </ul>
+              <br>
+              <strong>Producer Acknowledgments (acks):</strong>
+              <br>Determines when a write is considered successful:
+              <ul>
+                <li><code>acks=0</code>: Fire and forget. High speed, high risk of data loss.</li>
+                <li><code>acks=1</code>: Acknowledged once the partition's **Leader** broker writes it to disk. Risk of data loss if Leader crashes before replicating.</li>
+                <li><code>acks=all</code> (or <code>-1</code>): Absolute durability. Acknowledged only when the Leader AND all In-Sync Replicas (ISRs) write it. Safe against broker crashes.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 3 -->
+      <div class="acc" id="acc-kafka-2">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'kafka')">
+          <div class="acc-title">3. Consumers & Consumer Groups <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Consumers subscribe to topics. For massive scale, multiple consumers form a **Consumer Group** to share the load:
+              <ul>
+                <li><strong>Partition Ownership:</strong> Each partition in a topic is assigned to exactly **one** consumer instance in a group. This prevents duplicate processing.</li>
+                <li><strong>Scalability Rule:</strong> If you have 4 partitions, you can have up to 4 consumers active in the group. Any extra consumers will sit idle as warm standby spares!</li>
+                <li><strong>Rebalancing:</strong> If a consumer in the group dies, Kafka detects this via heartbeats and triggers a *Rebalance*, reassigning partitions to active consumers automatically.</li>
+              </ul>
+            </div>
+
+            <div class="diagram-container">
+              <div class="ascii-art">
+   TOPIC PARTITIONS                   CONSUMER GROUP
++--------------------+            +--------------------+
+|  Topic P0          |----------->| Consumer Instance1 |
++--------------------+            +--------------------+
+|  Topic P1          |----------->| Consumer Instance2 |
++--------------------+            +--------------------+
+|  Topic P2          |---\        +--------------------+
++--------------------+    =======>| Consumer Instance3 |
+|  Topic P3          |---/        +--------------------+
++--------------------+</div>
+            </div>
+            
+            <div class="warn">
+              <strong>Beware of Stop-the-World Rebalances:</strong> A rebalance pauses active consumption. Keep consumer execution processing times small and adjust `max.poll.interval.ms` properly to avoid consumer eviction!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 4 -->
+      <div class="acc" id="acc-kafka-3">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'kafka')">
+          <div class="acc-title">4. Kafka Performance Secrets: Zero-Copy & Page Cache <span class="badge badge-advanced">Advanced</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              How does Kafka handle millions of messages per second on standard hardware?
+              <br><br>
+              <strong>1. OS Page Cache:</strong>
+              <br>Rather than keeping messages in JVM memory (which causes high GC overheads), Kafka writes immediately to the OS Page Cache. The OS handles syncing page cache to physical disk.
+              <br><br>
+              <strong>2. Zero-Copy Network Transfer (sendfile):</strong>
+              <br>In a standard web app, sending file bytes over the network requires four context switches:
+              <br><code>Disk -> Read Buffer (OS) -> Application Buffer (JVM) -> Socket Buffer (OS) -> NIC Buffer</code>
+              <br><br>
+              Kafka bypasses this completely using the Linux <code>sendfile</code> system call. This is **Zero-Copy**:
+              <br><code>Disk -> Page Cache (OS) -> NIC Buffer (OS)</code>
+              <br>Data is sent straight from the page cache to the network card buffer, avoiding memory copy overhead and CPU context shifts entirely.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 5 -->
+      <div class="acc" id="acc-kafka-4">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'kafka')">
+          <div class="acc-title">5. Production Code: Python & NodeJS <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="code-label">JavaScript (NodeJS Kafkajs) - Production Producer</div>
+            <pre><code class="language-javascript">const { Kafka, Partitioners } = require('kafkajs');
+
+const kafka = new Kafka({
+  clientId: 'order-service',
+  brokers: ['localhost:9092']
+});
+
+const producer = kafka.producer({
+  // Modern safe partitioning rule
+  createPartitioner: Partitioners.DefaultPartitioner
+});
+
+async function publishOrder(orderId, orderData) {
+  await producer.connect();
+  try {
+    await producer.send({
+      topic: 'orders-v1',
+      acks: -1, // Guarantee absolute durability (acks=all)
+      messages: [
+        {
+          key: orderId, // Keys guarantee sequential ordering per order
+          value: JSON.stringify(orderData)
+        }
+      ]
+    });
+    console.log(`Order ${orderId} successfully published to Kafka.`);
+  } catch (error) {
+    console.error('Kafka Producer Error:', error);
+    // Trigger retry logic or write to internal recovery log
+  } finally {
+    await producer.disconnect();
+  }
+}</code></pre>
+
+            <div class="code-label">Python (confluent-kafka) - Safe Consumer Loop</div>
+            <pre><code class="language-python">from confluent_kafka import Consumer, KafkaError, KafkaException
+import json
+import sys
+
+conf = {
+    'bootstrap.servers': 'localhost:9092',
+    'group.id': 'order-fulfillment-group',
+    'auto.offset.reset': 'earliest',
+    'enable.auto.commit': False,  # Manual commits for safety!
+}
+
+consumer = Consumer(conf)
+
+def process_messages():
+    try:
+        consumer.subscribe(['orders-v1'])
+        while True:
+            msg = consumer.poll(timeout=1.0)
+            if msg is None:
+                continue
+            if msg.error():
+                if msg.error().code() == KafkaError._PARTITION_EOF:
+                    # End of partition event
+                    sys.stderr.write(f'%% {msg.topic()} [{msg.partition()}] reached end at offset {msg.offset()}\n')
+                else:
+                    raise KafkaException(msg.error())
+            else:
+                # Valid message received
+                order_id = msg.key().decode('utf-8')
+                order_data = json.loads(msg.value().decode('utf-8'))
+                
+                print(f"Processing order {order_id} at partition {msg.partition()} offset {msg.offset()}")
+                
+                # Fulfil order database mutations here...
+                
+                # Commit offset synchronously to ensure At-Least-Once Delivery
+                consumer.commit(asynchronous=False)
+                
+    except KeyboardInterrupt:
+        print("Stopping consumer...")
+    finally:
+        consumer.close()
+
+if __name__ == "__main__":
+    process_messages()</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: RABBITMQ ── -->
+    <div id="tab-rabbitmq" class="tab-content">
+      <div class="prog-wrap">
+        <div class="prog-info">
+          <div class="prog-title">RabbitMQ — Course Progress</div>
+          <div class="prog-track"><div class="prog-fill" id="prog-rabbitmq"></div></div>
+        </div>
+        <div class="prog-count" id="progc-rabbitmq">0 / 5 read</div>
+      </div>
+
+      <div class="sec-label">Deep Dive: Smart Broker, Dumb Client Topologies</div>
+
+      <!-- TOPIC 1 -->
+      <div class="acc" id="acc-rabbitmq-0">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'rabbitmq')">
+          <div class="acc-title">1. Channels & Virtual Hosts <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              RabbitMQ is a highly flexible, open-source message broker written in **Erlang** that implements **AMQP**. It uses a "smart broker, dumb consumer" model, meaning the broker handles all routing, delivery tracking, and message filtering logic internally.
+              <br><br>
+              <strong>Connections vs. Channels:</strong>
+              <ul>
+                <li><strong>TCP Connection:</strong> Establishing a physical TCP connection is expensive and requires a handshake.</li>
+                <li><strong>Channels:</strong> To solve this, RabbitMQ uses virtual multiplexed connections inside a single physical TCP connection called **Channels**. All publish, consume, and queue-declare API calls happen inside channels. This dramatically reduces resource overhead on both clients and servers.</li>
+              </ul>
+              <br>
+              <strong>Virtual Hosts (vhosts):</strong>
+              <br>Vhosts provide absolute logical isolation on a single RabbitMQ node. They act like virtual directory environments containing their own sets of exchanges, queues, and user permissions.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 2 -->
+      <div class="acc" id="acc-rabbitmq-1">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'rabbitmq')">
+          <div class="acc-title">2. Routing Mechanics: The 4 Exchanges <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              In RabbitMQ, producers **never** send messages directly to a queue. Instead, producers publish to an **Exchange**. The exchange accepts the message and routes it to zero or more **Queues** based on logical relationships called **Bindings** and **Routing Keys**.
+            </div>
+
+            <div class="diagram-container">
+              <div class="ascii-art">
+   PRODUCER          EXCHANGE              BINDING              QUEUE          CONSUMER
++----------+      +------------+       "routing-key"        +-----------+    +----------+
+|  Publish |----->|  Direct    |===========================>| Job-Queue |--->| Consume  |
++----------+      +------------+                            +-----------+    +----------+</div>
+            </div>
+
+            <div class="flex-grid">
+              <div class="flex-card">
+                <h4>Direct Exchange</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  Routes messages directly to queues based on an **exact match** between the message routing-key and the binding key.
+                  <br><br>
+                  <em>Use-case:</em> Targeted job routing (e.g., routing key <code>pdf-convert</code> lands in the PDF conversion queue).
+                </p>
+              </div>
+              <div class="flex-card">
+                <h4>Fanout Exchange</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  Ignores routing keys completely. It **broadcasts** a copy of every message to all queues bound to it.
+                  <br><br>
+                  <em>Use-case:</em> Real-time pub/sub notifications (e.g., broadcasting a global configuration update to 10 instances).
+                </p>
+              </div>
+            </div>
+
+            <div class="flex-grid">
+              <div class="flex-card">
+                <h4>Topic Exchange</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  Powerful wildcard routing based on dot-separated words.
+                  <br>• <code>*</code> (star) matches exactly one word.
+                  <br>• <code>#</code> (hash) matches zero or more words.
+                  <br><br>
+                  <em>Use-case:</em> E.g., binding <code>eu.orders.*</code> routes all European orders regardless of type.
+                </p>
+              </div>
+              <div class="flex-card">
+                <h4>Headers Exchange</h4>
+                <p class="theory" style="font-size:0.82rem;">
+                  Ignores routing keys. Uses message **header key-value attributes** for matching (using <code>x-match: all</code> or <code>any</code> bindings).
+                  <br><br>
+                  <em>Use-case:</em> Routing structured messages based on format type or security clearances.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 3 -->
+      <div class="acc" id="acc-rabbitmq-2">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'rabbitmq')">
+          <div class="acc-title">3. Queue Durability & Message Persistence <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              If the RabbitMQ server restarts, will you lose your data? By default, yes, unless you configure durability:
+              <br><br>
+              <strong>1. Durable Queues:</strong>
+              <br>When declaring a queue, set <code>durable = true</code>. This ensures the queue's *metadata* survives a broker reboot.
+              <br><br>
+              <strong>2. Persistent Messages:</strong>
+              <br>When publishing, set the delivery mode header to <code>2</code> (Persistent). This tells RabbitMQ to write the message payload to disk inside Erlang’s database log.
+              <br><br>
+              <strong>3. High Availability (Quorum Queues):</strong>
+              <br>For clustered setups, classic queues are unsafe. Use **Quorum Queues**, which implement the Raft consensus protocol, replicating queue state across multiple cluster nodes to guarantee fault tolerance against node losses.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 4 -->
+      <div class="acc" id="acc-rabbitmq-3">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'rabbitmq')">
+          <div class="acc-title">4. Prefetch, Acknowledgment, & Flow Control <span class="badge badge-advanced">Advanced</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Because RabbitMQ utilizes a **Push model**, a fast producer can choke a slow consumer by flooding its memory with thousands of unacknowledged messages.
+              <br><br>
+              <strong>Consumer Prefetch (QoS):</strong>
+              <br>By setting <code>channel.basicQos(prefetchLimit)</code>, you restrict the maximum number of unacknowledged messages the broker will push to this consumer. If prefetch is set to <code>1</code>, the broker will NOT push the next message until the consumer commits the acknowledgment (ACK) for the current one.
+              <br><br>
+              <strong>Flow Control:</strong>
+              <br>If RabbitMQ brokers run low on memory or free disk space, they trigger a "blocked connection" state, immediately pausing all incoming publishing TCP connections to protect the broker.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 5 -->
+      <div class="acc" id="acc-rabbitmq-4">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'rabbitmq')">
+          <div class="acc-title">5. Production Code: NodeJS & Python <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="code-label">JavaScript (amqplib) - Reliable Publisher</div>
+            <pre><code class="language-javascript">const amqp = require('amqplib');
+
+async function sendTask(taskId, taskPayload) {
+  let connection;
+  try {
+    // Establish physical TCP connection
+    connection = await amqp.connect('amqp://localhost');
+    
+    // Create virtual multiplexed channel
+    const channel = await connection.createChannel();
+    
+    const exchangeName = 'tasks-exchange';
+    const routingKey = 'tasks.priority.high';
+    
+    // Assert exchange exists (durable & safe)
+    await channel.assertExchange(exchangeName, 'topic', { durable: true });
+    
+    const message = JSON.stringify(taskPayload);
+    
+    // Publish message with persistence
+    channel.publish(exchangeName, routingKey, Buffer.from(message), {
+      deliveryMode: 2, // Persistent message (writes payload to physical disk)
+      messageId: taskId
+    });
+    
+    console.log(`Task ${taskId} published to exchange.`);
+    
+  } catch (error) {
+    console.error('RabbitMQ Publisher Error:', error);
+  } finally {
+    if (connection) {
+      setTimeout(() => connection.close(), 500);
+    }
+  }
+}</code></pre>
+
+            <div class="code-label">Python (pika) - Production Consumer with QOS & Manual ACKs</div>
+            <pre><code class="language-python">import pika
+import sys
+import json
+import time
+
+def main():
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
+
+    # Assert exchange and queue are durable
+    channel.exchange_declare(exchange='tasks-exchange', exchange_type='topic', durable=True)
+    channel.queue_declare(queue='high-priority-jobs', durable=True)
+    
+    # Bind queue to exchange with wildcard routing key
+    channel.queue_bind(exchange='tasks-exchange', queue='high-priority-jobs', routing_key='tasks.priority.*')
+
+    # VERY IMPORTANT: Define Prefetch limit (Backpressure)
+    # Never push more than 1 unacknowledged message to this consumer
+    channel.basic_qos(prefetch_count=1)
+
+    def callback(ch, method, properties, body):
+        try:
+            task = json.loads(body.decode('utf-8'))
+            print(f" [x] Processing task {properties.message_id} on thread")
+            
+            # Simulate work
+            time.sleep(2)
+            
+            print(f" [x] Task {properties.message_id} complete")
+            
+            # Acknowledge completion manually
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            
+        except Exception as e:
+            print(f"Error processing task: {e}")
+            # Requeue=True: Puts it back in queue. Requeue=False: DLQ routing
+            ch.basic_nack(delivery_tag=method.delivery_tag, requeue=True)
+
+    # Register consumer with manual ACKs (no auto_ack=True!)
+    channel.basic_consume(queue='high-priority-jobs', on_message_callback=callback, auto_ack=False)
+
+    print(' [*] Waiting for tasks. Press CTRL+C to exit')
+    channel.start_consuming()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Exiting consumer.')
+        sys.exit(0)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PATTERNS ── -->
+    <div id="tab-patterns" class="tab-content">
+      <div class="prog-wrap">
+        <div class="prog-info">
+          <div class="prog-title">Distributed Patterns — Course Progress</div>
+          <div class="prog-track"><div class="prog-fill" id="prog-patterns"></div></div>
+        </div>
+        <div class="prog-count" id="progc-patterns">0 / 4 read</div>
+      </div>
+
+      <div class="sec-label">Distributed Systems Reliability Patterns</div>
+
+      <!-- TOPIC 1 -->
+      <div class="acc" id="acc-patterns-0">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'patterns')">
+          <div class="acc-title">1. Delivery Semantics (At-Least-Once, At-Most-Once, Exactly-Once) <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              In distributed systems, failures are guaranteed. Designing how messages are delivered in failure conditions is crucial.
+            </div>
+
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Semantic</th>
+                    <th>Under-the-Hood Guarantee</th>
+                    <th>Performance Impact</th>
+                    <th>How to Implement</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>At-Most-Once</strong></td>
+                    <td>Messages are sent once. If the network or consumer dies, the message is lost forever. Zero duplicates.</td>
+                    <td>Lowest latency, highest speed.</td>
+                    <td>Consumer immediately commits the offset/ACK *before* running processing logic.</td>
+                  </tr>
+                  <tr>
+                    <td><strong>At-Least-Once</strong></td>
+                    <td>Messages are guaranteed to be delivered and processed. If a crash occurs mid-execution, they are redelivered. Duplicate records are possible.</td>
+                    <td>Moderate overhead due to ACKs.</td>
+                    <td>Consumer runs processing logic, saves state, and *only then* commits the offset/ACK manually. <strong>Requires Idempotent Consumers!</strong></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Exactly-Once</strong></td>
+                    <td>Messages are processed precisely once. Under the hood, this requires a transaction across the broker and storage.</td>
+                    <td>Highest latency and resource overhead.</td>
+                    <td>In Kafka, uses transactional producers (writes offsets and messages in a single atomic transaction). In general: At-Least-Once delivery + Idempotence checks.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="tip">
+              <strong>The Golden Rule:</strong> Never rely 100% on expensive network-layer Exactly-Once guarantees. Always design your consumer processing logic to be **Idempotent** (processing a message twice results in the exact same state as processing it once). Use a deduplication table in your database with unique message IDs!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 2 -->
+      <div class="acc" id="acc-patterns-1">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'patterns')">
+          <div class="acc-title">2. Dead Letter Queues (DLQ) & Retry Topologies <span class="badge badge-important">Important</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              What happens when a message fails processing because of a bug or database lock?
+              If you just throw an error and requeue, you create an infinite loop: the message immediately hits the consumer again, crashes it, requeues, and chokes your cpu (poison pill!).
+              <br><br>
+              <strong>The Retry & DLQ Architecture:</strong>
+              <ul>
+                <li><strong>Retry Queues:</strong> On failure, nack/requeue with a delay. Under RabbitMQ, this can be done using TTL (Time-To-Live) on a helper retry-queue with a Dead Letter Exchange binding to route back to the main queue once the time expires.</li>
+                <li><strong>Dead Letter Queue (DLQ):</strong> If a message fails processing a maximum number of times (e.g., 3 retries), route it to a DLQ. This keeps the main queue clear of unprocessable "poison pills". Developers can inspect the DLQ, fix bugs, and republish the messages.</li>
+              </ul>
+            </div>
+
+            <div class="diagram-container">
+              <div class="ascii-art">
+   [Main Queue]
+        |
+        +-----> [Consumer] ----(Success)----> [ACK & Complete]
+                    |
+                (Fail)
+                    v
+            [Retry Counter]
+             /           \
+     (< 3 Retries)     (>= 3 Retries)
+           /               \
+          v                 v
+   [Retry Queue]       [Dead Letter Queue]
+  (Buffered Delay)    (Developer Inspection)
+          |
+          v
+   (Route back to Main)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 3 -->
+      <div class="acc" id="acc-patterns-2">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'patterns')">
+          <div class="acc-title">3. Transactional Outbox Pattern <span class="badge badge-critical">Critical</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              <strong>The Dual-Write Problem:</strong>
+              <br>Imagine a checkout service. It must write a new order record to the SQL database, and then publish an <code>OrderCreated</code> event to Kafka/RabbitMQ.
+              <br>What if the database write succeeds, but the message broker is temporarily offline? Or what if the broker write succeeds, but the database transactions rollback?
+              <br>Your system is now in an inconsistent state.
+              <br><br>
+              <strong>The Solution: Transactional Outbox Pattern</strong>
+              <br>Instead of direct writes to two places, write both the entity change AND the event to the **same database** in a single ACID transaction. The event is written to an <code>outbox</code> table.
+              <br><br>
+              A separate utility (called an **Outbox Relayer** or a Change-Data-Capture tool like **Debezium**) reads the <code>outbox</code> table continuously and publishes the messages to the broker. Once acknowledged, it deletes the outbox records.
+            </div>
+
+            <div class="diagram-container">
+              <div class="ascii-art">
++------------------+
+| Checkout Service |
++------------------+
+        |
+   (Single ACID Transaction)
+        v
++-----------------------------+
+|    RDBMS DATABASE           |
+|                             |
+|  +-----------------------+  |
+|  |  "orders" Table       |  |
+|  +-----------------------+  |
+|  |  "outbox" Table       |  |
+|  +-----------------------+  |
++-----------------------------+
+        |
+        v (Continuous CDC / Polling)
++-------------------+
+|  Outbox Relayer   |-------------> [Message Broker]
++-------------------+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOPIC 4 -->
+      <div class="acc" id="acc-patterns-3">
+        <div class="acc-header" onclick="toggleAcc(this.closest('.acc'), 'patterns')">
+          <div class="acc-title">4. Event Sourcing & CQRS Integrations <span class="badge badge-advanced">Advanced</span></div>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="acc-body">
+          <div class="acc-content">
+            <div class="theory">
+              Kafka and RabbitMQ are the backbones of event-driven microservices:
+              <ul>
+                <li><strong>Event Sourcing:</strong> Instead of saving the current state (e.g. <code>balance = $100</code>), save every historical transaction event (<code>+$50</code>, <code>+$50</code>) as an append-only log in Kafka. State is reconstructed by replaying the partition log from offset 0.</li>
+                <li><strong>CQRS (Command Query Responsibility Segregation):</strong> Separate write databases (RDBMS optimized for ACID write transactions) from read databases (Elasticsearch/NoSQL optimized for speed). Commands write events to the broker; a consumer syncs the read-views.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: ARCHITECTURAL DECISION MATRIX ── -->
+    <div id="tab-compare" class="tab-content">
+      <div class="sec-label">Kafka vs. RabbitMQ Deep Analysis</div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Apache Kafka (Event Stream)</th>
+              <th>RabbitMQ (Message Queue)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Primary Paradigm</strong></td>
+              <td><span class="table-tag tag-purple">Distributed Commit Log</span></td>
+              <td><span class="table-tag tag-cyan">Smart Broker Routing</span></td>
+            </tr>
+            <tr>
+              <td><strong>Scale & Throughput</strong></td>
+              <td>Ultra-high throughput (millions/sec). Sequentially writes directly to Page Cache.</td>
+              <td>Moderate/high throughput (tens of thousands/sec). High memory/CPU routing costs.</td>
+            </tr>
+            <tr>
+              <td><strong>Message Durability</strong></td>
+              <td>Persistent by default. Logs are kept on disk based on a defined retention window (e.g. days/weeks).</td>
+              <td>Transient by default. Messages are physically purged immediately once consumer ACKs processing.</td>
+            </tr>
+            <tr>
+              <td><strong>Routing Capabilities</strong></td>
+              <td>Simple partition mapping. Requires stream processing (Kafka Streams) for complex transformations.</td>
+              <td>Extremely rich out-of-the-box routing (Direct, Fanout, Topic, Headers exchanges).</td>
+            </tr>
+            <tr>
+              <td><strong>Consumer Flow Model</strong></td>
+              <td><span class="table-tag tag-purple">Pull Model</span> (Consumers poll in batches).</td>
+              <td><span class="table-tag tag-cyan">Push Model</span> (Broker pushes, requires Prefetch limits).</td>
+            </tr>
+            <tr>
+              <td><strong>Message Replay</strong></td>
+              <td>Yes. Multiple consumers can seek backward in time and replay old offsets independently.</td>
+              <td>No. Once consumed and ACKed, messages are gone forever.</td>
+            </tr>
+            <tr>
+              <td><strong>Scale Out Model</strong></td>
+              <td>Horizontal scale via adding brokers and partitions.</td>
+              <td>Vertical scaling (fast CPUs/RAM), or clustered mirroring (Quorum queues).</td>
+            </tr>
+            <tr>
+              <td><strong>Typical Use-Cases</strong></td>
+              <td>Metrics/logging pipelines, real-time analytics, event sourcing, change-data-capture.</td>
+              <td>Transactional e-commerce tasks, job background queues, legacy system integrations.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sec-label">Which one should you choose?</div>
+      
+      <div class="flex-grid">
+        <div class="flex-card" style="border-color: rgba(167, 139, 250, 0.4); background: rgba(167, 139, 250, 0.02);">
+          <h4 style="color: var(--accent);">Choose Apache Kafka if:</h4>
+          <p class="theory" style="font-size:0.88rem;">
+            1. You need to ingest and process high-volume, continuous stream data (e.g., IoT telemetry, user clickstreams).
+            <br>2. Multiple different microservices need to read the same data streams independently at their own pace.
+            <br>3. You need high scale resilience and ability to "rewind" and replay historical event history.
+            <br>4. You are implementing Event Sourcing or CQRS system design architectures.
+          </p>
+        </div>
+        <div class="flex-card" style="border-color: rgba(34, 211, 238, 0.4); background: rgba(34, 211, 238, 0.02);">
+          <h4 style="color: var(--cyan);">Choose RabbitMQ if:</h4>
+          <p class="theory" style="font-size:0.88rem;">
+            1. You need complex routing topologies, like wildcard patterns, header matches, or broadcast exchanges.
+            <br>2. You have a simple background task runner queue where jobs are read, completed, and safely discarded.
+            <br>3. Low-latency is key, and you want near-instant push execution to waiting consumer servers.
+            <br>4. You require standard protocols (AMQP, MQTT, STOMP) to integrate legacy enterprise software systems.
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Progress tracker data
+    const progress = { foundations: 0, kafka: 0, rabbitmq: 0, patterns: 0 };
+    const totalPerTab = { foundations: 4, kafka: 5, rabbitmq: 5, patterns: 4 };
+
+    // Function to switch tabs
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      
+      const targetContent = document.getElementById('tab-' + tabId);
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+      btn.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // Toggle accordion state
+    function toggleAcc(acc, tab) {
+      const isOpen = acc.classList.contains('open');
+      acc.classList.toggle('open');
+      if (!isOpen) {
+        updateProgress(tab);
+      }
+    }
+
+    // Dynamic progress bar computation
+    function updateProgress(tab) {
+      if (!totalPerTab[tab]) return;
+      const openCount = document.querySelectorAll('#tab-' + tab + ' .acc.open').length;
+      const percent = (openCount / totalPerTab[tab]) * 100;
+      
+      const fillEl = document.getElementById('prog-' + tab);
+      const countEl = document.getElementById('progc-' + tab);
+      
+      if (fillEl) fillEl.style.width = percent + '%';
+      if (countEl) countEl.innerText = `${openCount} / ${totalPerTab[tab]} read`;
+    }
+
+    // Instant searching across topics
+    function handleSearch(query) {
+      query = query.toLowerCase().trim();
+      document.querySelectorAll('.acc').forEach(acc => {
+        const titleText = acc.querySelector('.acc-title').innerText.toLowerCase();
+        const contentText = acc.querySelector('.acc-content') ? acc.querySelector('.acc-content').innerText.toLowerCase() : '';
+        
+        if (titleText.includes(query) || contentText.includes(query)) {
+          acc.classList.remove('search-hidden');
+          // Auto-expand searched matches to help user locate term
+          if (query.length > 2) {
+            acc.classList.add('open');
+          }
+        } else {
+          acc.classList.add('search-hidden');
+          acc.classList.remove('open');
+        }
+      });
+    }
+
+    // Start syntax highlight on load
+    document.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+      // Initialize progress bars to 0
+      ['foundations', 'kafka', 'rabbitmq', 'patterns'].forEach(updateProgress);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,2488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Production & Containers Architect Interview Guide — FAANG & MNC Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card: #0e111e;
+      --border: #1f263e;
+      --accent: #38bdf8;
+      --accent-light: #7dd3fc;
+      --accent-glow: rgba(56, 189, 248, 0.15);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --code-bg: #030408;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      
+      --basic: #10b981;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --expert: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── SCROLLBARS ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.85rem;
+      border-left: 1px solid var(--border);
+      padding-left: 0.75rem;
+    }
+    .logo-img {
+      font-size: 1.4rem;
+    }
+    .back-hub {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .back-hub:hover {
+      background: var(--border);
+      color: var(--accent-light);
+      border-color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 57px);
+    }
+    
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 380px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sb-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .progress-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .progress-percent {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+    .progress-bar-bg {
+      background: #181c2e;
+      height: 6px;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(to right, var(--accent), var(--accent-light));
+      width: 0%;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .search-wrapper {
+      position: relative;
+    }
+    .search {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .q-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .cat-group {
+      margin-bottom: 2rem;
+    }
+    .cat-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cat-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+    .q-item {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.01);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-item:hover {
+      background: rgba(56, 189, 248, 0.04);
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .q-item.active {
+      background: rgba(56, 189, 248, 0.12);
+      border-color: var(--accent);
+      box-shadow: inset 3px 0 0 var(--accent-light);
+    }
+    .q-title-wrap {
+      flex: 1;
+      padding-right: 0.5rem;
+    }
+    .q-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+    .q-meta {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .level-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .level-text {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .status-check {
+      font-size: 0.9rem;
+      color: var(--success);
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    .q-item.completed .status-check {
+      opacity: 1;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.04), transparent 60%);
+      position: relative;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      text-align: center;
+      padding: 10vh 1rem 5vh;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .welcome h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #fff, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .welcome p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .summary-card h3 {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card p {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    /* ── ANSWER CARD ── */
+    .ans-card {
+      max-width: 1000px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ans-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    .header-info {
+      flex: 1;
+    }
+    .completion-action {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .completion-action:hover {
+      border-color: var(--accent);
+      background: rgba(56, 189, 248, 0.03);
+    }
+    .completion-action input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .completion-action label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .ans-level {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .level-medium {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--medium);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .level-hard {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--hard);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .level-expert {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--expert);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .ans-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ans-def {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .sec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-light);
+      margin: 3.5rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .expl-list {
+      list-style: none;
+      margin-bottom: 2.5rem;
+    }
+    .expl-item {
+      position: relative;
+      padding-left: 1.8rem;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .expl-item::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-light);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .expl-item strong {
+      color: var(--text-main);
+    }
+
+    /* ── SCENARIOS ACCORDION ── */
+    .scenario-container {
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card);
+    }
+    .scenario-header {
+      padding: 1.25rem 1.5rem;
+      background: rgba(255,255,255,0.01);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .scenario-header:hover {
+      background: rgba(56, 189, 248, 0.02);
+    }
+    .scenario-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .scenario-title span {
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .scenario-arrow {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+    .scenario-container.open .scenario-arrow {
+      transform: rotate(180deg);
+    }
+    .scenario-body {
+      display: none;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      background: #090c17;
+    }
+    .scenario-container.open .scenario-body {
+      display: block;
+    }
+    .scenario-expl {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* ── DUAL CODE TABS ── */
+    .code-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .code-tab {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .code-tab:hover {
+      color: #fff;
+    }
+    .code-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+    }
+
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .code-header {
+      padding: 0.9rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-lang {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+
+    /* ── CODE SYNTAX HIGHLIGHTING (CSS classes) ── */
+    .kw { color: #38bdf8; font-weight: 600; } /* keyword */
+    .fn { color: #f59e0b; } /* function */
+    .str { color: #10b981; } /* string */
+    .num { color: #ec4899; } /* number */
+    .com { color: #64748b; font-style: italic; } /* comment */
+    .op { color: #818cf8; } /* operator */
+    .cls { color: #a855f7; font-weight: bold; } /* class */
+
+    /* ── VISUAL WRAPPER (ASCII DIAGRAMS) ── */
+    .visual-wrap {
+      background: #030408;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--accent-light);
+      overflow-x: auto;
+      white-space: pre;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--accent);
+    }
+
+    /* ── INTERVIEW QUESTIONS SECTION ── */
+    .qa-group {
+      margin-bottom: 2.5rem;
+    }
+    .qa-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+    }
+    .qa-box:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      transform: translateY(-2px);
+    }
+    .qa-badge {
+      display: inline-block;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-light);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .qa-question {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+    .qa-answer {
+      color: var(--text-dim);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .qa-answer p {
+      margin-bottom: 1rem;
+    }
+    .qa-answer p:last-child {
+      margin-bottom: 0;
+    }
+    .qa-answer ul, .qa-answer ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .qa-answer li {
+      margin-bottom: 0.5rem;
+    }
+    .qa-answer strong {
+      color: var(--text-main);
+    }
+    .qa-answer code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-light);
+    }
+
+    /* ── EXPERT TIP BOX ── */
+    .tip-box {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(56, 189, 248, 0.05));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    .tip-text {
+      color: var(--text-main);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .tip-text strong {
+      color: var(--accent-light);
+    }
+
+    /* ── BURGER MENU FOR MOBILE ── */
+    .burger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE DESIGN ── */
+    @media (max-width: 960px) {
+      .burger { display: block; }
+      .sidebar {
+        position: absolute;
+        left: -380px;
+        top: 57px;
+        height: calc(100vh - 57px);
+        z-index: 100;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .main {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="logo">
+      <span class="logo-img">🐳</span>
+      DOCKER CONTAINER MASTER
+      <span>Senior Architect Interview Guide</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <a href="index.html" class="back-hub">← Mastery Hub</a>
+      <button class="burger" onclick="toggleSidebar()">☰</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="layout">
+    
+    <!-- ── LEFT SIDEBAR ── -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="progress-container">
+          <div class="progress-header">
+            <span class="progress-title">Your Progress</span>
+            <span class="progress-percent" id="progressPercent">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="search-wrapper">
+          <input type="text" class="search" placeholder="Filter topics..." onkeyup="filterQ()">
+        </div>
+      </div>
+      <div class="q-list" id="qList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- ── RIGHT CONTENT PANE ── -->
+    <div class="main">
+      
+      <!-- WELCOME STATE -->
+      <div id="welcomeScreen" class="welcome">
+        <h1>Docker & Container Internals<br>Architect Loop Guide</h1>
+        <p>A comprehensive pedagogical guide designed to help senior software architects and platform engineers pass extreme container interview loops at Tier-1 MNCs and FAANG. Select a topic on the left to start.</p>
+        
+        <div class="grid-summary">
+          <div class="summary-card">
+            <h3>Under The Hood</h3>
+            <p>Namespaces, cgroups v2, OverlayFS internals</p>
+          </div>
+          <div class="summary-card">
+            <h3>Production Focus</h3>
+            <p>Layer caches, multi-stage builds, non-root users</p>
+          </div>
+          <div class="summary-card">
+            <h3>Extreme Security</h3>
+            <p>Capabilities, AppArmor profiles, rootless runtimes</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVE CONTENT CARD -->
+      <div id="ansCard" class="ans-card" style="display: none;">
+        <!-- Rendered dynamically on sidebar click -->
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Selected language state
+    let currentLang = 'py';
+    let completedTopics = JSON.parse(localStorage.getItem('completed_docker_topics') || '[]');
+
+    // Highlight helper
+    function highlight(code, lang) {
+      let html = code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      const placeholders = [];
+      let placeholderCount = 0;
+
+      function savePlaceholder(text, type) {
+        const key = `__${type}_PLACEHOLDER_${placeholderCount}__`;
+        placeholders.push({ key, text });
+        placeholderCount++;
+        return key;
+      }
+
+      // Pre-process comments and strings to protect them
+      if (lang === 'js' || lang === 'javascript') {
+        html = html.replace(/(\/\/.*|\/\*[\s\S]*?\*\/)/g, (match) => {
+          return savePlaceholder(`<span class="com">${match}</span>`, 'COM');
+        });
+        html = html.replace(/(["'`])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(const|let|var|class|constructor|extends|super|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|typeof|instanceof|import|export|from|default|async|await|yield|null|undefined|true|false)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(console\.log|Math\.\w+|Array\.\w+|Object\.\w+|JSON\.\w+|Map|Set|Promise|Error|fetch)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      } else {
+        html = html.replace(/(#.*)/g, (match) => {
+          return savePlaceholder(`<span class="com">${match}</span>`, 'COM');
+        });
+        html = html.replace(/(r?['"])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(def|class|self|import|from|return|if|elif|else|for|in|while|try|except|finally|raise|assert|with|as|lambda|pass|break|continue|global|nonlocal|and|or|not|is|None|True|False)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(print|len|range|list|dict|set|tuple|str|int|float|type|object|super|abs|min|max|sum|dir|vars|map|filter|reduce|sorted|open|asyncio\.\w+|Exception)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      }
+
+      // Restore placeholders
+      for (let i = placeholders.length - 1; i >= 0; i--) {
+        html = html.replace(placeholders[i].key, placeholders[i].text);
+      }
+
+      return html;
+    }
+
+    const topics = [
+      {
+        id: 1,
+        title: "Linux Namespaces, Cgroups, & OverlayFS",
+        level: "expert",
+        category: "Core Architecture",
+        def: "Namespaces isolate what a container can see, Control Groups (cgroups v1/v2) restrict what it can consume, and Union File Systems (OverlayFS overlay2) combine separate layers into a single unified directory tree with efficient copy-on-write semantics.",
+        machinery: "To launch an isolated environment, the Docker daemon makes syscalls to create <strong>Namespaces</strong>: <code>pid</code> isolates process IDs, <code>net</code> isolates networking configurations, <code>mnt</code> isolates filesystem mount directories, <code>ipc</code> isolates shared memory, <code>uts</code> isolates hostnames, and <code>user</code> isolates user ID mappings. Dynamic resource limits are enforced using <strong>cgroups</strong> by reading/writing to files inside <code>/sys/fs/cgroup/</code>. The layered structure utilizes <strong>OverlayFS</strong> which mounts: <code>lowerdir</code> (read-only base image layers), <code>upperdir</code> (a read-write layer storing runtime changes), <code>merged</code> (the exposed unified viewpoint), and <code>workdir</code> (temporary transactional scratchpad). When a file in <code>lowerdir</code> is modified, a <strong>Copy-on-Write (CoW)</strong> operation clones it up to <code>upperdir</code> before execution.",
+        scenarios: [
+          {
+            title: "Scenario A: Re-executing system calls to build a low-level Namespace sandbox wrapper programmatically",
+            expl: "We use lower-level system library calls to simulate container runtime creation by unsharing and isolating network and mount namespaces. This demonstrates how container runtimes construct isolation barriers without resorting to standard high-level docker commands.",
+            diagram: `
++------------------ Host OS kernel system namespace ------------------+
+|                                                                     |
+|  +----- isolated child process NET/MNT/PID namespace -------+       |
+|  |                                                          |       |
+|  |   [sys unshare] ---> isolated root directory (chroot)     |       |
+|  |   [net ns config] ---> loopback interface activation      |       |
+|  +----------------------------------------------------------+       |
++---------------------------------------------------------------------+`,
+            jsCode: `// Low-level Namespace virtualization check using dynamic execution child loops (Node.js)
+const { spawn } = require('child_process');
+
+function createIsolatedSandbox() {
+  console.log("Initializing namespace isolation via unshare syscall wrappers...");
+  
+  // Executing lower level unshare flags:
+  // -m (mount), -u (uts hostname), -i (ipc), -n (network), -p (pid), -f (fork child process)
+  const sandbox = spawn('unshare', [
+    '--mount', '--uts', '--ipc', '--net', '--pid', '--fork',
+    'chroot', '/path/to/isolated/rootfs', '/bin/sh'
+  ]);
+
+  sandbox.stdout.on('data', (data) => console.log(\`Sandbox stdout: \${data}\`));
+  sandbox.stderr.on('data', (data) => console.error(\`Sandbox stderr: \${data}\`));
+  
+  sandbox.on('close', (code) => {
+    console.log(\`Sandbox execution completed with code \${code}\`);
+  });
+}
+
+createIsolatedSandbox();`,
+            pyCode: `# Low-level unshare syscall wrappers for isolated mount namespaces (Python)
+import os
+import sys
+import ctypes
+
+CLONE_NEWNS   = 0x00020000 # Mount namespace
+CLONE_NEWUTS  = 0x04000000 # UTS namespace
+CLONE_NEWPID  = 0x20000000 # PID namespace
+CLONE_NEWNET  = 0x40000000 # Network namespace
+
+def launch_low_level_sandbox():
+    try:
+        # Accessing libc bindings to make raw system calls
+        libc = ctypes.CDLL('libc.so.6')
+        
+        # Disassociate namespaces
+        print("Executing unshare system call to isolate MNT, NET and PID layers...")
+        result = libc.unshare(CLONE_NEWNS | CLONE_NEWUTS | CLONE_NEWPID | CLONE_NEWNET)
+        if result != 0:
+            raise OSError("Unshare failed to isolate namespaces")
+            
+        print("Namespace isolation successful. Forking process shell...")
+    except Exception as e:
+        print(f"Low level kernel binding failed: {e}. Ensuring running on Linux platform with root privileges.")
+
+if __name__ == '__main__':
+    launch_low_level_sandbox()`
+          },
+          {
+            title: "Scenario B: Dynamically adjusting Cgroup Memory Limits to prevent runtime container OOM kills",
+            expl: "We construct code using Docker clients to dynamically tune system limits on live workloads, adjusting resource parameters in flight without dropping client traffic.",
+            diagram: `
++------------------- Host Linux Kernel Memory Scheduler -------------------+
+|                                                                          |
+|  +----------------------- Running Container -------------------------+  |
+|  |   Current Cgroup Limit: 512MB                                     |  |
+|  |   Dynamic workload spike ---> triggers Memory Monitor Alert       |  |
+|  |   [API call] ---> Update Cgroup Limit: 1024MB                     |  |
+|  +-------------------------------------------------------------------+  |
++--------------------------------------------------------------------------+`,
+            jsCode: `// Adjust live container resource limits using Dockerode SDK (Node.js)
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function adjustContainerLimits(containerId, memoryLimitBytes) {
+  try {
+    const container = docker.getContainer(containerId);
+    console.log(\`Updating resource structures on container \${containerId} to \${memoryLimitBytes / (1024*1024)}MB...\`);
+    
+    // Update live memory limits (cgroup system configurations)
+    await container.update({
+      Memory: memoryLimitBytes,
+      MemorySwap: memoryLimitBytes, // Prevents swapping to drive
+      CpuShares: 512
+    });
+    console.log("Memory limit updated successfully in cgroups!");
+  } catch (error) {
+    console.error("Failed to adjust dynamic cgroup parameters:", error);
+  }
+}
+
+adjustContainerLimits('my-active-container-sha', 1073741824); // Scale to 1GB`,
+            pyCode: `# Update live container limits using Docker-py SDK (Python)
+import docker
+
+def scale_container_cgroup_limits(container_id, max_mem_mb):
+    client = docker.from_env()
+    try:
+        container = client.containers.get(container_id)
+        print(f"Dynamically modifying live configurations for container {container.name}...")
+        
+        # Pass memory parameter overrides directly to cgroups v2 subsystems
+        container.update(
+            memory=f"{max_mem_mb}m",
+            memswap=f"{max_mem_mb}m",
+            cpu_shares=1024
+        )
+        print("Live cgroup limits successfully scaled up!")
+    except Exception as e:
+        print(f"Error modifying cgroup parameters: {e}")
+
+scale_container_cgroup_limits('my-active-container-sha', 1024)`
+          },
+          {
+            title: "Scenario C: Mounting OverlayFS manually to debug a corrupted multi-layer image pipeline",
+            expl: "We demonstrate how to reconstruct an OverlayFS stack manually to inspect layer drift, using local filesystem directories representing base layers (`lowerdir`), current changes (`upperdir`), and the final runtime output (`merged`).",
+            diagram: `
++------------------- Manual OverlayFS Reconstruction -------------------+
+|                                                                       |
+|   lowerdir/   (Read-Only Image Layer: base filesystem)                 |
+|   upperdir/   (Read-Write Runtime layer: changes made)                |
+|   workdir/    (Kernel tracking directory)                             |
+|                                                                       |
+|   [mount -t overlay] ---> unified merged/ directory viewpoint          |
++-----------------------------------------------------------------------+`,
+            jsCode: `// Reconstructing manual OverlayFS view via Node.js system commands
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function manualOverlayReconstruction() {
+  console.log("Creating dry-run directories to simulate overlay structures...");
+  
+  // Set up directory trees
+  fs.mkdirSync('./lower', { recursive: true });
+  fs.mkdirSync('./upper', { recursive: true });
+  fs.mkdirSync('./work', { recursive: true });
+  fs.mkdirSync('./merged', { recursive: true });
+
+  fs.writeFileSync('./lower/base.txt', "Original OS Configuration File Content\\n");
+
+  try {
+    console.log("Mounting OverlayFS manually to inspect merged configurations...");
+    // Emulates internal overlay2 mount structures
+    execSync('sudo mount -t overlay overlay -o lowerdir=./lower,upperdir=./upper,workdir=./work ./merged');
+    console.log("Overlay system is live in ./merged. Writing file in ./merged...");
+    
+    fs.writeFileSync('./merged/new_config.txt', "Overwritten at Runtime!");
+    // Filesystem check: upperdir now contains the changes, lowerdir is untouched!
+  } catch (err) {
+    console.error("Mount system failed. Requires Linux machine with sudo/root credentials.", err.message);
+  }
+}
+
+manualOverlayReconstruction();`,
+            pyCode: `# Manual mounting of OverlayFS filesystem using os shell subprocess (Python)
+import os
+import subprocess
+
+def debug_overlayfs_layering():
+    # Setup test workspace
+    os.makedirs('lower', exist_ok=True)
+    os.makedirs('upper', exist_ok=True)
+    os.makedirs('work', exist_ok=True)
+    os.makedirs('merged', exist_ok=True)
+    
+    with open('lower/version.txt', 'w') as f:
+        f.write("v1.0.0 (Base Layer)")
+        
+    try:
+        print("Mounting layered OverlayFS environment via Linux mount systems...")
+        cmd = [
+            "sudo", "mount", "-t", "overlay", "overlay",
+            "-o", "lowerdir=lower,upperdir=upper,workdir=work", "merged"
+        ]
+        subprocess.run(cmd, check=True)
+        print("Overlay mount active. Check 'merged' directory structure for real-time reads.")
+    except Exception as e:
+        print(f"Layer inspection mount failed: {e}. Check host permissions.")
+
+if __name__ == '__main__':
+    debug_overlayfs_layering()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Google SRE Loop",
+            question: "How does the Linux kernel's Out-Of-Memory (OOM) killer decide to terminate a Docker container, and how do you configure cgroups/OOM score adjustments to protect critical workloads?",
+            answer: `
+<p>The Linux kernel manages memory allocation limit pools via **cgroups**. When a container attempts to allocate memory beyond its configured limit (or the host runs out of physical memory), the kernel invokes the **Out-Of-Memory (OOM) killer**:</p>
+<ul>
+  <li><strong>OOM Score Calculation:</strong> The kernel assigns an <code>oom_score</code> to each process inside namespaces based on the percentage of memory used relative to the limits. Processes with the highest score are killed first.</li>
+  <li><strong>OOM Score Adjustment:</strong> Inside cgroups, each process is checked against the <code>oom_score_adj</code> value. Runtimes configure this dynamically. For critical services, you adjust this parameter. Setting <code>oom_score_adj</code> to <code>-1000</code> entirely disables OOM termination for that process, while setting it to positive values makes the process highly expendable.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Netflix Platform Loop",
+            question: "Explain the performance and filesystem overhead of Copy-on-Write (CoW) in OverlayFS under high-write workloads, and how to mitigate it.",
+            answer: `
+<p>Under heavy write-intensive tasks (e.g., intensive logging or database storage), **OverlayFS Copy-on-Write (CoW)** introduces significant performance degradation:</p>
+<ol>
+  <li><strong>CoW Latency:</strong> The first time a file residing in a read-only lower layer is modified, OverlayFS must search through the layer stack, locate the file, allocate blocks in the writable <code>upperdir</code>, copy the entire file contents to the upper layer, and update directory mappings. If the file is 5GB and we only edit 1 byte, the entire 5GB is copied. This results in heavy I/O blocking.</li>
+  <li><strong>Mitigation Strategy:</strong> Always isolate write workloads from the container layers by mounting **Docker Volumes**. Volumes bypass OverlayFS completely, utilizing direct block-level access to the host file systems, avoiding layer lookups and CoW penalties.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Stripe Infrastructure",
+            question: "How does network namespace virtualization bridge a Docker container's internal traffic to the external network interface via veth pairs?",
+            answer: `
+<p>When a container is created, Docker creates a dedicated **Network Namespace** for it and hooks it up to the host using a virtual network pair:</p>
+<ul>
+  <li><strong>veth Pairs:</strong> Docker creates a pipe interface consisting of two virtual ethernet endpoints (a veth pair). One endpoint is moved inside the container's isolated network namespace (renamed as <code>eth0</code>), and the other is bound to the host's virtual bridge (<code>docker0</code>).</li>
+  <li><strong>Routing Flow:</strong> Traffic leaving the container namespace goes through <code>eth0</code>, exits the other end of the veth pair on the host, enters <code>docker0</code>, and is routed using iptables NAT configurations to reach the physical host interface (<code>eth0</code> or similar).</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Always use cgroups v2 when possible. Unlike cgroups v1 which had separate resource trees, cgroups v2 provides a unified single-hierarchy design with superior multi-resource control, preventing kernel OOM actions from misallocating IO and memory constraints across co-located containers!"
+      },
+      {
+        id: 2,
+        title: "Production-Grade Dockerfiles & Layers",
+        level: "hard",
+        category: "Build Engineering",
+        def: "Optimizing the container lifecycle demands multi-stage build paradigms, non-root system boundaries, layer layout prioritization, caching mounts, and signal-aware process reapers to safely build minimal runtime footprints.",
+        machinery: "Every instruction in a Dockerfile creates a read-only image layer. <strong>Multi-stage builds</strong> discard build-time tooling by copying only compilation artifacts from initial builders to final runtimes. Security dictates using explicit non-root users (<code>USER node</code> or creating user groups) rather than running as root by default. Runtimes must use minimal base images like Alpine or Google's **Distroless** (which contains no shell or packages, lowering CVE exposure). Caching uses ordered structures: put volatile instructions (like copying source code) near the bottom, and static inputs (like dependencies manifests) at the top. Advanced builds leverage <code>RUN --mount=type=cache</code> to persist compiler caches across builds, and <code>RUN --mount=type=secret</code> to inject SSH/vault credentials safely without embedding them inside intermediate layer filesystems.",
+        scenarios: [
+          {
+            title: "Scenario A: Building a secure high-performance Node.js multi-stage build utilizing pnpm and cache mounts",
+            expl: "We structure a Dockerfile definition dynamically and programmatically trigger optimized compilation via SDKs, showing the difference in layers and size between simple and multi-stage approaches.",
+            diagram: `
++------------------- Multi-Stage Compilation Pipeline -------------------+
+|                                                                        |
+|  [Stage 1: Build & Package] ---> Installs devDependencies, compiles TS |
+|                                 Uses --mount=type=cache for local pkg   |
+|                                                                        |
+|  [Stage 2: Production Run]  <--- Copies ONLY compiled JS and Node mod   |
+|                                 Zero compiler overhead, non-root user  |
++------------------------------------------------------------------------+`,
+            jsCode: `// Programmatic triggers for building multi-stage docker images (Node.js)
+const Docker = require('dockerode');
+const docker = new Docker();
+const fs = require('fs');
+
+async function triggerProductionBuild() {
+  const dockerfileContent = \`
+# --- Stage 1: Dependency Builder ---
+FROM node:20-alpine AS builder
+WORKDIR /app
+RUN npm install -g pnpm
+COPY package.json pnpm-lock.yaml ./
+# Utilize cache mounts to prevent downloading identical packages across rebuilds
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \\
+    pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build
+
+# --- Stage 2: Minimal Production Runtime ---
+FROM node:20-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+USER nextjs
+EXPOSE 3000
+CMD ["node", "dist/main.js"]
+\`;
+
+  fs.writeFileSync('Dockerfile.prod', dockerfileContent);
+  console.log("Production Dockerfile generated. Triggering Docker daemon build engine...");
+  
+  const stream = await docker.buildImage({
+    context: __dirname,
+    src: ['Dockerfile.prod', 'package.json']
+  }, { t: 'enterprise-app:production', dockerfile: 'Dockerfile.prod' });
+  
+  stream.pipe(process.stdout);
+}
+
+triggerProductionBuild().catch(console.error);`,
+            pyCode: `# Programmatically execute optimized container builds using custom Dockerfile configurations (Python)
+import docker
+
+def build_minified_production_image():
+    client = docker.from_env()
+    dockerfile_data = """
+# Stage 1: Build Environment
+FROM python:3.11-slim AS builder
+WORKDIR /app
+RUN pip install --no-cache-dir poetry
+COPY pyproject.toml poetry.lock ./
+# Inject cache mount to reuse local pip download directories
+RUN --mount=type=cache,target=/root/.cache/pip \\
+    poetry config virtualenvs.create false && poetry install --no-dev
+
+# Stage 2: Distroless-inspired Production Runtime
+FROM python:3.11-slim AS runner
+WORKDIR /app
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY . .
+RUN chown -R appuser:appgroup /app
+USER appuser
+EXPOSE 8080
+CMD ["python", "app.py"]
+"""
+    # Simulate programmatic payload distribution
+    print("Beginning multi-stage Docker build via daemon client bindings...")
+    try:
+        # Programmatic build with layer cache validation
+        image, build_logs = client.images.build(
+            path=".",
+            dockerfile="Dockerfile.prod",
+            tag="python-service:prod",
+            rm=True
+        )
+        print("Success! Multi-stage image build completed successfully.")
+    except Exception as e:
+        print(f"Build failed: {e}")
+
+if __name__ == '__main__':
+    build_minified_production_image()`
+          },
+          {
+            title: "Scenario B: Implementing dynamic secret mounting during image build phase to secure API tokens",
+            expl: "We use BuildKit secrets capabilities to mount sensitive environment variables during the build process, preventing sensitive credentials from remaining in intermediate image layers.",
+            diagram: `
++------------------- BuildKit Secrets Injection -------------------+
+|                                                                   |
+|   Build Environment ---> RUN --mount=type=secret,id=token         |
+|                          (Mounts temporary RAM file with key)     |
+|                                                                   |
+|   Intermediate Layers ---> [Build Completed] ---> Secret is purged |
+|                            No keys stored in final image layers!  |
++-------------------------------------------------------------------+`,
+            jsCode: `// Configure programmatic BuildKit secret mounts via Node.js
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function buildWithRuntimeSecrets() {
+  console.log("Writing secure intermediate Dockerfile...");
+  const dockerfile = \`
+FROM alpine
+# Read secret at mount path dynamically during compile-time execution
+RUN --mount=type=secret,id=my_secret_key \\
+    SECRET_VAL=$(cat /run/secrets/my_secret_key) && \\
+    echo "Using build secret in compile script..." && \\
+    # Executing external curl/build commands requiring authentication
+    echo "Secured."
+\`;
+  fs.writeFileSync('Dockerfile.secret', dockerfile);
+
+  try {
+    console.log("Starting BuildKit container compilation with secret attachment...");
+    // Force BuildKit active and pass secret values securely
+    execSync('DOCKER_BUILDKIT=1 docker build --secret id=my_secret_key,src=./secret_source.txt -f Dockerfile.secret .', {
+      stdio: 'inherit'
+    });
+  } catch (error) {
+    console.error("Secrets build execution failed: ", error.message);
+  }
+}
+
+buildWithRuntimeSecrets();`,
+            pyCode: `# Building containers programmatically with BuildKit secrets mapping (Python)
+import subprocess
+
+def execute_secure_secret_build():
+    # Construct source secret file temporarily on host (outside docker context)
+    with open('npm_token.txt', 'w') as f:
+        f.write("npm_sec_991823abdc882")
+        
+    dockerfile_data = """
+FROM node:18-alpine
+WORKDIR /app
+# Temporary mount node configuration token without saving it in filesystem metadata
+RUN --mount=type=secret,id=npm_token \\
+    npm config set //registry.npmjs.org/:_authToken=$(cat /run/secrets/npm_token) && \\
+    echo "Token loaded, initiating secure package download..."
+"""
+    with open('Dockerfile.secret', 'w') as f:
+        f.write(dockerfile_data)
+        
+    try:
+        print("Launching BuildKit compiler framework...")
+        subprocess.run([
+            "docker", "build",
+            "--secret", "id=npm_token,src=npm_token.txt",
+            "-f", "Dockerfile.secret", "."
+        ], check=True, env={"DOCKER_BUILDKIT": "1"})
+        print("Secure build completed. Purging host secret source file...")
+    except Exception as e:
+        print(f"Secret build execution failed: {e}")
+
+if __name__ == '__main__':
+    execute_secure_secret_build()`
+          },
+          {
+            title: "Scenario C: Resolving Zombie Process Accumulation inside containers using a custom Tini init reaper",
+            expl: "When running as PID 1, standard processes (like Node.js or Python) do not inherit default operating system reaping characteristics. This scenario implements a proper signal handler and init zombie reclaimer wrapper.",
+            diagram: `
++------------------- Signal Handling Isolation -------------------+
+|                                                                  |
+|   Host OS ---> sends SIGTERM ---> PID 1 (Container init/tini)    |
+|                                    |                             |
+|                                    +---> Reaps orphan children   |
+|                                    +---> Forwards SIGTERM to app |
+|                                                                  |
+|   Zombie process chains are cleanly reaped and container shuts down|
++------------------------------------------------------------------+`,
+            jsCode: `// Simulating init signal routing inside container scripts (Node.js)
+const process = require('process');
+
+function initiateSignalAwareLoop() {
+  console.log(\`Process started as PID \${process.pid}. Setting up signal handlers...\`);
+
+  // Intercepting Terminate signals sent from host docker engine daemon
+  process.on('SIGTERM', () => {
+    console.log("SIGTERM received. Starting graceful shutdown sequence...");
+    // Flush logs, disconnect DB clients, release port allocations
+    setTimeout(() => {
+      console.log("Shutdown complete. Exiting clean.");
+      process.exit(0);
+    }, 1000);
+  });
+
+  process.on('SIGINT', () => {
+    console.log("SIGINT (Ctrl+C) captured. Shuttling resources down...");
+    process.exit(0);
+  });
+
+  // Keep process alive to simulate container operations
+  setInterval(() => {
+    console.log("Application running cleanly...");
+  }, 10000);
+}
+
+initiateSignalAwareLoop();`,
+            pyCode: `# Custom PID 1 Zombie Reclaiming simulations via Python OS bindings
+import os
+import sys
+import signal
+import time
+
+def signal_handler(signum, frame):
+    print(f"Signal {signum} intercepted by Python process framework.")
+    print("Initiating cluster resource draining sequence...")
+    # Simulate DB cleanup and socket closures
+    sys.exit(0)
+
+def register_system_listeners():
+    # Register termination listeners
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    print(f"Python server running inside isolated environment with PID: {os.getpid()}")
+    # Loop keeping container operational
+    try:
+        while True:
+            time.sleep(5)
+    except KeyboardInterrupt:
+        sys.exit(0)
+
+if __name__ == '__main__':
+    register_system_listeners()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Meta DevOps Loop",
+            question: "Why should you avoid using Alpine base images for Python applications in high-performance enterprise pipelines, and what are the alternatives?",
+            answer: `
+<p>While **Alpine** results in smaller container sizes, it is often a poor choice for Python and C/C++ compiled applications due to the underlying C standard library difference:</p>
+<ol>
+  <li><strong>Musl vs Glibc compatibility:</strong> Alpine uses <code>musl libc</code>, while standard Linux distributions use <code>glibc</code>. Most pre-compiled Python wheels (wheels containing compiled C extensions like NumPy, Pandas, or Cryptography) are compiled against <code>glibc</code>.</li>
+  <li><strong>Compiling from Source overhead:</strong> When pip installs these packages on Alpine, it cannot use the pre-compiled binary wheels. It must download the source files and compile them from scratch. This requires installing heavy compilation tools (<code>gcc, g++</code>) inside the image, increasing build times from 30 seconds to over 30 minutes, and increasing intermediate layer sizes.</li>
+  <li><strong>Recommendation:</strong> Use <code>slim-debian</code> based images (e.g., <code>python:3.11-slim</code>) which use <code>glibc</code>, retaining compatibility with precompiled wheels while keeping the image size small.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Amazon System Architect",
+            question: "Explain why running an application as PID 1 inside a container causes issues with signal handling and zombie process accumulation, and how to resolve it.",
+            answer: `
+<p>In Linux, the process with **PID 1** acts as the parent of all system processes. Running an application directly as PID 1 inside a container introduces two fatal architectural flaws:</p>
+<ul>
+  <li><strong>Flawed Signal Forwarding:</strong> The kernel treats PID 1 specially. It does not apply default signal handlers. If a Node.js/JVM application is running as PID 1 and receives a <code>SIGTERM</code> from Docker daemon, it will ignore it by default, forcing the daemon to terminate it violently with <code>SIGKILL</code> after a 10-second timeout.</li>
+  <li><strong>Zombie Processes Accumulation:</strong> When a child process terminates, its exit status must be read by its parent. If the parent dies, the process is re-parented to PID 1. If PID 1 does not actively reap these terminated child processes (called zombie processes), they remain in the kernel system tables, slowly exhausting the host PID limit pool.</li>
+  <li><strong>Solution:</strong> Use an init reaper like **Tini** (<code>ENTRYPOINT ["/sbin/tini", "--", "node", "app.js"]</code> or use <code>docker run --init</code>). Tini acts as PID 1, properly forwards signals, and reaps orphan processes.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Microsoft Platform Loop",
+            question: "How do Docker multi-stage builds work under the hood in BuildKit, and how does it optimize dependency resolution graph compilation?",
+            answer: `
+<p>Under the hood, modern Docker builds run on **BuildKit**, which translates Dockerfiles into a **Directed Acyclic Graph (DAG)** of execution steps:</p>
+<ul>
+  <li><strong>Parallel Graph Execution:</strong> Unlike legacy builders that ran sequentially, BuildKit analyzes the graph of dependencies between stages. If Stage 2 does not depend on the output of Stage 1, BuildKit executes both stages concurrently in isolated worker pods.</li>
+  <li><strong>Layer Pruning:</strong> If you define stages in a multi-stage build that are not used in the final target stage, BuildKit automatically prunes those branches, preventing unnecessary downloads and compilations from occurring entirely.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid using simple standard environment injections for passwords in Dockerfiles (like ENV DB_PASS=secret), as these are baked directly into the image layers metadata. Anyone who downloads the image can extract the credentials using 'docker inspect' or 'docker history'. Always use build secrets or container runtime mounts!"
+      },
+      {
+        id: 3,
+        title: "Advanced Container Networking",
+        level: "hard",
+        category: "Networking & Security",
+        def: "Container networking isolates traffic using virtual bridges (docker0), host adapters, Overlay VXLAN routing meshes, and secure kernel iptables NAT firewall routing.",
+        machinery: "Docker provides multiple isolation profiles: **Bridge** (default virtual ethernet switch <code>docker0</code>, allocating subnet ranges to host virtual ports), **Host** (removes network isolation entirely, binding container ports directly to the physical interface), and **Overlay** (establishes VXLAN overlays across Swarm nodes, encapsulating traffic dynamically via routing meshes). External communication requires **Port Forwarding**, managed by <code>docker-proxy</code> processes co-located on the host and dynamically updated **iptables NAT rules**. When port mapping is established, iptables intercepts external requests, maps the port translation, and forwards packets over the virtual interface interfaces.",
+        scenarios: [
+          {
+            title: "Scenario A: Creating custom dynamic routing namespaces and bridging interfaces manually to mimic the Docker bridge driver",
+            expl: "We bypass Docker's built-in networking command infrastructure to manually create Linux net namespaces, virtual ethernet pairs, and route traffic to a physical interface. This exposes the under-the-hood engine operations of the Docker bridge driver.",
+            diagram: `
++---------------------------- Host OS Kernel ----------------------------+
+|                                                                        |
+|   [Container namespace (netns1)] ---> veth_child                       |
+|                                            |                           |
+|   [Host virtual bridge (br0)]   <--- veth_parent                       |
+|                                            |                           |
+|   [Iptables IP Forwarding]      <---> Route to External Web Interface  |
++------------------------------------------------------------------------+`,
+            jsCode: `// Programmatic creation and inspection of custom network namespaces (Node.js)
+const { execSync } = require('child_process');
+
+function constructManualBridgeNetwork() {
+  console.log("Configuring virtual manual network bridges via kernel interfaces...");
+  try {
+    // Creating namespaced containers
+    execSync('sudo ip netns add my_custom_namespace_1');
+    
+    // Establishing virtual ethernet pairs (veth)
+    execSync('sudo ip link add veth_host type veth peer name veth_container');
+    
+    // Shuttling one end of virtual interface inside target namespace
+    execSync('sudo ip link set veth_container netns my_custom_namespace_1');
+    
+    // Activating host interface
+    execSync('sudo ip link set veth_host up');
+    
+    console.log("Manual netns and virtual network pipes active. Verifying interfaces...");
+    const interfaces = execSync('sudo ip netns exec my_custom_namespace_1 ip link').toString();
+    console.log(interfaces);
+  } catch (error) {
+    console.error("Failed to map Linux interface structures. Ensure root/sudo environment access.", error.message);
+  }
+}
+
+constructManualBridgeNetwork();`,
+            pyCode: `# Manual low-level network namespace configuration script (Python)
+import subprocess
+
+def create_manual_virtual_ethernet_interfaces():
+    try:
+        # Define virtual ethernet pair interfaces
+        print("Provisioning system namespaces and virtual ethernet pipes...")
+        subprocess.run(["sudo", "ip", "netns", "add", "app_ns_1"], check=True)
+        subprocess.run(["sudo", "ip", "link", "add", "veth_h", "type", "veth", "peer", "name", "veth_c"], check=True)
+        
+        # Attach to namespace
+        subprocess.run(["sudo", "ip", "link", "set", "veth_c", "netns", "app_ns_1"], check=True)
+        
+        # Allocate IP configurations inside namespace
+        subprocess.run(["sudo", "ip", "netns", "exec", "app_ns_1", "ip", "addr", "add", "10.200.0.2/24", "dev", "veth_c"], check=True)
+        subprocess.run(["sudo", "ip", "netns", "exec", "app_ns_1", "ip", "link", "set", "veth_c", "up"], check=True)
+        
+        print("Network sandbox successfully virtualized with address 10.200.0.2!")
+    except Exception as e:
+        print(f"Interface configuration failed: {e}. Sudo privileges required.")
+
+if __name__ == '__main__':
+    create_manual_virtual_ethernet_interfaces()`
+          },
+          {
+            title: "Scenario B: Dynamically updating iptables host configurations programmatically to block malicious container traffic",
+            expl: "We intercept traffic on virtual networks to dynamically block IPs on live bridges, ensuring high-security network isolation for multitenant deployments.",
+            diagram: `
++------------------------ Host Iptables Filtering ------------------------+
+|                                                                         |
+|   Container eth0 (172.17.0.5) ---> HTTP GET requests                    |
+|                                          |                              |
+|   [Iptables FORWARD Filter]  <---------- |   Intercepts packet          |
+|   Matches bad IP (198.51.100.2) ---> REJECT                             |
+|                                                                         |
+|   Prevents suspicious container egress without restarting container      |
++-------------------------------------------------------------------------+`,
+            jsCode: `// Intercepting and block container bridge egress traffic via Node.js
+const { execSync } = require('child_process');
+
+function isolateMaliciousContainerPort(containerIp, targetBlockIp) {
+  console.log(\`Injecting secure firewall rules for container \${containerIp}...\`);
+  try {
+    // Append routing intercept in forwarding chain
+    execSync(\`sudo iptables -I FORWARD -s \${containerIp} -d \${targetBlockIp} -j REJECT\`);
+    console.log(\`Successfully blocked egress traffic from \${containerIp} to destination \${targetBlockIp}\`);
+  } catch (error) {
+    console.error("Iptables modification failed:", error.message);
+  }
+}
+
+isolateMaliciousContainerPort('172.17.0.5', '198.51.100.2');`,
+            pyCode: `# Dynamically configure host iptables filter configurations to secure bridges (Python)
+import subprocess
+
+def enforce_egress_firewall(container_ip, block_destination):
+    print(f"Injecting host packet filter to isolate container {container_ip}...")
+    try:
+        # Block outgoing traffic to target destination using iptables routing tables
+        cmd = [
+            "sudo", "iptables", "-I", "FORWARD",
+            "-s", container_ip,
+            "-d", block_destination,
+            "-j", "DROP"
+        ]
+        subprocess.run(cmd, check=True)
+        print(f"Egress target block active. Packet forwarding to {block_destination} is disabled.")
+    except Exception as e:
+        print(f"Error updating security firewall: {e}")
+
+if __name__ == '__main__':
+    enforce_egress_firewall('172.20.0.12', '8.8.8.8')`
+          },
+          {
+            title: "Scenario C: Automating Overlay network healthchecks and dynamic routing analysis in a Swarm cluster",
+            expl: "We inspect MTU mismatch issues and network diagnostic indicators across container overlay layers dynamically using programmatic network analysis.",
+            diagram: `
++------------------- Overlay Network VXLAN Tunneling -------------------+
+|                                                                       |
+|   Host Node A (10.0.0.10)                        Host Node B (10.0.0.11)|
+|   Container A (10.0.1.5)                         Container B (10.0.1.6) |
+|         |                                              ^              |
+|         v                                              |              |
+|   [VXLAN Encap] ---> tunnel UDP port 4789 ------------> [VXLAN Decap]  |
++-----------------------------------------------------------------------+`,
+            jsCode: `// Troubleshooting and inspecting Docker network drivers dynamically via Node.js
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function analyzeNetworkConfiguration() {
+  console.log("Fetching local network drive metadata...");
+  try {
+    const networks = await docker.listNetworks();
+    networks.forEach(net => {
+      console.log(\`Network Name: \${net.Name} | Driver: \${net.Driver} | ID: \${net.Id}\`);
+      if (net.Driver === 'overlay') {
+        console.log("Overlay active. Checking MTU configuration options...");
+        console.log(JSON.stringify(net.Options, null, 2));
+      }
+    });
+  } catch (err) {
+    console.error("Failed to inspect network drivers:", err);
+  }
+}
+
+analyzeNetworkConfiguration();`,
+            pyCode: `# Validate MTU and network settings across system interfaces (Python)
+import docker
+import socket
+import struct
+
+def check_overlay_network_health():
+    client = docker.from_env()
+    print("Initiating docker network routing validation checks...")
+    try:
+        networks = client.networks.list()
+        for net in networks:
+            # Analyze settings looking for MTU parameters
+            options = net.attrs.get('Options', {})
+            driver = net.attrs.get('Driver', '')
+            
+            print(f"Driver: {driver} | Name: {net.name}")
+            if 'com.docker.network.driver.mtu' in options:
+                print(f"  -> Configured MTU: {options['com.docker.network.driver.mtu']}")
+            else:
+                print("  -> Using default network driver MTU limits (1500 bytes)")
+    except Exception as e:
+        print(f"Failed to inspect cluster networks: {e}")
+
+if __name__ == '__main__':
+    check_overlay_network_health()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Stripe DevOps Loop",
+            question: "Why do containers on a custom user-defined bridge network communicate using DNS service discovery, whereas default bridge containers can only communicate using static raw IP addresses?",
+            answer: `
+<p>This is a fundamental architecture behavior difference between default and custom bridge networks managed by Docker's built-in **DNS server**:</p>
+<ul>
+  <li><strong>Default Bridge (docker0):</strong> In this network, Docker does not activate name resolution services. The only way containers can locate and communicate with each other is by hardcoding internal IP addresses or using the legacy (and deprecated) <code>--link</code> parameters which manually inject mappings into <code>/etc/hosts</code> files.</li>
+  <li><strong>User-Defined Bridge:</strong> When you create a custom network (e.g. <code>docker network create my-net</code>), Docker automatically initiates an embedded **DNS resolver** inside the daemon at address <code>127.0.0.11</code>. When container names are queried, this DNS server intercepts the request and resolves the container name to its current internal IP address dynamically, facilitating seamless service discovery.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Uber Platform Team",
+            question: "Explain the routing latency and network performance differences between Host Network Mode and default Bridge Network Mode.",
+            answer: `
+<p>Understanding port binding modes is critical for high-throughput microservice engineering:</p>
+<ol>
+  <li><strong>Bridge Network Mode:</strong> This mode uses Linux network namespaces. Every packet leaving or entering the container must pass through a virtual network bridge interface (<code>docker0</code>), undergoing **NAT (Network Address Translation)**. The packet is processed by the host's iptables engine, creating a CPU overhead of 10-15% and minor packet routing latency.</li>
+  <li><strong>Host Network Mode:</strong> In this mode, the container shares the host network namespace. It has direct access to the host's network interfaces. No veth pair is created, and NAT is skipped. The container performs at native physical OS wire speed, making it ideal for latency-sensitive applications like VoIP, media streaming, or high-throughput API gateways.</li>
+</ol>
+            `
+          },
+          {
+            badge: "LinkedIn Systems Loop",
+            question: "What is an MTU mismatch inside Docker Overlay networks, and how does it cause silent socket drop failures?",
+            answer: `
+<p>An **MTU (Maximum Transmission Unit)** mismatch occurs when container packets exceed physical network pipeline limits:</p>
+<ul>
+  <li><strong>VXLAN Overhead:</strong> Docker Overlay networks use VXLAN encapsulation to route traffic across physical nodes, adding a **50-byte wrapper header** to every ethernet frame.</li>
+  <li><strong>Fragmentation Drop:</strong> If the host network MTU is 1500 bytes and the container network MTU is also 1500 bytes, sending a full-sized container frame results in a 1550-byte packet. When routed across host interfaces, routers drop the packet if the 'Don't Fragment' (DF) flag is set. This leads to silent timeouts on heavy operations like file uploads, while lightweight HTTP handshakes succeed.</li>
+  <li><strong>Mitigation:</strong> Set the overlay network MTU to <code>1450</code> bytes to leave a 50-byte buffer for the VXLAN header wrapper.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid using default host port mappings (like -p 80:80) for high-performance enterprise endpoints. This spins up a 'docker-proxy' process for every port, adding an unnecessary user-space proxy layer. Configure direct host networking or ingress routing interfaces instead to bypass docker-proxy entirely!"
+      },
+      {
+        id: 4,
+        title: "State Persistence & Storage Drivers",
+        level: "medium",
+        category: "Storage Engineering",
+        def: "Storage architectures separate container runtime lifecycles from persistent application data using Bind Mounts, Docker Volumes, and optimized storage drivers (OverlayFS/Btrfs).",
+        machinery: "Containers are designed to be stateless. Data written directly to container filesystems is ephemeral and stored in the writable layer of **OverlayFS**, which incurs performance penalties. To achieve persistence, Docker supports **Bind Mounts** (mounting a specific file or directory from the host to the container; tightly coupled to the host host configuration) and **Volumes** (managed directly by the Docker daemon within <code>/var/lib/docker/volumes/</code>; decoupled from host structures). In host virtualization layers (like Docker Desktop on macOS or Windows), bind mounts undergo severe latency due to the dynamic filesystem translation translation layer between the host and the virtual utility VM. Enterprise database engines must isolate their data using volume mounts to ensure raw block-level I/O performance.",
+        scenarios: [
+          {
+            title: "Scenario A: Dynamically creating and verifying volumes programmatically with high-performance storage configurations",
+            expl: "We write automated scripts using SDKs to provision and attach managed volumes, verifying read-write I/O performance directly inside container mounts.",
+            diagram: `
++---------------------- Docker Volume Virtualization ----------------------+
+|                                                                          |
+|   /var/lib/docker/volumes/db_data/   <--- Managed by Docker Daemon       |
+|                                           (Direct block I/O pass-through)|
+|   Container Mount: /var/lib/mysql/   <--- Bind-mounted inside sandbox    |
+|                                                                          |
+|   Bypasses OverlayFS CoW layering to write directly to host filesystem  |
++--------------------------------------------------------------------------+`,
+            jsCode: `// Programmatic Volume provisioning and inspection via Node.js
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function createHighPerformanceVolume() {
+  console.log("Configuring managed data volume...");
+  try {
+    const volume = await docker.createVolume({
+      Name: 'prod_database_store',
+      Driver: 'local',
+      DriverOpts: {
+        type: 'tmpfs', // Zero disc read-write latency for temporary caching
+        device: 'tmpfs',
+        o: 'size=2g,noatime'
+      }
+    });
+    console.log(\`Volume provisioned successfully: \${volume.name}\`);
+    
+    // Inspect metadata
+    const info = await volume.inspect();
+    console.log(JSON.stringify(info, null, 2));
+  } catch (error) {
+    console.error("Volume allocation failed:", error);
+  }
+}
+
+createHighPerformanceVolume();`,
+            pyCode: `# Provision Docker storage volumes programmatically with SDK parameters (Python)
+import docker
+
+def configure_production_volume():
+    client = docker.from_env()
+    print("Initiating automated volume allocation...")
+    try:
+        # Create volume using local storage driver with custom options
+        volume = client.volumes.create(
+            name="customer_media_store",
+            driver="local",
+            driver_opts={
+                "type": "none",
+                "o": "bind",
+                "device": "/mnt/shared/data"
+            }
+        )
+        print(f"Volume created successfully: {volume.name}")
+        print(f"Mount Point: {volume.attrs['Mountpoint']}")
+    except Exception as e:
+        print(f"Volume allocation failed: {e}")
+
+if __name__ == '__main__':
+    configure_production_volume()`
+          },
+          {
+            title: "Scenario B: Mitigating filesystem virtualization I/O bottlenecks in macOS and Windows build pipelines",
+            expl: "We configure container execution parameters to benchmark write latency, switching configurations from standard bind mounts to named volumes to demonstrate dynamic performance improvement.",
+            diagram: `
++------------------- VirtioFS Host Filesystem Translation -------------------+
+|                                                                            |
+|   macOS/Windows Host  ----> virtual translator (VirtioFS) ----> Guest VM   |
+|   (Heavy Disk I/O)                                            (Container)  |
+|                                                                            |
+|   Bind Mount Latency: High I/O overhead  ||  Volume Mount Latency: Native  |
++----------------------------------------------------------------------------+`,
+            jsCode: `// Programmatically running standard and volume-mounted containers to run I/O benchmarks
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function executeVolumePerformanceBenchmark() {
+  console.log("Starting high-speed container with volume mount for I/O performance...");
+  try {
+    const container = await docker.createContainer({
+      Image: 'alpine',
+      Cmd: ['dd', 'if=/dev/zero', 'of=/data/test.img', 'bs=1G', 'count=1', 'oflag=dsync'],
+      HostConfig: {
+        Binds: ['prod_database_store:/data'] // Mounts high speed Volume
+      }
+    });
+    await container.start();
+    console.log("Benchmark container started. Awaiting disk writes...");
+  } catch (err) {
+    console.error("Benchmark deployment failed:", err);
+  }
+}
+
+executeVolumePerformanceBenchmark();`,
+            pyCode: `# Run speed benchmark comparisons against volume configurations programmatically (Python)
+import docker
+import time
+
+def benchmark_io_profiles():
+    client = docker.from_env()
+    print("Launching container to benchmark mount points...")
+    try:
+        # Bind mount comparison container
+        container = client.containers.run(
+            image="alpine",
+            command="dd if=/dev/zero of=/test.img bs=1M count=100",
+            volumes={'prod_database_store': {'bind': '/test_vol', 'mode': 'rw'}},
+            detach=True
+        )
+        # Wait for operation to complete
+        while container.status == 'running':
+            time.sleep(1)
+            container.reload()
+            
+        print("I/O benchmarking run completed. Purging temporary runtime container...")
+        container.remove()
+        print("Done.")
+    except Exception as e:
+        print(f"Error executing storage benchmarks: {e}")
+
+if __name__ == '__main__':
+    benchmark_io_profiles()`
+          },
+          {
+            title: "Scenario C: Inspecting local disk allocation and implementing safe volume cleanup strategies",
+            expl: "We inspect storage utilization across containers programmatically and execute automated cleanups of orphan volumes to reclaim storage space.",
+            diagram: `
++------------------- Volume Lifecycle & Pruning -------------------+
+|                                                                   |
+|   Volume Store ---> [Volume A: in use by Database container]      |
+|                ---> [Volume B: dangling/orphan volume]           |
+|                                                                   |
+|   [Prune Command] ---> Deletes dangling Volume B                  |
+|                        Leaves critical Volume A untouched!        |
++-------------------------------------------------------------------+`,
+            jsCode: `// Pruning dangling/orphan data volumes using Node.js SDK
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function purgeDanglingVolumes() {
+  console.log("Scanning volume repository for unused state directories...");
+  try {
+    const pruneResults = await docker.pruneVolumes();
+    console.log("Orphan volumes purged successfully:");
+    console.log(JSON.stringify(pruneResults, null, 2));
+  } catch (err) {
+    console.error("Cleanup scan failed:", err);
+  }
+}
+
+purgeDanglingVolumes();`,
+            pyCode: `# Reclaiming host disk allocations by pruning dangling volumes (Python)
+import docker
+
+def cleanup_orphan_volumes():
+    client = docker.from_env()
+    print("Initiating automated disk reclamation check...")
+    try:
+        # Scan and prune unused/dangling volumes
+        results = client.volumes.prune()
+        reclaimed_bytes = results.get('SpaceReclaimed', 0)
+        deleted_volumes = results.get('VolumesDeleted', [])
+        
+        print(f"Reclaimed Space: {reclaimed_bytes / (1024*1024):.2f} MB")
+        print(f"Deleted Volumes Count: {len(deleted_volumes)}")
+        for vol in deleted_volumes:
+            print(f"  - Purged: {vol}")
+    except Exception as e:
+        print(f"Error during volumes pruning: {e}")
+
+if __name__ == '__main__':
+    cleanup_orphan_volumes()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Amazon DB Loop",
+            question: "Why do relational databases (e.g. Postgres) mounted via Bind Mounts on Windows/macOS virtual environments suffer extreme latency, and how do you resolve this?",
+            answer: `
+<p>This issue stems from the virtual filesystem bridge translation layers in host virtualization frameworks:</p>
+<ol>
+  <li><strong>Filesystem Virtualization Latency:</strong> In macOS (Docker Desktop) or Windows (WSL2), Docker runs inside a lightweight virtual utility VM. When you use a Bind Mount (e.g., sharing a directory from macOS Host filesystem to the container Guest filesystem), every I/O operation must be translated across host boundary interfaces using protocol frameworks like VirtioFS or gRPC FUSE. This protocol translation adds extreme latency overhead (sometimes up to 10x-50x slower) for random read/write patterns typical of database engines.</li>
+  <li><strong>Resolution Strategy:</strong> Use **Named Docker Volumes** instead. Named volumes are allocated directly within the storage tree inside the Guest utility VM (e.g. in <code>/var/lib/docker/volumes/</code>). Writes are executed locally inside the Linux filesystem structure, bypassing virtual bridge translators entirely and performing at native disk speed.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Facebook Storage Systems",
+            question: "What is the difference between Named Volumes and Anonymous Volumes, and how does Docker manage their life cycle during container deletion?",
+            answer: `
+<p>Docker categorizes volumes based on how their metadata identifiers are defined:</p>
+<ul>
+  <li><strong>Named Volumes:</strong> Created with explicit names (e.g. <code>docker volume create db_data</code>). Their lifecycle is managed independently. When you delete a container mounted with a named volume, Docker will **never** delete the volume automatically. You must run <code>docker volume rm</code>.</li>
+  <li><strong>Anonymous Volumes:</strong> Created automatically when a Dockerfile defines a volume mount point without an explicit name mapping (e.g. <code>VOLUME /var/log</code>). When the container is deleted using <code>docker rm -v</code>, anonymous volumes are swept and purged automatically. If you delete the container without the <code>-v</code> flag, these volumes become dangling orphans, slowly consuming host disk space.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Uber Site Reliability",
+            question: "How do storage drivers like Overlay2 handle block-level writes versus file-level writes, and what are the performance trade-offs?",
+            answer: `
+<p>Storage drivers manage container disk changes using two architectural layers:</p>
+<ul>
+  <li><strong>File-level Driver (Overlay2):</strong> Operates on files. Modifications force copy-on-write operations of the **entire file** from read-only image layers to the writable container layer. This is fast for reads but inefficient for writing to large files.</li>
+  <li><strong>Block-level Driver (Devicemapper/Btrfs):</strong> Operates on block devices. When a file is modified, only the changed blocks are written, preventing the overhead of copying the entire file. This is highly efficient for heavy transactional workloads (like databases) but introduces complex metadata architecture management.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Always set your persistent data volume configurations to mount as read-only where write access is not required by default (using :ro flag, like -v my-vol:/config:ro). This enforces least-privilege security boundaries and prevents software anomalies from modifying critical infrastructure configurations at runtime!"
+      },
+      {
+        id: 5,
+        title: "Docker Compose & Local Orchestration",
+        level: "medium",
+        category: "Orchestration & Tools",
+        def: "Compose enables multi-container orchestration using declarative YAML service definitions, private network environments, dependency graphs, and target health checks.",
+        machinery: "Docker Compose compiles service configurations into runtime workloads. Declarative service structures define isolated networks, persistent volume maps, resource allocations (CPU/Memory caps), and startup ordering using **depends_on** with active **healthcheck** criteria. When launched, Compose creates a private default bridge network, enabling containers to automatically resolve peer services using DNS service discovery.",
+        scenarios: [
+          {
+            title: "Scenario A: Deploying a highly resilient multi-service stack with strict startup sequence validations",
+            expl: "We define a database, a cache, and an application layer using Docker Compose, establishing health check dependencies to ensure the application only launches when database sockets are fully online.",
+            diagram: `
++------------------- Compose Dependency Order -------------------+
+|                                                                 |
+|   App Container  <--- [depends_on DB: healthy]                  |
+|         |                                                       |
+|         +---> [Database Container] (Runs healthy probe check)   |
+|                                                                 |
+|   App is held in pause until Database is fully initialized!     |
++-----------------------------------------------------------------+`,
+            jsCode: `// Programmatic deployment validation of Compose configuration stacks (Node.js)
+const { execSync } = require('child_process');
+const fs = require('fs');
+
+function deployComposeStack() {
+  const composeConfig = \`
+version: "3.8"
+services:
+  database:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: main_db
+      POSTGRES_PASSWORD: securepassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d main_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  application:
+    image: node:20-alpine
+    command: ["node", "-e", "console.log('App connected to database!')"]
+    depends_on:
+      database:
+        condition: service_healthy
+\`;
+  fs.writeFileSync('docker-compose.yml', composeConfig);
+  console.log("Compose file created. Triggering service graph deployment...");
+  
+  try {
+    execSync('docker compose up --abort-on-container-exit', { stdio: 'inherit' });
+  } catch (error) {
+    console.error("Compose deployment failed:", error.message);
+  }
+}
+
+deployComposeStack();`,
+            pyCode: `# Manage multi-container compose deployments dynamically via scripts (Python)
+import subprocess
+
+def deploy_microservices_graph():
+    print("Initiating docker compose stack verification check...")
+    try:
+        # Launch services utilizing command-line interfaces
+        subprocess.run([
+            "docker", "compose", "up",
+            "--build", "-d"
+        ], check=True)
+        print("Compose orchestration active. Reviewing dynamic statuses...")
+        
+        # Verify status output
+        status = subprocess.run(["docker", "compose", "ps"], capture_output=True, text=True)
+        print(status.stdout)
+    except Exception as e:
+        print(f"Failed to orchestrate stack: {e}")
+
+if __name__ == '__main__':
+    deploy_microservices_graph()`
+          },
+          {
+            title: "Scenario B: Restricting container resource allocations inside Compose definitions to prevent node CPU lockups",
+            expl: "We specify CPU and Memory resource allocation limits inside Compose configurations to enforce strict boundaries on memory-intensive background workers.",
+            diagram: `
++------------------- CPU & Memory Resource Caps -------------------+
+|                                                                   |
+|   App worker service ---> runs intensive calculations             |
+|                                                                   |
+|   [Compose limit config] ---> limit CPU usage to 0.5 shares       |
+|                          ---> limit Memory usage to 512MB         |
+|                                                                   |
+|   Prevents worker from starving critical co-located host processes |
++-------------------------------------------------------------------+`,
+            jsCode: `// Validating resource configuration mappings within local Compose descriptors
+const fs = require('fs');
+
+function validateComposeResourceCaps() {
+  console.log("Inspecting Compose manifest to ensure cgroup resource allocations are set...");
+  const manifest = \`
+version: "3.8"
+services:
+  worker:
+    image: alpine
+    command: dd if=/dev/zero of=/dev/null
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          memory: 128M
+\`;
+  // Parsing verification: Ensure limits are properly mapped before deployment execution
+  if (manifest.includes("limits") && manifest.includes("cpus")) {
+    console.log("Verification passed! Resources limits properly defined.");
+  } else {
+    console.warn("Security Alert: Compose service has infinite allocation limits configured!");
+  }
+}
+
+validateComposeResourceCaps();`,
+            pyCode: `# Programmatically scale and deploy Compose replica layouts (Python)
+import yaml
+import subprocess
+
+def scale_compose_workload(service_name, replicas_count):
+    print(f"Modifying scale profiles for service: {service_name}...")
+    try:
+        # Execute scale command dynamically
+        subprocess.run([
+            "docker", "compose", "up",
+            "--scale", f"{service_name}={replicas_count}", "-d"
+        ], check=True)
+        print(f"Service scaled up successfully to {replicas_count} active replicas!")
+    except Exception as e:
+        print(f"Scaling execution failed: {e}")
+
+if __name__ == '__main__':
+    scale_compose_workload('web', 3)`
+          },
+          {
+            title: "Scenario C: Isolating secure database traffic from public web frontends using separated networks",
+            expl: "We implement separated internal and external bridge networks inside Compose configurations, preventing public-facing containers from directly reaching secure database backends.",
+            diagram: `
++------------------- Multi-Network Segmentation -------------------+
+|                                                                   |
+|   [Public Internet]                                               |
+|         |                                                         |
+|         v                                                         |
+|   [Web Frontend]    <--- Connected to: frontend_net (public)      |
+|         |                                                         |
+|         +--------------> Connected to: backend_net  (private)     |
+|                                |                                  |
+|                                v                                  |
+|                         [Database Container]                      |
+|                         (No connection to frontend_net!)          |
++-------------------------------------------------------------------+`,
+            jsCode: `// Programmatic inspection of network isolations in Compose environments
+const { execSync } = require('child_process');
+
+function verifyNetworkSeparation() {
+  console.log("Analyzing container bridging networks inside running compose stack...");
+  try {
+    const output = execSync("docker network ls --filter driver=bridge").toString();
+    console.log("Bridge networks currently running on host:");
+    console.log(output);
+  } catch (err) {
+    console.error("Failed to fetch running bridges:", err.message);
+  }
+}
+
+verifyNetworkSeparation();`,
+            pyCode: `# Verify network driver isolation policies via Docker client structures (Python)
+import docker
+
+def check_compose_network_isolation(network_name):
+    client = docker.from_env()
+    try:
+        net = client.networks.get(network_name)
+        print(f"Network Name: {net.name} | ID: {net.id}")
+        print("Attached Containers to this network channel:")
+        for container_id, details in net.attrs.get('Containers', {}).items():
+            print(f"  - Container: {details.get('Name')} | IP: {details.get('IPv4Address')}")
+    except Exception as e:
+        print(f"Network verification failed: {e}")
+
+if __name__ == '__main__':
+    check_compose_network_isolation('compose_backend_net')`
+          }
+        ],
+        questions: [
+          {
+            badge: "Salesforce Systems Loop",
+            question: "How does Docker Compose manage service name resolution under the hood, and what happens when two services have overlapping ports on the host?",
+            answer: `
+<p>Docker Compose dynamically virtualizes DNS routing for microservice networks:</p>
+<ul>
+  <li><strong>DNS Service Discovery:</strong> When you start a stack, Compose creates a private network. Every service uses its name (e.g. <code>database</code>) as its hostname. Docker's embedded DNS server intercepts requests, resolving <code>database</code> to the internal container IP dynamically.</li>
+  <li><strong>Host Port Overlap:</strong> If two services attempt to expose the same host port (e.g. <code>8080:80</code>), the host's networking sockets will throw an address-in-use error. This occurs because port bindings map to the host's loopback and physical interfaces, which cannot share sockets simultaneously.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Uber Platform Loop",
+            question: "What is the difference between depends_on 'service_started' and depends_on 'service_healthy' conditions, and why is this critical for database startup?",
+            answer: `
+<p>Startup orchestration requires validating operational health parameters:</p>
+<ol>
+  <li><strong>service_started:</strong> Tells Compose to start the child container once the parent container is initialized at the OS layer. This does NOT guarantee the database process inside is ready to accept client TCP connections.</li>
+  <li><strong>service_healthy:</strong> Instructs Compose to wait until the parent container's dynamic **healthcheck** probe returns success. For databases, this guarantees that the server socket is fully listening, preventing premature application startup errors.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Atlassian DevOps Loop",
+            question: "How do you override environment variables inside Compose stack deployments dynamically during CI/CD execution?",
+            answer: `
+<p>Compose implements an environment override hierarchy:</p>
+<ul>
+  <li><strong>Override Hierarchy:</strong> Variables are loaded in the following order (highest precedence first): Shell environment variables, the system <code>.env</code> file, and configurations inside the YAML definition.</li>
+  <li><strong>Dynamic CI/CD Overrides:</strong> During CI/CD runs, you inject variables by exporting them in the shell before execution (e.g. <code>TAG=v2.0.0 docker compose up -d</code>) or utilizing multiple composition overrides: <code>docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d</code>.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Never hardcode passwords or sensitive credentials in docker-compose.yml files. Use external environment variables (e.g., POSTGRES_PASSWORD=${DB_PASSWORD}) and manage them securely in your CI/CD runner environments or host system environments!"
+      },
+      {
+        id: 6,
+        title: "Daemon Runtimes & Container Security",
+        level: "expert",
+        category: "Daemon & Security",
+        def: "Security architectures enforce boundaries on running workloads using Rootless mode daemon executions, Linux capability drops, seccomp filters, AppArmor profiles, and read-only host filesystem overlays.",
+        machinery: "Docker security is built on kernel-level boundaries. By default, containers run as root inside their namespaces, which presents host security risks. To secure environments, you can implement **Rootless Mode** (running the Docker daemon and containers inside a user namespace, eliminating root requirements). High-security workloads drop Linux kernel capabilities by default using <code>--cap-drop=ALL</code> and selectively adding only what's required (e.g., <code>--cap-add=NET_BIND_SERVICE</code>). System call execution is filtered using custom **seccomp profiles** that block hazardous kernel calls, and filesystem vectors are neutralized by running with a **read-only root filesystem** (<code>--read-only</code>), forcing runtime files to be written only to temporary in-memory tmpfs mounts.",
+        scenarios: [
+          {
+            title: "Scenario A: Deploying a highly secure container with fully dropped capabilities and custom seccomp filters",
+            expl: "We launch an isolated container, stripping all kernel system privileges by default and restricting syscall executions using seccomp parameters.",
+            diagram: `
++------------------- Kernel Capabilities Dropping -------------------+
+|                                                                   |
+|   System Call from Container (e.g. reboot)                        |
+|         |                                                         |
+|         v                                                         |
+|   [Kernel seccomp Filter] ---> Blocks raw syscall                 |
+|   [Capabilities Filter]   ---> Drops write-access to kernel       |
+|                                                                   |
+|   Workload is isolated from executing host-level system actions   |
++-------------------------------------------------------------------+`,
+            jsCode: `// Configure a highly secure, restricted container via Node.js SDK
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function launchSecureContainer() {
+  console.log("Initializing secure container deployment...");
+  try {
+    const container = await docker.createContainer({
+      Image: 'nginx:alpine',
+      HostConfig: {
+        CapDrop: ['ALL'], // Strip all Linux system capabilities
+        CapAdd: ['NET_BIND_SERVICE'], // Restrict access to only port binding (port < 1024)
+        ReadonlyRootfs: true, // Mark container system disk read-only
+        Binds: ['/tmp/cache:/tmp'] // Route write operations to explicit scratchpads
+      }
+    });
+    await container.start();
+    console.log(\`Secure container started successfully: \${container.id}\`);
+  } catch (err) {
+    console.error("Security configuration deployment failed:", err);
+  }
+}
+
+launchSecureContainer();`,
+            pyCode: `# Enforce strict seccomp filtering and cap-drops programmatically (Python)
+import docker
+
+def deploy_hardened_runtime():
+    client = docker.from_env()
+    print("Deploying hardened workload with drop capabilities...")
+    try:
+        # Run container with seccomp profile, dropped capabilities, and read-only filesystems
+        container = client.containers.run(
+            image="nginx:alpine",
+            detach=True,
+            read_only=True,
+            cap_drop=["ALL"],
+            cap_add=["NET_BIND_SERVICE"],
+            # Mount memory tmpfs for Nginx writable directories
+            tmpfs={'/var/cache/nginx': 'rw,size=64m', '/var/run': 'rw,size=16m'}
+        )
+        print(f"Hardened container deployed successfully: {container.name}")
+        print("Workload is isolated from writing to host directories.")
+    except Exception as e:
+        print(f"Hardening deployment failed: {e}")
+
+if __name__ == '__main__':
+    deploy_hardened_runtime()`
+          },
+          {
+            title: "Scenario B: Dynamically auditing container runtime privileges using seccomp kernel detection checks",
+            expl: "We inspect seccomp and security configuration details of running containers programmatically, identifying workloads running with unsafe root capabilities.",
+            diagram: `
++------------------- Privilege Auditing Engine -------------------+
+|                                                                  |
+|   Security Scanner Container ---> audits local running hosts     |
+|                                                                  |
+|   [Privilege Check] ---> Scans runtime security profiles         |
+|                     ---> Flags containers with Privileged=true  |
+|                                                                  |
+|   Generates CVE alert dashboards for enterprise compliance       |
++------------------------------------------------------------------+`,
+            jsCode: `// Audit container privilege levels dynamically using Dockerode (Node.js)
+const Docker = require('dockerode');
+const docker = new Docker();
+
+async function auditContainerPrivileges() {
+  console.log("Scanning active containers for privileged access violations...");
+  try {
+    const containers = await docker.listContainers({ all: true });
+    for (const containerInfo of containers) {
+      const container = docker.getContainer(containerInfo.Id);
+      const details = await container.inspect();
+      
+      const isPrivileged = details.HostConfig.Privileged;
+      const capAdd = details.HostConfig.CapAdd || [];
+      
+      console.log(\`Container: \${details.Name} | Privileged: \${isPrivileged}\`);
+      if (isPrivileged) {
+        console.warn(\`⚠️ SECURITY RISK: Container \${details.Name} is running with full root system privileges!\`);
+      }
+    }
+  } catch (error) {
+    console.error("Auditing process failed:", error);
+  }
+}
+
+auditContainerPrivileges();`,
+            pyCode: `# Scan and detect containers running with unsafe security privileges (Python)
+import docker
+
+def audit_runtime_security():
+    client = docker.from_env()
+    print("Scanning active docker runtime configurations...")
+    try:
+        containers = client.containers.list(all=True)
+        for c in containers:
+            # Reload metadata
+            c.reload()
+            config = c.attrs.get('HostConfig', {})
+            privileged = config.get('Privileged', False)
+            cap_add = config.get('CapAdd', [])
+            
+            print(f"Container: {c.name} | Privileged: {privileged}")
+            if privileged or "SYS_ADMIN" in (cap_add or []):
+                print(f"  -> WARNING: {c.name} possesses high system administration capabilities!")
+    except Exception as e:
+        print(f"Auditing execution failed: {e}")
+
+if __name__ == '__main__':
+    audit_runtime_security()`
+          },
+          {
+            title: "Scenario C: Isolating system applications using custom read-only mounts and user namespace mappings",
+            expl: "We implement custom user namespace remap settings dynamically, ensuring container root IDs map to unprivileged users on the host OS.",
+            diagram: `
++------------------- User Namespace Remapping -------------------+
+|                                                                 |
+|   Container Root (UID 0)  ======> Unprivileged Host User (UID 10000) |
+|                                                                 |
+|   If container process escapes to host filesystem:              |
+|   Host Kernel rejects privileges ---> Host system remains secure! |
++-----------------------------------------------------------------+`,
+            jsCode: `// Programmatic validation of user namespace remap configurations
+const { execSync } = require('child_process');
+
+function verifyUserNamespaceRemap() {
+  console.log("Validating daemon-level userns-remap configuration status...");
+  try {
+    // Read docker daemon configurations
+    const daemonConfig = execSync("docker info --format '{{json .SecurityOptions}}'").toString();
+    console.log("Active security options on daemon runtime:");
+    console.log(daemonConfig);
+    
+    if (daemonConfig.includes("name=userns")) {
+      console.log("Success! User namespace remapping is active in the cluster.");
+    } else {
+      console.warn("Security Alert: User namespace remapping is disabled. Containers can escape as host root!");
+    }
+  } catch (err) {
+    console.error("Namespace verification failed:", err.message);
+  }
+}
+
+verifyUserNamespaceRemap();`,
+            pyCode: `# Programmatic validation of user namespace mappings inside containers (Python)
+import subprocess
+
+def check_userns_remap():
+    try:
+        print("Analyzing namespace isolation bounds inside running workloads...")
+        # Inspect real host UID of root user inside target container
+        output = subprocess.run([
+            "docker", "run", "--rm", "alpine", "id", "-u"
+        ], capture_output=True, text=True, check=True)
+        
+        container_uid = int(output.stdout.strip())
+        print(f"Container root process is running as UID: {container_uid}")
+    except Exception as e:
+        print(f"Failed to execute verification: {e}")
+
+if __name__ == '__main__':
+    check_userns_remap()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Palantir Security Loop",
+            question: "Explain the threat model of a container escape, and how running a container in '--privileged' mode bypasses all security layers.",
+            answer: `
+<p>A **container escape** occurs when a process breaks out of its namespace isolation barriers to execute commands directly on the host:</p>
+<ol>
+  <li><strong>--privileged Mode:</strong> Running with <code>--privileged</code> tells Docker to disable all namespaces, seccomp filters, AppArmor/SELinux profiles, and cgroup limits. The container root is given direct access to all host devices (e.g., <code>/dev/</code>).</li>
+  <li><strong>Escape Mechanism:</strong> A process inside a privileged container can mount the host's physical disk drive (e.g. <code>mount /dev/sda1 /mnt</code>), modify files (like <code>/etc/shadow</code> or cron jobs on the host), and execute arbitrary commands as the host's actual root user.</li>
+  <li><strong>Prevention:</strong> Never use privileged mode in production. Use explicit capability flags (e.g. <code>--cap-add=SYS_ADMIN</code>) only if absolutely necessary, and run workloads in rootless environments.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Cloudflare Security",
+            question: "What is seccomp (Secure Computing Mode), and how does it prevent kernel privilege escalation inside Docker containers?",
+            answer: `
+<p>**Seccomp** is a Linux kernel security facility that restricts the system calls a process can make:</p>
+<ul>
+  <li><strong>Syscall Interception:</strong> When a container process attempts a system call (e.g. <code>reboot</code> or <code>ptrace</code>), the kernel checks it against the active seccomp profile.</li>
+  <li><strong>Docker Default Profile:</strong> Docker applies a default seccomp profile that **blocks around 44 of the 300+ Linux system calls** (including <code>reboot, swapon, mount</code>). This prevents compromised container processes from executing kernel privilege escalations or taking control of the host kernel interface.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Okta Identity Team",
+            question: "How does User Namespace Remapping (userns-remap) mitigate the security risk of a container's root user having access to host resources?",
+            answer: `
+<p>**User Namespace Remapping** isolates root user identity mappings across the container boundary:</p>
+<ul>
+  <li><strong>UID Translation:</strong> When enabled, Docker maps the container's root user (UID 0) to an unprivileged user (e.g., UID 10000) on the host OS.</li>
+  <li><strong>Mitigation:</strong> If a compromised container process escapes to the host filesystem, it will be treated by the host kernel as UID 10000, which has no administrative privileges, preventing the attacker from compromising the host.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Always run containers with a read-only root filesystem (--read-only) and mount write locations (like /tmp or logs) as in-memory tmpfs structures. This stops attackers from compiling and running malicious binary backdoors inside the container filesystem during intrusion events!"
+      }
+    ];
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function filterQ() {
+      const val = document.querySelector('.search').value.toLowerCase();
+      const items = document.querySelectorAll('.q-item');
+      items.forEach(item => {
+        const title = item.querySelector('.q-title').textContent.toLowerCase();
+        const cat = item.dataset.category.toLowerCase();
+        if (title.includes(val) || cat.includes(val)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function updateProgress() {
+      const total = topics.length;
+      const completed = completedTopics.length;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressPercent').textContent = pct + '%';
+      
+      // Update sidebar items status classes
+      document.querySelectorAll('.q-item').forEach(item => {
+        const id = parseInt(item.dataset.id);
+        if (completedTopics.includes(id)) {
+          item.classList.add('completed');
+        } else {
+          item.classList.remove('completed');
+        }
+      });
+    }
+
+    function toggleTopicCompletion(id) {
+      id = parseInt(id);
+      if (completedTopics.includes(id)) {
+        completedTopics = completedTopics.filter(t => t !== id);
+      } else {
+        completedTopics.push(id);
+      }
+      localStorage.setItem('completed_docker_topics', JSON.stringify(completedTopics));
+      updateProgress();
+    }
+
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.code-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      // Refresh current active view
+      const activeItem = document.querySelector('.q-item.active');
+      if (activeItem) {
+        loadTopic(activeItem.dataset.id);
+      }
+    }
+
+    function toggleScenario(index) {
+      const container = document.querySelectorAll('.scenario-container')[index];
+      container.classList.toggle('open');
+    }
+
+    function loadTopic(id) {
+      id = parseInt(id);
+      const topic = topics.find(t => t.id === id);
+      if (!topic) return;
+
+      // Update sidebar active status
+      document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.id) === id);
+      });
+
+      document.getElementById('welcomeScreen').style.display = 'none';
+      const ansCard = document.getElementById('ansCard');
+      ansCard.style.display = 'block';
+
+      const isCompleted = completedTopics.includes(id);
+
+      // Render scenarios
+      let scenariosHTML = '';
+      topic.scenarios.forEach((sc, idx) => {
+        const codeText = currentLang === 'py' ? sc.pyCode : sc.jsCode;
+        const codeLang = currentLang === 'py' ? 'python' : 'javascript';
+        
+        scenariosHTML += `
+          <div class="scenario-container">
+            <div class="scenario-header" onclick="toggleScenario(${idx})">
+              <div class="scenario-title">
+                <span>Scenario ${idx + 1}</span> ${sc.title}
+              </div>
+              <div class="scenario-arrow">▼</div>
+            </div>
+            <div class="scenario-body">
+              <div class="scenario-expl">${sc.expl}</div>
+              <div class="visual-wrap">${sc.diagram.trim()}</div>
+              
+              <div class="code-wrap">
+                <div class="code-header">
+                  <div class="code-lang">${codeLang}</div>
+                </div>
+                <div class="code-body">${highlight(codeText.trim(), codeLang)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render interview questions
+      let questionsHTML = '';
+      topic.questions.forEach((q, idx) => {
+        questionsHTML += `
+          <div class="qa-box">
+            <div class="qa-badge">${q.badge}</div>
+            <h4 class="qa-question">Q: ${q.question}</h4>
+            <div class="qa-answer">${q.answer}</div>
+          </div>
+        `;
+      });
+
+      ansCard.innerHTML = `
+        <div class="ans-header">
+          <div class="header-info">
+            <span class="ans-level level-${topic.level}">${topic.level}</span>
+            <h2 class="ans-title">${topic.title}</h2>
+            <div class="ans-def">${topic.def}</div>
+          </div>
+          <div class="completion-action" onclick="toggleTopicCompletion(${topic.id})">
+            <input type="checkbox" id="chkComplete" ${isCompleted ? 'checked' : ''} onchange="event.stopPropagation(); toggleTopicCompletion(${topic.id})">
+            <label for="chkComplete">Mark as Completed</label>
+          </div>
+        </div>
+
+        <div class="sec-title">Internal Machinery & Distributed Design</div>
+        <div class="expl-list">
+          <div class="expl-item">${topic.machinery}</div>
+        </div>
+
+        <div class="code-control">
+          <div class="sec-title" style="margin: 0;">Enterprise Scenarios & Code Integration</div>
+          <div class="code-tabs">
+            <button class="code-tab ${currentLang === 'py' ? 'active' : ''}" data-lang="py" onclick="switchLang('py')">Python (docker-py)</button>
+            <button class="code-tab ${currentLang === 'js' ? 'active' : ''}" data-lang="js" onclick="switchLang('js')">Node.js (dockerode)</button>
+          </div>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          ${scenariosHTML}
+        </div>
+
+        <div class="sec-title">MNC & FAANG Interview Questions</div>
+        <div class="qa-group">
+          ${questionsHTML}
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-text">
+            <strong>EXPERT DESIGN RECOMMENDATION:</strong> ${topic.tip}
+          </div>
+        </div>
+      `;
+
+      // Auto-open first scenario
+      setTimeout(() => {
+        const firstScenario = document.querySelector('.scenario-container');
+        if (firstScenario) firstScenario.classList.add('open');
+      }, 50);
+
+      // On mobile, close sidebar after selection
+      if (window.innerWidth <= 960) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    function init() {
+      const qList = document.getElementById('qList');
+      let currentCategory = '';
+      let html = '';
+
+      topics.forEach(t => {
+        if (t.category !== currentCategory) {
+          if (currentCategory !== '') {
+            html += '</div>'; // close cat-group
+          }
+          currentCategory = t.category;
+          html += `
+            <div class="cat-group">
+              <div class="cat-title">${currentCategory}</div>
+          `;
+        }
+
+        const isCompleted = completedTopics.includes(t.id);
+
+        html += `
+          <div class="q-item ${isCompleted ? 'completed' : ''}" data-id="${t.id}" data-category="${t.category}" onclick="loadTopic(${t.id})">
+            <div class="q-title-wrap">
+              <div class="q-title">${t.title}</div>
+              <div class="q-meta">
+                <span class="level-dot" style="background-color: var(--${t.level})"></span>
+                <span class="level-text">${t.level}</span>
+              </div>
+            </div>
+            <span class="status-check">✓</span>
+          </div>
+        `;
+      });
+
+      if (currentCategory !== '') {
+        html += '</div>';
+      }
+
+      qList.innerHTML = html;
+      updateProgress();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

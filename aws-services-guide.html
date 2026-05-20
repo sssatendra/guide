@@ -250,7 +250,7 @@ const topics = [
   {id:67, title:"Systems Manager (SSM): Parameter Store & Run Command", cat:"advanced", level:"DevOps"},
   {id:68, title:"AWS Config & Resource Compliance", cat:"advanced", level:"Management"},
   {id:69, title:"AWS Service Catalog", cat:"advanced", level:"Management"},
-  {id:70, title:"AWS OpsWorks (Chef/Puppet)", cat:"advanced", level:"DevOps"},
+  {id:70, title:"Amazon MSK (Managed Streaming for Apache Kafka)", cat:"advanced", level:"Streaming"},
 
   // --- SECURITY, AI/ML & ADVANCED SERVICES (71-80) ---
   {id:71, title:"KMS (Key Management Service) & Envelope Encryption", cat:"advanced", level:"Security"},
@@ -419,6 +419,197 @@ const content = {
       "Privacy: Your data is not used to train the base foundation models.",
       "Knowledge Bases: Allows you to connect Bedrock to your company's private data sources (RAG).",
       "Agents: Give FMs the ability to execute APIs and perform actions."
+    ]
+  },
+  26: {
+    def: "<strong>Amazon ECS (Elastic Container Service)</strong> is a highly scalable, fast container orchestration service that allows you to easily run, scale, and secure Docker containers on AWS using either AWS Fargate (serverless) or EC2 instances.",
+    examples: [
+      {title:"ECS Task Definition JSON Structure & Service Creation CLI", code:`{
+  "family": "prod-web-app",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "containerDefinitions": [
+    {
+      "name": "web-container",
+      "image": "123456789012.dkr.ecr.us-east-1.amazonaws.com/nginx:latest",
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ]
+    }
+  ]
+}
+
+# Deploy service using CLI
+aws ecs create-service \\
+  --cluster prod-cluster \\
+  --service-name web-service \\
+  --task-definition prod-web-app:1 \\
+  --desired-count 3 \\
+  --launch-type FARGATE \\
+  --network-configuration "awsvpcConfiguration={subnets=[subnet-abc123,subnet-def456],securityGroups=[sg-789012],assignPublicIp=ENABLED}"`, output: "ECS Service 'web-service' created successfully running on AWS Fargate."}
+    ],
+    expl: [
+      "<strong>Task Definition</strong>: The blueprint (in JSON) defining your container settings, storage volumes, resource allocations, and IAM execution roles (similar to a K8s Pod).",
+      "<strong>Tasks vs Services</strong>: A <em>Task</em> is a single running container instance. A <em>Service</em> manages long-running tasks, ensures desired task count, scales them, and registers them with Application Load Balancers.",
+      "<strong>AWS Fargate</strong>: A serverless compute engine for containers. You pay only for the vCPU and memory resources requested by your Task Definition, removing the need to manage EC2 clusters.",
+      "<strong>Networking</strong>: The <code>awsvpc</code> network mode allocates a dedicated Elastic Network Interface (ENI) and a real private VPC IP to each task, enabling granular security group rules."
+    ]
+  },
+  28: {
+    def: "<strong>Amazon EKS (Elastic Kubernetes Service)</strong> is a fully managed service that makes it easy to run Kubernetes on AWS without needing to install, operate, and maintain your own Kubernetes control plane or worker nodes.",
+    examples: [
+      {title:"Kubernetes Deployment Manifest & EKS CLI Commands", code:`apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-service
+  namespace: production
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+      - name: api-container
+        image: 123456789012.dkr.ecr.us-east-1.amazonaws.com/api:v1.0
+        ports:
+        - containerPort: 8080
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "200m"
+            memory: "256Mi"
+
+# CLI: Configure local kubeconfig to interact with the EKS cluster
+aws eks update-kubeconfig --region us-east-1 --name prod-eks-cluster
+kubectl get deployments -n production`, output: "NAME          READY   UP-TO-DATE   AVAILABLE   AGE\napi-service   3/3     3            3           14d"}
+    ],
+    expl: [
+      "<strong>Managed Control Plane</strong>: AWS manages the Kubernetes master nodes, etcd quorum, and API server across three Availability Zones to ensure high availability and automatic upgrades.",
+      "<strong>VPC CNI Plugin</strong>: The default Kubernetes Container Network Interface for EKS. It assigns real AWS VPC IP addresses directly to Kubernetes Pods, avoiding overlay network latency.",
+      "<strong>IRSA (IAM Roles for Service Accounts)</strong>: Maps AWS IAM Roles to Kubernetes Service Accounts via an OpenID Connect (OIDC) identity provider, enforcing the principle of least privilege at the pod level.",
+      "<strong>Data Plane Nodes</strong>: Worker nodes can be managed by AWS (Managed Node Groups), self-managed EC2 instances, or completely serverless using AWS Fargate profiles."
+    ]
+  },
+  42: {
+    def: "<strong>Amazon Aurora</strong> is a fully managed PostgreSQL and MySQL-compatible relational database engine. It features a cloud-native, distributed, self-healing storage architecture that automatically scales up to 128TB.",
+    examples: [
+      {title:"Aurora Shared Storage & Auto-scaling Read Replicas", code:`[Aurora Shared Storage Architecture]
+  Active Writer (AZ-A)  ──┐
+  Read Replica (AZ-B)   ──┼──> [Distributed 10GB-128TB Storage Volume]
+  Read Replica (AZ-C)   ──┘    (Replicated 6 times across 3 AZs)
+
+# Create an Aurora PostgreSQL Database Cluster
+aws rds create-db-cluster \\
+  --db-cluster-identifier prod-aurora-cluster \\
+  --engine aurora-postgresql \\
+  --engine-version 15.4 \\
+  --master-username superuser \\
+  --master-user-password SecurePassword123 \\
+  --db-subnet-group-name default-vpc-subnets`, output: "Cluster prod-aurora-cluster created. 6-way synchronous write replication initiated across 3 AZs."}
+    ],
+    expl: [
+      "<strong>Cloud-Native Storage</strong>: Aurora striping separates compute and storage. Storage auto-grows in 10GB increments up to 128TB, replicated 6 times across 3 AZs. Writes only require a 4/6 quorum.",
+      "<strong>Aurora Serverless v2</strong>: Instantly scales compute capacity (measured in ACUs - Aurora Capacity Units) up or down in fractions of a second based on database demand, saving up to 90% in database costs.",
+      "<strong>Low Replica Lag</strong>: Up to 15 Aurora Read Replicas share the same storage volume as the primary instance, reducing replication lag to single-digit milliseconds (<10ms).",
+      "<strong>Global Databases</strong>: Replicates data asynchronously across regions in under 1 second, enabling cross-region disaster recovery and low-latency local reads worldwide."
+    ]
+  },
+  43: {
+    def: "<strong>Amazon DynamoDB</strong> is a fully managed, serverless, multi-region NoSQL database designed to deliver single-digit millisecond response times at any scale, with built-in security, backups, and in-memory caching.",
+    examples: [
+      {title:"DynamoDB Boto3 Client Query & Key Schemes", code:`import boto3
+from boto3.dynamodb.conditions import Key
+
+# Initialize DynamoDB Client
+db = boto3.resource('dynamodb', region_name='us-east-1')
+table = db.Table('UserOrders')
+
+# Query using Partition Key (UserID) and Sort Key (OrderDate)
+response = table.query(
+    KeyConditionExpression=Key('UserID').eq('user_87214') & Key('OrderDate').gt('2026-01-01')
+)
+
+for order in response['Items']:
+    print(f"OrderID: {order['OrderID']}, Total: \${order['Amount']}")`, output: "OrderID: ord_299104, Total: $128.50\nOrderID: ord_304211, Total: $45.00"}
+    ],
+    expl: [
+      "<strong>Primary Keys</strong>: Supports either a single Partition Key (hash key) or a composite key consisting of a Partition Key + Sort Key (hash + range key) for advanced querying.",
+      "<strong>Read/Write Provisioning</strong>: Supports <em>On-Demand</em> mode (scales instantly with request volume) and <em>Provisioned</em> mode (define specific RCUs and WCUs, with auto-scaling configured).",
+      "<strong>Secondary Indexes</strong>: <em>Global Secondary Indexes (GSI)</em> allow querying on any attribute with a different Partition Key. <em>Local Secondary Indexes (LSI)</em> share the Partition Key but have a different Sort Key.",
+      "<strong>DAX (DynamoDB Accelerator)</strong>: A fully managed, highly available, in-memory cache for DynamoDB that reduces read latencies from milliseconds to microseconds for hot items."
+    ]
+  },
+  60: {
+    def: "<strong>Amazon MQ</strong> is a managed message broker service that makes it easy to set up and operate popular open-source message brokers (Apache ActiveMQ and RabbitMQ) in the cloud, maintaining full compatibility with existing applications.",
+    examples: [
+      {title:"RabbitMQ AMQPS Connection & Publishing via JS", code:`const amqp = require('amqplib');
+
+async function publishEvent() {
+  // Connect to Amazon MQ RabbitMQ broker endpoint using TLS
+  const conn = await amqp.connect('amqps://admin:SuperSecurePw@b-9876a-543c.mq.us-east-1.amazonaws.com:5671');
+  const ch = await conn.createChannel();
+  
+  const exchange = 'orders-exchange';
+  const queue = 'orders-queue';
+  
+  await ch.assertExchange(exchange, 'direct', { durable: true });
+  await ch.assertQueue(queue, { durable: true });
+  await ch.bindQueue(queue, exchange, 'order.created');
+  
+  // Publish durable, persistent message
+  ch.publish(exchange, 'order.created', Buffer.from(JSON.stringify({ orderId: 9918, amount: 250.00 })), { persistent: true });
+  console.log(" [x] Sent order event to Amazon MQ RabbitMQ broker");
+  
+  await ch.close();
+  await conn.close();
+}
+publishEvent();`, output: "Connected to Amazon MQ RabbitMQ Broker. Event 'order.created' routed and persisted to 'orders-queue'."}
+    ],
+    expl: [
+      "<strong>Seamless Migration</strong>: Zero code rewrites when moving from on-premises brokers. Supports industry-standard messaging protocols: AMQP, MQTT, STOMP, and JMS.",
+      "<strong>Active/Standby Deployment</strong>: Amazon MQ manages automatic failover across different Availability Zones (active-standby brokers sharing a shared storage volume) to ensure high availability.",
+      "<strong>RabbitMQ vs ActiveMQ</strong>: Use RabbitMQ for modern, lightweight, complex routing architectures (topic/fanout exchanges). Use ActiveMQ for traditional JMS enterprise workloads.",
+      "<strong>Security</strong>: Integrates with AWS IAM for monitoring and administrative access, runs within your private VPC, and encrypts all messages at rest and in transit."
+    ]
+  },
+  70: {
+    def: "<strong>Amazon MSK (Managed Streaming for Apache Kafka)</strong> is a fully managed service that makes it easy to build and run applications that use Apache Kafka to process real-time streaming data with built-in high availability and security.",
+    examples: [
+      {title:"MSK Kafka Topic CLI & Confluent-Kafka Python Consumer", code:`# Create a Kafka topic on MSK using bootstrap servers
+/bin/kafka-topics.sh --create \\
+  --bootstrap-server b-1.prod-msk.us-east-1.amazonaws.com:9092,b-2.prod-msk.us-east-1.amazonaws.com:9092 \\
+  --replication-factor 3 \\
+  --partitions 12 \\
+  --topic transactions-stream
+
+# Python Kafka Consumer connecting to MSK
+from confluent_kafka import Consumer
+
+consumer = Consumer({
+    'bootstrap.servers': 'b-1.prod-msk.us-east-1.amazonaws.com:9092',
+    'group.id': 'transaction-processors',
+    'auto.offset.reset': 'earliest'
+})
+consumer.subscribe(['transactions-stream'])`, output: "Topic 'transactions-stream' initialized with 12 partitions. Multi-AZ broker replication verified."}
+    ],
+    expl: [
+      "<strong>Operational Ease</strong>: AWS handles cluster setup, ZooKeeper or KRaft broker quorum, operating system patches, broker replacements, and disk space auto-scaling.",
+      "<strong>High Availability</strong>: MSK automatically deploys and replicates brokers across 2 or 3 Availability Zones within a region, ensuring continuous streaming operations.",
+      "<strong>IAM Access Control</strong>: Eliminates SASL/SCRAM secrets! MSK natively supports AWS IAM for cluster connection authorization, simplifying credentials management.",
+      "<strong>MSK Serverless</strong>: An on-demand deployment option that automatically scales compute and storage resources dynamically based on application throughput, charging only for usage."
     ]
   }
 };

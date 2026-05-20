@@ -3,21 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Engineering Mastery Hub — Curated Learning Tracks</title>
-  <meta name="description" content="A premium repository of senior-level engineering guides covering React, Python, Testing, and System Design.">
+  <title>Engineering Mastery Hub — Curated Learning Tracks & Prep</title>
+  <meta name="description" content="A premium repository of senior-level engineering guides covering React, Python, Testing, System Design, and gRPC.">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #050505;
-      --card-bg: #0f0f12;
-      --border: #1f1f23;
+      --bg: #030306;
+      --card-bg: #09090f;
+      --card-hover-bg: #0f0f18;
+      --border: #171725;
+      --border-hover: #292942;
       --accent: #8b5cf6;
-      --accent-glow: rgba(139, 92, 246, 0.15);
-      --text-main: #ffffff;
-      --text-dim: #e2e8f0;
+      --accent-glow: rgba(139, 92, 246, 0.2);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
       --success: #10b981;
+      
+      /* Theme accents */
+      --color-js: #eab308;
+      --color-py: #3776ab;
+      --color-react: #06b6d4;
+      --color-sys: #8b5cf6;
+      --color-db: #10b981;
+      --color-cloud: #ff9900;
+      --color-docker: #38bdf8;
+      --color-java: #ec4899;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,10 +40,10 @@
       color: var(--text-main);
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
-      line-height: 1.5;
+      line-height: 1.4;
     }
 
-    /* ── BACKGROUND GRADIENT ── */
+    /* ── GRADIENT OVERLAYS ── */
     .bg-glow {
       position: fixed;
       top: 0;
@@ -37,79 +51,160 @@
       transform: translateX(-50%);
       width: 100vw;
       height: 100vh;
-      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 50%);
+      background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.05) 0%, transparent 60%);
       pointer-events: none;
       z-index: -1;
     }
 
-    /* ── CONTAINER ── */
-    .container {
-      max-width: 1200px;
+    /* ── PAGE LAYOUT (1 Column Grid + Right Ad Rail) ── */
+    .app-layout {
+      max-width: 1600px;
       margin: 0 auto;
-      padding: 0 2rem;
+      padding: 1.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 2rem;
     }
 
     /* ── HEADER ── */
     header {
-      padding: 4rem 0 6rem;
-      text-align: center;
+      padding: 1rem 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      flex-direction: column;
     }
 
     .badge {
       display: inline-block;
-      padding: 6px 14px;
+      align-self: flex-start;
+      padding: 4px 10px;
       background: var(--accent-glow);
       color: var(--accent);
       border: 1px solid rgba(139, 92, 246, 0.2);
       border-radius: 100px;
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.68rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.5rem;
     }
 
     h1 {
       font-family: 'Syne', sans-serif;
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-size: 2.2rem;
       font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.04em;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(to bottom, #fff 40%, rgba(255,255,255,0.4));
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      background: linear-gradient(to right, #fff 40%, rgba(255,255,255,0.5));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
     .subtitle {
-      font-size: 1.125rem;
+      font-size: 0.9rem;
       color: var(--text-dim);
-      max-width: 600px;
-      margin: 0 auto;
+      margin-top: 0.25rem;
     }
 
-    /* ── TRACKS GRID ── */
-    .tracks-grid {
+    /* ── FILTER & SEARCH CONTROLS ── */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tabs-container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      color: #fff;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+    }
+
+    .tab-count {
+      font-size: 0.7rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .search-input {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 8px 18px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.85rem;
+      width: 280px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      width: 320px;
+    }
+
+    /* ── CARD GRID (Super Premium & Compact) ── */
+    .grid-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 2rem;
-      padding-bottom: 8rem;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
     }
 
     .track-card {
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2.5rem;
+      border-radius: 18px;
+      padding: 1.5rem;
       text-decoration: none;
       color: inherit;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       position: relative;
       overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    /* Glow effect dynamically controlled by category variables */
     .track-card::before {
       content: '';
       position: absolute;
@@ -117,78 +212,91 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at top right, rgba(255,255,255,0.03), transparent);
+      background: radial-gradient(circle at top right, var(--theme-glow, rgba(255,255,255,0.03)), transparent 60%);
       opacity: 0;
       transition: opacity 0.3s;
     }
 
     .track-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-8px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      border-color: var(--theme-color, var(--accent));
+      transform: translateY(-4px);
+      background: var(--card-hover-bg);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.5), 0 0 15px var(--theme-glow, rgba(139, 92, 246, 0.1));
     }
 
     .track-card:hover::before {
       opacity: 1;
     }
 
-    .track-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1.5rem;
+    .card-top {
+      margin-bottom: 1.25rem;
     }
 
-    .track-meta {
+    .card-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
     }
 
-    .track-level {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--accent);
+    .card-icon {
+      font-size: 1.5rem;
+      filter: drop-shadow(0 0 8px var(--theme-glow, transparent));
+    }
+
+    .card-level {
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--theme-color, var(--text-dim));
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      border: 1px solid var(--theme-glow, var(--border));
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.01);
     }
 
-    .track-duration {
-      font-size: 0.7rem;
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .card-duration {
+      font-size: 0.68rem;
       color: var(--text-dim);
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .track-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 1rem;
-      line-height: 1.2;
-    }
-
-    .track-desc {
-      font-size: 0.95rem;
-      color: var(--text-dim);
-      margin-bottom: 2rem;
-      flex: 1;
-    }
-
-    .track-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-    }
-
     .start-btn {
-      font-size: 0.85rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      color: #fff;
+      color: var(--theme-color, #fff);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.25rem;
     }
 
     .start-btn svg {
@@ -196,454 +304,816 @@
     }
 
     .track-card:hover .start-btn svg {
-      transform: translateX(4px);
+      transform: translateX(3px);
     }
 
-    .progress-dots {
+    /* ── ADVERTISEMENT RAIL ── */
+    .ad-rail {
       display: flex;
-      gap: 4px;
+      flex-direction: column;
+      gap: 1.5rem;
+      position: sticky;
+      top: 1.5rem;
+      height: fit-content;
     }
 
-    .dot {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--border);
+    .ad-container {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px dashed rgba(148, 163, 184, 0.15);
+      border-radius: 18px;
+      padding: 1.25rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 250px;
+      position: relative;
     }
 
-    .dot.fill {
-      background: var(--success);
+    .ad-container.fixed-300-600 {
+      min-height: 600px;
+    }
+
+    .ad-label {
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 1rem;
+      opacity: 0.6;
+    }
+
+    .ad-slot-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, rgba(139, 92, 246, 0.02), transparent);
+    }
+
+    .ad-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .ad-desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      max-width: 200px;
+      line-height: 1.3;
+    }
+
+    .ad-action-btn {
+      margin-top: 1rem;
+      padding: 6px 16px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .ad-action-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Sponsored Card in grid */
+    .track-card.sponsored-card {
+      border: 1px dashed rgba(139, 92, 246, 0.3);
+      background: linear-gradient(135deg, rgba(13,11,26,0.3) 0%, rgba(9,9,15,0.3) 100%);
     }
 
     /* ── FOOTER ── */
     footer {
-      padding: 4rem 0;
+      grid-column: span 2;
+      padding: 2.5rem 0 1rem;
       text-align: center;
       border-top: 1px solid var(--border);
       color: var(--text-dim);
-      font-size: 0.85rem;
+      font-size: 0.75rem;
+      margin-top: 4rem;
     }
 
     /* ── RESPONSIVE ── */
+    @media (max-width: 1100px) {
+      .app-layout {
+        grid-template-columns: 1fr;
+      }
+      .ad-rail {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        position: relative;
+        top: 0;
+      }
+      .ad-container.fixed-300-600 {
+        min-height: 250px;
+      }
+      footer {
+        grid-column: span 1;
+      }
+    }
+
     @media (max-width: 768px) {
-      .container { padding: 0 1.5rem; }
-      header { padding: 3rem 0; }
-      .tracks-grid { grid-template-columns: 1fr; }
+      .app-layout { padding: 1rem; }
+      header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+      .controls-row { flex-direction: column; align-items: stretch; }
+      .search-input { width: 100%; }
+      .search-input:focus { width: 100%; }
+      .ad-rail { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="bg-glow"></div>
 
-  <div class="container">
-    <header>
-      <div class="badge">Mastery Hub v1.0</div>
-      <h1>Choose Your <br>Learning Track</h1>
-      <p class="subtitle">Premium, senior-level curriculum designed for the modern engineer. Pick a path to start your journey today.</p>
-    </header>
+  <div class="app-layout">
+    <!-- LEFT SIDE: MAIN APP CONTENT -->
+    <main>
+      <header>
+        <div class="brand-wrap">
+          <div class="badge">Mastery Hub v2.0</div>
+          <h1>Engineering Mastery Hub</h1>
+          <p class="subtitle">Premium, senior-level curriculum & elite interview preparation.</p>
+        </div>
+      </header>
 
-    <div class="tracks-grid">
-      <!-- JAVASCRIPT MASTERY -->
-      <a href="javascript-mastery-guide.html" class="track-card">
-        <div class="track-icon">JS</div>
-        <div class="track-meta">
-          <span class="track-level">A to Z</span>
-          <span class="track-duration">40 Topics</span>
+      <div class="controls-row">
+        <div class="tabs-container">
+          <button class="tab-btn active" onclick="switchTab('all')">
+            All Paths <span class="tab-count" id="count-all">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('mastery')">
+            Core Mastery <span class="tab-count" id="count-mastery">0</span>
+          </button>
+          <button class="tab-btn" onclick="switchTab('interview')">
+            Interview Prep <span class="tab-count" id="count-interview">0</span>
+          </button>
         </div>
-        <h3 class="track-title">JavaScript Core <br>Mastery</h3>
-        <p class="track-desc">Master the world's most popular language. From primitive types and closures to the event loop, prototypes, and advanced web APIs.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
 
-      <!-- PYTHON MASTERY -->
-      <a href="python-mastery-guide.html" class="track-card">
+        <input type="text" class="search-input" placeholder="Search guides..." oninput="filterGuides(this.value)">
+      </div>
 
-        <div class="track-icon">🐍</div>
-        <div class="track-meta">
-          <span class="track-level">Fundamentals</span>
-          <span class="track-duration">20 Modules</span>
-        </div>
-        <h3 class="track-title">Python Core <br>Mastery</h3>
-        <p class="track-desc">From basic syntax to advanced decorators, generators, and memory management. The complete roadmap for Python engineers.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
+      <div class="grid-container" id="grid">
+        
+        <!-- ── CORE MASTERY TRACKS ── -->
 
-      <!-- PYTHON TESTING -->
-      <a href="python-testing-guide.html" class="track-card">
-        <div class="track-icon">🧪</div>
-        <div class="track-meta">
-          <span class="track-level">Expert</span>
-          <span class="track-duration">20 Topics</span>
-        </div>
-        <h3 class="track-title">Python Production Testing</h3>
-        <p class="track-desc">Master Pytest, Fixtures, Mocking, and Async testing. Learn to build robust, bug-free production systems with a 100% confidence rate.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- JS Core Mastery -->
+        <a href="javascript-mastery-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-js); --theme-glow: rgba(234,179,8,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">JS</div>
+              <span class="card-level">A to Z</span>
+            </div>
+            <h3 class="card-title">JavaScript Core Mastery</h3>
+            <p class="card-desc">Master the world's most popular language. Closures, Event Loop, prototypes, V8 engines, and advanced APIs.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="card-footer">
+            <span class="card-duration">40 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <!-- REACT NEXTJS -->
-      <a href="react-nextjs-guide.html" class="track-card">
-        <div class="track-icon">⚛️</div>
-        <div class="track-meta">
-          <span class="track-level">Advanced</span>
-          <span class="track-duration">35 Modules</span>
-        </div>
-        <h3 class="track-title">React & Next.js <br>Mastery</h3>
-        <p class="track-desc">Deep dive into App Router, Server Components, SSR, and complex state management patterns used in modern high-performance web apps.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- Python Core Mastery -->
+        <a href="python-mastery-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🐍</div>
+              <span class="card-level">Fundamentals</span>
+            </div>
+            <h3 class="card-title">Python Core Mastery</h3>
+            <p class="card-desc">From basic syntax to advanced decorators, generators, multi-threading, and memory management mechanics.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="card-footer">
+            <span class="card-duration">20 Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <!-- REACT TESTING -->
-      <a href="react-testing-guide.html" class="track-card">
-        <div class="track-icon">🛠️</div>
-        <div class="track-meta">
-          <span class="track-level">Expert</span>
-          <span class="track-duration">21 Topics</span>
-        </div>
-        <h3 class="track-title">React Production Testing</h3>
-        <p class="track-desc">Master Vitest, RTL, MSW, and end-to-end strategies. Learn to test behavior over implementation to ensure long-term maintainability.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- Python Production Testing -->
+        <a href="python-testing-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🧪</div>
+              <span class="card-level">Expert</span>
+            </div>
+            <h3 class="card-title">Python Production Testing</h3>
+            <p class="card-desc">Master Pytest, complex fixture systems, mock interfaces, and async testing patterns with 100% confidence.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+          <div class="card-footer">
+            <span class="card-duration">20 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <!-- SYSTEM DESIGN -->
-      <a href="system-design-45.html" class="track-card">
-        <div class="track-icon">🏗️</div>
-        <div class="track-meta">
-          <span class="track-level">Senior+</span>
-          <span class="track-duration">45 Topics</span>
-        </div>
-        <h3 class="track-title">System Design <br>Architecture</h3>
-        <p class="track-desc">Scalability, Availability, Consistency. Master the patterns used to build world-class distributed systems at scale.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- React & Next.js Mastery -->
+        <a href="react-nextjs-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-react); --theme-glow: rgba(6,182,212,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">⚛️</div>
+              <span class="card-level">Advanced</span>
+            </div>
+            <h3 class="card-title">React & Next.js Mastery</h3>
+            <p class="card-desc">App Router paradigms, Server Components, SSR mechanics, and premium complex state management systems.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div>
+          <div class="card-footer">
+            <span class="card-duration">35 Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <!-- 30 CORE CONCEPTS -->
-      <a href="system-design-30.html" class="track-card" style="border: 1px solid rgba(16, 185, 129, 0.4); background: linear-gradient(145deg, #0d1117, #0b1a15); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);">
-        <div class="track-icon" style="text-shadow: 0 0 10px rgba(16,185,129,0.5);">📡</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #10b981; font-weight: 800;">Essential</span>
-          <span class="track-duration" style="color: #10b981;">30 Concepts</span>
-        </div>
-        <h3 class="track-title" style="background: linear-gradient(to right, #fff, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">System Design <br>30 Core Concepts</h3>
-        <p class="track-desc">Master client-server patterns, DNS, reverse proxies, database sharding/partitioning, caching layers, CDN edges, rate limiting, and consistent hashing rings.</p>
-        <div class="track-footer" style="border-top: 1px solid rgba(16, 185, 129, 0.25);">
-          <div class="start-btn" style="color: #10b981;">
-            Start learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- React Production Testing -->
+        <a href="react-testing-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-react); --theme-glow: rgba(6,182,212,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🛠️</div>
+              <span class="card-level">Expert</span>
+            </div>
+            <h3 class="card-title">React Production Testing</h3>
+            <p class="card-desc">Master Vitest, React Testing Library, MSW network mocking, and long-term maintainable verification strategies.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill" style="background: #10b981;"></div><div class="dot fill" style="background: #10b981;"></div><div class="dot fill" style="background: #10b981;"></div><div class="dot fill" style="background: #10b981;"></div><div class="dot fill" style="background: #10b981;"></div>
+          <div class="card-footer">
+            <span class="card-duration">21 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
           </div>
-        </div>
-      </a>
+        </a>
 
-      <!-- SYSTEM DESIGN LEARNING PLATFORM -->
-      <a href="system-design-learning-platform.html" class="track-card" style="border: 1px solid rgba(139, 92, 246, 0.4); background: linear-gradient(145deg, #0f0f12, #181424); box-shadow: 0 0 20px rgba(139, 92, 246, 0.15);">
-        <div class="track-icon" style="text-shadow: 0 0 10px rgba(139,92,246,0.5);">🎨</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #c084fc; font-weight: 800;">Premium Platform</span>
-          <span class="track-duration" style="color: #c084fc;">Interactive Lab</span>
-        </div>
-        <h3 class="track-title" style="background: linear-gradient(to right, #fff, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Interactive System Design Platform</h3>
-        <p class="track-desc">Real-time architectural sandbox. Explore Netflix, Uber, Spotify, Kafka, and Spanner topology mapping with step-by-step request flow visualization.</p>
-        <div class="track-footer" style="border-top: 1px solid rgba(139, 92, 246, 0.25);">
-          <div class="start-btn" style="color: #c084fc;">
-            Launch Sandbox
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <!-- System Design Architecture -->
+        <a href="system-design-45.html" class="track-card card-mastery" style="--theme-color: var(--color-sys); --theme-glow: rgba(139,92,246,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🏗️</div>
+              <span class="card-level">Senior+</span>
+            </div>
+            <h3 class="card-title">System Design Architecture</h3>
+            <p class="card-desc">Scalability, high availability, database sharding, consistency, replication models, and distributed networks.</p>
           </div>
-          <div class="progress-dots">
-            <div class="dot fill" style="background: #c084fc;"></div><div class="dot fill" style="background: #c084fc;"></div><div class="dot fill" style="background: #c084fc;"></div><div class="dot fill" style="background: #c084fc;"></div><div class="dot fill" style="background: #c084fc;"></div>
+          <div class="card-footer">
+            <span class="card-duration">45 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- System Design 30 Core Concepts -->
+        <a href="system-design-30.html" class="track-card card-mastery" style="--theme-color: var(--color-db); --theme-glow: rgba(16,185,129,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📡</div>
+              <span class="card-level">Essential</span>
+            </div>
+            <h3 class="card-title">System Design: 30 Concepts</h3>
+            <p class="card-desc">DNS topologies, reverse proxies, database sharding, rate limiting, and consistent hashing rings.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">30 Concepts</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Interactive System Design Sandbox -->
+        <a href="system-design-learning-platform.html" class="track-card card-mastery" style="--theme-color: var(--color-sys); --theme-glow: rgba(139,92,246,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🎨</div>
+              <span class="card-level">Interactive</span>
+            </div>
+            <h3 class="card-title">Interactive System Design</h3>
+            <p class="card-desc">Real-time architectural sandbox. Explore Netflix, Uber, Spotify, and Spanner topology maps visually.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Interactive Lab</span>
+            <div class="start-btn">
+              Explore Sandbox
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- System Design LLD & Concurrency -->
+        <a href="system-design-lld.html" class="track-card card-mastery" style="--theme-color: var(--color-sys); --theme-glow: rgba(139,92,246,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🧩</div>
+              <span class="card-level">Senior+</span>
+            </div>
+            <h3 class="card-title">LLD & Concurrency Design</h3>
+            <p class="card-desc">Object-oriented modeling, architectural design patterns, threading synchronization, and lock mechanics.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">35 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- GraphQL Full-Stack Mastery -->
+        <a href="graphql-mastery-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-sys); --theme-glow: rgba(139,92,246,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🚀</div>
+              <span class="card-level">Full-Stack</span>
+            </div>
+            <h3 class="card-title">GraphQL Full-Stack Mastery</h3>
+            <p class="card-desc">Master GraphQL schema compilation, Apollo server, Next.js integrations, and dynamic caching policies.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">31 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Python Data Science -->
+        <a href="python-data-science-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📊</div>
+              <span class="card-level">Data</span>
+            </div>
+            <h3 class="card-title">Python Data Science</h3>
+            <p class="card-desc">High-performance data computing with NumPy, Pandas, and distributed PySpark analytical computing structures.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">20 Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- AWS Mastery Zero to Hero -->
+        <a href="aws-services-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-cloud); --theme-glow: rgba(255,153,0,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">☁️</div>
+              <span class="card-level">DevOps</span>
+            </div>
+            <h3 class="card-title">AWS Services Mastery</h3>
+            <p class="card-desc">Complete AWS landscape deep-dive. VPC routing, EKS clusters, IAM boundaries, Bedrock, and SageMaker.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">80 Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Docker & Kubernetes Orchestration -->
+        <a href="docker-k8s-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-docker); --theme-glow: rgba(56,189,248,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🐳</div>
+              <span class="card-level">Infra</span>
+            </div>
+            <h3 class="card-title">Docker & K8s Orchestration</h3>
+            <p class="card-desc">Linux control groups, multi-stage compilation, secure network overlay, cluster scaling, and CSI storage.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">8 Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Java & Spring Boot Mastery -->
+        <a href="java-springboot-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-java); --theme-glow: rgba(236,72,153,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">☕</div>
+              <span class="card-level">Enterprise</span>
+            </div>
+            <h3 class="card-title">Java & Spring Boot Mastery</h3>
+            <p class="card-desc">JVM internals, custom class loaders, Spring MVC dispatching machinery, transactional states, and JPA caching.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">70 Topics</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Kafka & RabbitMQ Mastery -->
+        <a href="kafka-rabbitmq-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-sys); --theme-glow: rgba(139,92,246,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🔄</div>
+              <span class="card-level">Systems</span>
+            </div>
+            <h3 class="card-title">Kafka & RabbitMQ Systems</h3>
+            <p class="card-desc">Event streams, high-throughput consumer offsets, RabbitMQ exchange routing, and reliable message brokers.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Deep Dive</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- gRPC Systems & Performance Mastery (Moved to Core Mastery!) -->
+        <a href="grpc-mastery-guide.html" class="track-card card-mastery" style="--theme-color: var(--color-react); --theme-glow: rgba(6,182,212,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🔌</div>
+              <span class="card-level">Systems</span>
+            </div>
+            <h3 class="card-title">gRPC Systems & Performance</h3>
+            <p class="card-desc">Master HTTP/2 multiplexed streams, Protobuf compaction, interception strategies, and asynchronous executor pools.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">6 Deep Modules</span>
+            <div class="start-btn">
+              Explore Guide
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+
+        <!-- ── INTERVIEW PREPARATION TRACKS ── -->
+
+        <!-- JS Interview Guide -->
+        <a href="javascript-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-js); --theme-glow: rgba(234,179,8,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">⚡</div>
+              <span class="card-level">JS Prep</span>
+            </div>
+            <h3 class="card-title">JS Interview Guide</h3>
+            <p class="card-desc">Hoisting, functional closures, execution scopes, event loops, call stacks, and V8 optimization triggers.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Basic to Extreme</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Python Interview Guide -->
+        <a href="python-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🐍</div>
+              <span class="card-level">Py Prep</span>
+            </div>
+            <h3 class="card-title">Python Interview Guide</h3>
+            <p class="card-desc">Advanced decorators, descriptors, reference counting, dynamic introspection, and memory mapping loops.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Basic to Extreme</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- React Interview Guide -->
+        <a href="react-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-react); --theme-glow: rgba(6,182,212,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">⚛️</div>
+              <span class="card-level">React Prep</span>
+            </div>
+            <h3 class="card-title">React Interview Guide</h3>
+            <p class="card-desc">Fiber architecture reconciliations, state update batches, scheduling lifecycles, and Server Components.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Basic to Extreme</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Backend Interview Guide -->
+        <a href="backend-interview.html" class="track-card card-interview" style="--theme-color: var(--color-db); --theme-glow: rgba(16,185,129,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🌐</div>
+              <span class="card-level">Backend Prep</span>
+            </div>
+            <h3 class="card-title">Backend Interview Guide</h3>
+            <p class="card-desc">API designs, SQL query execution engines, indexing, caching distribution, and service reliability loops.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Senior+</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- DSA Interview Guide -->
+        <a href="dsa-guide.html" class="track-card card-interview" style="--theme-color: var(--color-db); --theme-glow: rgba(16,185,129,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🧠</div>
+              <span class="card-level">DSA Prep</span>
+            </div>
+            <h3 class="card-title">DSA & Blind 75 Solutions</h3>
+            <p class="card-desc">Crush algorithmic checks. Advanced arrays, trees, dynamic programming, and binary systems in Python & JS.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">All Levels</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- PayPal Interview Guide -->
+        <a href="paypal-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">💳</div>
+              <span class="card-level">PayPal Prep</span>
+            </div>
+            <h3 class="card-title">PayPal Frontend Guide</h3>
+            <p class="card-desc">Detailed DSA, OOP, React Low-Level Design, and backend distributed routing to clear the Bangalore loop.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Senior Loop</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- AWS Cloud Services Interview Guide -->
+        <a href="aws-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-cloud); --theme-glow: rgba(255,153,0,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">☁️</div>
+              <span class="card-level">AWS Prep</span>
+            </div>
+            <h3 class="card-title">AWS Services Interview</h3>
+            <p class="card-desc">DynamoDB query indexes, Aurora replica routing, S3 multipart uploads, and senior system architecture.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Architect</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Docker Interview Guide -->
+        <a href="docker-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-docker); --theme-glow: rgba(56,189,248,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🐳</div>
+              <span class="card-level">Docker Prep</span>
+            </div>
+            <h3 class="card-title">Docker Systems Interview</h3>
+            <p class="card-desc">Kernel control namespaces, cgroups resource restrictions, OverlayFS layer caches, and seccomp configurations.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Containers</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Kubernetes Interview Guide -->
+        <a href="kubernetes-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-py); --theme-glow: rgba(55,118,171,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">☸️</div>
+              <span class="card-level">K8s Prep</span>
+            </div>
+            <h3 class="card-title">Kubernetes Platform Guide</h3>
+            <p class="card-desc">API server architecture, etcd consensus, CNI packet flows, CSI persistent mounts, and RBAC policies.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Platform</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- SPONSORED GRID AD CARD -->
+        <div class="track-card sponsored-card" style="--theme-color: #a78bfa; --theme-glow: rgba(167,139,250,0.15);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <span class="ad-label" style="margin: 0; opacity: 0.8;">Sponsored</span>
+              <span class="card-level" style="border-style: dashed; color: #a78bfa;">Ad Slot</span>
+            </div>
+            <h3 class="card-title" style="color: #c084fc;">Aomi Transact Engine</h3>
+            <p class="card-desc" style="color: var(--text-dim);">Unlock 100k TPS transactional throughput with zero overhead. Integrate the premier low-latency backend core in minutes.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Developer SDK</span>
+            <a href="#" class="start-btn" style="color: #c084fc;">
+              Try Free
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
           </div>
         </div>
-      </a>
 
-      <!-- LLD SYSTEM DESIGN -->
-      <a href="system-design-lld.html" class="track-card">
-        <div class="track-icon">🧩</div>
-        <div class="track-meta">
-          <span class="track-level">Senior+</span>
-          <span class="track-duration">35 Topics</span>
+      </div>
+    </main>
+
+    <!-- RIGHT SIDE: PREMIUM SYSTEMATIC AD PLACEMENTS -->
+    <aside class="ad-rail">
+      
+      <!-- Top banner placement -->
+      <div class="ad-container">
+        <span class="ad-label">Sponsored Partner</span>
+        <div class="ad-slot-placeholder">
+          <div class="ad-title">Neon Postgres Database</div>
+          <div class="ad-desc">Serverless Postgres built for scale. Instantly branch databases, scale to zero, and boost query speeds.</div>
+          <a href="#" class="ad-action-btn">Launch Free Database</a>
         </div>
-        <h3 class="track-title">System Design <br>LLD & Concurrency</h3>
-        <p class="track-desc">Object-Oriented Design, Multithreading, and Code Architectures. Master the components behind the systems.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+      </div>
+
+      <!-- Main Sidebar banner placement -->
+      <div class="ad-container fixed-300-600">
+        <span class="ad-label">Sponsored Advertisement</span>
+        <div class="ad-slot-placeholder">
+          <div style="font-size: 2rem; margin-bottom: 1.5rem;">🧠</div>
+          <div class="ad-title" style="font-size: 1.1rem; margin-bottom: 0.75rem;">Aimi AI Agent Platform</div>
+          <div class="ad-desc" style="font-size: 0.8rem; margin-bottom: 1.5rem;">
+            Run low-latency LLM agent graphs natively in your production cloud cluster. Fully compatible with OpenAI, Anthropic, and open models.
           </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div>
-          </div>
+          <a href="#" class="ad-action-btn" style="background: var(--accent); color: #fff;">Get Sandbox Access</a>
         </div>
-      </a>
+      </div>
 
-      <!-- GRAPHQL MASTERY -->
-      <a href="graphql-mastery-guide.html" class="track-card">
-        <div class="track-icon">🚀</div>
-        <div class="track-meta">
-          <span class="track-level">Full-Stack</span>
-          <span class="track-duration">31 Topics</span>
-        </div>
-        <h3 class="track-title">GraphQL Full-Stack <br>Mastery</h3>
-        <p class="track-desc">Master schema design, Apollo Server, Next.js integration, and production-grade security patterns for the modern web.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
+    </aside>
 
-      <!-- PYTHON DATA SCIENCE -->
-      <a href="python-data-science-guide.html" class="track-card">
-        <div class="track-icon">📊</div>
-        <div class="track-meta">
-          <span class="track-level">Advanced</span>
-          <span class="track-duration">20 Modules</span>
-        </div>
-        <h3 class="track-title">Python Data Science <br>NumPy, Pandas & Spark</h3>
-        <p class="track-desc">Master NumPy arrays, Pandas DataFrames, and distributed Spark computing. From data loading to real-world ML pipelines.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
-
-      <!-- AWS SERVICES -->
-      <a href="aws-services-guide.html" class="track-card">
-        <div class="track-icon">☁️</div>
-        <div class="track-meta">
-          <span class="track-level">Zero to Hero</span>
-          <span class="track-duration">80 Modules</span>
-        </div>
-        <h3 class="track-title">AWS Mastery <br>Zero to Hero</h3>
-        <p class="track-desc">Master the entire AWS ecosystem. From IAM, VPC, and EC2 to Serverless (Lambda), Kubernetes (EKS), AI/ML (Bedrock, SageMaker), and advanced CI/CD DevOps.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
-
-      <!-- DOCKER & KUBERNETES CORE MASTERY -->
-      <a href="docker-k8s-guide.html" class="track-card">
-        <div class="track-icon">🐳</div>
-        <div class="track-meta">
-          <span class="track-level">Fundamentals to Expert</span>
-          <span class="track-duration">8 Modules + Sandbox</span>
-        </div>
-        <h3 class="track-title">Docker & Kubernetes <br>Orchestration</h3>
-        <p class="track-desc">Master containerization and cluster orchestration. Deep dive into Linux internals, multi-stage Dockerfiles, Docker Compose, K8s networking, storage volumes, scaling, and production security hardening.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot"></div>
-          </div>
-        </div>
-      </a>
-
-      <!-- JAVA & SPRING BOOT MASTERY -->
-      <a href="java-springboot-guide.html" class="track-card">
-        <div class="track-icon">☕</div>
-        <div class="track-meta">
-          <span class="track-level">Scratch to Pro</span>
-          <span class="track-duration">70 Topics</span>
-        </div>
-        <h3 class="track-title">Java & Spring Boot <br>Mastery</h3>
-        <p class="track-desc">The definitive 70-module roadmap. From JVM internals and memory management to enterprise Spring Boot microservices, JWT Security, and Docker orchestration.</p>
-        <div class="track-footer">
-          <div class="start-btn">
-            Start Learning
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="progress-dots">
-            <div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div><div class="dot fill"></div>
-          </div>
-        </div>
-      </a>
-    </div>
-
-    <h2 style="font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; margin: 6rem 0 2.5rem; text-align: center;">Interview Preparation <br><span style="color: var(--accent); font-size: 1rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.1em;">Master the hot seat</span></h2>
-
-    <div class="tracks-grid">
-      <!-- JS INTERVIEW -->
-      <a href="javascript-interview-guide.html" class="track-card" style="border-color: rgba(234,179,8,0.2)">
-        <div class="track-icon">⚡</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #eab308">Basic to Extreme</span>
-          <span class="track-duration">JS Interview</span>
-        </div>
-        <h3 class="track-title">JavaScript <br>Interview Guide</h3>
-        <p class="track-desc">From hoisting and closures to V8 internal optimizations and custom event loop implementations. Be ready for anything.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-
-      <!-- PYTHON INTERVIEW -->
-      <a href="python-interview-guide.html" class="track-card" style="border-color: rgba(55,118,171,0.2)">
-        <div class="track-icon">🐍</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #3776ab">Basic to Extreme</span>
-          <span class="track-duration">PY Interview</span>
-        </div>
-        <h3 class="track-title">Python <br>Interview Guide</h3>
-        <p class="track-desc">Master decorators, generators, the GIL, and memory management internals. Deep technical answers for senior roles.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-
-      <!-- REACT INTERVIEW -->
-      <a href="react-interview-guide.html" class="track-card" style="border-color: rgba(97,218,251,0.2)">
-        <div class="track-icon">⚛️</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #61dafb">Basic to Extreme</span>
-          <span class="track-duration">React Interview</span>
-        </div>
-        <h3 class="track-title">React <br>Interview Guide</h3>
-        <p class="track-desc">Reconciliation, Fiber, Concurrent mode, and RSC. Understand the 'why' behind React to stand out in interviews.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-
-      <!-- BACKEND INTERVIEW -->
-      <a href="backend-interview.html" class="track-card" style="border-color: rgba(99,102,241,0.2)">
-        <div class="track-icon">🌐</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #6366f1">Senior+</span>
-          <span class="track-duration">Backend Interview</span>
-        </div>
-        <h3 class="track-title">Backend <br>Interview Guide</h3>
-        <p class="track-desc">Master APIs, Database Internals, Scaling, Caching, and Real-World Reliability to ace technical interviews.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-
-      <!-- DSA INTERVIEW -->
-      <a href="dsa-guide.html" class="track-card" style="border-color: rgba(16,185,129,0.2)">
-        <div class="track-icon">🧠</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #10b981">All Levels</span>
-          <span class="track-duration">DSA Interview</span>
-        </div>
-        <h3 class="track-title">Data Structures <br>& Algorithms</h3>
-        <p class="track-desc">Master top FAANG questions with deep pattern explanations and code implementations in JS & Python.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-
-      <!-- PAYPAL INTERVIEW -->
-      <a href="paypal-interview-guide.html" class="track-card" style="border-color: rgba(0,121,193,0.2)">
-        <div class="track-icon">💳</div>
-        <div class="track-meta">
-          <span class="track-level" style="color: #0079c1">Senior Loop</span>
-          <span class="track-duration">PayPal Interview</span>
-        </div>
-        <h3 class="track-title">PayPal Frontend <br>Interview Guide</h3>
-        <p class="track-desc">Detailed DSA, OOP, React LLD, and Backend System Design solutions covering all 4 Bangalore loop rounds.</p>
-        <div class="track-footer">
-          <div class="start-btn">Prepare Now</div>
-        </div>
-      </a>
-    </div>
-
+    <!-- FOOTER -->
     <footer>
-      <p>&copy; 2026 Engineering Mastery Hub. Curated for senior developers.</p>
+      <p>&copy; 2026 Engineering Mastery Hub. Designed for senior architects and developers. All rights reserved.</p>
     </footer>
   </div>
+
+  <script>
+    // Tab switching and filtering
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    function switchTab(category) {
+      activeCategory = category;
+      
+      // Update UI active state
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('onclick').includes(category));
+      });
+
+      render();
+    }
+
+    function filterGuides(query) {
+      searchQuery = query.toLowerCase().trim();
+      render();
+    }
+
+    function render() {
+      const cards = document.querySelectorAll('.track-card');
+      cards.forEach(card => {
+        // Skip sponsored cards if they are treated as static
+        if (card.classList.contains('sponsored-card')) {
+          card.style.display = 'flex';
+          return;
+        }
+
+        const matchesTab = activeCategory === 'all' || 
+                           (activeCategory === 'mastery' && card.classList.contains('card-mastery')) ||
+                           (activeCategory === 'interview' && card.classList.contains('card-interview'));
+
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const desc = card.querySelector('.card-desc').textContent.toLowerCase();
+        const matchesSearch = title.includes(searchQuery) || desc.includes(searchQuery);
+
+        if (matchesTab && matchesSearch) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function updateCounts() {
+      const all = document.querySelectorAll('.track-card:not(.sponsored-card)').length;
+      const mastery = document.querySelectorAll('.card-mastery').length;
+      const interview = document.querySelectorAll('.card-interview').length;
+
+      document.getElementById('count-all').textContent = all;
+      document.getElementById('count-mastery').textContent = mastery;
+      document.getElementById('count-interview').textContent = interview;
+    }
+
+    // Initialize counts on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updateCounts();
+      render();
+    });
+  </script>
 </body>
 </html>

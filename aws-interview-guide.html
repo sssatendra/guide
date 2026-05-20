@@ -1,0 +1,2723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AWS Cloud Services Architect Interview Guide — FAANG & MNC Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card: #0e111e;
+      --border: #1f263e;
+      --accent: #ff9900;
+      --accent-light: #ffac33;
+      --accent-glow: rgba(255, 153, 0, 0.15);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --code-bg: #030408;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      
+      --basic: #10b981;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --expert: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── SCROLLBARS ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.85rem;
+      border-left: 1px solid var(--border);
+      padding-left: 0.75rem;
+    }
+    .back-hub {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .back-hub:hover {
+      background: var(--border);
+      color: var(--accent-light);
+      border-color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 57px);
+    }
+    
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 380px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sb-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .progress-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .progress-bar-bg {
+      background: #181c2e;
+      height: 6px;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(to right, var(--accent), var(--accent-light));
+      width: 0%;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .search-wrapper {
+      position: relative;
+    }
+    .search {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .q-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .cat-group {
+      margin-bottom: 2rem;
+    }
+    .cat-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cat-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+    .q-item {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.01);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-item:hover {
+      background: rgba(255, 153, 0, 0.04);
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .q-item.active {
+      background: rgba(255, 153, 0, 0.12);
+      border-color: var(--accent);
+      box-shadow: inset 3px 0 0 var(--accent-light);
+    }
+    .q-title-wrap {
+      flex: 1;
+      padding-right: 0.5rem;
+    }
+    .q-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+    .q-meta {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .level-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .level-text {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .status-check {
+      font-size: 0.9rem;
+      color: var(--success);
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    .q-item.completed .status-check {
+      opacity: 1;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      background: radial-gradient(circle at top right, rgba(255, 153, 0, 0.04), transparent 60%);
+      position: relative;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      text-align: center;
+      padding: 10vh 1rem 5vh;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .welcome h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #fff, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .welcome p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .summary-card h3 {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card p {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    /* ── ANSWER CARD ── */
+    .ans-card {
+      max-width: 1000px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ans-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    .header-info {
+      flex: 1;
+    }
+    .completion-action {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .completion-action:hover {
+      border-color: var(--accent);
+      background: rgba(255, 153, 0, 0.03);
+    }
+    .completion-action input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .completion-action label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .ans-level {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .level-medium {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--medium);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .level-hard {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--hard);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .level-expert {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--expert);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .ans-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ans-def {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .sec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-light);
+      margin: 3.5rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .expl-list {
+      list-style: none;
+      margin-bottom: 2.5rem;
+    }
+    .expl-item {
+      position: relative;
+      padding-left: 1.8rem;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .expl-item::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-light);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .expl-item strong {
+      color: var(--text-main);
+    }
+
+    /* ── SCENARIOS ACCORDION ── */
+    .scenario-container {
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card);
+    }
+    .scenario-header {
+      padding: 1.25rem 1.5rem;
+      background: rgba(255,255,255,0.01);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .scenario-header:hover {
+      background: rgba(255, 153, 0, 0.02);
+    }
+    .scenario-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .scenario-title span {
+      background: rgba(255, 153, 0, 0.1);
+      color: var(--accent-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .scenario-arrow {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+    .scenario-container.open .scenario-arrow {
+      transform: rotate(180deg);
+    }
+    .scenario-body {
+      display: none;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      background: #090c17;
+    }
+    .scenario-container.open .scenario-body {
+      display: block;
+    }
+    .scenario-expl {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* ── DUAL CODE TABS ── */
+    .code-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .code-tab {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .code-tab:hover {
+      color: #fff;
+    }
+    .code-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255, 153, 0, 0.25);
+    }
+
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .code-header {
+      padding: 0.9rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-lang {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+
+    /* ── CODE SYNTAX HIGHLIGHTING (CSS classes) ── */
+    .kw { color: #ff9900; font-weight: 600; } /* keyword */
+    .fn { color: #f59e0b; } /* function */
+    .str { color: #10b981; } /* string */
+    .num { color: #ec4899; } /* number */
+    .com { color: #64748b; font-style: italic; } /* comment */
+    .op { color: #818cf8; } /* operator */
+    .cls { color: #a855f7; font-weight: bold; } /* class */
+
+    /* ── VISUAL WRAPPER (ASCII DIAGRAMS) ── */
+    .visual-wrap {
+      background: #030408;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--accent-light);
+      overflow-x: auto;
+      white-space: pre;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--accent);
+    }
+
+    /* ── INTERVIEW QUESTIONS SECTION ── */
+    .qa-group {
+      margin-bottom: 2.5rem;
+    }
+    .qa-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .qa-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+      background: rgba(139, 92, 246, 0.15);
+      color: #c084fc;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .qa-question {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1rem;
+      line-height: 1.4;
+    }
+    .qa-answer {
+      color: var(--text-dim);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .qa-answer p {
+      margin-bottom: 1rem;
+    }
+    .qa-answer strong {
+      color: var(--text-main);
+    }
+    .qa-answer ul, .qa-answer ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .qa-answer li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── PRO TIP BOX ── */
+    .tip-box {
+      background: linear-gradient(135deg, rgba(255, 153, 0, 0.1) 0%, transparent 100%);
+      border: 1px solid rgba(255, 153, 0, 0.25);
+      border-radius: 16px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      margin-top: 3.5rem;
+      box-shadow: 0 10px 25px rgba(255, 153, 0, 0.05);
+    }
+    .tip-box::before {
+      content: 'ARCHITECT PRO-TIPS';
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: var(--accent);
+      color: #000;
+      font-size: 0.6rem;
+      font-weight: 900;
+      padding: 5px 12px;
+      border-bottom-left-radius: 10px;
+      letter-spacing: 0.08em;
+    }
+    .tip-text {
+      font-size: 0.98rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .tip-text strong {
+      color: #fff;
+    }
+
+    /* ── MOBILE MENU BUTTON ── */
+    .mob-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--accent-light);
+      font-size: 1.5rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .sidebar {
+        position: fixed;
+        left: -380px;
+        top: 57px;
+        height: calc(100vh - 57px);
+        z-index: 900;
+        box-shadow: 5px 0 25px rgba(0,0,0,0.5);
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .main {
+        padding: 1.5rem;
+      }
+      .mob-menu-btn {
+        display: block;
+      }
+      .logo {
+        gap: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="logo">
+      <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
+      ☁️ AWS Mastery <span>FAANG Architect Interview Guide</span>
+    </div>
+    <a href="index.html" class="back-hub">← Mastery Hub</a>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="progress-container">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700;">
+            <span style="color:var(--text-dim)">STUDY PROGRESS</span>
+            <span id="progressPercent" style="color:var(--accent-light)">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="search-wrapper">
+          <input type="text" class="search" placeholder="Search architect topics..." onkeyup="filterQ()">
+        </div>
+      </div>
+      <div class="q-list" id="qList"></div>
+    </div>
+
+    <div class="main" id="mainContent">
+      <div class="welcome" id="welcomeScreen">
+        <h1>AWS Cloud Services Interview Guide</h1>
+        <p>A rigorous, comprehensive architectural prep platform focusing on deep internal engineering, real production scenarios, complete functional codes, and systemic interview challenges in MNC design loops.</p>
+        
+        <div class="grid-summary">
+          <div class="summary-card">
+            <h3>Architecture Standard</h3>
+            <p>Senior & Staff Level loops</p>
+          </div>
+          <div class="summary-card">
+            <h3>Machinery Explanations</h3>
+            <p>10 Primary Core Services</p>
+          </div>
+          <div class="summary-card">
+            <h3>High Fidelity</h3>
+            <p>SDK Code & ASCII flows</p>
+          </div>
+        </div>
+        
+        <div style="margin-top: 4rem; color: var(--accent-light); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; animation: pulse 2s infinite;">
+          Select a cloud service track in the sidebar to begin
+        </div>
+      </div>
+      
+      <div class="ans-card" id="ansCard" style="display:none"></div>
+    </div>
+  </div>
+
+  <script>
+    // Selected language state
+    let currentLang = 'py';
+    let completedTopics = JSON.parse(localStorage.getItem('completed_aws_topics') || '[]');
+
+    // Highlight helper
+    function highlight(code, lang) {
+      let html = code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      const placeholders = [];
+      let placeholderCount = 0;
+
+      function savePlaceholder(text, type) {
+        const key = `__\${type}_PLACEHOLDER_\${placeholderCount}__`;
+        placeholders.push({ key, text });
+        placeholderCount++;
+        return key;
+      }
+
+      // Pre-process comments and strings to protect them
+      if (lang === 'js' || lang === 'javascript') {
+        html = html.replace(/(\/\/.*|\/\*[\s\S]*?\*\/)/g, (match) => {
+          return savePlaceholder(`<span class="com">\${match}</span>`, 'COM');
+        });
+        html = html.replace(/(["'`])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">\${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(const|let|var|class|constructor|extends|super|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|typeof|instanceof|import|export|from|default|async|await|yield|null|undefined|true|false)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(console\.log|Math\.\w+|Array\.\w+|Object\.\w+|JSON\.\w+|Map|Set|Promise|Error|fetch)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      } else {
+        html = html.replace(/(#.*)/g, (match) => {
+          return savePlaceholder(`<span class="com">\${match}</span>`, 'COM');
+        });
+        html = html.replace(/(r?['"])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">\${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(def|class|self|import|from|return|if|elif|else|for|in|while|try|except|finally|raise|assert|with|as|lambda|pass|break|continue|global|nonlocal|and|or|not|is|None|True|False)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(print|len|range|list|dict|set|tuple|str|int|float|type|object|super|abs|min|max|sum|dir|vars|map|filter|reduce|sorted|open|asyncio\.\w+|Exception)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      }
+
+      // Restore placeholders
+      for (let i = placeholders.length - 1; i >= 0; i--) {
+        html = html.replace(placeholders[i].key, placeholders[i].text);
+      }
+
+      return html;
+    }
+
+    const topics = [
+      {
+        id: 1,
+        title: "Amazon S3 Storage Machinery",
+        level: "expert",
+        category: "Storage & CDN",
+        def: "Simple Storage Service (S3) is a distributed object store engineered for high scalability, strong data durability (99.999999999% over 3 AZs), and dynamic prefix scaling capabilities.",
+        machinery: "S3 maintains a highly decentralized storage subsystem utilizing an internal mapping engine based on consistent hashing of prefix keys. When an object is uploaded, S3 maps the unique key to internal partition nodes. In December 2020, S3 transitioned from eventual consistency to strict read-after-write consistency for PUT and DELETE operations. Under the hood, massive uploads exceeding 100MB leverage the Multipart Upload protocol, where files are split into parts, transmitted concurrently, and joined via an atomic commit payload.",
+        scenarios: [
+          {
+            title: "Scenario A: Parallel Multipart Upload with Node.js SDK v3",
+            expl: "When ingesting multi-gigabyte media packages, uploading in a single stream is highly vulnerable to network failures and suffers from single-thread bottlenecks. The Node.js solution uses the AWS SDK v3 `@aws-sdk/lib-storage` package to orchestrate thread pools that ingest streaming buffers, slice them, and execute parallel chunk uploads.",
+            diagram: `
++--------------------------------------------------------------+
+|                         Client Host                          |
+|  +--------------------+                                      |
+|  | File Ingestion     |                                      |
+|  +---------+----------+                                      |
+|            | Stream buffer (100MB)                           |
+|            v                                                 |
+|  +---------+----------+      Upload Part 1       +--------+  |
+|  | Chunk Multi-thread | -----------------------> | S3     |  |
+|  | Allocator          |      Upload Part 2       | Engine |  |
+|  | (Queue Pool Size 4)| -----------------------> | Bucket |  |
+|  +--------------------+      Upload Part 3       +--------+  |
+|                         ----------------------->             |
++--------------------------------------------------------------+
+            `,
+            jsCode: `import { S3Client } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+import fs from "fs";
+
+const s3Client = new S3Client({ region: "us-east-1" });
+
+async function uploadLargeFileConcurrently(bucketName, keyName, filePath) {
+  const fileStream = fs.createReadStream(filePath);
+  
+  try {
+    const parallelUpload = new Upload({
+      client: s3Client,
+      params: {
+        Bucket: bucketName,
+        Key: keyName,
+        Body: fileStream,
+        ContentType: "video/mp4"
+      },
+      // Slice file into 10MB parts and upload with a concurrency pool of 4 threads
+      queueSize: 4,
+      partSize: 1024 * 1024 * 10, 
+      leavePartsOnError: false
+    });
+
+    parallelUpload.on("httpUploadProgress", (progress) => {
+      console.log(\`Uploaded part: \${progress.part} | Bytes loaded: \${progress.loaded}\`);
+    });
+
+    const result = await parallelUpload.done();
+    console.log("Multipart Upload Complete. Object URI:", result.Location);
+    return result;
+  } catch (error) {
+    console.error("Multipart Upload Failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+from boto3.s3.transfer import TransferConfig
+import os
+
+s3_client = boto3.client('s3', region_name='us-east-1')
+
+def upload_large_file_concurrently(bucket_name, key_name, file_path):
+    # Establish dynamic threshold. Multi-part triggers if file size > 50MB
+    config = TransferConfig(
+        multipart_threshold=1024 * 1024 * 50,
+        max_concurrency=10,
+        multipart_chunksize=1024 * 1024 * 10,
+        use_threads=True
+    )
+    
+    try:
+        s3_client.upload_file(
+            Filename=file_path,
+            Bucket=bucket_name,
+            Key=key_name,
+            Config=config
+        )
+        print("Boto3 concurrent transfer upload completed successfully.")
+    except Exception as e:
+        print(f"Boto3 concurrent transfer failed: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Secure Temporary S3 Ingress using Presigned URLs",
+            expl: "Uploading directly from clients to S3 using backend server proxies wastes CPU cycles, bandwidth, and exposes credentials. The presigned URL pattern creates short-lived, cryptographic keys allowing the client to execute PUT payloads directly to the target bucket prefix under highly controlled limits.",
+            diagram: `
++-------------+      1. Request Presigned URL       +------------+
+|             | ----------------------------------> | Application|
+|             | <---------------------------------- | Server     |
+| Client Host |      2. Signed URL Cryptographic    +------------+
+|             |         Signature (Expires 900s)                  
+|             |                                                   
+|             |      3. Direct HTTP PUT Payload     +------------+
+|             | ----------------------------------> | Amazon S3  |
++-------------+                                     +------------+
+            `,
+            jsCode: `import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3Client = new S3Client({ region: "us-east-1" });
+
+async function generateSecurePutUrl(bucketName, keyName) {
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: keyName,
+    ContentType: "image/jpeg"
+  });
+
+  try {
+    // Generate signature set to expire in 15 minutes (900 seconds)
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 900 });
+    console.log("Client Ingress Target Signed URL:", url);
+    return url;
+  } catch (error) {
+    console.error("Presigned URL generation failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+from botocore.exceptions import ClientError
+
+s3_client = boto3.client('s3', region_name='us-east-1')
+
+def generate_secure_put_url(bucket_name, key_name, expiration=900):
+    try:
+        response = s3_client.generate_presigned_url(
+            'put_object',
+            Params={
+                'Bucket': bucket_name,
+                'Key': key_name,
+                'ContentType': 'image/jpeg'
+            },
+            ExpiresIn=expiration
+        )
+        return response
+    except ClientError as e:
+        print(f"Failed to sign client target endpoint: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Netflix System Architecture Loop",
+            question: "How would you design a highly reliable pipeline to ingest 10GB raw video files parallelly, maintaining strict sub-15 second response cycles, and securing files at rest?",
+            answer: `
+<p>To ingest large 10GB video streams efficiently under tight SLA budgets, we reject typical proxy server models and utilize S3's native <strong>Multipart Client Ingress</strong> with strict security barriers:</p>
+<ol>
+  <li><strong>Presigned Multipart Initializer:</strong> The client contacts a lightweight Auth Gateway API. The gateway initiates an S3 multipart upload using STS assumed roles, generates cryptographic presigned URLs for each 100MB chunk range, and returns them to the client.</li>
+  <li><strong>Parallel Client Workers:</strong> The client slices the raw video into 100 parts and uploads them concurrently (via a browser pool of 5-10 parallel Web Workers) directly to S3. Network retries with exponential backoffs are managed at the edge.</li>
+  <li><strong>Security at Rest:</strong> We enforce Server-Side Encryption with Customer Master Keys managed in AWS KMS (SSE-KMS). Custom IAM policies verify that any PUT requests must contain the header <code>x-amz-server-side-encryption: aws:kms</code>.</li>
+  <li><strong>Dynamic S3 Bucket Prefix Partitioning:</strong> S3 scales throughput horizontally to 3,500 PUTs and 5,500 GETs per second per prefix. We avoid sequential naming bottlenecks by using salted random prefixes (e.g., <code>s3://netflix-media/&lt;salted_random_hash&gt;/video.mp4</code>).</li>
+</ol>
+            `
+          },
+          {
+            badge: "Amazon S3 Core Loop",
+            question: "Amazon S3 claims strict read-after-write consistency. How does S3 internal replication mechanics handle concurrent updates, and how do you guarantee WORM audits?",
+            answer: `
+<p>S3 achieves strong read-after-write consistency across three distinct AZs by updating metadata caches synchronously prior to returning an <code>HTTP 200 OK</code> response:</p>
+<ul>
+  <li><strong>Replication Machinery:</strong> S3 uses partition-level consensus. A write payload must succeed across a quorum of replica storage blocks inside the primary region. S3 metadata stores are immediately updated. Subsequent GET operations query the updated metadata mappings, resolving the eventual-consistency issues common in early object stores.</li>
+  <li><strong>Lock-free Audit Trail (WORM):</strong> To enforce Write-Once-Read-Many (WORM) parameters for compliance logging, we enable <strong>S3 Object Lock</strong> in compliance mode. Once set, even the AWS root identity cannot overwrite or delete the logs during the retention period. S3 Versioning maintains historical immutable snapshots.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "When optimizing high-throughput S3 pipelines, avoid flat structures. Distributing files across different prefixes scales S3 throughput exponentially because S3 splits prefixes dynamically into separate partitions behind the scenes!"
+      },
+      {
+        id: 2,
+        title: "Amazon Aurora Architecture",
+        level: "expert",
+        category: "Databases",
+        def: "Amazon Aurora is a cloud-native relational database service engineered with decoupled compute and storage, providing self-healing, multi-AZ clustering with sub-10ms replica lags.",
+        machinery: "Aurora decouples compute nodes from the storage layer. Instead of traditional database engines that write dirty pages and double-write buffers to local storage, Aurora compute nodes ship log records (redo logs) directly to an independent, self-healing storage volume across 3 Availability Zones. This shared storage replicates data 6 ways (2 copies in each of the 3 AZs). A write requires quorum confirmation from 4 out of the 6 storage blocks, and reads rely on 3 out of 6 blocks, avoiding disk-level synchronous writes at compute endpoints.",
+        scenarios: [
+          {
+            title: "Scenario A: Aurora Serverless v2 Scaling & Replica Failover Monitoring",
+            expl: "Aurora Serverless v2 scales dynamically in fractions of an Aurora Capacity Unit (ACU). If a primary node suffers critical resource exhaustion, Aurora automatically promotes a reader node to the master state within 30 seconds. This script tracks cluster state parameters, evaluating failover readiness.",
+            diagram: `
++--------------------------------------------------------------+
+|                         Aurora Compute                       |
+|   +-------------------+            +---------------------+   |
+|   | Primary Instance  |            | Reader Replica (AZ2)|   |
+|   | (Writes Redo Logs)|            | (Failover Target)   |   |
+|   +---------+---------+            +----------+----------+   |
+|             |                                 ^              |
+|             | Redo logs only                  | Read requests|
++-------------+---------------------------------+--------------+
+|             v                                 v              |
+|   +------------------------------------------------------+   |
+|   | Shared Log-Structured Storage Volume (6x over 3 AZs) |   |
+|   +------------------------------------------------------+   |
++--------------------------------------------------------------+
+            `,
+            jsCode: `import { RDSClient, DescribeDBClustersCommand } from "@aws-sdk/client-rds";
+
+const rdsClient = new RDSClient({ region: "us-east-1" });
+
+async function verifyClusterFailoverReadiness(clusterIdentifier) {
+  const command = new DescribeDBClustersCommand({
+    DBClusterIdentifier: clusterIdentifier
+  });
+
+  try {
+    const data = await rdsClient.send(command);
+    const cluster = data.DBClusters[0];
+    
+    console.log(\`Cluster Status: \${cluster.Status} | Storage Encrypted: \${cluster.StorageEncrypted}\`);
+    
+    // Scan cluster members to evaluate write node and reader replica weights
+    cluster.DBClusterMembers.forEach((member) => {
+      console.log(\`- Instance: \${member.DBInstanceIdentifier} | IsClusterWriter: \${member.IsClusterWriter} | Priority: \${member.PromotionTier}\`);
+    });
+    
+    return cluster;
+  } catch (error) {
+    console.error("Failed to inspect RDS cluster topologies:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+rds_client = boto3.client('rds', region_name='us-east-1')
+
+def verify_cluster_failover_readiness(cluster_identifier):
+    try:
+        response = rds_client.describe_db_clusters(
+            DBClusterIdentifier=cluster_identifier
+        )
+        cluster = response['DBClusters'][0]
+        print(f"Cluster: {cluster['DBClusterIdentifier']} | Health: {cluster['Status']}")
+        
+        for member in cluster['DBClusterMembers']:
+            print(f" -> Node: {member['DBInstanceIdentifier']} | Writer: {member['IsClusterWriter']} | Tier: {member['PromotionTier']}")
+        return cluster
+    except Exception as e:
+        print(f"Error describing cluster states: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Aurora Dynamic Reader Discovery and Port Configuration",
+            expl: "Connecting applications to single primary endpoints causes single-point resource choke points. For write-heavy databases, developers must load-balance read workloads. This script fetches the read-only endpoint port specifications and dynamically routes client connection pools to the designated reader nodes.",
+            diagram: `
+                      +-------------------+
+                      | App Client Connection
+                      +---------+---------+
+                                |
+                  +-------------+-------------+
+                  |                           |
+                  v [Write Transactions]      v [Read Queries]
+        +-------------------+       +-----------------------+
+        | Cluster Endpoint  |       | Reader Endpoint       |
+        | (Target: Primary) |       | (Load Balances Replicas)
+        +---------+---------+       +-----------+-----------+
+                  |                             |
+                  v                             v
+            +-----------+                 +-----------+
+            |  Primary  |                 | Read-Only |
+            | SQL Node  |                 | SQL Node  |
+            +-----------+                 +-----------+
+            `,
+            jsCode: `import { RDSClient, DescribeDBClustersCommand } from "@aws-sdk/client-rds";
+
+const rdsClient = new RDSClient({ region: "us-east-1" });
+
+async function getClusterEndpoints(clusterIdentifier) {
+  const command = new DescribeDBClustersCommand({
+    DBClusterIdentifier: clusterIdentifier
+  });
+
+  try {
+    const data = await rdsClient.send(command);
+    const cluster = data.DBClusters[0];
+    
+    const writerEndpoint = cluster.Endpoint;
+    const readerEndpoint = cluster.ReaderEndpoint;
+    
+    console.log("Write Traffic Endpoint:", writerEndpoint);
+    console.log("Read Traffic Endpoint (DNS Round-Robin):", readerEndpoint);
+    
+    return { writerEndpoint, readerEndpoint };
+  } catch (error) {
+    console.error("Endpoint lookup failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+rds_client = boto3.client('rds', region_name='us-east-1')
+
+def get_cluster_endpoints(cluster_identifier):
+    try:
+        response = rds_client.describe_db_clusters(
+            DBClusterIdentifier=cluster_identifier
+        )
+        cluster = response['DBClusters'][0]
+        return {
+            'writer': cluster['Endpoint'],
+            'reader': cluster['ReaderEndpoint']
+        }
+    except Exception as e:
+        print(f"Error fetching endpoints: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Stripe Relational Databases Loop",
+            question: "How does Amazon Aurora guarantee zero-data-loss database replication across Availability Zones during write surges, and how does it optimize failover times?",
+            answer: `
+<p>Stripe requires absolute transaction consistency. Aurora addresses this with a specialized log-structured storage subsystem:</p>
+<ul>
+  <li><strong>Decoupled Log Shipment:</strong> Aurora compute nodes do not write full database pages to disk. They only write redo log records to the shared storage layer. The storage system handles asynchronous page consolidation. This dramatically reduces disk write bottlenecks, allowing high-throughput write streams.</li>
+  <li><strong>Quorum Writes:</strong> Aurora writes 6 copies across 3 AZs. When a write occurs, the compute node ships logs concurrently to all 6 storage nodes. Once 4 nodes confirm log ingestion, the write transaction is committed. If an entire AZ collapses, the remaining 4 storage nodes contain a complete, authoritative copy, guaranteeing no transaction loss.</li>
+  <li><strong>Rapid Failover:</strong> Aurora reader instances share the same storage volume as the primary node. Reader instances don't need to replicate data blocks across separate disks. During primary failure, the reader simply restarts its internal transaction logs from the shared storage volume and takes over as the writer in under 30 seconds.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Uber Database Reliability Loop",
+            question: "Explain Cross-Region Replication replication lag limits within Aurora Global Databases, and how you resolve local read performance bottlenecks in different regions.",
+            answer: `
+<p>To scale globally and reduce latency, we implement <strong>Aurora Global Databases</strong>:</p>
+<ol>
+  <li><strong>Storage-Level Replication:</strong> Aurora Global Databases do not use SQL-level replication. Instead, dedicated replication agents at the storage level stream updates directly from the primary region's storage volume to secondary regions. This bypasses compute resources entirely, keeping cross-region replication lag under 1 second under normal workloads.</li>
+  <li><strong>Local Reads:</strong> Read queries in remote regions are directed to local Aurora reader instances, eliminating high-latency cross-region network round-trips.</li>
+  <li><strong>Global Database Failover:</strong> If the primary region goes offline, we can promote a secondary region's cluster to primary. The storage layer ensures the remote volume is immediately writeable, minimizing recovery times (RTO &lt; 1 min).</li>
+</ol>
+            `
+          }
+        ],
+        tip: "Avoid standard JDBC/ODBC connection pooling with Aurora Serverless. Use the RDS Proxy to pool database connections dynamically, protecting your database from sudden serverless compute spikes!"
+      },
+      {
+        id: 3,
+        title: "DynamoDB Keys & Performance",
+        level: "hard",
+        category: "Databases",
+        def: "Amazon DynamoDB is a fully managed, serverless, single-digit millisecond latency NoSQL database designed to scale dynamically using partition keys and globally replicated active-active partitions.",
+        machinery: "DynamoDB partitions data internally across physical SSD storage zones. The partition key (PK) is routed through an internal MD5 hashing algorithm to locate the specific physical partition containing the target record. Physical partitions cap at 10GB in size and are limited to a maximum performance density of 1,000 WCUs and 3,000 RCUs. Global Secondary Indexes (GSIs) allow developers to query data using alternative keys. GSIs replicate data asynchronously from the base table via internal change streams.",
+        scenarios: [
+          {
+            title: "Scenario A: E-Commerce Multi-Entity Partition Key Modeling with Node.js",
+            expl: "In high-throughput e-commerce databases, storing orders, users, and transactions in separate tables creates high latency and requires expensive, complex joins. We design a single-table layout using composite keys (Partition Key PK and Sort Key SK) to query multiple entities in a single atomic transaction.",
+            diagram: `
++--------------------------------------------------------------+
+| Physical DynamoDB Cluster Partition Ring                     |
+|                                                              |
+|               Hash("USER#109")                               |
+|              -----------------> [Physical Partition A]       |
+|                                 PK: USER#109                 |
+|                                 SK: USER#METADATA            |
+|                                 SK: ORDER#2026-05-20T12:00:00|
+|                                                              |
+|               Hash("ORDER#990")                              |
+|              -----------------> [Physical Partition B]       |
+|                                 PK: ORDER#990                |
++--------------------------------------------------------------+
+            `,
+            jsCode: `import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+
+const rawClient = new DynamoDBClient({ region: "us-east-1" });
+const docClient = DynamoDBDocumentClient.from(rawClient);
+
+// Fetch order records for a specific user within a date range
+async function fetchUserOrders(userId, startYear) {
+  const command = new QueryCommand({
+    TableName: "ECommerceSingleTable",
+    KeyConditionExpression: "PK = :pk AND SK BEGINS_WITH(:skPrefix)",
+    ExpressionAttributeValues: {
+      ":pk": \`USER#\${userId}\`,
+      ":skPrefix": \`ORDER#\${startYear}\`
+    },
+    // Enforce strong consistency if needed (Note: GSIs do not support consistent reads)
+    ConsistentRead: false 
+  });
+
+  try {
+    const response = await docClient.send(command);
+    console.log(\`Retrieved \${response.Items.length} orders for user \${userId}\`);
+    return response.Items;
+  } catch (error) {
+    console.error("DynamoDB Query Failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+from boto3.dynamodb.conditions import Key
+
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+table = dynamodb.Table('ECommerceSingleTable')
+
+def fetch_user_orders(user_id, start_year):
+    try:
+        response = table.query(
+            KeyConditionExpression=Key('PK').eq(f"USER#{user_id}") & Key('SK').begins_with(f"ORDER#{start_year}")
+        )
+        print(f"Retrieved {len(response['Items'])} items from partition.")
+        return response['Items']
+    except Exception as e:
+        print(f"Error querying partition: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: DynamoDB Stream Pipelines for Serverless Microservices",
+            expl: "We capture database mutations (INSERT/MODIFY) in real-time, streaming the changes through DynamoDB Streams to a Lambda function to update an analytics engine or invalidate caches.",
+            diagram: `
++-----------------+      1. PutItem Transaction       +------------------+
+| Client App      | --------------------------------> | DynamoDB Base    |
++-----------------+                                   | Table            |
+                                                      +--------+---------+
+                                                               |
+                                                               | 2. Async Change capture
+                                                               v
++-----------------+      4. Process Stream Event      +--------+---------+
+| Lambda Handler  | <-------------------------------- | DynamoDB Streams |
++-----------------+                                   +------------------+
+            `,
+            jsCode: `// Lambda Handler parsing DynamoDB Stream event payloads
+export const handler = async (event) => {
+  for (const record of event.Records) {
+    console.log("Stream Event Type:", record.eventName);
+    console.log("Sequence Number:", record.dynamodb.SequenceNumber);
+    
+    if (record.eventName === "INSERT") {
+      const newImage = record.dynamodb.NewImage;
+      // Parse database fields securely
+      const userEmail = newImage.Email?.S;
+      console.log(\`Processing downstream trigger for newly registered email: \${userEmail}\`);
+    }
+  }
+  return { status: "SUCCESS" };
+};`,
+            pyCode: `# Python Lambda Handler mapping raw DynamoDB Stream items
+def lambda_handler(event, context):
+    for record in event['Records']:
+        event_name = record['eventName']
+        print(f"Captured: {event_name}")
+        
+        if event_name == 'INSERT':
+            new_image = record['dynamodb']['NewImage']
+            user_id = new_image['PK']['S']
+            print(f"Downstream tasks completed for target payload user ID: {user_id}")
+    return {"status": "SUCCESS"}`
+          }
+        ],
+        questions: [
+          {
+            badge: "PayPal Financial System Designs",
+            question: "How do you detect and resolve hot partition keys and GSI throttling issues in DynamoDB under massive write loads?",
+            answer: `
+<p>Financial systems generate huge write surges. When write traffic routes to a single key, we experience **hot partitioning** and partition-level throttling:</p>
+<ol>
+  <li><strong>Detection:</strong> We enable **CloudWatch Contributor Insights** on the base table to identify the specific partition keys causing the write spikes. We monitor <code>WriteThrottleEvents</code> and <code>ReadThrottleEvents</code>.</li>
+  <li><strong>Write Key Salting:</strong> To resolve hot partitions, we append a random suffix to the partition key (e.g., <code>USER#109#01</code> through <code>USER#109#10</code>). This distributes writes evenly across up to 10 distinct physical partitions.</li>
+  <li><strong>Scatter-Gather Queries:</strong> To query this salted partition, the application executes 10 query calls in parallel across the salted keys and merges the results in memory.</li>
+  <li><strong>GSI Write Bottlenecks:</strong> If a Global Secondary Index (GSI) gets throttled, it applies backpressure and throttles writes on the base table as well. We scale GSI provisioned throughput to match or exceed the base table's write throughput, avoiding backpressure bottlenecks.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Netflix User Services Loop",
+            question: "How does Amazon DynamoDB Global Tables implement multi-region active-active replication, and how are transaction conflicts resolved?",
+            answer: `
+<p>To scale globally, we deploy **DynamoDB Global Tables** across multiple target regions:</p>
+<ul>
+  <li><strong>Replication Engine:</strong> Global Tables replicate data across regions asynchronously using DynamoDB Streams. When a write occurs in region A, the update is immediately pushed to the stream and replicated to region B in under 1 second.</li>
+  <li><strong>Conflict Resolution:</strong> DynamoDB Global Tables use a <strong>Last-Writer-Wins (LWW)</strong> strategy. Each update contains an internal timestamp. If writes occur on the same item in two regions simultaneously, DynamoDB compares the timestamps and commits the write with the latest timestamp.</li>
+  <li><strong>Conflict Mitigation:</strong> To prevent data loss from LWW overrides, applications should use deterministic partition keys or unique transaction IDs. This ensures updates represent independent records, avoiding concurrent updates on shared records.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Always monitor DynamoDB GSI performance. Base table writes will fail if any associated GSI is throttled due to lack of provisioned write capacity!"
+      },
+      {
+        id: 4,
+        title: "Containers on AWS: EKS vs ECS",
+        level: "hard",
+        category: "Containers",
+        def: "EKS (Elastic Kubernetes Service) and ECS (Elastic Container Service) are AWS's managed container orchestration platforms, providing robust control plane automation and secure container runtimes.",
+        machinery: "EKS manages the Kubernetes control plane (including etcd and the API server) across multiple AZs. Node groups are managed on EC2 instances or deployed on AWS Fargate serverless containers. ECS uses an AWS-native control plane to orchestrate tasks. IAM Roles for Service Accounts (IRSA) maps Kubernetes Service Accounts to IAM roles via an OIDC provider. This injects STS credentials directly into target pods, enforcing strict security boundaries.",
+        scenarios: [
+          {
+            title: "Scenario A: Deploying a Multi-AZ Pod Group with ALB Ingress Controller on EKS",
+            expl: "We deploy a highly available container application on EKS using Managed Node Groups. Traffic routing is handled by the AWS Load Balancer Controller, which dynamically configures an Application Load Balancer.",
+            diagram: `
+                      +-----------------------------+
+                      | Application Load Balancer   |
+                      +--------------+--------------+
+                                     |
+                  +------------------+------------------+
+                  | (Target Group Routing)              |
+                  v                                     v
+      +-----------+-----------+             +-----------+-----------+
+      | Pod A (Private AZ 1)  |             | Pod B (Private AZ 2)  |
+      | Node: Managed EC2     |             | Node: Managed EC2     |
+      +-----------------------+             +-----------------------+
+            `,
+            jsCode: `# Kubernetes Ingress configuration for ALB routing
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: api-ingress
+  namespace: production
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: transaction-service
+                port:
+                  number: 80`,
+            pyCode: `# CLI commands to update EKS cluster context and apply manifests
+aws eks update-kubeconfig --name production-cluster --region us-east-1
+kubectl apply -f deployment.yaml
+kubectl apply -f ingress.yaml
+kubectl get ingress api-ingress -n production`
+          },
+          {
+            title: "Scenario B: Creating a Serverless ECS Fargate Task Definition",
+            expl: "When running containers on ECS Fargate, we define resource limits, container ports, and security profiles inside a Task Definition. This script deploys a Fargate task definition with strict IAM permissions.",
+            diagram: `
++--------------------------------------------------------------+
+| Amazon ECS Control Plane                                     |
+|                                                              |
+|       +---------------------------------------------+        |
+|       | ECS Task Definition                         |        |
+|       | - TaskRole: IAM Permissions (S3/DynamoDB)   |        |
+|       | - ExecutionRole: Pull ECR Images & Logs     |        |
+|       | - CPU: 512, Memory: 1024                    |        |
+|       +----------------------+----------------------+        |
+|                              |                               |
+|                              v Deploys Task                  |
+|       +----------------------+----------------------+        |
+|       | Fargate Sandbox Node                         |        |
+|       | (Isolated MicroVM Container Host)            |        |
+|       +---------------------------------------------+        |
++--------------------------------------------------------------+
+            `,
+            jsCode: `import { ECSClient, RegisterTaskDefinitionCommand } from "@aws-sdk/client-ecs";
+
+const ecsClient = new ECSClient({ region: "us-east-1" });
+
+async function deployFargateTask(taskName, taskRoleArn, executionRoleArn) {
+  const command = new RegisterTaskDefinitionCommand({
+    family: taskName,
+    requiresCompatibilities: ["FARGATE"],
+    cpu: "512", // 0.5 vCPU
+    memory: "1024", // 1 GB Memory
+    networkMode: "awsvpc", // Required for Fargate
+    taskRoleArn: taskRoleArn,
+    executionRoleArn: executionRoleArn,
+    containerDefinitions: [
+      {
+        name: "transaction-api",
+        image: "123456789012.dkr.ecr.us-east-1.amazonaws.com/api:v1",
+        portMappings: [
+          {
+            containerPort: 8080,
+            hostPort: 8080,
+            protocol: "tcp"
+          }
+        ]
+      }
+    ]
+  });
+
+  try {
+    const response = await ecsClient.send(command);
+    console.log("Fargate Task Registered. Revision:", response.taskDefinition.revision);
+    return response.taskDefinition;
+  } catch (error) {
+    console.error("ECS Deployment Failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+ecs_client = boto3.client('ecs', region_name='us-east-1')
+
+def deploy_fargate_task(task_name, task_role, exec_role):
+    try:
+        response = ecs_client.register_task_definition(
+            family=task_name,
+            requiresCompatibilities=['FARGATE'],
+            cpu='512',
+            memory='1024',
+            networkMode='awsvpc',
+            taskRoleArn=task_role,
+            executionRoleArn=exec_role,
+            containerDefinitions=[
+                {
+                    'name': 'transaction-api',
+                    'image': '123456789012.dkr.ecr.us-east-1.amazonaws.com/api:v1',
+                    'portMappings': [
+                        {
+                            'containerPort': 8080,
+                            'hostPort': 8080
+                        }
+                    ]
+                }
+            ]
+        )
+        return response['taskDefinition']
+    except Exception as e:
+        print(f"Error registering task: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Airbnb Cloud Operations Loop",
+            question: "How do you implement Pod-level security isolation in EKS using IAM Roles for Service Accounts (IRSA)?",
+            answer: `
+<p>To avoid sharing EC2 instance credentials across pods in EKS, we implement **IAM Roles for Service Accounts (IRSA)**:</p>
+<ol>
+  <li><strong>OIDC Provider Configuration:</strong> We associate our EKS cluster with an AWS IAM OIDC identity provider.</li>
+  <li><strong>IAM Role creation:</strong> We create an IAM role with policies scoped specifically for the application pod (e.g., S3 read-only access). The role's trust policy must trust the cluster's OIDC provider.</li>
+  <li><strong>Kubernetes Service Account:</strong> We declare a Kubernetes Service Account in the pod's namespace, annotated with the IAM Role's ARN:
+    <pre><code>eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/S3ReaderRole</code></pre>
+  </li>
+  <li><strong>Token Injection:</strong> When the pod starts, the EKS Pod Identity Webhook dynamically injects an OIDC token and updates env variables (<code>AWS_ROLE_ARN</code> and <code>AWS_WEB_IDENTITY_TOKEN_FILE</code>). The AWS SDK reads this token automatically to assume the target IAM role.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Twitter Infrastructure Loop",
+            question: "Compare EKS Cluster Auto-scaler with Karpenter for high-throughput container task pooling and cluster auto-scaling during traffic spikes.",
+            answer: `
+<p>For high-throughput workloads, Karpenter provides significant advantages over traditional Kubernetes Cluster Auto-scaler:</p>
+<ul>
+  <li><strong>Cluster Auto-scaler (ASG-based):</strong> The Cluster Auto-scaler monitors pending pods and triggers updates on AWS Auto Scaling Groups (ASGs). This introduces a database-like multi-tier delay. The ASG must provision the EC2 instance, boot it, register it with the EKS cluster, and only then scheduler can bind pods (often taking 2-3 minutes).</li>
+  <li><strong>Karpenter (Direct EC2 Provisioning):</strong> Karpenter bypasses AWS ASGs entirely. It talks directly to the AWS EC2 fleet APIs to provision the exact instance types required for the pending pods (bin-packing). Karpenter registers nodes instantly, dropping startup times to under 45 seconds.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid container host credential leakage by disabling the IMDSv1 service on underlying worker nodes, forcing all containers to use IMDSv2 with hop limits set to 1!"
+      },
+      {
+        id: 5,
+        title: "AWS Lambda Internals",
+        level: "hard",
+        category: "Compute",
+        def: "AWS Lambda is a serverless, event-driven compute service utilizing AWS Firecracker microVM sandboxes to run code within milliseconds of invocation triggers.",
+        machinery: "AWS Lambda utilizes Firecracker, an open-source virtualization technology built on Linux KVM, to spin up secure, isolated microVM sandboxes in milliseconds. The sandbox lifecycle consists of three distinct phases: the **Init phase** (loading extensions and static code), the **Invoke phase** (handler execution), and the **Shutdown phase** (sandbox suspension). Database pools must use dedicated connection proxies (RDS Proxy) because hundreds of ephemeral Lambda instances running concurrently will quickly exhaust standard database connection pools.",
+        scenarios: [
+          {
+            title: "Scenario A: Lambda with SQS FIFO Trigger and Dead-Letter Queue (DLQ)",
+            expl: "Processing high-value financial events sequentially requires Lambda to subscribe to an SQS FIFO queue. If execution fails, processing should halt for the affected Message Group while routing poison-pill events to a Dead Letter Queue (DLQ).",
+            diagram: `
++------------+     1. Push FIFO Message       +---------------+
+| Transaction| -----------------------------> | SQS FIFO      |
+| Service    |                                | Queue         |
++------------+                                +-------+-------+
+                                                      |
+                                                      | 2. Invokes Batch
+                                                      v
++------------+     4. Route Failures          +-------+-------+
+| SQS DLQ    | <----------------------------- | Lambda        |
+| Queue      |                                | Process Node  |
++------------+                                +---------------+
+            `,
+            jsCode: `// Node.js Lambda Handler processing SQS FIFO batches
+export const handler = async (event) => {
+  const batchItemFailures = [];
+
+  for (const record of event.Records) {
+    try {
+      const payload = JSON.parse(record.body);
+      console.log(\`Processing transaction ID: \${payload.transactionId}\`);
+      
+      // Simulate transaction logic
+      if (!payload.amount) {
+        throw new Error("Missing transaction amount");
+      }
+    } catch (error) {
+      console.error("Failed processing record:", error.message);
+      // Track failed record identifiers to prevent halting the entire batch
+      batchItemFailures.push({ itemIdentifier: record.messageId });
+    }
+  }
+
+  return { batchItemFailures };
+};`,
+            pyCode: `import json
+
+# Python SQS FIFO handler returning batchItemFailures
+def lambda_handler(event, context):
+    batch_item_failures = []
+    
+    for record in event['Records']:
+        try:
+            payload = json.loads(record['body'])
+            if 'amount' not in payload:
+                raise ValueError("Missing amount key")
+            print(f"Processed: {payload['transactionId']}")
+        except Exception as e:
+            print(f"Error: {e}")
+            batch_item_failures.append({"itemIdentifier": record['messageId']})
+            
+    return {"batchItemFailures": batch_item_failures}`
+          },
+          {
+            title: "Scenario B: Mitigating DB Connection Exhaustion using RDS Proxy",
+            expl: "Lambda functions run independently and cannot share standard connection pools in memory. A spike of 1,000 Lambda instances will establish 1,000 direct database connections, crash traditional RDS engines. This script routes connection requests through RDS Proxy, which multiplexes database connections efficiently.",
+            diagram: `
++--------------------+
+|  Lambda Sandbox 1  | --+
++--------------------+   |
++--------------------+   |    Establish SQL Pools     +-------------+     Dedicated     +-------------+
+|  Lambda Sandbox 2  | --+--------------------------> | RDS Proxy   | ----------------> | PostgreSQL  |
++--------------------+   |    (Dynamically pools)     +-------------+     SQL Pool      | Database    |
++--------------------+   |                                                              +-------------+
+|  Lambda Sandbox 3  | --+
++--------------------+
+            `,
+            jsCode: `import pg from "pg";
+
+// Configure database connection parameters to target the RDS Proxy endpoint
+const pool = new pg.Pool({
+  host: process.env.RDS_PROXY_ENDPOINT, 
+  user: "master_user",
+  password: process.env.DB_PASSWORD,
+  database: "transactions",
+  port: 5432,
+  ssl: { rejectUnauthorized: false }
+});
+
+export const handler = async (event) => {
+  // Query executes via RDS Proxy, reuse active connection pools if sandbox is warm
+  const client = await pool.connect();
+  
+  try {
+    const result = await client.query("SELECT * FROM balances WHERE id = $1", [event.userId]);
+    return { statusCode: 200, body: JSON.stringify(result.rows[0]) };
+  } catch (error) {
+    console.error("Database query failed:", error);
+    return { statusCode: 500, body: "Error connecting to db proxy" };
+  } finally {
+    client.release();
+  }
+};`,
+            pyCode: `import os
+import psycopg2
+
+db_proxy = os.environ['RDS_PROXY_ENDPOINT']
+db_pass = os.environ['DB_PASSWORD']
+
+def lambda_handler(event, context):
+    try:
+        conn = psycopg2.connect(
+            host=db_proxy,
+            database='transactions',
+            user='master_user',
+            password=db_pass,
+            sslmode='require'
+        )
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM balances WHERE id = %s", (event['userId'],))
+        row = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return {"userId": row[0], "balance": row[1]}
+    except Exception as e:
+        print(f"Failed to query database proxy: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Uber Platform Architecture",
+            question: "How do you minimize cold start latency inside AWS Lambda microVM container environments for critical APIs?",
+            answer: `
+<p>To reduce Lambda **cold starts** (which occur when Firecracker has to spin up a new container sandbox from scratch), we implement targeted design adjustments:</p>
+<ol>
+  <li><strong>Warm Sandboxes with Provisioned Concurrency:</strong> For latency-sensitive APIs, we set **Provisioned Concurrency**. This keeps a pre-warmed pool of microVMs active, ready to invoke handlers instantly and eliminating cold-start latency entirely.</li>
+  <li><strong>Dependency Optimization:</strong> We minimize bundle sizes by removing unnecessary dependencies and lazy-loading libraries inside our code. For instance, in Python, we import large packages like Pandas inside the handler function instead of globally, loading them only when the handler runs.</li>
+  <li><strong>Static Execution Initialization:</strong> We initialize SDK clients, database connection pools, and environment variables outside the handler function. This ensures these initialization tasks execute during the **Init phase** instead of the handler execution.</li>
+  <li><strong>Firecracker Memory Tuning:</strong> Allocating more memory to a Lambda function scales CPU resources proportionally, speeding up the Firecracker sandbox bootstrap phase.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Slack Messaging Architecture",
+            question: "How does AWS Lambda manage SQS queue triggers under high load, and how does SQS manage retries and dynamic batching?",
+            answer: `
+<p>AWS Lambda internal services manage SQS queue integration via an **Event Source Mapping (ESM)** process:</p>
+<ul>
+  <li><strong>ESM Poller:</strong> The ESM service polls the target SQS queue on behalf of the Lambda function. It uses long polling to fetch batches of up to 10 messages (or up to 10,000 using custom batch windows).</li>
+  <li><strong>Concurrency Scaling:</strong> The ESM automatically increases parallel execution. It starts with a concurrency limit of 5 client processes and can scale up by 60 instances per minute, capped at the account's total concurrency limit.</li>
+  <li><strong>Batch Failures:</strong> When Lambda returns a batch failure (or crashes), ESM flags the affected messages as un-processed and resets their visibility timeouts. This triggers a retry until the message's retry count exceeds the threshold, routing it to the Dead-Letter Queue (DLQ).</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid declaring heavy client connections inside your Lambda handler. Always instantiate clients outside the handler to take advantage of Firecracker's container reuse capabilities!"
+      },
+      {
+        id: 6,
+        title: "Amazon SQS & Message Queues",
+        level: "medium",
+        category: "Application Integration",
+        def: "Amazon Simple Queue Service (SQS) is a fully managed, decentralized message queuing service designed for loose coupling of microservices and highly scaleable event workflows.",
+        machinery: "SQS operates as a distributed queuing subsystem across multiple AZs. When a producer sends a message, it is copied across redundant servers. During consumption, a worker polls for messages. Once consumed, the message remains in the queue but is hidden from other workers for a configurable period called the **Visibility Timeout**. The worker must process the message and delete it explicitly from the queue. If the timeout expires before deletion, the message is un-hidden, exposing it to other workers. **Standard Queues** support at-least-once delivery with unlimited throughput, whereas **FIFO Queues** guarantee exactly-once processing but cap throughput at 3,000 messages/sec.",
+        scenarios: [
+          {
+            title: "Scenario A: SQS FIFO Queue with Message Group IDs for Transaction Pipelines",
+            expl: "High-value transactions (e.g., banking or trading logs) require exact chronological order per account, but must scale horizontally across different accounts. We use SQS FIFO queues with **Message Group IDs** to process transactions sequentially for each user, while parallelizing workloads across multiple users.",
+            diagram: `
++--------------------+
+| Transaction        |
+| Events (User A, B) |
++---------+----------+
+          |
+          v Producer sends to SQS FIFO (Group ID = User ID)
++---------+----------+      Route concurrently by Group ID      +----------------------+
+| SQS FIFO Queue     | ---------------------------------------> | Consumer Instance A  |
+| - GroupA: [1, 2]   |      (Ensures order per User)            | (Processes User A)   |
+| - GroupB: [3, 4]   |                                          +----------------------+
++--------------------+                                          +----------------------+
+                                                                | Consumer Instance B  |
+                                                                | (Processes User B)   |
+                                                                +----------------------+
+            `,
+            jsCode: `import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
+import crypto from "crypto";
+
+const sqsClient = new SQSClient({ region: "us-east-1" });
+
+async function publishTransaction(queueUrl, userId, transactionPayload) {
+  const deduplicationId = crypto.createHash("sha256").update(JSON.stringify(transactionPayload)).digest("hex");
+  
+  const command = new SendMessageCommand({
+    QueueUrl: queueUrl,
+    MessageBody: JSON.stringify(transactionPayload),
+    // Route by user ID to isolate sequencing per account
+    MessageGroupId: \`USER#\${userId}\`, 
+    // Deduplication ID ensures exactly-once delivery within a 5-minute window
+    MessageDeduplicationId: deduplicationId 
+  });
+
+  try {
+    const result = await sqsClient.send(command);
+    console.log("Transaction message pushed successfully. MessageId:", result.MessageId);
+    return result;
+  } catch (error) {
+    console.error("Failed to push message to SQS FIFO:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+import hashlib
+import json
+
+sqs_client = boto3.client('sqs', region_name='us-east-1')
+
+def publish_transaction(queue_url, user_id, transaction_payload):
+    serialized = json.dumps(transaction_payload)
+    dedup_id = hashlib.sha256(serialized.encode('utf-8')).hexdigest()
+    
+    try:
+        response = sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=serialized,
+            MessageGroupId=f"USER#{user_id}",
+            MessageDeduplicationId=dedup_id
+        )
+        return response
+    except Exception as e:
+        print(f"Error publishing FIFO event: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Monitoring SQS Queue Backlogs for Worker Auto-Scaling",
+            expl: "Scaling consumer hosts based on CPU usage fails to reflect actual queue backlog. This script queries SQS CloudWatch metrics to fetch the exact backlog size (number of visible messages), enabling precise container scaling.",
+            diagram: `
++------------------+
+| CloudWatch       | <---+
+| SQS Metrics      |     | 1. Query Visibility Stats
++--------+---------+     |
+         |               |
+         v               +---------------+
++--------+---------+                     |
+| AWS Auto-Scaling |                     |
+| Controller       |                     |
++--------+---------+                     |
+         |                               |
+         v 2. Scale up/down              |
++--------+---------+                     |
+| Consumer Node    | --------------------+
+| Groups           |
++------------------+
+            `,
+            jsCode: `import { SQSClient, GetQueueAttributesCommand } from "@aws-sdk/client-sqs";
+
+const sqsClient = new SQSClient({ region: "us-east-1" });
+
+async function getQueueBacklogMetrics(queueUrl) {
+  const command = new GetQueueAttributesCommand({
+    QueueUrl: queueUrl,
+    AttributeNames: ["ApproximateNumberOfMessages", "ApproximateNumberOfMessagesNotVisible"]
+  });
+
+  try {
+    const data = await sqsClient.send(command);
+    const visible = parseInt(data.Attributes.ApproximateNumberOfMessages);
+    const hidden = parseInt(data.Attributes.ApproximateNumberOfMessagesNotVisible);
+    
+    console.log(\`Queue Backlog metrics -> Visible: \${visible} | Processing: \${hidden}\`);
+    return { visible, hidden };
+  } catch (error) {
+    console.error("Failed to query queue metrics:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+sqs_client = boto3.client('sqs', region_name='us-east-1')
+
+def get_queue_backlog_metrics(queue_url):
+    try:
+        response = sqs_client.get_queue_attributes(
+            QueueUrl=queue_url,
+            AttributeNames=['ApproximateNumberOfMessages', 'ApproximateNumberOfMessagesNotVisible']
+        )
+        attributes = response['Attributes']
+        return {
+            'visible': int(attributes['ApproximateNumberOfMessages']),
+            'hidden': int(attributes['ApproximateNumberOfMessagesNotVisible'])
+        }
+    except Exception as e:
+        print(f"Error fetching queue size: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Amazon eCommerce Core Loop",
+            question: "How do you guarantee exactly-once delivery across distributed systems using SQS FIFO queues and deduplication mechanisms?",
+            answer: `
+<p>Distributed queues can cause duplicate message delivery due to network hiccups. We implement exactly-once processing with **SQS FIFO queues** and strict design patterns:</p>
+<ol>
+  <li><strong>Deduplication Window:</strong> SQS FIFO tracks message deduplication signatures (using SHA-256 hashes of the payload or custom **Message Deduplication IDs**) over a 5-minute rolling window. If a producer retries a sent message, SQS drops the duplicate automatically.</li>
+  <li><strong>Consumer Idempotency:</strong> If network timeouts occur outside the deduplication window, we handle duplicates at the application layer by assigning unique **Idempotency Keys** to each transaction. Consumers track these keys in a fast write-through cache (such as Redis or DynamoDB), verifying their state before processing transactions to prevent duplicate mutations.</li>
+</ol>
+            `
+          },
+          {
+            badge: "LinkedIn Messaging Reliability",
+            question: "Explain the Visibility Timeout mechanics in SQS. How do you handle message processing bottlenecks without triggering duplicate deliveries?",
+            answer: `
+<p>If a consumer takes longer to process a message than the configured **Visibility Timeout**, the message becomes visible to other consumers, leading to double-processing bottlenecks:</p>
+<ul>
+  <li><strong>Sizing Timeout:</strong> We set the Visibility Timeout to 6 times the average message processing time.</li>
+  <li><strong>Dynamic Visibility Extensions:</strong> If a consumer encounters a complex task, it uses the <code>ChangeMessageVisibility</code> API dynamically to extend the message's visibility window before the timeout expires, keeping it hidden from other workers.</li>
+  <li><strong>Handling Failures:</strong> If a consumer crashes, the visibility timeout eventually expires, making the message visible again so other workers can process it automatically.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid polling SQS queues using loops with zero-second timeouts. Always use Long Polling by setting WaitTimeSeconds to 20 to eliminate empty-response API costs!"
+      },
+      {
+        id: 7,
+        title: "Amazon MSK & RabbitMQ",
+        level: "expert",
+        category: "Application Integration",
+        def: "Amazon MSK (Managed Streaming for Apache Kafka) and RabbitMQ are AWS's managed event streaming and messaging brokers, designed for high-throughput event logs and complex AMQP routing.",
+        machinery: "Amazon MSK runs Apache Kafka, using KRaft or ZooKeeper to coordinate cluster metadata. Kafka stores events as an immutable append-only commit log distributed across partitions. Kafka achieves blistering throughput using OS Zero-Copy optimizations, shifting data directly from the system page cache to network interface cards (NICs), bypassing user-space buffer swaps entirely. RabbitMQ runs on the AMQP protocol, routing messages through exchanges (Direct, Fanout, Topic) to bound queues. It uses consensus-based Quorum Queues to guarantee strong durability and prevent split-brain issues.",
+        scenarios: [
+          {
+            title: "Scenario A: High-Throughput Telemetry Stream Producer with python-kafka",
+            expl: "Ingesting thousands of telemetry events per second requires a non-blocking, asynchronous stream producer. The python solution uses confluent-kafka to buffer events in memory and flush them to Amazon MSK brokers in batches, maximizing network efficiency.",
+            diagram: `
++--------------------+
+| Telemetry App      |
++---------+----------+
+          |
+          v 1. Buffer metrics in memory
++---------+----------+      2. High-Throughput Batch Flush      +----------------------+
+| Kafka Producer     | ---------------------------------------> | Amazon MSK Cluster   |
+| (confluent-kafka)  |      (Optimized Zero-Copy pipeline)      | (Broker Partition 1) |
++--------------------+                                          +----------------------+
+            `,
+            jsCode: `// Node.js Kafka Producer template for Amazon MSK connection
+import { Kafka } from "kafkajs";
+
+const kafka = new Kafka({
+  clientId: "telemetry-client",
+  brokers: ["msk-broker1.amazonaws.com:9092", "msk-broker2.amazonaws.com:9092"],
+  ssl: true
+});
+
+async function runProducer(topic, key, val) {
+  const producer = kafka.producer();
+  await producer.connect();
+  
+  try {
+    const result = await producer.send({
+      topic: topic,
+      messages: [
+        { key: key, value: JSON.stringify(val) }
+      ]
+    });
+    console.log("Kafka message dispatched successfully:", result);
+  } catch (error) {
+    console.error("MSK Producer Dispatch Failed:", error);
+  } finally {
+    await producer.disconnect();
+  }
+}`,
+            pyCode: `from confluent_kafka import Producer
+import json
+
+# MSK cluster broker configuration endpoints
+conf = {
+    'bootstrap.servers': 'msk-broker1.amazonaws.com:9092,msk-broker2.amazonaws.com:9092',
+    'security.protocol': 'SASL_SSL',
+    'sasl.mechanism': 'AWS_MSK_IAM',
+    'linger.ms': 10,
+    'batch.num.messages': 500
+}
+
+producer = Producer(conf)
+
+def delivery_callback(err, msg):
+    if err:
+        print(f"Message delivery failed: {err}")
+    else:
+        print(f"Message delivered to {msg.topic()} [{msg.partition()}]")
+
+def publish_telemetry(topic, key, payload):
+    try:
+        producer.produce(
+            topic=topic,
+            key=key,
+            value=json.dumps(payload),
+            callback=delivery_callback
+        )
+        # Flush background buffer queues asynchronously
+        producer.poll(0)
+    except BufferError:
+        print("Local queue full. Blocking and waiting for flush...")
+        producer.flush()`
+          },
+          {
+            title: "Scenario B: RabbitMQ AMQP exchange and Quorum Queue integration",
+            expl: "For transactional message routing, RabbitMQ exchanges provide advanced routing logic. This script configures a RabbitMQ exchange, creates a high-durability Quorum Queue, and binds them together to handle multi-tenant tasks.",
+            diagram: `
++--------------------+
+| Task Publisher     |
++---------+----------+
+          |
+          v Publish payload with RoutingKey "tenant.payment"
++---------+----------+      Topic Exchange Routing              +-----------------------+
+| AMQP Topic Exchange| ---------------------------------------> | Quorum Queue          |
+| (Directs by keys)  |                                          | (Raft consensus AZs)  |
++--------------------+                                          +-----------------------+
+            `,
+            jsCode: `import amqp from "amqplib";
+
+async function setupRabbitMQQuorumQueue(url, exchangeName, queueName) {
+  const connection = await amqp.connect(url);
+  const channel = await connection.createChannel();
+  
+  try {
+    // Declare a Topic Exchange
+    await channel.assertExchange(exchangeName, "topic", { durable: true });
+    
+    // Declare a high-durability Quorum Queue utilizing Raft consensus
+    const q = await channel.assertQueue(queueName, {
+      durable: true,
+      arguments: { "x-queue-type": "quorum" } 
+    });
+
+    // Bind queue using routing keys
+    await channel.bindQueue(q.queue, exchangeName, "tenant.*");
+    console.log("RabbitMQ Quorum Queue configured and bound successfully.");
+  } catch (error) {
+    console.error("RabbitMQ setup failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import pika
+
+def setup_rabbitmq_quorum(url, exchange, queue):
+    connection = pika.BlockingConnection(pika.URLParameters(url))
+    channel = connection.channel()
+    
+    channel.exchange_declare(exchange=exchange, exchange_type='topic', durable=True)
+    
+    # Declare queue set to type=quorum for Raft-based high-availability replication
+    channel.queue_declare(
+        queue=queue,
+        durable=True,
+        arguments={'x-queue-type': 'quorum'}
+    )
+    
+    channel.queue_bind(queue=queue, exchange=exchange, routing_key='tenant.*')
+    print("Quorum Queue setup completed successfully.")
+    connection.close()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Netflix Streaming Loop",
+            question: "How do you detect and mitigate partition key skew and hot broker issues inside AWS MSK clusters?",
+            answer: `
+<p>High-volume pipelines can trigger partition key skew, overloading a single partition and broker while others sit idle:</p>
+<ol>
+  <li><strong>Detection:</strong> We monitor MSK JMX metrics like <code>BytesInPerSec</code> and <code>MessagesInPerSec</code> across individual partitions. We identify partitions showing disproportionately high traffic patterns.</li>
+  <li><strong>Partition Key Hashing:</strong> We refactor the partition key generation. If a key has uneven data distribution (e.g., a popular merchant ID like <code>MERCHANT#STRIPE</code>), we append a random salt prefix (e.g., <code>MERCHANT#STRIPE#1</code> through <code>MERCHANT#STRIPE#5</code>) to distribute the logs evenly across multiple partitions.</li>
+  <li><strong>Dynamic Partition Scaling:</strong> We scale the partition count on the target Kafka topic, triggering MSK partition rebalancing to distribute workloads evenly.</li>
+</ol>
+            `
+          },
+          {
+            badge: "LinkedIn Infrastructure Loop",
+            question: "Explain the Zero-Copy optimization mechanics used by MSK brokers under the hood. How does it improve network throughput?",
+            answer: `
+<p>Traditional database systems write page cache buffers back and forth through user-space space boundaries, generating bottleneck context-switches. MSK utilizes **Zero-Copy** optimizations:</p>
+<ul>
+  <li><strong>Context-switching waste:</strong> A traditional file transmission reads from disk into the OS page cache -> copies to user-space buffer -> copies back to OS socket buffer -> sends to network adapter. This involves 4 buffer copies and 4 context switches.</li>
+  <li><strong>Zero-Copy transfer:</strong> Kafka uses the Linux kernel <code>sendfile()</code> system call. This instructs the OS kernel to read data directly from the page cache into the network adapter buffer, bypassing user-space memory entirely. This reduces buffer copies to 2 and context switches to 2, maximizing disk-to-network pipeline efficiency.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid deploying RabbitMQ clusters on single EBS volumes. Always configure multi-AZ Quorum Queues to survive physical disk failures during active write transactions!"
+      },
+      {
+        id: 8,
+        title: "VPC & Cloud Networking",
+        level: "hard",
+        category: "Networking & Security",
+        def: "Amazon VPC (Virtual Private Cloud) is a software-defined networking service designed to isolate and secure infrastructure resources via subnets, route tables, and VPC endpoints.",
+        machinery: "VPC provides a logically isolated virtual network within AWS. Traffic routing inside a VPC is controlled by software-defined Route Tables. Public subnets contain a direct route to an Internet Gateway (IGW), whereas private subnets route outbound traffic through a NAT Gateway (which performs Source NAT to mask private IPs). VPC Endpoints provide secure, private connections to AWS services without exposing traffic to the public internet: **Gateway Endpoints** (available for S3 and DynamoDB) modify route tables directly, while **Interface Endpoints** (powered by AWS PrivateLink) allocate local Elastic Network Interfaces (ENIs) with private IP addresses in your subnets.",
+        scenarios: [
+          {
+            title: "Scenario A: Deploying a Multi-Tier Highly Available Private VPC Architecture",
+            expl: "We design a secure, multi-tier VPC structure spanning 2 Availability Zones. The architecture isolates databases from the internet while enabling private application subnets to access outbound resources via NAT Gateways.",
+            diagram: `
++--------------------------------------------------------------+
+| Amazon VPC: 10.0.0.0/16                                      |
+|                                                              |
+|   +------------------------------------------------------+   |
+|   | AZ 1 (us-east-1a)                                    |   |
+|   |   +----------------+  Public Route  +-------------+  |   |
+|   |   | Public Subnet  | -------------> | Internet    |  |   |
+|   |   | (10.0.1.0/24)  |                | Gateway     |  |   |
+|   |   +--------+-------+                +-------------+  |   |
+|   |            | Outbound NAT Route                      |   |
+|   |            v                                         |   |
+|   |   +----------------+                                 |   |
+|   |   | Private Subnet | (Internal App Servers)          |   |
+|   |   | (10.0.3.0/24)  |                                 |   |
+|   |   +--------+-------+                                 |   |
+|   |            | Database Route                          |   |
+|   |            v                                         |   |
+|   |   +----------------+                                 |   |
+|   |   | Database Subnet| (Strictly Isolated, No Internet)|   |
+|   |   | (10.0.5.0/24)  |                                 |   |
+|   |   +----------------+                                 |   |
+|   +------------------------------------------------------+   |
++--------------------------------------------------------------+
+            `,
+            jsCode: `# AWS CLI commands configuring highly isolated VPC topologies
+# 1. Create target VPC block
+aws ec2 create-vpc --cidr-block 10.0.0.0/16 --region us-east-1
+
+# 2. Deploy public and private subnets in AZ 1
+aws ec2 create-subnet --vpc-id vpc-123456 --cidr-block 10.0.1.0/24 --availability-zone us-east-1a
+aws ec2 create-subnet --vpc-id vpc-123456 --cidr-block 10.0.3.0/24 --availability-zone us-east-1a
+
+# 3. Create public Internet Gateway
+aws ec2 create-internet-gateway --region us-east-1
+aws ec2 attach-internet-gateway --vpc-id vpc-123456 --internet-gateway-id igw-9990`,
+            pyCode: `import boto3
+
+ec2_client = boto3.client('ec2', region_name='us-east-1')
+
+def deploy_isolated_vpc():
+    try:
+        # Create base isolated VPC block
+        vpc = ec2_client.create_vpc(CidrBlock='10.0.0.0/16')
+        vpc_id = vpc['Vpc']['VpcId']
+        
+        # Deploy dynamic Subnet groups
+        public_subnet = ec2_client.create_subnet(VpcId=vpc_id, CidrBlock='10.0.1.0/24', AvailabilityZone='us-east-1a')
+        private_subnet = ec2_client.create_subnet(VpcId=vpc_id, CidrBlock='10.0.3.0/24', AvailabilityZone='us-east-1a')
+        
+        print(f"VPC Deployed: {vpc_id} | Public Subnet: {public_subnet['Subnet']['SubnetId']}")
+        return vpc_id
+    except Exception as e:
+        print(f"Failed to provision network resources: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Zero-Egress VPC Interface Endpoints for KMS Security",
+            expl: "Security compliance policies prohibit critical encryption traffic from traversing the public internet. This script deploys a VPC Interface Endpoint (powered by AWS PrivateLink) inside our private subnets, enabling isolated, private access to AWS KMS.",
+            diagram: `
++--------------------------------------------------------------+
+| Amazon VPC (No Internet Access route)                        |
+|                                                              |
+|   +------------------------------------------------------+   |
+|   | Private Subnet                                       |   |
+|   |   +-------------------+                              |   |
+|   |   | App Server Node   |                              |   |
+|   |   +---------+---------+                              |   |
+|   |             | Private KMS Call                       |   |
+|   |             v (Local Endpoint Interface IP)          |   |
+|   |   +-------------------+                              |   |
+|   |   | KMS VPC Endpoint  | (Allocated private ENI IP)   |   |
+|   |   +---------+---------+                              |   |
+|   +-------------+----------------------------------------+   |
+|                 |                                            |
++-----------------+--------------------------------------------+
+                  | Traverse AWS Internal Network
+                  v
+          +---------------+
+          | AWS KMS       | (Private Encryption Core)
+          +---------------+
+            `,
+            jsCode: `import { EC2Client, CreateVpcEndpointCommand } from "@aws-sdk/client-ec2";
+
+const ec2Client = new EC2Client({ region: "us-east-1" });
+
+async function createSecureKmsEndpoint(vpcId, subnetIds, securityGroupId) {
+  const command = new CreateVpcEndpointCommand({
+    VpcId: vpcId,
+    // Define target service endpoint (KMS)
+    ServiceName: "com.amazonaws.us-east-1.kms", 
+    VpcEndpointType: "Interface",
+    SubnetIds: subnetIds,
+    SecurityGroupIds: [securityGroupId],
+    PrivateDnsEnabled: true // Resolves KMS calls natively to private endpoint IPs
+  });
+
+  try {
+    const data = await ec2Client.send(command);
+    console.log("Secure Interface Endpoint Deployed successfully:", data.VpcEndpoint.VpcEndpointId);
+    return data.VpcEndpoint;
+  } catch (error) {
+    console.error("VPC Endpoint deployment failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+ec2_client = boto3.client('ec2', region_name='us-east-1')
+
+def create_secure_kms_endpoint(vpc_id, subnet_ids, security_group_id):
+    try:
+        response = ec2_client.create_vpc_endpoint(
+            VpcId=vpc_id,
+            ServiceName='com.amazonaws.us-east-1.kms',
+            VpcEndpointType='Interface',
+            SubnetIds=subnet_ids,
+            SecurityGroupIds=[security_group_id],
+            PrivateDnsEnabled=True
+        )
+        return response['VpcEndpoint']
+    except Exception as e:
+        print(f"Error provisioning Interface endpoint: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Zoom Telemetry Loop",
+            question: "How do you implement low-latency global geolocation routing and active-passive DNS failover architectures using AWS Route 53?",
+            answer: `
+<p>To support global real-time video communications, Zoom relies on low-latency global routing and DNS failover:</p>
+<ol>
+  <li><strong>Geoproximity Routing:</strong> We use Route 53 **Geoproximity Routing Policies**. This routes traffic to the nearest geographic AWS region based on the user's GPS coordinates or IP block location.</li>
+  <li><strong>Latency Routing Policies:</strong> We supplement this with Latency Routing Policies, measuring round-trip network performance to route users dynamically to the region delivering the lowest latency.</li>
+  <li><strong>Active-Passive Failover:</strong> To ensure high availability, we deploy active-passive failover:
+    <ul>
+      <li><strong>Health Checks:</strong> We configure Route 53 health checks on primary endpoint APIs, monitoring response metrics continuously.</li>
+      <li><strong>Secondary Routing:</strong> If the primary region goes offline, Route 53 automatically updates DNS records, redirecting global traffic to passive disaster recovery sites within 10-20 seconds.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "Salesforce Cloud Security",
+            question: "Explain the network architecture of AWS PrivateLink. How do you securely expose internal APIs to third-party AWS accounts without public internet access or VPC peering?",
+            answer: `
+<p>AWS PrivateLink enables highly secure, unidirectional service exposure across separate AWS accounts, avoiding public IP configurations or complex VPC Peering routing tables:</p>
+<ul>
+  <li><strong>Service Provider Architecture:</strong> We configure a Network Load Balancer (NLB) in the provider VPC, routing traffic to our backend application pods. We expose this configuration using an **Endpoint Service**.</li>
+  <li><strong>Service Consumer Integration:</strong> The consumer whitelist requests a connection to our Endpoint Service from their own AWS account. Once approved, local ENIs with private IP addresses are dynamically provisioned in their private subnets.</li>
+  <li><strong>Security Isolation:</strong> All traffic traverses AWS's internal private backplane. PrivateLink prevents IP overlaps, avoids broad-network exposures common in VPC peering, and ensures consumer networks cannot route traffic to other zones in the provider's VPC.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid utilizing VPC NAT Gateways for high-volume S3 data transfers. NAT Gateways charge per-gigabyte processing fees. Deploy S3 Gateway Endpoints (which are free) to bypass NAT translation completely!"
+      },
+      {
+        id: 9,
+        title: "IAM Security & KMS Cryptography",
+        level: "expert",
+        category: "Networking & Security",
+        def: "AWS IAM manages permissions and authorization, while KMS (Key Management Service) orchestrates envelope encryption using FIPS 140-2 Level 3 hardware security modules.",
+        machinery: "AWS IAM evaluates authorization policies deterministically using a strict evaluation engine: **Default Deny -> Explicit Deny -> Explicit Allow -> Default Deny**. Authorization structures can incorporate permissions boundaries and multi-account Service Control Policies (SCPs). KMS handles secure encryption using **Envelope Encryption**. Under this pattern, the KMS master Customer Managed Key (CMK) never leaves the KMS service. Instead, KMS generates a raw **Data Key (DK)**. The client uses the DK locally to encrypt large data payloads, immediately erases the raw DK from memory, and stores the encrypted payload alongside the encrypted Data Key (CDK).",
+        scenarios: [
+          {
+            title: "Scenario A: Cross-Account Role Assumption (STS) using Boto3",
+            expl: "Storing hardcoded access keys on servers is a critical security vulnerability. We authenticate cross-account operations securely using temporary, short-lived security tokens via the AWS Security Token Service (STS).",
+            diagram: `
++-----------------------------------+
+| Account A (Development Host)      |
+|                                   |
+|   +---------------------------+   |
+|   | App Server Node           |   |
+|   +-------------+-------------+   |
+|                 |                 |
+|                 | 1. Request Role Assumption (STS)
+|                 v                 |
++-----------------+-----------------+
+                  |
+                  v [Cross Account Boundary]
++-----------------+--------------------------------------------+
+| Account B (Production S3 Core)                               |
+|                                                              |
+|   +---------------------------+                              |
+|   | S3 Bucket Resource        |                              |
+|   +---------------------------+                              |
++--------------------------------------------------------------+
+            `,
+            jsCode: `import { STSClient, AssumeRoleCommand } from "@aws-sdk/client-sts";
+import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+
+const stsClient = new STSClient({ region: "us-east-1" });
+
+async function assumeCrossAccountAndList(targetRoleArn, targetBucket) {
+  const assumeRoleCommand = new AssumeRoleCommand({
+    RoleArn: targetRoleArn,
+    RoleSessionName: "TemporaryCrossAccountSession",
+    DurationSeconds: 900 // 15 Minute expiration
+  });
+
+  try {
+    const stsResponse = await stsClient.send(assumeRoleCommand);
+    const credentials = stsResponse.Credentials;
+    
+    // Instantiate new S3 Client using temporary, assumed security keys
+    const crossAccountS3 = new S3Client({
+      region: "us-east-1",
+      credentials: {
+        accessKeyId: credentials.AccessKeyId,
+        secretAccessKey: credentials.SecretAccessKey,
+        sessionToken: credentials.SessionToken
+      }
+    });
+
+    const s3Command = new ListObjectsV2Command({ Bucket: targetBucket });
+    const s3Data = await crossAccountS3.send(s3Command);
+    console.log("Listing objects from secure assumed target bucket:", s3Data.Contents);
+    return s3Data.Contents;
+  } catch (error) {
+    console.error("Cross-account STS authentication failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+
+sts_client = boto3.client('sts', region_name='us-east-1')
+
+def assume_cross_account_and_list(target_role_arn, target_bucket):
+    try:
+        # Request temporary assumed session tokens
+        assumed_role = sts_client.assume_role(
+            RoleArn=target_role_arn,
+            RoleSessionName='TemporaryCrossAccountSession',
+            DurationSeconds=900
+        )
+        
+        credentials = assumed_role['Credentials']
+        
+        # Instantiate localized S3 Client utilizing temporary sessions
+        s3_resource = boto3.client(
+            's3',
+            aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken']
+        )
+        
+        response = s3_resource.list_objects_v2(Bucket=target_bucket)
+        return response.get('Contents', [])
+    except Exception as e:
+        print(f"Failed to authenticate cross-account session: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Core KMS Envelope Encryption for Secure Local Audits",
+            expl: "We implement local **Envelope Encryption** to secure massive database audit logs. We request a Data Key from AWS KMS, encrypt the audit payload locally using AES-256-GCM, discard the plaintext key, and save the ciphertext alongside the encrypted data key.",
+            diagram: `
++--------------------+      1. GenerateDataKey       +-------------+
+| App Server Node    | ----------------------------> | AWS KMS     |
+| (Local Mem Zone)   | <---------------------------- | Engine      |
++---------+----------+      2. Plaintext DK &        +-------------+
+          |            Encrypted DK (CDK)                           
+          |                                                         
+          | 3. AES-256-GCM Cryptographic Local Write                 
+          v                                                         
++---------+----------+                                              
+| Local Log Storage  | [Stores Encrypted Payload + Encrypted CDK]   
++--------------------+                                              
+            `,
+            jsCode: `import { KMSClient, GenerateDataKeyCommand } from "@aws-sdk/client-kms";
+import crypto from "crypto";
+
+const kmsClient = new KMSClient({ region: "us-east-1" });
+
+async function encryptAuditPayload(kmsKeyId, rawPayload) {
+  const command = new GenerateDataKeyCommand({
+    KeyId: kmsKeyId,
+    KeySpec: "AES_256"
+  });
+
+  try {
+    const data = await kmsClient.send(command);
+    
+    const plaintextKey = data.Plaintext; // Buffer containing raw key
+    const encryptedKey = data.CiphertextBlob; // Encrypted Data Key (CDK)
+    
+    // Encrypt payload locally using AES-GCM
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv("aes-256-gcm", plaintextKey, iv);
+    
+    let encryptedData = cipher.update(rawPayload, "utf8", "hex");
+    encryptedData += cipher.final("hex");
+    const authTag = cipher.getAuthTag().toString("hex");
+
+    // Zero-out raw plaintext key in memory
+    plaintextKey.fill(0);
+    
+    return {
+      ciphertext: encryptedData,
+      iv: iv.toString("hex"),
+      authTag: authTag,
+      encryptedKey: Buffer.from(encryptedKey).toString("base64")
+    };
+  } catch (error) {
+    console.error("Local envelope encryption failed:", error);
+    throw error;
+  }
+}`,
+            pyCode: `import boto3
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+import os
+import base64
+
+kms_client = boto3.client('kms', region_name='us-east-1')
+
+def encrypt_audit_payload(kms_key_id, raw_payload):
+    try:
+        response = kms_client.generate_data_key(
+            KeyId=kms_key_id,
+            KeySpec='AES_256'
+        )
+        
+        plaintext_key = response['Plaintext']
+        encrypted_key = response['CiphertextBlob']
+        
+        # Local AES-GCM encryption
+        aesgcm = AESGCM(plaintext_key)
+        nonce = os.urandom(12)
+        ciphertext = aesgcm.encrypt(nonce, raw_payload.encode('utf-8'), None)
+        
+        # Zero out local plaintext key variable in memory
+        del plaintext_key
+        
+        return {
+            'ciphertext': base64.b64encode(ciphertext).decode('utf-8'),
+            'nonce': base64.b64encode(nonce).decode('utf-8'),
+            'encryptedKey': base64.b64encode(encrypted_key).decode('utf-8')
+        }
+    except Exception as e:
+        print(f"Error performing envelope encryption: {e}")
+        raise e`
+          }
+        ],
+        questions: [
+          {
+            badge: "Amazon Cryptographic Security Loop",
+            question: "How does the KMS envelope encryption system guarantee that data remains secure even if the storage layer is compromised?",
+            answer: `
+<p>KMS envelope encryption provides absolute data security at rest by ensuring that no single security breach can compromise your database:</p>
+<ol>
+  <li><strong>Decoupled Key Storage:</strong> Payloads are encrypted with unique **Data Keys (DK)**. The master Customer Managed Key (CMK) never leaves the highly secure HSM boundaries of AWS KMS. If a database is hacked and the raw storage layer is leaked, the attacker only has access to the encrypted payloads and the encrypted data keys (CDK).</li>
+  <li><strong>No Key Access:</strong> Without permissions to invoke the KMS Decrypt API for that specific CMK, the attacker cannot decrypt the CDK to recover the raw data key, rendering the stolen database completely useless.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Apple Identity Architect Loop",
+            question: "How do you construct a dynamic credentials rotation pipeline inside AWS Secrets Manager, and how are database target configurations updated without downtime?",
+            answer: `
+<p>To secure access tokens, Apple implements dynamic credentials rotation pipelines using **AWS Secrets Manager** and serverless triggers:</p>
+<ul>
+  <li><strong>Multi-Step Rotation:</strong> Secrets Manager coordinates rotation via a specialized Lambda function. This function executes a multi-step sequence:
+    <ol>
+      <li><code>createSecret</code>: Generates a new random database password and saves it as a pending version (<code>AWSPENDING</code>).</li>
+      <li><code>setSecret</code>: Connects to the target database and updates the database engine with the new password.</li>
+      <li><code>testSecret</code>: Tests the pending credentials to verify the connection succeeds.</li>
+      <li><code>finishSecret</code>: Labels the pending password as active (<code>AWSCURRENT</code>) and archives the old password (<code>AWSPREVIOUS</code>).</li>
+    </ol>
+  </li>
+  <li><strong>Zero Downtime:</strong> Database connection pools should handle authentication failures gracefully by retrying connection requests. The application dynamically fetches the latest credentials from Secrets Manager upon connection failure, avoiding downtime.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid referencing root access keys in application codes. Utilize AWS IAM Roles and STS assumed profiles for all runtime tasks to eliminate key leakage risks!"
+      },
+      {
+        id: 10,
+        title: "CloudFront Edge Routing & WAF",
+        level: "hard",
+        category: "Storage & CDN",
+        def: "Amazon CloudFront is a globally distributed CDN (Content Delivery Network) designed to cache static and dynamic web content at edge locations, using WAF (Web Application Firewall) to mitigate DDoS attacks.",
+        machinery: "CloudFront distributes traffic globally using Anycast routing, directing users to the nearest Edge Location. CloudFront leverages **Regional Edge Caches** to buffer cache hits, preventing cache misses from hammering the origin. Developers configure **Cache Policies** (defining cache keys based on headers, cookies, or query strings) and **Origin Request Policies** to control header forwarding. Edge compute logic is implemented using **Lambda@Edge** (running on Regional Edge nodes with full Node.js runtimes) or **CloudFront Functions** (blazing-fast JavaScript execution at edge nodes, ideal for header manipulation). WAF integrates at the edge to block malicious traffic before it reaches your backend origins.",
+        scenarios: [
+          {
+            title: "Scenario A: Deploying CloudFront Dynamic Routing for Hybrid Applications",
+            expl: "Modern applications require low-latency static file delivery alongside dynamic API routing. We deploy a CloudFront distribution that routes static asset traffic (<code>/static/*</code>) to an S3 bucket and API traffic (<code>/api/*</code>) directly to an Application Load Balancer.",
+            diagram: `
+                              +-------------------------+
+                              | Client Browser Request  |
+                              +------------+------------+
+                                           |
+                                           v
+                              +------------+------------+
+                              | CloudFront CDN Edge     |
+                              +------------+------------+
+                                           |
+                     +---------------------+---------------------+
+                     | Path = "/api/*"                           | Path = "/static/*"
+                     v                                           v
+        +------------+------------+                 +------------+------------+
+        | Application Load        |                 | Amazon S3 Storage       |
+        | Balancer (Dynamic API)  |                 | Bucket (Static Assets)  |
+        +-------------------------+                 +-------------------------+
+            `,
+            jsCode: `# AWS CLI commands configuring complex cache behaviors and paths
+# 1. Update CloudFront distribution configuration with dynamic origins
+aws cloudfront create-distribution --origin-domain-name netflix-assets.s3.amazonaws.com --default-root-object index.html
+
+# 2. Add API behavior routing to ALB origin
+aws cloudfront update-distribution --id E2W1234567 --default-cache-behavior TargetOriginId=ALB-Origin,ViewerProtocolPolicy=redirect-to-https`,
+            pyCode: `import boto3
+
+cf_client = boto3.client('cloudfront', region_name='us-east-1')
+
+def configure_edge_routing(distribution_id, config_payload):
+    try:
+        # Retrieve current configuration and ETag
+        dist = cf_client.get_distribution_config(Id=distribution_id)
+        config = dist['DistributionConfig']
+        etag = dist['ETag']
+        
+        # Modify default cache behavior configurations
+        config['DefaultCacheBehavior']['TargetOriginId'] = 'S3-Asset-Origin'
+        
+        # Update distribution settings with matching validation ETags
+        response = cf_client.update_distribution(
+            DistributionConfig=config,
+            Id=distribution_id,
+            IfMatch=etag
+        )
+        return response['Distribution']
+    except Exception as e:
+        print(f"Failed to update edge routing policies: {e}")
+        raise e`
+          },
+          {
+            title: "Scenario B: Dynamic Image Optimization and Format Rewrites with Lambda@Edge",
+            expl: "Serving heavy PNG or JPEG images to modern browsers wastes bandwidth. We implement a **Lambda@Edge** function triggered on **Origin Request** events. The function inspects the browser's <code>Accept</code> headers and dynamically rewrites request paths to serve highly compressed WebP files if supported.",
+            diagram: `
++-------------+      1. HTTP GET /image.png        +------------+
+| Client      | ---------------------------------> | CloudFront |
+| Browser     |                                    | Edge       |
++-------------+                                    +-----+------+
+                                                         |
+                                                         | 2. Origin Request Trigger
+                                                         v
++-------------+      3. Rewrite /image.webp        +-----+------+
+| S3 Storage  | <--------------------------------- | Lambda@Edge|
+| Bucket      |      (WebP image sent back)        | Node.js    |
++-------------+                                    +------------+
+            `,
+            jsCode: `// Lambda@Edge Origin Request Handler (Node.js)
+export const handler = async (event) => {
+  const request = event.Records[0].cf.request;
+  const headers = request.headers;
+
+  // Inspect client HTTP Accept headers for WebP support
+  if (headers.accept) {
+    const acceptHeader = headers.accept[0].value;
+    
+    if (acceptHeader.includes("image/webp")) {
+      const uri = request.uri;
+      console.log(\`Rewriting original path \${uri} to serve optimized WebP image.\`);
+      
+      // Rewrite the file extension dynamically before requesting from origin S3
+      request.uri = uri.replace(/\\.(png|jpg|jpeg)$/i, ".webp");
+    }
+  }
+
+  return request;
+};`,
+            pyCode: `# Python representation of dynamic image routing logic at the edge
+def lambda_handler(event, context):
+    request = event['Records'][0]['cf']['request']
+    headers = request['headers']
+    
+    if 'accept' in headers:
+        accept_val = headers['accept'][0]['value']
+        if 'image/webp' in accept_val:
+            uri = request['uri']
+            # Dynamic suffix mapping
+            if uri.endswith('.png') or uri.endswith('.jpg'):
+                request['uri'] = uri.rsplit('.', 1)[0] + '.webp'
+                
+    return request`
+          }
+        ],
+        questions: [
+          {
+            badge: "Netflix Performance Loop",
+            question: "How do you implement global origin failover and custom cache headers inside CloudFront distributions to survive API backend outages?",
+            answer: `
+<p>To guarantee uninterrupted global streaming, we configure **Origin Groups** and robust cache behavior structures inside CloudFront:</p>
+<ol>
+  <li><strong>Origin Groups for Failover:</strong> We define an Origin Group containing a primary origin (e.g., US-East ALB) and a secondary origin (e.g., EU-West ALB). If the primary origin returns <code>500, 502, 503</code> error codes, CloudFront automatically transparently retries the request against the secondary origin.</li>
+  <li><strong>Stale-While-Revalidate Headers:</strong> We configure Cache-Control headers (such as <code>stale-while-revalidate=60</code>). This instructs edge nodes to serve stale cached content immediately during backend outages, while asynchronously validating and updating resources in the background.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Ticketmaster Ticketing Loops",
+            question: "How does AWS WAF protect your origin application servers from high-volume credential stuffing and brute-force bot attacks at the CDN edge?",
+            answer: `
+<p>During massive ticket drops, we secure backend endpoints using **AWS WAF** integrated directly with our CloudFront edge locations:</p>
+<ul>
+  <li><strong>Edge Rate Limiting:</strong> We deploy WAF **Rate-Based Rules** that monitor client IPs over a sliding 5-minute window. If an IP exceeds 100 requests, WAF immediately blocks further traffic from that IP at the edge location, protecting our application servers from resource starvation.</li>
+  <li><strong>Bot Control Integration:</strong> We enable **WAF Bot Control** to analyze request signatures, TLS handshakes, and client behaviors in real-time. This blocks known brute-force bots and scrapers at edge locations, preventing credential stuffing attacks from reaching origin authentication APIs.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Keep CloudFront edge function code blocks small. CloudFront Functions execute within a 1ms CPU budget and cap file sizes at 10KB, making them ideal for rapid URL rewrites and header manipulation!"
+      }
+    ];
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function filterQ() {
+      const val = document.querySelector('.search').value.toLowerCase();
+      const items = document.querySelectorAll('.q-item');
+      items.forEach(item => {
+        const title = item.querySelector('.q-title').textContent.toLowerCase();
+        const cat = item.dataset.category.toLowerCase();
+        if (title.includes(val) || cat.includes(val)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function updateProgress() {
+      const total = topics.length;
+      const completed = completedTopics.length;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressPercent').textContent = pct + '%';
+      
+      // Update sidebar items status classes
+      document.querySelectorAll('.q-item').forEach(item => {
+        const id = parseInt(item.dataset.id);
+        if (completedTopics.includes(id)) {
+          item.classList.add('completed');
+        } else {
+          item.classList.remove('completed');
+        }
+      });
+    }
+
+    function toggleTopicCompletion(id) {
+      id = parseInt(id);
+      if (completedTopics.includes(id)) {
+        completedTopics = completedTopics.filter(t => t !== id);
+      } else {
+        completedTopics.push(id);
+      }
+      localStorage.setItem('completed_aws_topics', JSON.stringify(completedTopics));
+      updateProgress();
+    }
+
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.code-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      // Refresh current active view
+      const activeItem = document.querySelector('.q-item.active');
+      if (activeItem) {
+        loadTopic(activeItem.dataset.id);
+      }
+    }
+
+    function toggleScenario(index) {
+      const container = document.querySelectorAll('.scenario-container')[index];
+      container.classList.toggle('open');
+    }
+
+    function loadTopic(id) {
+      id = parseInt(id);
+      const topic = topics.find(t => t.id === id);
+      if (!topic) return;
+
+      // Update sidebar active status
+      document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.id) === id);
+      });
+
+      document.getElementById('welcomeScreen').style.display = 'none';
+      const ansCard = document.getElementById('ansCard');
+      ansCard.style.display = 'block';
+
+      const isCompleted = completedTopics.includes(id);
+
+      // Render scenarios
+      let scenariosHTML = '';
+      topic.scenarios.forEach((sc, idx) => {
+        const codeText = currentLang === 'py' ? sc.pyCode : sc.jsCode;
+        const codeLang = currentLang === 'py' ? 'python' : 'javascript';
+        
+        scenariosHTML += `
+          <div class="scenario-container">
+            <div class="scenario-header" onclick="toggleScenario(${idx})">
+              <div class="scenario-title">
+                <span>Scenario ${idx + 1}</span> ${sc.title}
+              </div>
+              <div class="scenario-arrow">▼</div>
+            </div>
+            <div class="scenario-body">
+              <div class="scenario-expl">${sc.expl}</div>
+              <div class="visual-wrap">${sc.diagram.trim()}</div>
+              
+              <div class="code-wrap">
+                <div class="code-header">
+                  <div class="code-lang">${codeLang}</div>
+                </div>
+                <div class="code-body">${highlight(codeText.trim(), codeLang)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render interview questions
+      let questionsHTML = '';
+      topic.questions.forEach((q, idx) => {
+        questionsHTML += `
+          <div class="qa-box">
+            <div class="qa-badge">${q.badge}</div>
+            <h4 class="qa-question">Q: ${q.question}</h4>
+            <div class="qa-answer">${q.answer}</div>
+          </div>
+        `;
+      });
+
+      ansCard.innerHTML = `
+        <div class="ans-header">
+          <div class="header-info">
+            <span class="ans-level level-${topic.level}">${topic.level}</span>
+            <h2 class="ans-title">${topic.title}</h2>
+            <div class="ans-def">${topic.def}</div>
+          </div>
+          <div class="completion-action" onclick="toggleTopicCompletion(${topic.id})">
+            <input type="checkbox" id="chkComplete" ${isCompleted ? 'checked' : ''} onchange="event.stopPropagation(); toggleTopicCompletion(${topic.id})">
+            <label for="chkComplete">Mark as Completed</label>
+          </div>
+        </div>
+
+        <div class="sec-title">Internal Machinery & Distributed Design</div>
+        <div class="expl-list">
+          <div class="expl-item">${topic.machinery}</div>
+        </div>
+
+        <div class="code-control">
+          <div class="sec-title" style="margin: 0;">Enterprise Scenarios & Code Integration</div>
+          <div class="code-tabs">
+            <button class="code-tab ${currentLang === 'py' ? 'active' : ''}" data-lang="py" onclick="switchLang('py')">Python (Boto3)</button>
+            <button class="code-tab ${currentLang === 'js' ? 'active' : ''}" data-lang="js" onclick="switchLang('js')">Node.js (SDK v3)</button>
+          </div>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          ${scenariosHTML}
+        </div>
+
+        <div class="sec-title">MNC & FAANG Interview Questions</div>
+        <div class="qa-group">
+          ${questionsHTML}
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-text">
+            <strong>EXPERT DESIGN RECOMMENDATION:</strong> ${topic.tip}
+          </div>
+        </div>
+      `;
+
+      // Auto-open first scenario
+      setTimeout(() => {
+        const firstScenario = document.querySelector('.scenario-container');
+        if (firstScenario) firstScenario.classList.add('open');
+      }, 50);
+
+      // On mobile, close sidebar after selection
+      if (window.innerWidth <= 960) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    function init() {
+      const qList = document.getElementById('qList');
+      let currentCategory = '';
+      let html = '';
+
+      topics.forEach(t => {
+        if (t.category !== currentCategory) {
+          if (currentCategory !== '') {
+            html += '</div>'; // close cat-group
+          }
+          currentCategory = t.category;
+          html += `
+            <div class="cat-group">
+              <div class="cat-title">${currentCategory}</div>
+          `;
+        }
+
+        const isCompleted = completedTopics.includes(t.id);
+        const activeClass = '';
+
+        html += `
+          <div class="q-item ${isCompleted ? 'completed' : ''}" data-id="${t.id}" data-category="${t.category}" onclick="loadTopic(${t.id})">
+            <div class="q-title-wrap">
+              <div class="q-title">${t.title}</div>
+              <div class="q-meta">
+                <span class="level-dot" style="background-color: var(--${t.level})"></span>
+                <span class="level-text">${t.level}</span>
+              </div>
+            </div>
+            <span class="status-check">✓</span>
+          </div>
+        `;
+      });
+
+      if (currentCategory !== '') {
+        html += '</div>';
+      }
+
+      qList.innerHTML = html;
+      updateProgress();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

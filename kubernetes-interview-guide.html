@@ -1,0 +1,3258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubernetes Production & Platform Architect Interview Guide — FAANG & MNC Mastery</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070913;
+      --card: #0e111e;
+      --border: #1f263e;
+      --accent: #326ce5;
+      --accent-light: #60a5fa;
+      --accent-glow: rgba(50, 108, 229, 0.15);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --code-bg: #030408;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #8b5cf6;
+      
+      --basic: #10b981;
+      --medium: #f59e0b;
+      --hard: #ef4444;
+      --expert: #8b5cf6;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ── SCROLLBARS ── */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo span {
+      color: var(--text-dim);
+      font-weight: 400;
+      font-size: 0.85rem;
+      border-left: 1px solid var(--border);
+      padding-left: 0.75rem;
+    }
+    .logo-img {
+      font-size: 1.4rem;
+    }
+    .back-hub {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .back-hub:hover {
+      background: var(--border);
+      color: var(--accent-light);
+      border-color: var(--accent-light);
+      transform: translateY(-1px);
+    }
+
+    /* ── LAYOUT ── */
+    .layout {
+      display: flex;
+      height: calc(100vh - 57px);
+    }
+    
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 380px;
+      background: var(--card);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .sb-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .progress-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .progress-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .progress-percent {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+    .progress-bar-bg {
+      background: #181c2e;
+      height: 6px;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: linear-gradient(to right, var(--accent), var(--accent-light));
+      width: 0%;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .search-wrapper {
+      position: relative;
+    }
+    .search {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.7rem 1rem;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .search:focus {
+      border-color: var(--accent-light);
+      box-shadow: 0 0 10px var(--accent-glow);
+    }
+    .q-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    .cat-group {
+      margin-bottom: 2rem;
+    }
+    .cat-title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      padding-left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .cat-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+    }
+    .q-item {
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.01);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .q-item:hover {
+      background: rgba(50, 108, 229, 0.04);
+      border-color: var(--border);
+      transform: translateX(4px);
+    }
+    .q-item.active {
+      background: rgba(50, 108, 229, 0.12);
+      border-color: var(--accent);
+      box-shadow: inset 3px 0 0 var(--accent-light);
+    }
+    .q-title-wrap {
+      flex: 1;
+      padding-right: 0.5rem;
+    }
+    .q-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      line-height: 1.4;
+      color: var(--text-main);
+    }
+    .q-meta {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .level-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .level-text {
+      font-size: 0.62rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .status-check {
+      font-size: 0.9rem;
+      color: var(--success);
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+    .q-item.completed .status-check {
+      opacity: 1;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2.5rem;
+      background: radial-gradient(circle at top right, rgba(50, 108, 229, 0.04), transparent 60%);
+      position: relative;
+    }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      text-align: center;
+      padding: 10vh 1rem 5vh;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .welcome h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(to right, #fff, var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .welcome p {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+    .grid-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .summary-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: left;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    }
+    .summary-card h3 {
+      font-size: 0.8rem;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .summary-card p {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    /* ── ANSWER CARD ── */
+    .ans-card {
+      max-width: 1000px;
+      margin: 0 auto;
+      animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ans-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    .header-info {
+      flex: 1;
+    }
+    .completion-action {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s;
+    }
+    .completion-action:hover {
+      border-color: var(--accent);
+      background: rgba(50, 108, 229, 0.03);
+    }
+    .completion-action input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .completion-action label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .ans-level {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+    .level-medium {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--medium);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .level-hard {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--hard);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .level-expert {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--expert);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .ans-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .ans-def {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    .sec-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-light);
+      margin: 3.5rem 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .sec-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .expl-list {
+      list-style: none;
+      margin-bottom: 2.5rem;
+    }
+    .expl-item {
+      position: relative;
+      padding-left: 1.8rem;
+      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .expl-item::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-light);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .expl-item strong {
+      color: var(--text-main);
+    }
+
+    /* ── SCENARIOS ACCORDION ── */
+    .scenario-container {
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card);
+    }
+    .scenario-header {
+      padding: 1.25rem 1.5rem;
+      background: rgba(255,255,255,0.01);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    .scenario-header:hover {
+      background: rgba(50, 108, 229, 0.02);
+    }
+    .scenario-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .scenario-title span {
+      background: rgba(50, 108, 229, 0.1);
+      color: var(--accent-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .scenario-arrow {
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+    .scenario-container.open .scenario-arrow {
+      transform: rotate(180deg);
+    }
+    .scenario-body {
+      display: none;
+      padding: 1.5rem;
+      border-top: 1px solid var(--border);
+      background: #090c17;
+    }
+    .scenario-container.open .scenario-body {
+      display: block;
+    }
+    .scenario-expl {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+
+    /* ── DUAL CODE TABS ── */
+    .code-control {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      padding: 4px;
+      border-radius: 10px;
+    }
+    .code-tab {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.2s;
+    }
+    .code-tab:hover {
+      color: #fff;
+    }
+    .code-tab.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(50, 108, 229, 0.25);
+    }
+
+    .code-wrap {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .code-header {
+      padding: 0.9rem 1.25rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .code-lang {
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent-light);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: #e2e8f0;
+      white-space: pre;
+    }
+
+    /* ── CODE SYNTAX HIGHLIGHTING (CSS classes) ── */
+    .kw { color: #60a5fa; font-weight: 600; } /* keyword */
+    .fn { color: #f59e0b; } /* function */
+    .str { color: #10b981; } /* string */
+    .num { color: #ec4899; } /* number */
+    .com { color: #64748b; font-style: italic; } /* comment */
+    .op { color: #818cf8; } /* operator */
+    .cls { color: #a855f7; font-weight: bold; } /* class */
+
+    /* ── VISUAL WRAPPER (ASCII DIAGRAMS) ── */
+    .visual-wrap {
+      background: #030408;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.4;
+      color: var(--accent-light);
+      overflow-x: auto;
+      white-space: pre;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--accent);
+    }
+
+    /* ── INTERVIEW QUESTIONS SECTION ── */
+    .qa-group {
+      margin-bottom: 2.5rem;
+    }
+    .qa-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      transition: all 0.2s;
+    }
+    .qa-box:hover {
+      border-color: rgba(50, 108, 229, 0.3);
+      transform: translateY(-2px);
+    }
+    .qa-badge {
+      display: inline-block;
+      background: rgba(50, 108, 229, 0.1);
+      color: var(--accent-light);
+      border: 1px solid rgba(50, 108, 229, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+    .qa-question {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+      line-height: 1.4;
+    }
+    .qa-answer {
+      color: var(--text-dim);
+      font-size: 0.98rem;
+      line-height: 1.7;
+    }
+    .qa-answer p {
+      margin-bottom: 1rem;
+    }
+    .qa-answer p:last-child {
+      margin-bottom: 0;
+    }
+    .qa-answer ul, .qa-answer ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .qa-answer li {
+      margin-bottom: 0.5rem;
+    }
+    .qa-answer strong {
+      color: var(--text-main);
+    }
+    .qa-answer code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: rgba(255,255,255,0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--accent-light);
+    }
+
+    /* ── EXPERT TIP BOX ── */
+    .tip-box {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(50, 108, 229, 0.05));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    .tip-text {
+      color: var(--text-main);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    .tip-text strong {
+      color: var(--accent-light);
+    }
+
+    /* ── BURGER MENU FOR MOBILE ── */
+    .burger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-main);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* ── RESPONSIVE DESIGN ── */
+    @media (max-width: 960px) {
+      .burger { display: block; }
+      .sidebar {
+        position: absolute;
+        left: -380px;
+        top: 57px;
+        height: calc(100vh - 57px);
+        z-index: 100;
+      }
+      .sidebar.open {
+        left: 0;
+      }
+      .main {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── TOPBAR ── -->
+  <div class="topbar">
+    <div class="logo">
+      <span class="logo-img">☸️</span>
+      KUBERNETES PLATFORM ARCHITECT
+      <span>FAANG & MNC Mastery Loop</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <a href="index.html" class="back-hub">← Mastery Hub</a>
+      <button class="burger" onclick="toggleSidebar()">☰</button>
+    </div>
+  </div>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="layout">
+    
+    <!-- ── LEFT SIDEBAR ── -->
+    <div class="sidebar" id="sidebar">
+      <div class="sb-header">
+        <div class="progress-container">
+          <div class="progress-header">
+            <span class="progress-title">Your Progress</span>
+            <span class="progress-percent" id="progressPercent">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="search-wrapper">
+          <input type="text" class="search" placeholder="Filter topics..." onkeyup="filterQ()">
+        </div>
+      </div>
+      <div class="q-list" id="qList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- ── RIGHT CONTENT PANE ── -->
+    <div class="main">
+      
+      <!-- WELCOME STATE -->
+      <div id="welcomeScreen" class="welcome">
+        <h1>Kubernetes Platform &<br>Cloud Architect Loop Guide</h1>
+        <p>A comprehensive pedagogical guide designed to help senior software architects and platform engineers pass extreme Kubernetes platform interview loops at Tier-1 MNCs and FAANG. Select a topic on the left to start.</p>
+        
+        <div class="grid-summary">
+          <div class="summary-card">
+            <h3>Under The Hood</h3>
+            <p>Control Plane machinery, etcd Raft, PLEg sync loops</p>
+          </div>
+          <div class="summary-card">
+            <h3>CNI, Storage & Scaling</h3>
+            <p>eBPF packet routing, CSI mount lifecycles, Karpenter dynamic consolidation</p>
+          </div>
+          <div class="summary-card">
+            <h3>Extreme Security</h3>
+            <p>RBAC least-privilege, dropped Linux capabilities, Restricted namespaces</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACTIVE CONTENT CARD -->
+      <div id="ansCard" class="ans-card" style="display: none;">
+        <!-- Rendered dynamically on sidebar click -->
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // Selected language state
+    let currentLang = 'py';
+    let completedTopics = JSON.parse(localStorage.getItem('completed_k8s_topics') || '[]');
+
+    // Highlight helper
+    function highlight(code, lang) {
+      let html = code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      const placeholders = [];
+      let placeholderCount = 0;
+
+      function savePlaceholder(text, type) {
+        const key = `__${type}_PLACEHOLDER_${placeholderCount}__`;
+        placeholders.push({ key, text });
+        placeholderCount++;
+        return key;
+      }
+
+      // Pre-process comments and strings to protect them
+      if (lang === 'js' || lang === 'javascript') {
+        html = html.replace(/(\/\/.*|\/\*[\s\S]*?\*\/)/g, (match) => {
+          return savePlaceholder(`<span class="com">${match}</span>`, 'COM');
+        });
+        html = html.replace(/(["'`])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(const|let|var|class|constructor|extends|super|function|return|if|else|for|while|do|switch|case|break|continue|try|catch|finally|throw|new|this|typeof|instanceof|import|export|from|default|async|await|yield|null|undefined|true|false)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(console\.log|Math\.\w+|Array\.\w+|Object\.\w+|JSON\.\w+|Map|Set|Promise|Error|fetch)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      } else {
+        html = html.replace(/(#.*)/g, (match) => {
+          return savePlaceholder(`<span class="com">${match}</span>`, 'COM');
+        });
+        html = html.replace(/(r?['"])(?:\\.|[^\\])*?\1/g, (match) => {
+          return savePlaceholder(`<span class="str">${match}</span>`, 'STR');
+        });
+        html = html.replace(/\b(def|class|self|import|from|return|if|elif|else|for|in|while|try|except|finally|raise|assert|with|as|lambda|pass|break|continue|global|nonlocal|and|or|not|is|None|True|False)\b/g, '<span class="kw">$1</span>');
+        html = html.replace(/\b(print|len|range|list|dict|set|tuple|str|int|float|type|object|super|abs|min|max|sum|dir|vars|map|filter|reduce|sorted|open|asyncio\.\w+|Exception)\b/g, '<span class="fn">$1</span>');
+        html = html.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+      }
+
+      // Restore placeholders
+      for (let i = placeholders.length - 1; i >= 0; i--) {
+        html = html.replace(placeholders[i].key, placeholders[i].text);
+      }
+
+      return html;
+    }
+
+    const topics = [
+      {
+        id: 1,
+        title: "Control Plane Machinery & etcd Consensus",
+        level: "expert",
+        category: "Cluster Core Architecture",
+        def: "Master the internals of the Kubernetes API Server concurrency models, etcd Raft consensus, active controller reconciliation loops, Kube-Scheduler filter/score phases, and local Kubelet node loops.",
+        machinery: "The control plane acts as the unified distributed coordinator of the cluster: <br>1. <strong>API Server Concurrency & Caching:</strong> All reads bypass etcd by querying the in-memory <code>watch cache</code>, while updates require strict etcd write validation using optimistic concurrency control via metadata <code>resourceVersion</code> matching.<br>2. <strong>etcd Raft Consensus:</strong> etcd enforces consistency using the Raft consensus algorithm. Writes require a quorum confirmation ($N/2 + 1$), writing to a write-ahead log (WAL) and memory index with multi-version concurrency control (MVCC) to persist key states and allow point-in-time rollbacks.<br>3. <strong>Controller Manager Loops:</strong> Controllers use active reconciliation loops that list and watch resource streams, queueing events using rate-limiting workqueues to transition the cluster's current state to the user's declared target state.<br>4. <strong>Kube-Scheduler Phases:</strong> Resolves node scheduling through two sequential phases: <code>Filtering</code> (evaluates node predicates like resource availability, port conflicts, taints/tolerations) and <code>Scoring</code> (evaluates prioritizations like node affinity weight, topology spreads) to select the highest-rated node target.<br>5. <strong>Kubelet PLEg Loops:</strong> The local node agent uses a <strong>Pod Lifecycle Event Generator (PLEg)</strong> to continuously compare container states by translating low-level container runtime (containerd/CRI) logs and events into high-level pod phase statuses, checking for deviations every 1 second.",
+        scenarios: [
+          {
+            title: "Scenario A: Building a Custom Active-Passive Leader Election System using Kubernetes Leases",
+            expl: "We utilize K8s Lease APIs to build a distributed lock mechanism. This implements the same locking architecture used by the Kubernetes Controller Manager and Kube-Scheduler to prevent race conditions during active-passive high availability failovers.",
+            diagram: `
++------------------- Kubernetes API Server / etcd -------------------+
+|                                                                    |
+|  +----------------- Coordination Lease Object -------------------+ |
+|  |  Name: "my-controller-leader-lock"                             | |
+|  |  HolderIdentity: "pod-replica-a"                               | |
+|  |  LeaseDurationSeconds: 15s                                     | |
+|  +----------------------------------------------------------------+ |
+|                                                                    |
++---------------------------------+----------------------------------+
+                                  |
+            Acquired Lock!        |       Heartbeat / Renew Loop
+     +----------------------------+-----------------------------+
+     |                                                          |
+     v                                                          v
++------------------------+                             +------------------------+
+| Pod Replica A (Leader) |                             | Pod Replica B (Backup) |
+| Running active loops   |                             | Watching lock state    |
++------------------------+                             +------------------------+`,
+            jsCode: `// Leader election controller loop using Coordination API (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coordinationApi = kc.makeApiClient(k8s.CoordinationV1Api);
+
+async function runLeaderElection(podName, namespace = "default") {
+  const leaseName = "controller-leader-lock";
+  console.log(\`Starting leader election loops for: \${podName}\`);
+  
+  while (true) {
+    try {
+      let lease;
+      try {
+        const res = await coordinationApi.readNamespacedLease(leaseName, namespace);
+        lease = res.body;
+      } catch (err) {
+        if (err.statusCode === 404) {
+          console.log("Lease lock not found. Attempting to create new lock...");
+          await createNewLease(leaseName, namespace, podName);
+          continue;
+        }
+        throw err;
+      }
+
+      const now = new Date();
+      const acquireTime = new Date(lease.spec.acquireTime);
+      const durationMs = lease.spec.leaseDurationSeconds * 1000;
+      
+      const isExpired = (now.getTime() - acquireTime.getTime()) > durationMs;
+      const isHolder = lease.spec.holderIdentity === podName;
+
+      if (isHolder || isExpired) {
+        console.log(\`Updating lease acquisition lock... Holder: \${podName}\`);
+        lease.spec.holderIdentity = podName;
+        lease.spec.acquireTime = new Date();
+        lease.spec.leaseDurationSeconds = 15;
+        await coordinationApi.replaceNamespacedLease(leaseName, namespace, lease);
+        console.log("Leader lease renewed successfully.");
+      } else {
+        console.log(\`Lease held by \${lease.spec.holderIdentity}. Standing by...\`);
+      }
+    } catch (e) {
+      console.error("Failed to execute lease loop transaction:", e.message);
+    }
+    await new Promise(resolve => setTimeout(resolve, 5000));
+  }
+}
+
+async function createNewLease(name, namespace, podName) {
+  const lease = {
+    metadata: { name: name, namespace: namespace },
+    spec: {
+      holderIdentity: podName,
+      leaseDurationSeconds: 15,
+      acquireTime: new Date(),
+      renewTime: new Date()
+    }
+  };
+  await coordinationApi.createNamespacedLease(namespace, lease);
+  console.log("Acquired initial leader lock successfully!");
+}
+
+runLeaderElection("pod-replica-a");`,
+            pyCode: `# Distributed active-passive controller locking using Lease objects (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+import datetime
+import time
+
+def execute_leader_election(pod_name, namespace="default"):
+    config.load_kube_config()
+    api = client.CoordinationV1Api()
+    lease_name = "controller-leader-lock"
+    
+    while True:
+        try:
+            print(f"Polling leader lock lease state for {pod_name}...")
+            lease = api.read_namespaced_lease(lease_name, namespace)
+            
+            now = datetime.datetime.now(datetime.timezone.utc)
+            acquire_time = lease.spec.acquire_time
+            duration = datetime.timedelta(seconds=lease.spec.lease_duration_seconds)
+            
+            is_expired = (now - acquire_time) > duration
+            is_holder = lease.spec.holder_identity == pod_name
+            
+            if is_holder or is_expired:
+                print("Lease expired or held by us. Attempting dynamic renewal...")
+                lease.spec.holder_identity = pod_name
+                lease.spec.acquire_time = now
+                api.replace_namespaced_lease(lease_name, namespace, lease)
+                print("Leader lock renewed successfully!")
+            else:
+                print(f"Active lock held by {lease.spec.holder_identity}. Sleeping...")
+                
+        except ApiException as e:
+            if e.status == 404:
+                print("Lease lock is absent. Initializing acquisition...")
+                try:
+                    new_lease = client.V1Lease(
+                        metadata=client.V1ObjectMeta(name=lease_name, namespace=namespace),
+                        spec=client.V1LeaseSpec(
+                            holder_identity=pod_name,
+                            lease_duration_seconds=15,
+                            acquire_time=datetime.datetime.now(datetime.timezone.utc)
+                        )
+                    )
+                    api.create_namespaced_lease(namespace, new_lease)
+                    print("Lease created and lock held successfully!")
+                except ApiException as create_err:
+                    print(f"Collision error during lease generation: {create_err.reason}")
+            else:
+                print(f"Kubernetes API error: {e.reason}")
+                
+        time.sleep(5)`
+          },
+          {
+            title: "Scenario B: Monitoring API Server Performance and Mutating Webhook Latencies",
+            expl: "We write an admission controller health and latency checker. This program queries mutating webhooks in the cluster, validating metadata configurations to trace webhook latency boundaries that block API Server processing.",
+            diagram: `
++------------------------------- API Server -------------------------------+
+|                                                                          |
+|  [HTTP Request] ---> Mutating Webhook ---> Validating Webhook ---> etcd |
+|                           |                                              |
+|                           v                                              |
+|                  Latency Check / Timeout                                 |
++--------------------------------------------------------------------------+`,
+            jsCode: `// Retrieve and audit Mutating Webhook configurations for latency risks (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const api = kc.makeApiClient(k8s.AdmissionregistrationV1Api);
+
+async function auditWebhookLatencies() {
+  try {
+    console.log("Auditing active Mutating Webhooks in the cluster...");
+    const res = await api.listMutatingWebhookConfiguration();
+    
+    res.body.items.forEach(webhook => {
+      console.log(\`Webhook Configuration: \${webhook.metadata.name}\`);
+      webhook.webhooks.forEach(wh => {
+        const timeout = wh.timeoutSeconds || 30; // default K8s timeout
+        console.log(\`  - Webhook name: \${wh.name}\`);
+        console.log(\`    * Client path: \${wh.clientConfig.service ? wh.clientConfig.service.path : wh.clientConfig.url}\`);
+        console.log(\`    * Timeout value: \${timeout}s\`);
+        
+        if (timeout > 5) {
+          console.warn(\`    [WARNING] High timeout risk! Latency > 5 seconds can bottleneck the API Server processing queue under load!\`);
+        }
+      });
+    });
+  } catch (err) {
+    console.error("Failed to retrieve webhook registration maps:", err.message);
+  }
+}
+
+auditWebhookLatencies();`,
+            pyCode: `# Programmatic audit of cluster admission webhook configurations (Python)
+from kubernetes import client, config
+
+def evaluate_webhook_configurations():
+    config.load_kube_config()
+    api = client.AdmissionregistrationV1Api()
+    
+    try:
+        print("Fetching mutating webhook registration pipelines...")
+        configs = api.list_mutating_webhook_configuration()
+        
+        for config_item in configs.items:
+            print(f"Webhook Configuration Hook: {config_item.metadata.name}")
+            for webhook in config_item.webhooks:
+                timeout = webhook.timeout_seconds if webhook.timeout_seconds else 30
+                print(f"  * Webhook Name: {webhook.name}")
+                print(f"  * Failure Policy: {webhook.failure_policy}")
+                print(f"  * Configured Timeout: {timeout} seconds")
+                
+                if timeout > 5 and webhook.failure_policy == "Fail":
+                    print("  [CRITICAL WARNING] Webhook blocks mutations and has a high timeout! Slow hooks will choke API server capacity.")
+    except Exception as e:
+        print(f"Failed to query Webhooks: {e}")
+
+if __name__ == '__main__':
+    evaluate_webhook_configurations()`
+          },
+          {
+            title: "Scenario C: Designing a Programmatic Pod-to-Node Manual Scheduler Binder",
+            expl: "We bypass Kube-Scheduler completely and bind pods to nodes programmatically. This uses the low-level API Server /binding endpoint, illustrating how scheduling binds are finalized in control plane machinery.",
+            diagram: `
++------------------- Custom Scheduler / Binder -------------------+
+|                                                                 |
+|   1. Query pending Pods (nodeName is empty)                     |
+|   2. Assess system constraints & select host: "node-worker-z"    |
+|   3. POST raw Binding object payload directly to API Server      |
+|                                                                 |
++--------------------------------+--------------------------------+
+                                 |
+                                 v Binding Syscall Object
++-------------------- Kubernetes API Server ----------------------+
+|                                                                 |
+|  POST /api/v1/namespaces/{ns}/pods/{pod-name}/binding           |
+|                                                                 |
+|  Target Name: "node-worker-z"                                   |
+|  Updates pod's metadata and alerts target node Kubelet          |
++-----------------------------------------------------------------+`,
+            jsCode: `// Manual Pod binding program bypassing the default scheduler (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function bindPodToNode(podName, nodeName, namespace = "default") {
+  console.log(\`Programmatically binding pod \${podName} directly to \${nodeName}...\`);
+  
+  const binding = {
+    apiVersion: "v1",
+    kind: "Binding",
+    metadata: {
+      name: podName,
+      namespace: namespace
+    },
+    target: {
+      apiVersion: "v1",
+      kind: "Node",
+      name: nodeName
+    }
+  };
+
+  try {
+    // Invoke low level pod binding endpoint on the API server
+    await coreApi.createNamespacedPodBinding(podName, namespace, binding);
+    console.log(\`Successfully created Binding object. Pod \${podName} bound to \${nodeName}!\`);
+  } catch (err) {
+    console.error("Binding transaction rejected by API Server:", err.body ? err.body.message : err.message);
+  }
+}
+
+bindPodToNode("nginx-manual-pod", "node-worker-2");`,
+            pyCode: `# Manual scheduler simulation executing raw bindings to API Server (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def create_manual_pod_binding(pod_name, node_name, namespace="default"):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    # Define binding schema
+    binding_target = client.V1ObjectReference(
+        api_version="v1",
+        kind="Node",
+        name=node_name
+    )
+    binding = client.V1Binding(
+        api_version="v1",
+        kind="Binding",
+        metadata=client.V1ObjectMeta(name=pod_name, namespace=namespace),
+        target=binding_target
+    )
+    
+    try:
+        print(f"Injecting binding resource to write pod {pod_name} -> {node_name}...")
+        api.create_namespaced_pod_binding(pod_name, namespace, binding)
+        print("API Server binding object acknowledged. Host scheduler bypassed.")
+    except ApiException as e:
+        print(f"API Server rejected binding request: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    create_manual_pod_binding("nginx-manual-pod", "node-worker-2")`
+          }
+        ],
+        questions: [
+          {
+            badge: "AWS EKS Platform Team",
+            question: "An etcd cluster undergoes network partitioning, separating a 3-node control plane into two segments (a 1-node partition and a 2-node partition). Explain step-by-step what happens to linearizable read and write operations on both sides.",
+            answer: `
+<p>When a 3-node etcd cluster splits into a <strong>1-node partition (A)</strong> and a <strong>2-node partition (B)</strong>, consistency is strictly preserved at the cost of partition availability:</p>
+<ol>
+  <li><strong>Write Operations:</strong>
+    <ul>
+      <li><strong>Partition A (1 node):</strong> A write request fails. etcd requires a Raft quorum ($N/2 + 1$), which is $3/2 + 1 = 2$ nodes. Partition A cannot reach a quorum, rejecting all write mutations.</li>
+      <li><strong>Partition B (2 nodes):</strong> A write request succeeds. The 2-node partition constitutes a majority, allowing it to commit the write to the WAL and return success.</li>
+    </ul>
+  </li>
+  <li><strong>Read Operations (Linearizable):</strong>
+    <ul>
+      <li><strong>Partition B (2 nodes):</strong> Linearizable reads succeed because the majority is reached, confirming that no newer leader has been elected elsewhere.</li>
+      <li><strong>Partition A (1 node):</strong> Linearizable reads fail because A cannot check in with a quorum to guarantee its data is not stale. If <code>serializable</code> (stale-allowed) reads are explicitly enabled, Partition A will return old data.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "Google GKE Core Loop",
+            question: "Why do client informers sometimes raise an 'HTTP 410 Gone' exception under heavy cluster mutation load, and how does the List-Watch architectural design resolve this?",
+            answer: `
+<p>An **HTTP 410 Gone** error occurs when a client's **Informer** attempts to resume watching resource changes but its tracked <code>resourceVersion</code> has been compacted out of etcd's key-value memory history:</p>
+<ul>
+  <li><strong>List-Watch Pattern:</strong> Informers execute a single expensive <code>List</code> operation to pull the current resource state, followed by a continuous streaming <code>Watch</code> pipeline starting from the last returned <code>resourceVersion</code>.</li>
+  <li><strong>Compaction Bottleneck:</strong> etcd aggressively runs compaction jobs to prevent storage bloat. If an Informer experiences network disconnection and takes too long to reconnect, etcd may have cleared the history between the client's last active version and the current state.</li>
+  <li><strong>Resolution:</strong> Upon catching the HTTP 410 Gone error, the Informer automatically triggers a full re-List to establish a fresh baseline, then resumes the Watch stream.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Netflix Platform Infrastructure",
+            question: "A high-performance cluster experiences 'Kubelet PLEG Unhealthy' states, causing nodes to transition to 'NotReady' status. Explain PLEG internals, the sync loop dependency, and how to debug container runtime thread saturation.",
+            answer: `
+<p>The <strong>Pod Lifecycle Event Generator (PLEG)</strong> is an internal Kubelet subsystem responsible for tracking pod containers' health states and mapping them into status reports:</p>
+<ul>
+  <li><strong>Sync Loop Mechanism:</strong> PLEG periodically polls the container runtime (e.g. <code>containerd</code>) using CRI gRPC interfaces to compare the actual runtime container state with the expected local cache state. It aggregates changes into Pod Lifecycle Events.</li>
+  <li><strong>Unhealthy Status Trigger:</strong> If PLEG's internal sync loop takes **longer than 3 seconds** to complete, Kubelet flags the PLEG as unhealthy, marking the node as <code>NotReady</code>.</li>
+  <li><strong>Thread Saturation Root Cause:</strong> Under heavy thread starvation or slow disk I/O, the container runtime's gRPC threads become blocked (often waiting on kernel locks during storage volume mounts). This delay bubbles up to the PLEG CRI poll, causing sync loop timeouts.</li>
+  <li><strong>Debugging Steps:</strong> Run <code>journalctl -u containerd</code> to trace CRI latency spikes, inspect container thread pools, check CPU throttling on the node, and check for storage controller I/O latency bottlenecks.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Configure etcd with regular manual auto-compaction and dynamic defragmentation loops (e.g., --auto-compaction-retention=1). Compacting clears stale historical revision states, preventing etcd from reaching its critical 8GB database quota limit, which triggers catastrophic read-only locks across GKE/EKS platforms!"
+      },
+      {
+        id: 2,
+        title: "Pod Lifecycle & Scheduling Mechanics",
+        level: "expert",
+        category: "Cluster Core Architecture",
+        def: "Deep dive into pod phases, probe execution sequences, init and ephemeral containers, hard/soft scheduling rules, taints and tolerations, and eviction policies.",
+        machinery: "Pods represent the basic unit of execution, governed by complex scheduling rules and runtime lifecycles: <br>1. <strong>Lifecycle Phases:</strong> A pod transitions from <code>Pending</code> (scheduler selects host) -> <code>Running</code> (at least one container starts) -> <code>Succeeded</code> (all containers exit with code 0) or <code>Failed</code> (non-zero exits).<br>2. <strong>Probe Execution Paths:</strong> Probes are executed locally by Kubelet: <code>Startup Probe</code> blocks all other checks until it succeeds; <code>Readiness Probe</code> controls target routing, removing the pod IP from Endpoint slices if it fails; <code>Liveness Probe</code> triggers container restart via CRI if failure thresholds are crossed.<br>3. <strong>Init & Ephemeral Containers:</strong> Init containers run sequentially to completion before app containers start. Ephemeral containers lack resource guarantees and are patched dynamically onto active pods to facilitate real-time troubleshooting inside distroless sandboxes.<br>4. <strong>Scheduling Affinities:</strong> Enforced by Kube-Scheduler. <code>nodeAffinity</code> dictates target hosts. Pod <code>affinity</code> and <code>anti-affinity</code> enforce co-location or separation of workloads. <code>RequiredDuringSchedulingIgnoredDuringExecution</code> represents hard criteria, whereas <code>PreferredDuringScheduling</code> acts as a soft rating score.<br>5. <strong>Taints, Tolerations, & Evictions:</strong> Nodes apply taints (e.g., <code>NoSchedule</code> or <code>NoExecute</code>) to reject pods lacking matching tolerations. Pods with <code>NoExecute</code> undergo instant eviction if the toleration expires. Scheduler preemptions occur when high-priority pods displace lower-priority workloads under resource pressure.",
+        scenarios: [
+          {
+            title: "Scenario A: Building a Custom Web Server with Graceful SIGTERM Connection Draining",
+            expl: "We write a production server script that handles Kubelet SIGTERM events. It starts a connection draining window, completing current database requests before shutting down, avoiding terminated gateway errors.",
+            diagram: `
++------------------- Kubelet Pod Termination -------------------+
+|                                                                |
+|  1. Kubelet transitions Pod to "Terminating" and starts clock  |
+|  2. Webhook triggers preStop hook (drains LB routing)          |
+|  3. Kubelet sends SIGTERM signal to PID 1 inside container     |
+|                                                                |
++--------------------------------+--------------------------------+
+                                 v Connection Draining Window
++---------------------- Node.js / Python Web App ----------------+
+|                                                                |
+|   * Intercept SIGTERM                                          |
+|   * Stop accepting new TCP connections                         |
+|   * Process pending in-flight requests (drain pool)            |
+|   * Exit cleanly within terminationGracePeriodSeconds          |
++----------------------------------------------------------------+`,
+            jsCode: `// Graceful SIGTERM connection shutdown listener (Node.js)
+const http = require('http');
+
+let activeConnections = 0;
+let isShuttingDown = false;
+
+const server = http.createServer((req, res) => {
+  activeConnections++;
+  console.log("Received incoming HTTP request. Processing transaction...");
+  
+  // Simulate active background database transaction
+  setTimeout(() => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: "success", data: "Transaction complete" }));
+    activeConnections--;
+  }, 3000);
+});
+
+server.listen(8080, () => {
+  console.log("Application server running on port 8080");
+});
+
+// Capture SIGTERM from Kubelet pod eviction
+process.on('SIGTERM', () => {
+  console.log("SIGTERM signal received. Initiating graceful connection draining...");
+  isShuttingDown = true;
+  
+  // Stop accepting new connections
+  server.close(() => {
+    console.log("All HTTP connections drained cleanly. Exiting container process.");
+    process.exit(0);
+  });
+  
+  // Monitor remaining connections, force termination if grace period expires
+  setInterval(() => {
+    console.log(\`Draining active connections... Remaining: \${activeConnections}\`);
+    if (activeConnections === 0) {
+      console.log("Zero active connections remaining. Exiting process.");
+      process.exit(0);
+    }
+  }, 1000);
+});`,
+            pyCode: `# Graceful SIGTERM request draining web server (Python)
+import signal
+import sys
+import time
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
+
+active_requests = 0
+shutdown_flag = False
+
+class TransactionHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        global active_requests
+        active_requests += 1
+        print("Handling database transaction query...")
+        
+        # Simulate active workload delay
+        time.sleep(3)
+        
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(b'{"status": "processed"}')
+        active_requests -= 1
+
+def handle_sigterm(signum, frame):
+    global shutdown_flag
+    print("SIGTERM received. Starting process connection draining...")
+    shutdown_flag = True
+    
+    # Check pending transactions before shutting down
+    while active_requests > 0:
+        print(f"Waiting on active HTTP transactions... Remaining: {active_requests}")
+        time.sleep(1)
+        
+    print("All connections cleared. Exiting safely.")
+    sys.exit(0)
+
+if __name__ == '__main__':
+    # Intercept SIGTERM from cluster container engine
+    signal.signal(signal.SIGTERM, handle_sigterm)
+    
+    server = HTTPServer(('0.0.0.0', 8080), TransactionHandler)
+    print("Web server running on port 8080...")
+    
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.start()
+    
+    while not shutdown_flag:
+        time.sleep(1)`
+          },
+          {
+            title: "Scenario B: Dynamically Patching Ephemeral Troubleshooting Containers onto Crashed Pods",
+            expl: "We use core API libraries to patch an ephemeral container containing diagnostic tools onto an active, distroless application pod to perform live filesystem and networking checks.",
+            diagram: `
++---------------------------- Running Pod ----------------------------+
+|                                                                     |
+|  +-----------------------+           +---------------------------+  |
+|  | App Container         |           | Ephemeral Container       |  |
+|  | (Distroless / Minimal)|           | (Diagnostic Tools)        |  |
+|  | No shell, no curl     | <-------> | curl, netstat, bash       |  |
+|  +-----------------------+           +---------------------------+  |
+|  * Shared Process & Network namespaces inside Pod boundary           |
++---------------------------------------------------------------------+`,
+            jsCode: `// Programmatic injection of ephemeral container for live debugging (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const api = kc.makeApiClient(k8s.CoreV1Api);
+
+async function injectEphemeralContainer(podName, namespace = "default") {
+  console.log(\`Targeting pod \${podName} for ephemeral debugging container patch...\`);
+  
+  try {
+    // Get active Pod metadata
+    const podRes = await api.readNamespacedPod(podName, namespace);
+    const pod = podRes.body;
+    
+    // Define ephemeral container specification
+    const ephemeralContainer = {
+      name: "debugger",
+      image: "busybox:latest",
+      stdin: true,
+      tty: true,
+      imagePullPolicy: "IfNotPresent",
+      command: ["sh"]
+    };
+
+    // Apply JSON Merge Patch or direct spec replacement
+    const patches = {
+      spec: {
+        ephemeralContainers: [ephemeralContainer]
+      }
+    };
+
+    // Send patch request directly to pod resource
+    await api.patchNamespacedPodEphemeralcontainers(
+      podName, 
+      namespace, 
+      patches,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { headers: { 'Content-Type': 'application/strategic-merge-patch+json' } }
+    );
+    
+    console.log("Success! Ephemeral debug container injected and active inside Pod namespace.");
+  } catch (err) {
+    console.error("Failed to attach ephemeral container:", err.body ? err.body.message : err.message);
+  }
+}
+
+injectEphemeralContainer("crashed-web-pod");`,
+            pyCode: `# Programmatic patch deployment of ephemeral containers to running pods (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def inject_debug_container(pod_name, namespace="default"):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    # Define ephemeral configuration specs
+    ephemeral = client.V1EphemeralContainer(
+        name="platform-debugger",
+        image="nicolaka/netshoot:latest", # high utility net debug image
+        stdin=True,
+        tty=True,
+        image_pull_policy="IfNotPresent",
+        command=["sh"]
+    )
+    
+    # Configure request payload patch
+    patch_body = {
+        "spec": {
+            "ephemeralContainers": [ephemeral.to_dict()]
+        }
+    }
+    
+    try:
+        print(f"Patching pod {pod_name} ephemeral container mappings...")
+        api.patch_namespaced_pod_ephemeralcontainers(
+            name=pod_name,
+            namespace=namespace,
+            body=patch_body
+        )
+        print("Ephemeral container patch accepted. Shell is accessible via kubectl attach.")
+    except ApiException as e:
+        print(f"Failed to inject ephemeral container: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    inject_debug_container("crashed-web-pod")`
+          },
+          {
+            title: "Scenario C: Enforcing Dynamic Node Affinity Rules to Guarantee Multi-AZ Resiliency",
+            expl: "We write a scheduling coordinator program that inspects active node distributions across zones, patch-injecting strict node affinities to balance workloads and ensure multi-AZ HA topologies.",
+            diagram: `
++------------------- Multi-AZ Cluster Layout -------------------+
+|                                                                |
+|    Zone US-East-1A                   Zone US-East-1B           |
+|  +--------------------+             +--------------------+     |
+|  | Node 1 (4 Pods)    |             | Node 2 (0 Pods)    |     |
+|  +--------------------+             +--------------------+     |
+|                                                                |
++-------------------------------+--------------------------------+
+                                |
+                                v Balance Action: Assign to Zone B
++----------------------- Scheduler Patch -----------------------+
+|                                                                |
+|  Dynamic insertion of nodeAffinity:                            |
+|  topologyKey: "topology.kubernetes.io/zone"                    |
+|  Values: ["us-east-1b"]                                        |
++----------------------------------------------------------------+`,
+            jsCode: `// Enforce dynamic node affinity configurations programmatically (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const api = kc.makeApiClient(k8s.AppsV1Api);
+
+async function patchDeploymentAffinity(deploymentName, targetZone, namespace = "default") {
+  console.log(\`Patching deployment \${deploymentName} with dynamic nodeAffinity target zone: \${targetZone}\`);
+  
+  const patch = [
+    {
+      op: "replace",
+      path: "/spec/template/spec/affinity",
+      value: {
+        nodeAffinity: {
+          requiredDuringSchedulingIgnoredDuringExecution: {
+            nodeSelectorTerms: [
+              {
+                matchExpressions: [
+                  {
+                    key: "topology.kubernetes.io/zone",
+                    operator: "In",
+                    values: [targetZone]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  ];
+
+  try {
+    await api.patchNamespacedDeployment(
+      deploymentName,
+      namespace,
+      patch,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { headers: { 'Content-Type': 'application/json-patch+json' } }
+    );
+    console.log("Deployment affinity successfully updated for high availability.");
+  } catch (err) {
+    console.error("Failed to patch deployment affinity:", err.body ? err.body.message : err.message);
+  }
+}
+
+patchDeploymentAffinity("stateful-db-deployment", "us-east-1b");`,
+            pyCode: `# Dynamic patch update of Node Affinity policies on deployments (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def apply_az_node_affinity(deployment_name, target_zone, namespace="default"):
+    config.load_kube_config()
+    api = client.AppsV1Api()
+    
+    # Configure affinity dictionary structure
+    affinity_spec = {
+        "nodeAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": {
+                "nodeSelectorTerms": [
+                    {
+                        "matchExpressions": [
+                            {
+                                "key": "topology.kubernetes.io/zone",
+                                "operator": "In",
+                                "values": [target_zone]
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+    
+    patch_body = {
+        "spec": {
+            "template": {
+                "spec": {
+                    "affinity": affinity_spec
+                }
+            }
+        }
+    }
+    
+    try:
+        print(f"Applying zone affinity criteria target: {target_zone}...")
+        api.patch_namespaced_deployment(
+            name=deployment_name,
+            namespace=namespace,
+            body=patch_body
+        )
+        print("Deployment affinity patched. Workloads will schedule only on nodes in target zone.")
+    except ApiException as e:
+        print(f"Failed to update Deployment: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    apply_az_node_affinity("stateful-db-deployment", "us-east-1b")`
+          }
+        ],
+        questions: [
+          {
+            badge: "Meta Core Systems",
+            question: "Differentiate between an Out-Of-Memory (OOM) event triggered by the Linux Kernel's OOM Killer vs a container eviction performed by the local Node Kubelet. Explain process namespaces, control group metrics, and OOM scores.",
+            answer: `
+<p>While both events terminate memory-starved container processes, their triggers, logic, and scopes differ fundamentally:</p>
+<ol>
+  <li><strong>Linux Kernel OOM Killer:</strong>
+    <ul>
+      <li><strong>Trigger:</strong> Occurs when the node's physical RAM is completely exhausted. The kernel needs to free memory immediately to prevent host panic.</li>
+      <li><strong>Mechanism:</strong> The kernel checks cgroup limits and scans processes, selecting a victim using its <code>oom_score</code> (calculated from RAM usage relative to limit, adjusted by <code>oom_score_adj</code>). It sends a sudden <code>SIGKILL</code> directly to the process.</li>
+      <li><strong>Namespace Scope:</strong> Operates at the OS kernel level, completely bypassing Kubernetes control plane logic.</li>
+    </ul>
+  </li>
+  <li><strong>Kubelet Eviction:</strong>
+    <ul>
+      <li><strong>Trigger:</strong> Occurs when the node reaches a Kubelet hard threshold (e.g., <code>memory.available &lt; 100Mi</code>), indicating imminent node pressure.</li>
+      <li><strong>Mechanism:</strong> Kubelet acts proactively. It ranks pods by QoS class (first evicting <code>BestEffort</code>, then <code>Burstable</code> exceeding requests, and never <code>Guaranteed</code> if resource limits are respected). It sends a <code>SIGTERM</code> to allow graceful shutdown, transitioning the pod's status to <code>Failed (Evicted)</code>.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "Microsoft AKS Loop",
+            question: "Why do hard Pod Anti-Affinity rules ('requiredDuringSchedulingIgnoredDuringExecution') scale terribly as a cluster expands, and what scheduling algorithmic bottlenecks are encountered?",
+            answer: `
+<p>Hard Pod Anti-Affinity rules degrade scheduler throughput as a cluster scales due to **$O(N \times P)$ computational complexity**:</p>
+<ul>
+  <li><strong>Evaluation Bottleneck:</strong> When scheduling a pod with anti-affinity, the scheduler cannot simply check node resources. It must evaluate **every node (N)** against **every active pod (P)** currently running in the target topology key to verify no matching labels conflict.</li>
+  <li><strong>Database Lock Contention:</strong> If 1000 pods with mutual anti-affinity are deployed, the scheduler must execute $1000 \times 1000 = 1,000,000$ comparisons. Under heavy queue saturation, this spikes scheduler CPU consumption, blocking pod bindings.</li>
+  <li><strong>Workaround:</strong> Prefer soft anti-affinity (<code>preferredDuringScheduling</code>) which permits the scheduler to approximate placements, or enforce <code>topologySpreadConstraints</code> which calculates skews via lighter integer calculations.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Uber Infrastructure Loop",
+            question: "A high-load microservice exhibits transient probe failures under network congestion, leading to a cascade of container restarts. How do you distinguish between Liveness, Readiness, and Startup probe execution paths to mitigate this?",
+            answer: `
+<p>Flapping probes under high load trigger cascading failures due to incorrect mapping of probe execution paths:</p>
+<ul>
+  <li><strong>Liveness Probe Flapping:</strong> Triggers container restarts when failed. If a microservice is simply slow due to database lock contention, a failed liveness probe tells Kubelet to restart the container, compounding connection recovery overhead.</li>
+  <li><strong>Readiness Probe Flapping:</strong> Isolates routing. When failed, Kubelet removes the pod from active endpoint lists, dropping load balancer traffic. If all pods fail simultaneously, the service experiences total blackouts.</li>
+  <li><strong>Resolution Strategy:</strong>
+    <ol>
+      <li>Use a **Startup Probe** with a high failure threshold to allow slow application boot times without triggering liveness failures.</li>
+      <li>Set **Liveness Probes** to evaluate only severe structural errors (e.g., internal deadlock) rather than transient dependencies like database pings.</li>
+      <li>Tune <code>failureThreshold</code> and <code>periodSeconds</code> to provide dampening against temporary spikes.</li>
+    </ol>
+  </li>
+</ul>
+            `
+          }
+        ],
+        tip: "Avoid setting extreme Liveness probe frequencies. A liveness probe with a short period (e.g. 1s) under thread congestion will fail due to simple queue delays, triggering continuous crash loops that block service startup!"
+      },
+      {
+        id: 3,
+        title: "CNI, Service Routing, & Gateway API",
+        level: "expert",
+        category: "Cluster Networking",
+        def: "Inspect network architectures, Calico BGP vs Cilium eBPF packet routing, service proxy modes (IPTables vs IPVS), CoreDNS resolution flows, and Gateway API architectures.",
+        machinery: "Kubernetes networking routes traffic across nodes and namespaces with high performance: <br>1. <strong>CNI Network Overlays:</strong> **Calico** encapsulates packets inside virtual tunnel interfaces using IP-in-IP or VXLAN, routing traffic using BGP peer meshes. **Cilium** eliminates overlays entirely, writing low-level **eBPF (Extended Berkeley Packet Filter)** hooks directly into the Linux kernel socket interfaces (tc/XDP), routing packets at the socket level without traversing the host TCP stack.<br>2. <strong>Service Proxies (Kube-Proxy):</strong> Translates virtual Service IPs into actual Pod endpoint IPs: **iptables** evaluates linear rules sequentially ($O(N)$ lookup complexity), causing CPU thrashing at scale; **IPVS** leverages IP Virtual Server kernel modules, creating hash tables ($O(1)$ search complexity) to efficiently balance millions of IP endpoints.<br>3. <strong>CoreDNS Flow:</strong> Pods resolve DNS by querying CoreDNS service IP. CoreDNS evaluates search path iterations (e.g. <code>.svc.cluster.local</code>, <code>.cluster.local</code>) sequentially. Misconfigured search paths can trigger up to 4 redundant queries for a single external domain lookup.<br>4. <strong>Gateway API Concerns:</strong> Replaces monolithic Ingress controllers with role-isolated resources. <code>GatewayClass</code> (managed by CNI providers), <code>Gateway</code> (managed by Infrastructure teams), and <code>HTTPRoute</code> (managed by Application teams) provide clean multi-tenant traffic routing configuration.",
+        scenarios: [
+          {
+            title: "Scenario A: Building a CNI Endpoint IP Mapper using eBPF-like TC interface traces",
+            expl: "We build a network endpoint tracer script using API clients. This mimics an eBPF controller by dynamically mapping active Pod IPs to local CNI network endpoints in real-time.",
+            diagram: `
++------------------- K8s Cluster Host Network -------------------+
+|                                                                |
+|  Pod interface (veth-abc) <---> CNI bridge <---> Host physical|
+|  IP: 10.244.1.42                                               |
+|                                                                |
++--------------------------------+--------------------------------+
+                                 |
+                                 v CNI Endpoint Mapping
++---------------------- Network Controller ----------------------+
+|                                                                |
+|  * List all Pod Endpoints                                      |
+|  * Track local interface indexes and IP mappings               |
+|  * Update lookup tables to fast-route packets                 |
++----------------------------------------------------------------+`,
+            jsCode: `// Programmatic map of Pod IPs to CNI Endpoint bridges (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function mapCniEndpoints() {
+  try {
+    console.log("Fetching active Pod IPs and host network mappings...");
+    const res = await coreApi.listPodForAllNamespaces();
+    
+    const mappings = res.body.items.map(pod => ({
+      name: pod.metadata.name,
+      namespace: pod.metadata.namespace,
+      podIP: pod.status.podIP,
+      hostIP: pod.status.hostIP,
+      phase: pod.status.phase
+    })).filter(p => p.podIP && p.phase === 'Running');
+
+    console.log("Current CNI Routing Table Simulation:");
+    console.table(mappings);
+  } catch (err) {
+    console.error("Failed to query Pod CNI maps:", err.message);
+  }
+}
+
+mapCniEndpoints();`,
+            pyCode: `# Retrieve and map Pod network IP mappings in the cluster (Python)
+from kubernetes import client, config
+
+def list_cni_ip_routing_map():
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    try:
+        print("Gathering cluster Pod IP configurations...")
+        pods = api.list_pod_for_all_namespaces()
+        
+        print(f"{'NAMESPACE':<15} | {'POD NAME':<30} | {'POD IP':<15} | {'HOST NODE IP':<15}")
+        print("-" * 85)
+        for pod in pods.items:
+            if pod.status.phase == "Running" and pod.status.pod_ip:
+                print(f"{pod.metadata.namespace:<15} | {pod.metadata.name[:30]:<30} | {pod.status.pod_ip:<15} | {pod.status.host_ip:<15}")
+    except Exception as e:
+        print(f"Network audit failed: {e}")
+
+if __name__ == '__main__':
+    list_cni_ip_routing_map()`
+          },
+          {
+            title: "Scenario B: Dynamically Patching CoreDNS Configurations for External Service Interception",
+            expl: "We write a program to patch the CoreDNS ConfigMap, inserting a custom upstream resolver block to intercept specific external API requests and route them to local mock services.",
+            diagram: `
++----------------------- CoreDNS Corefile -----------------------+
+|                                                                |
+|   original Corefile {}                                         |
+|   + Dynamic Patch Added:                                       |
+|     mock-api.external.com {                                    |
+|         forward . 10.96.42.242                                 |
+|     }                                                          |
+|                                                                |
++--------------------------------+--------------------------------+
+                                 v Applied to CoreDNS ConfigMap
++------------------------ CoreDNS Pods --------------------------+
+|                                                                |
+|  * Reloads config automatically without service restarts       |
+|  * DNS requests for mock-api are resolved to internal mock IP  |
++----------------------------------------------------------------+`,
+            jsCode: `// Programmatically patch CoreDNS Corefile config mappings (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function injectCorednsRoute(mockTargetIP) {
+  const configMapName = "coredns";
+  const namespace = "kube-system";
+  
+  try {
+    console.log("Fetching current CoreDNS ConfigMap specifications...");
+    const res = await coreApi.readNamespacedConfigMap(configMapName, namespace);
+    const configMap = res.body;
+    
+    let corefile = configMap.data["Corefile"];
+    
+    // Add custom zone routing
+    const customZone = \`
+mock-api.external.com {
+    errors
+    cache 30
+    forward . \${mockTargetIP}
+}
+\`;
+
+    if (!corefile.includes("mock-api.external.com")) {
+      console.log("Injecting mock DNS routing zone...");
+      configMap.data["Corefile"] = corefile + "\\n" + customZone;
+      await coreApi.replaceNamespacedConfigMap(configMapName, namespace, configMap);
+      console.log("CoreDNS ConfigMap patched. Hot reload initialized.");
+    } else {
+      console.log("Mock DNS route already active in Corefile.");
+    }
+  } catch (err) {
+    console.error("DNS Configuration patch failed:", err.body ? err.body.message : err.message);
+  }
+}
+
+injectCorednsRoute("10.96.42.242");`,
+            pyCode: `# Programmatic patch modifications of CoreDNS ConfigMap parameters (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def add_coredns_upstream_override(mock_ip, namespace="kube-system"):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    try:
+        print("Reading current kube-system CoreDNS mappings...")
+        config_map = api.read_namespaced_config_map("coredns", namespace)
+        corefile_content = config_map.data["Corefile"]
+        
+        override_block = f"""
+mock-api.external.com {{
+    errors
+    cache 10
+    forward . {mock_ip}
+}}
+"""
+        if "mock-api.external.com" not in corefile_content:
+            print("Injecting custom forward zone into Corefile...")
+            config_map.data["Corefile"] = corefile_content + "\n" + override_block
+            api.replace_namespaced_config_map("coredns", namespace, config_map)
+            print("CoreDNS ConfigMap successfully updated.")
+        else:
+            print("CoreDNS override block already present. Bypassing patch.")
+            
+    except ApiException as e:
+        print(f"Failed to modify DNS configuration: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    add_coredns_upstream_override("10.96.42.242")`
+          },
+          {
+            title: "Scenario C: Provisioning Gateway API HTTPRoute Weights for Advanced Canary Releases",
+            expl: "We programmatically instantiate an HTTPRoute object using Custom Objects APIs to split live HTTP traffic, directing 90% to stable production and 10% to dynamic canary services.",
+            diagram: `
+                    +--------------------+
+                    | HTTPRoute Frontend |
+                    +---------+----------+
+                              |
+                     Traffic Split Weights
+                     +--------+--------+
+                 90% |                 | 10%
+                     v                 v
+            +----------------+ +---------------+
+            | v1 Production  | | v2 Canary     |
+            +----------------+ +---------------+`,
+            jsCode: `// Programmatic provisioning of Gateway API HTTPRoute weights (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const customApi = kc.makeApiClient(k8s.CustomObjectsApi);
+
+async function deployHTTPRoute(namespace = "default") {
+  const group = "gateway.networking.k8s.io";
+  const version = "v1";
+  const plural = "httproutes";
+  
+  const httpRoute = {
+    apiVersion: "gateway.networking.k8s.io/v1",
+    kind: "HTTPRoute",
+    metadata: {
+      name: "api-service-route",
+      namespace: namespace
+    },
+    spec: {
+      parentRefs: [{
+        name: "main-gateway",
+        group: "gateway.networking.k8s.io",
+        kind: "Gateway"
+      }],
+      rules: [{
+        backendRefs: [
+          {
+            name: "api-v1-stable",
+            port: 80,
+            weight: 90
+          },
+          {
+            name: "api-v2-canary",
+            port: 80,
+            weight: 10
+          }
+        ]
+      }]
+    }
+  };
+
+  try {
+    console.log("Deploying Gateway API HTTPRoute with canary weights...");
+    await customApi.createNamespacedCustomObject(group, version, namespace, plural, httpRoute);
+    console.log("Gateway API HTTPRoute generated successfully!");
+  } catch (err) {
+    console.error("HTTPRoute deployment rejected:", err.body ? err.body.message : err.message);
+  }
+}
+
+deployHTTPRoute();`,
+            pyCode: `# Custom Object API client orchestrating HTTPRoute resources (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def create_gateway_http_route(namespace="default"):
+    config.load_kube_config()
+    api = client.CustomObjectsApi()
+    
+    # Define HTTPRoute specification dictionary
+    http_route_manifest = {
+        "apiVersion": "gateway.networking.k8s.io/v1",
+        "kind": "HTTPRoute",
+        "metadata": {
+            "name": "api-service-route",
+            "namespace": namespace
+        },
+        "spec": {
+            "parentRefs": [{
+                "name": "main-gateway",
+                "group": "gateway.networking.k8s.io",
+                "kind": "Gateway"
+            }],
+            "rules": [{
+                "backendRefs": [
+                    {
+                        "name": "api-v1-stable",
+                        "port": 80,
+                        "weight": 90
+                    },
+                    {
+                        "name": "api-v2-canary",
+                        "port": 80,
+                        "weight": 10
+                    }
+                ]
+            }]
+        }
+    }
+    
+    try:
+        print("Provisioning HTTPRoute split parameters to the cluster...")
+        api.create_namespaced_custom_object(
+            group="gateway.networking.k8s.io",
+            version="v1",
+            namespace=namespace,
+            plural="httproutes",
+            body=http_route_manifest
+        )
+        print("HTTPRoute successfully applied. Canary split is active.")
+    except ApiException as e:
+        print(f"Failed to create Custom Object HTTPRoute: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    create_gateway_http_route()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Apple Network Infrastructure",
+            question: "Analyze the scaling and routing bottlenecks of a mesh-topology Calico BGP deployment in a 1000-node cluster, and explain how Route Reflectors and MTU settings prevent network routing crashes.",
+            answer: `
+<p>In a 1000-node Calico cluster, a default **Full-Mesh BGP topology** degrades cluster networking due to quadratic connection scaling limits:</p>
+<ol>
+  <li><strong>Full-Mesh Limitations:</strong> In full-mesh, every node maintains a BGP peering connection with every other node. The total connections scale as $N(N - 1) / 2$, which at 1000 nodes is $1000 \times 999 / 2 = 499,500$ BGP sessions. Node kernels consume excessive CPU and memory simply processing continuous TCP routing updates.</li>
+  <li><strong>BGP Route Reflectors:</strong> Calico resolves this bottleneck by implementing Route Reflectors. Nodes are organized into localized pods/zones. Nodes peering solely with designated central Route Reflectors reduce total active cluster connections down from $O(N^2)$ to $O(N)$.</li>
+  <li><strong>MTU Settings & Encapsulation:</strong> Calico overlays (e.g., VXLAN or IP-in-IP) append encapsulation headers to standard ethernet frames:
+    <ul>
+      <li>VXLAN appends a **50-byte header**, reducing the usable payload size.</li>
+      <li>If the host MTU is 1500 bytes, the Calico tunnel interface MTU must be explicitly capped to **1450 bytes** (1500 - 50). Failing to align this causes host-to-pod packet fragmentation and silent dropouts under heavy traffic.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "System Design Loop (Netflix Scale)",
+            question: "Explain why IPTables rules suffer performance degradation in large-scale Kubernetes clusters and contrast its architecture with IPVS service load-balancing mechanics.",
+            answer: `
+<p>The performance divergence between <strong>IPTables</strong> and <strong>IPVS</strong> is a result of their underlying lookup data structures:</p>
+<ul>
+  <li><strong>IPTables ($O(N)$ Complexity):</strong> IPTables stores routing rules in a linear linked list. When a packet reaches a service IP, the Linux kernel must parse rules sequentially from the beginning of the list until a match is found. In a cluster with 5,000 Services and 20,000 Endpoints, the list expands to over 100,000 entries. This sequential scan thrashes node CPU capacity and spikes network latency for every packet.</li>
+  <li><strong>IPVS ($O(1)$ Complexity):</strong> IPVS utilizes kernel-level **Hash Tables** implemented via IP Virtual Server facilities. A service IP lookup performs a direct hash calculation, resolving destination endpoints in constant time ($O(1)$) regardless of whether there are 10 or 100,000 active cluster services, preserving optimal performance.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Cloudflare Gateway Team",
+            question: "Explain the separation of role-based concerns in the modern Gateway API vs classic Ingress configurations, and how this prevents config pollution in multi-tenant environments.",
+            answer: `
+<p>The classic Kubernetes <strong>Ingress</strong> resource acts as a monolithic configuration interface, mapping routing rules, host domains, TLS certs, and controller definitions into a single, shared object. Under multi-tenancy, this causes config pollution and security risks.</p>
+<p>The modern <strong>Gateway API</strong> decouples these parameters into expressive, role-oriented resources:</p>
+<ol>
+  <li><strong>GatewayClass (Infrastructure Provider):</strong> Configures the controller implementation details (e.g., eBPF vs Envoy, load balancer hardware class).</li>
+  <li><strong>Gateway (Cluster Administrator):</strong> Binds public IP addresses, configures TLS termination, and sets namespace boundary rules.</li>
+  <li><strong>HTTPRoute (Application Developer):</strong> Defines specific HTTP routing paths, retries, headers, and destination services. Route manifests attach to Gateways using cross-namespace references, preventing developers from modifying edge load-balancing parameters.</li>
+</ol>
+            `
+          }
+        ],
+        tip: "Avoid long search paths in your pod's DNS configuration (ndots: 5). High ndots values tell Kubelet to append local search paths for every external query, triggering multiple redundant NXDOMAIN lookup failures at CoreDNS nodes for simple external resolves (like google.com)!"
+      },
+      {
+        id: 4,
+        title: "Stateful Storage & Persistent Volumes",
+        level: "expert",
+        category: "Stateful Applications",
+        def: "Master the lifecycles of PersistentVolumes, CSI driver interaction stages, Volume binding delays, and StatefulSet ordinal storage mappings.",
+        machinery: "Kubernetes integrates dynamic storage subsystems using Container Storage Interfaces: <br>1. <strong>PV/PVC Lifecycle:</strong> A PersistentVolumeClaim (PVC) acts as a resource request. The StorageClass driver handles dynamic provisioning, generating a PersistentVolume (PV) resource, and binding the two together. The reclaim policy dictates whether the underlying storage is preserved (<code>Retain</code>) or deleted (<code>Delete</code>) when the PVC is cleared.<br>2. <strong>CSI Driver Operations:</strong> Dynamic mounting occurs in three distinct RPC stages: <br>&nbsp;&nbsp;&nbsp;- <code>ControllerPublishVolume</code> (runs on master node, attaches physical cloud disk to target host hypervisor)<br>&nbsp;&nbsp;&nbsp;- <code>NodeStageVolume</code> (runs on worker node, formats raw drive block to ext4/xfs and mounts it to local global directory)<br>&nbsp;&nbsp;&nbsp;- <code>NodePublishVolume</code> (bind-mounts block directory directly into targeted container filesystem sandbox namespace).<br>3. <strong>Access Modes:</strong> `ReadWriteOnce` isolates mount access to a single node, `ReadWriteMany` allows shared mounts across multiple nodes (NFS/Ceph), and `ReadWriteOncePod` guarantees exclusive container mount locks.<br>4. <strong>StatefulSet Ordinals:</strong> StatefulSets preserve identities. Pods receive deterministic names (e.g. <code>db-0, db-1</code>) and are bound to specific ordinal PVC structures. Rolling updates occur in reverse ordinal order (e.g., terminating `db-2` first), ensuring strict transaction integrity.",
+        scenarios: [
+          {
+            title: "Scenario A: Automatically Expanding PVC Volume Size under Active Disk Pressure",
+            expl: "We build a storage operations controller program that watches PVC storage capacity metrics. If dynamic disk consumption exceeds 85%, the program updates the PVC specification to trigger online volume expansion via the CSI driver.",
+            diagram: `
++------------------- Storage Monitor Engine --------------------+
+|                                                               |
+|  1. Query active PVC metric sizing mappings                   |
+|  2. Disk usage > 85% capacity threshold                       |
+|  3. Edit PVC spec: requests.storage = 100Gi                  |
+|                                                               |
++--------------------------------+--------------------------------+
+                                 v API Patch Request
++--------------------- Kubernetes API Server -------------------+
+|                                                               |
+|  CSI Controller detects PVC modification                       |
+|  Invokes cloud storage APIs to expand physical block drive    |
+|  Kubelet resizes filesystem layout without pod restarts       |
++---------------------------------------------------------------+`,
+            jsCode: `// Programmatic hot-resizing of PersistentVolumeClaims (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function checkAndExpandPvc(pvcName, namespace = "default") {
+  try {
+    console.log(\`Checking PersistentVolumeClaim status for: \${pvcName}\`);
+    const res = await coreApi.readNamespacedPersistentVolumeClaim(pvcName, namespace);
+    const pvc = res.body;
+
+    const currentStorage = pvc.spec.resources.requests.storage;
+    console.log(\`Current PVC allocated size: \${currentStorage}\`);
+
+    // Parse size and calculate upgrade target (e.g. upgrading 10Gi -> 20Gi)
+    const currentSizeInt = parseInt(currentStorage);
+    const newSize = \`\${currentSizeInt * 2}Gi\`;
+
+    console.log(\`Patching PVC \${pvcName} size constraint to: \${newSize}\`);
+    
+    const patch = {
+      spec: {
+        resources: {
+          requests: {
+            storage: newSize
+          }
+        }
+      }
+    };
+
+    await coreApi.patchNamespacedPersistentVolumeClaim(
+      pvcName,
+      namespace,
+      patch,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { headers: { 'Content-Type': 'application/merge-patch+json' } }
+    );
+    console.log("Success! PVC resized. Storage driver will expand physical drive online.");
+  } catch (err) {
+    console.error("Failed to execute PVC volume expansion:", err.body ? err.body.message : err.message);
+  }
+}
+
+checkAndExpandPvc("database-storage-pvc");`,
+            pyCode: `# Automated check and expand script for PersistentVolumeClaims (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def expand_active_pvc(pvc_name, namespace="default"):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    try:
+        print(f"Reading PVC specs for {pvc_name}...")
+        pvc = api.read_namespaced_persistent_volume_claim(pvc_name, namespace)
+        
+        current_allocated = pvc.spec.resources.requests["storage"]
+        print(f"Current allocation value: {current_allocated}")
+        
+        # Calculate size increment (e.g., doubling the capacity)
+        size_digits = "".join([c for c in current_allocated if c.isdigit()])
+        size_unit = "".join([c for c in current_allocated if c.isalpha()])
+        new_size = f"{int(size_digits) * 2}{size_unit}"
+        
+        patch_body = {
+            "spec": {
+                "resources": {
+                    "requests": {
+                        "storage": new_size
+                    }
+                }
+            }
+        }
+        
+        print(f"Patching PVC target request size to {new_size}...")
+        api.patch_namespaced_persistent_volume_claim(
+            name=pvc_name,
+            namespace=namespace,
+            body=patch_body
+        )
+        print("PVC size parameter successfully patched on API Server.")
+    except ApiException as e:
+        print(f"PVC modification failed: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    expand_active_pvc("database-storage-pvc")`
+          },
+          {
+            title: "Scenario B: Dynamically Creating VolumeSnapshots for Database Backup Pipelines",
+            expl: "We write a snapshot coordinator utilizing Custom Object APIs to invoke VolumeSnapshot generation. This instructs the CSI controller to freeze I/O writes and create a dynamic host snapshot.",
+            diagram: `
++------------------- Backup Pipeline Engine --------------------+
+|                                                               |
+|  1. Freeze database transactions dynamically                   |
+|  2. POST VolumeSnapshot Custom Object Manifest to API Server   |
+|                                                               |
++--------------------------------+--------------------------------+
+                                 v Dynamic CSI Snapshot Creation
++-------------------- Kubernetes API Server --------------------+
+|                                                               |
+|  CSI Controller matches VolumeSnapshotClass                    |
+|  Instructs Cloud Hypervisor to freeze disk and snapshot       |
+|  Exposes backup object for quick restore point                |
++---------------------------------------------------------------+`,
+            jsCode: `// Programmatic dynamic VolumeSnapshot creation using Custom Objects API (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const customApi = kc.makeApiClient(k8s.CustomObjectsApi);
+
+async function triggerVolumeSnapshot(pvcName, namespace = "default") {
+  const group = "snapshot.storage.k8s.io";
+  const version = "v1";
+  const plural = "volumesnapshots";
+  
+  const timestamp = Date.now();
+  const snapshotName = \`db-backup-snapshot-\${timestamp}\`;
+
+  const snapshotManifest = {
+    apiVersion: "snapshot.storage.k8s.io/v1",
+    kind: "VolumeSnapshot",
+    metadata: {
+      name: snapshotName,
+      namespace: namespace
+    },
+    spec: {
+      volumeSnapshotClassName: "csi-aws-ebs-snapshot-class",
+      source: {
+        persistentVolumeClaimName: pvcName
+      }
+    }
+  };
+
+  try {
+    console.log(\`Provisioning VolumeSnapshot \${snapshotName} from PVC \${pvcName}...\`);
+    await customApi.createNamespacedCustomObject(group, version, namespace, plural, snapshotManifest);
+    console.log("VolumeSnapshot applied successfully. Cloud storage backup process is running.");
+  } catch (err) {
+    console.error("VolumeSnapshot execution failed:", err.body ? err.body.message : err.message);
+  }
+}
+
+triggerVolumeSnapshot("database-storage-pvc");`,
+            pyCode: `# Custom Objects client deploying VolumeSnapshot resources (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+import time
+
+def generate_volume_snapshot(pvc_name, namespace="default"):
+    config.load_kube_config()
+    api = client.CustomObjectsApi()
+    
+    snapshot_name = f"db-backup-snapshot-{int(time.time())}"
+    
+    snapshot_manifest = {
+        "apiVersion": "snapshot.storage.k8s.io/v1",
+        "kind": "VolumeSnapshot",
+        "metadata": {
+            "name": snapshot_name,
+            "namespace": namespace
+        },
+        "spec": {
+            "volumeSnapshotClassName": "csi-aws-ebs-snapshot-class",
+            "source": {
+                "persistentVolumeClaimName": pvc_name
+            }
+        }
+    }
+    
+    try:
+        print(f"Submitting VolumeSnapshot request for: {snapshot_name}...")
+        api.create_namespaced_custom_object(
+            group="snapshot.storage.k8s.io",
+            version="v1",
+            namespace=namespace,
+            plural="volumesnapshots",
+            body=snapshot_manifest
+        )
+        print("VolumeSnapshot custom object successfully generated.")
+    except ApiException as e:
+        print(f"Snapshot creation rejected by API server: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    generate_volume_snapshot("database-storage-pvc")`
+          },
+          {
+            title: "Scenario C: Verifying Storage Zone Topologies in Multi-AZ StatefulSets",
+            expl: "We query PersistentVolumes and verify that scheduling labels are aligned with active target node availability zones. This program prevents cross-AZ volume mounting conflicts before pods are scheduled.",
+            diagram: `
++------------------- Multi-AZ CSI Verification --------------------+
+|                                                                  |
+|   StatefulSet Pod (db-0) <--- scheduled to Host Node in AZ-1A     |
+|   PVC (db-storage-db-0)  <--- Bound to PV located in AZ-1B       |
+|   ! Conflict: Cloud hypervisor cannot mount PV AZ-1B to AZ-1A    |
+|                                                                  |
++--------------------------------+----------------------------------+
+                                 v Programmatic Topology Auditing
++---------------------- Storage Topology Checker -------------------+
+|                                                                  |
+|  * Scan all PV topologies via nodeAffinity requirements           |
+|  * Correlate Node zone configurations with PV constraints         |
+|  * Flag zone misalignment risks immediately                      |
++------------------------------------------------------------------+`,
+            jsCode: `// Validate dynamic PersistentVolume zone alignment topology metrics (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function verifyStorageTopology() {
+  try {
+    console.log("Auditing cluster PersistentVolumes zone topologies...");
+    const pvList = await coreApi.listPersistentVolume();
+    
+    pvList.body.items.forEach(pv => {
+      console.log(\`PersistentVolume: \${pv.metadata.name}\`);
+      
+      const nodeAffinity = pv.spec.nodeAffinity;
+      if (nodeAffinity && nodeAffinity.required) {
+        nodeAffinity.required.nodeSelectorTerms.forEach(term => {
+          term.matchExpressions.forEach(expr => {
+            if (expr.key === "topology.kubernetes.io/zone") {
+              console.log(\`  - Exclusive Zone Affinity Enforced: \${expr.values.join(", ")}\`);
+            }
+          });
+        });
+      } else {
+        console.warn("  [WARNING] PV has no defined zone topologies. Risk of mount failures in multi-AZ clusters!");
+      }
+    });
+  } catch (err) {
+    console.error("Storage topology check failed:", err.message);
+  }
+}
+
+verifyStorageTopology();`,
+            pyCode: `# Programmatic validation of cluster PV zone topology boundaries (Python)
+from kubernetes import client, config
+
+def evaluate_storage_zone_affinity():
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    try:
+        print("Gathering cluster PersistentVolume configurations...")
+        pvs = api.list_persistent_volume()
+        
+        for pv in pvs.items:
+            print(f"PV Ident: {pv.metadata.name}")
+            affinity = pv.spec.node_affinity
+            
+            if affinity and affinity.required:
+                for term in affinity.required.node_selector_terms:
+                    for expr in term.match_expressions:
+                        if expr.key == "topology.kubernetes.io/zone":
+                            print(f"  * Hard Zone Restraints: {expr.values}")
+            else:
+                print("  [ALERT] No zone metrics found on PV. Potential multi-AZ binding mismatch.")
+    except Exception as e:
+        print(f"Failed to query Storage: {e}")
+
+if __name__ == '__main__':
+    evaluate_storage_zone_affinity()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Snowflake DB Platform",
+            question: "A pod reschedule event fails with a 'VolumeAlreadyMounted' CSI error. Explain the locking mechanics of storage attachments in AWS/GCP, node-controller recovery timelines, and safe recovery procedures.",
+            answer: `
+<p>A <strong>VolumeAlreadyMounted</strong> error occurs when a newly scheduled pod attempts to mount a cloud block store (e.g. AWS EBS) that is still locked by the hypervisor attach-table to a failed host node:</p>
+<ol>
+  <li><strong>Cloud Attachment Locking:</strong> Cloud block storage blocks permit mounting to a single hypervisor instance at a time (ReadWriteOnce constraints). When a node crashes, the cluster control plane registers node status loss, but the hypervisor attach-table continues to lock the volume.</li>
+  <li><strong>AD Controller Timelines:</strong> The Kubernetes **Attach/Detach (A/D) Controller** manages attachments. It waits for the Node heartbeat timeout (40s) + grace eviction timers before issuing a host detach command. However, if the hypervisor API is sluggish, the detach fails or gets delayed, blocking the scheduled pod in <code>ContainerCreating</code>.</li>
+  <li><strong>Safe Remediation:</strong>
+    <ul>
+      <li>Do not force-evict pods immediately to avoid potential double-attach database file corruptions.</li>
+      <li>Perform a programmatic check of the block attachment, cordon the failed node, trigger a graceful host reboot to release hypervisor mount mappings, and allow K8s to safely transition the storage lock to the new node host.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "Amazon EBS Storage Team",
+            question: "Analyze the architectural differences between 'Immediate' and 'WaitForFirstConsumer' volume binding modes within StorageClass specifications, and how they resolve AZ placement mismatches.",
+            answer: `
+<p>The choice of <strong>volumeBindingMode</strong> determines the scheduling phase when persistent storage is allocated:</p>
+<ul>
+  <li><strong>Immediate Mode:</strong> The StorageClass allocates storage the moment the PVC is created. If the cluster spans multiple Availability Zones (AZs) and the cloud driver happens to provision the disk in <code>us-east-1a</code>, the scheduler is now forced to schedule the consumer pod only to a node inside <code>us-east-1a</code>, potentially violating CPU availability or node anti-affinity constraints.</li>
+  <li><strong>WaitForFirstConsumer Mode:</strong> Storage provisioning is deferred. When a PVC is created, the storage driver remains idle. The scheduler first evaluates node constraints for the pod (AZs, CPU/RAM, affinities). Once the target node is chosen, the storage controller provisions the physical disk in the node's **exact Availability Zone**, eliminating scheduling AZ placement mismatches.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Database Systems Loop",
+            question: "A StatefulSet RollingUpdate fails, leaving 'db-2' in a pending state and blocking the rollout of 'db-1'. Explain the strict ordinal sequencing rules of StatefulSet rollouts, storage locking, and how to unblock the loop.",
+            answer: `
+<p>A StatefulSet enforces **ordinal sequence rules ($N-1$ down to $0$)** during rollouts to preserve database state consistency:</p>
+<ul>
+  <li><strong>Ordinal Locking:</strong> Under <code>RollingUpdate</code>, the controller scales down and updates the highest ordinal pod (e.g., <code>db-2</code>). The rollout process **blocks completely** and will not proceed to update <code>db-1</code> until <code>db-2</code> is fully <code>Running</code> and <code>Ready</code>.</li>
+  <li><strong>Stateful Rollout Failures:</strong> If <code>db-2</code> fails to run (due to image pull errors, scheduling constraint conflicts, or CSI volume mount locks), the entire deployment freezes. The controller refuses to bypass the failure, protecting the database cluster from experiencing multiple concurrent nodes offline.</li>
+  <li><strong>Unblocking Strategy:</strong> Inspect and patch the failure root cause on <code>db-2</code> (e.g., clear mount locks, edit storage class limits). If the failure is an unresolvable config mismatch, rollback the StatefulSet configuration to let the controller restore the stable v1 states.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Set volumeBindingMode: WaitForFirstConsumer in all cluster StorageClass templates. This forces Kube-Scheduler to pick the node first, ensuring your persistent disk is created in the exact same Availability Zone as your workload, avoiding unresolvable AZ scheduling deadlocks!"
+      },
+      {
+        id: 5,
+        title: "Autoscaling & Rollout Strategies",
+        level: "expert",
+        category: "Scaling & Rollouts",
+        def: "Inspect autoscaling dynamics, ReplicaSet rolling update metrics, HPA vs VPA operations, and Karpenter scheduling-driven node auto-provisioning.",
+        machinery: "Kubernetes coordinates scaling and updates dynamically to respond to traffic demands: <br>1. <strong>ReplicaSet Rollouts:</strong> Deployments manage ReplicaSets using <code>maxSurge</code> (excess pods permitted during rollout) and <code>maxUnavailable</code> (pods allowed offline). The controller creates a new v2 ReplicaSet, scaling up new pods while scaling down v1 pods until the old ReplicaSet count hits zero.<br>2. <strong>Horizontal Pod Autoscaler (HPA):</strong> The HPA controller queries the **Metrics Server API** every 15 seconds. It computes scaling ratios: $TargetReplicas = \\lceil CurrentReplicas \\times (CurrentMetric / TargetMetric) \\rceil$. Advanced pipelines employ **Prometheus Adapter** to scale pods using custom domain metrics (like Kafka queue consumer lag).<br>3. <strong>Vertical Pod Autoscaler (VPA):</strong> VPA reconciles sizing. The <code>Recommender</code> gathers metrics history, <code>Updater</code> evicts under-provisioned pods, and the <code>Admission Controller</code> injects updated CPU/RAM request resources during pod initialization. *Note: VPA cannot operate on resource metrics used by HPA.*<br>4. <strong>Karpenter Node Provisioner:</strong> Karpenter bypasses traditional cluster autoscalers. Instead of monitoring node groups, it parses pending pods' scheduling requirements directly, selecting the optimal cloud instance types and launching them in seconds, consolidating nodes aggressively during low-load windows.",
+        scenarios: [
+          {
+            title: "Scenario A: Creating an Event-Driven Custom Autoscaler using Kafka Consumer Queue Lag",
+            expl: "We write a custom autoscaler controller. It monitors a queue metric and programmatically adjusts a Deployment's replica count via API clients to handle dynamic workload spikes.",
+            diagram: `
++------------------- Kafka Queue Monitoring --------------------+
+|                                                               |
+|  Queue Consumer Lag: 12,000 pending messages                  |
+|  Target Lag limit: 1,000 per Pod                              |
+|  Required Replicas: 12 Pods                                    |
+|                                                               |
++--------------------------------+--------------------------------+
+                                 v Dynamic Scaling Command
++--------------------- Kubernetes API Server -------------------+
+|                                                               |
+|  PATCH /apis/apps/v1/namespaces/default/deployments/worker/scale|
+|                                                               |
+|  Replicas update to 12.                                       |
+|  Deployment controller scales pods instantly.                 |
++---------------------------------------------------------------+`,
+            jsCode: `// Programmatic auto-scale controller based on external queue lag metrics (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+
+async function scaleDeploymentReplicas(deploymentName, targetReplicas, namespace = "default") {
+  console.log(\`Updating replica scale for deployment \${deploymentName} to: \${targetReplicas}\`);
+  
+  const patch = {
+    spec: {
+      replicas: targetReplicas
+    }
+  };
+
+  try {
+    // Invoke Scale API endpoint
+    await appsApi.patchNamespacedDeploymentScale(
+      deploymentName,
+      namespace,
+      patch,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { headers: { 'Content-Type': 'application/merge-patch+json' } }
+    );
+    console.log("Scale command processed. Replica set count updated successfully.");
+  } catch (err) {
+    console.error("Scale operation rejected:", err.body ? err.body.message : err.message);
+  }
+}
+
+// Simulating monitoring trigger
+const mockKafkaQueueLag = 15000;
+const messagesPerPod = 2000;
+const computedReplicas = Math.ceil(mockKafkaQueueLag / messagesPerPod); // 8 replicas
+
+scaleDeploymentReplicas("data-worker-deployment", computedReplicas);`,
+            pyCode: `# Dynamic queue lag monitoring auto-scaler controller (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+import math
+
+def adjust_deployment_scale(deployment_name, computed_replicas, namespace="default"):
+    config.load_kube_config()
+    api = client.AppsV1Api()
+    
+    scale_patch = {
+        "spec": {
+            "replicas": computed_replicas
+        }
+    }
+    
+    try:
+        print(f"Submitting replica scale patch command to: {computed_replicas}...")
+        api.patch_namespaced_deployment_scale(
+            name=deployment_name,
+            namespace=namespace,
+            body=scale_patch
+        )
+        print("Deployment replica size successfully adjusted.")
+    except ApiException as e:
+        print(f"Failed to adjust replica scaling settings: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    # Compute active target count
+    queue_depth_lag = 18500
+    pod_capacity = 3000
+    target = math.ceil(queue_depth_lag / pod_capacity) # 7 replicas
+    
+    adjust_deployment_scale("data-worker-deployment", target)`
+          },
+          {
+            title: "Scenario B: Automating Canary Rollouts with RollingUpdate and Health Checks",
+            expl: "We write a rollout monitoring program that updates a deployment image, tracks rollout progress, and programmatically triggers a rollback to the previous version if container crashes occur during the rollout.",
+            diagram: `
++------------------- Canary Deployment Rollout -------------------+
+|                                                                 |
+|   Scale up new ReplicaSet v2  ---> [Container Crash Loop]       |
+|   Rollout Monitor detects high failure rate                     |
+|   Trigger rollBack to revision 1                                |
+|                                                                 |
++--------------------------------+--------------------------------+
+                                 v Trigger Rollback
++-------------------- Kubernetes API Server ----------------------+
+|                                                                 |
+|  PATCH deployment.spec.template.spec.containers[0].image = v1   |
+|  Scales down broken v2 and restores stable v1 pods              |
++-----------------------------------------------------------------+`,
+            jsCode: `// Automated rollout manager and rollback loop handler (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const appsApi = kc.makeApiClient(k8s.AppsV1Api);
+
+async function deployWithHealthCheck(deploymentName, targetImage, prevImage, namespace = "default") {
+  try {
+    console.log(\`Initiating rolling update: \${deploymentName} -> \${targetImage}\`);
+    
+    const patch = {
+      spec: {
+        template: {
+          spec: {
+            containers: [{
+              name: "app",
+              image: targetImage
+            }]
+          }
+        }
+      }
+    };
+
+    // Apply new image
+    await appsApi.patchNamespacedDeployment(deploymentName, namespace, patch);
+    console.log("Image updated. Monitoring rollout progress...");
+
+    // Monitor for 10 seconds (simulate rollout timeout check)
+    let isHealthy = false;
+    for (let i = 0; i < 5; i++) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const res = await appsApi.readNamespacedDeployment(deploymentName, namespace);
+      const status = res.body.status;
+      
+      console.log(\`  - Replicas: \${status.updatedReplicas} updated, \${status.unavailableReplicas || 0} unavailable\`);
+      
+      if (status.unavailableReplicas > 0) {
+        console.warn("  [ALERT] Crash detected on updated replicas! Tracing rollback triggers...");
+        isHealthy = false;
+        break;
+      }
+      isHealthy = true;
+    }
+
+    if (!isHealthy) {
+      console.error("Rollout unhealthy! Executing automatic rollback transaction...");
+      const rollbackPatch = {
+        spec: {
+          template: {
+            spec: {
+              containers: [{
+                name: "app",
+                image: prevImage // rollback image
+              }]
+            }
+          }
+        }
+      };
+      await appsApi.patchNamespacedDeployment(deploymentName, namespace, rollbackPatch);
+      console.log("Rollback completed successfully. Cluster stabilized.");
+    } else {
+      console.log("Deployment healthy! Rolling update finalized.");
+    }
+  } catch (err) {
+    console.error("Rollout lifecycle manager failed:", err.body ? err.body.message : err.message);
+  }
+}
+
+deployWithHealthCheck("app-web-deployment", "my-app:v2-broken", "my-app:v1-stable");`,
+            pyCode: `# Automated rollout monitor with automatic crash rollback (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+import time
+
+def manage_canary_rollout(deployment_name, target_image, stable_image, namespace="default"):
+    config.load_kube_config()
+    api = client.AppsV1Api()
+    
+    patch_spec = {
+        "spec": {
+            "template": {
+                "spec": {
+                    "containers": [{
+                        "name": "app",
+                        "image": target_image
+                    }]
+                }
+            }
+        }
+    }
+    
+    try:
+        print(f"Updating image target to {target_image}...")
+        api.patch_namespaced_deployment(deployment_name, namespace, patch_spec)
+        
+        # Poll cluster state for failure detection
+        for _ in range(5):
+            time.sleep(2)
+            dep = api.read_namespaced_deployment(deployment_name, namespace)
+            unavailable = dep.status.unavailable_replicas if dep.status.unavailable_replicas else 0
+            print(f"  * Rollout status check: Unavailable count = {unavailable}")
+            
+            if unavailable > 0:
+                print("  [CRITICAL ALERT] Failure detected inside rolling pods. Aborting...")
+                rollback_spec = {
+                    "spec": {
+                        "template": {
+                            "spec": {
+                                "containers": [{
+                                    "name": "app",
+                                    "image": stable_image
+                                }]
+                            }
+                        }
+                    }
+                }
+                api.patch_namespaced_deployment(deployment_name, namespace, rollback_spec)
+                print("Rollback applied to restore previous stable environment.")
+                return
+                
+        print("Rollout successfully completed. Stable status achieved.")
+    except ApiException as e:
+        print(f"Deployment process failed: {e.reason}")
+
+if __name__ == '__main__':
+    manage_canary_rollout("app-web-deployment", "my-app:v2-broken", "my-app:v1-stable")`
+          },
+          {
+            title: "Scenario C: Safely Draining Pods during Spot Instance Interruptions",
+            expl: "We write a programmatic host draining utility. Upon intercepting a cloud spot instance termination warning, the program cordons the node and evicts running pods programmatically to guarantee zero downtime.",
+            diagram: `
++------------------- Spot Termination Hook --------------------+
+|                                                              |
+|   1. Node receives Spot Instance 2-Minute Warning             |
+|   2. Monitor marks node unschedulable (Cordon)               |
+|   3. Evicts all active workloads programmatically            |
+|                                                              |
++--------------------------------+------------------------------+
+                                 v Cordon & Evict APIs
++--------------------- Kubernetes Worker Node ------------------+
+|                                                              |
+|  * Pods are safely moved to stable nodes                      |
+|  * Eviction endpoints enforce PodDisruptionBudget limits     |
++--------------------------------------------------------------+`,
+            jsCode: `// Cordon node and trigger pod eviction under spot interruption warning (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function drainNode(nodeName) {
+  try {
+    console.log(\`Spot interruption intercepted! Cordons node: \${nodeName}\`);
+    
+    // 1. Cordon the node (set unschedulable = true)
+    const nodePatch = {
+      spec: {
+        unschedulable: true
+      }
+    };
+    await coreApi.patchNode(nodeName, nodePatch, undefined, undefined, undefined, undefined, undefined, {
+      headers: { 'Content-Type': 'application/merge-patch+json' }
+    });
+    console.log(\`Node \${nodeName} cordoned successfully.\`);
+
+    // 2. Query and evict all active workloads on this node
+    const podsRes = await coreApi.listPodForAllNamespaces(undefined, undefined, undefined, \`spec.nodeName=\${nodeName}\`);
+    const pods = podsRes.body.items;
+    
+    console.log(\`Evicting \${pods.length} pods from node \${nodeName}...\`);
+    for (const pod of pods) {
+      const eviction = {
+        apiVersion: "policy/v1",
+        kind: "Eviction",
+        metadata: {
+          name: pod.metadata.name,
+          namespace: pod.metadata.namespace
+        }
+      };
+      
+      await coreApi.createNamespacedPodEviction(pod.metadata.name, pod.metadata.namespace, eviction);
+      console.log(\`  - Evicted pod: \${pod.metadata.name}\`);
+    }
+    console.log("All workloads safely evicted before host shutdown.");
+  } catch (err) {
+    console.error("Drain transaction failed:", err.body ? err.body.message : err.message);
+  }
+}
+
+drainNode("node-spot-worker-1");`,
+            pyCode: `# Node cordon and workload eviction coordinator (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def execute_spot_interruption_drain(node_name):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    # 1. Cordon node
+    node_patch = {
+        "spec": {
+            "unschedulable": True
+        }
+    }
+    
+    try:
+        print(f"Cordoning target host: {node_name}...")
+        api.patch_node(node_name, node_patch)
+        print("Node marked unschedulable.")
+        
+        # 2. Query workloads bound to host node
+        print("Listing active workloads scheduled on host...")
+        pods = api.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node_name}")
+        
+        for pod in pods.items:
+            print(f"  * Generating eviction request for: {pod.metadata.name}")
+            eviction = client.V1Eviction(
+                api_version="policy/v1",
+                kind="Eviction",
+                metadata=client.V1ObjectMeta(name=pod.metadata.name, namespace=pod.metadata.namespace)
+            )
+            api.create_namespaced_pod_eviction(pod.metadata.name, pod.metadata.namespace, eviction)
+            
+        print("Node drain operations completed successfully.")
+    except ApiException as e:
+        print(f"Drain failed: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    execute_spot_interruption_drain("node-spot-worker-1")`
+          }
+        ],
+        questions: [
+          {
+            badge: "TikTok Scaling Loop",
+            question: "Explain the phenomenon of Horizontal Pod Autoscaler (HPA) routing loop oscillation (flapping). What parameters control this behavior, and how do you customize scale stabilization templates?",
+            answer: `
+<p>HPA **flapping** occurs when the autoscaler continuously loops between scaling up and scaling down due to rapid, volatile metric fluctuations:</p>
+<ol>
+  <li><strong>Flapping Mechanism:</strong> A metric spike (e.g. CPU > 85%) triggers a scale-up event. The addition of new pod replicas instantly lowers the average CPU utilization below target thresholds (e.g. to 40%). HPA immediately scale-down the pods, which causes the load to spike again, generating a continuous scaling oscillation loop.</li>
+  <li><strong>Control Parameters:</strong> Flapping behavior is regulated by stabilization windows. By default, Kubernetes includes a **scale-down stabilization window of 5 minutes**, preventing down-scaling during temporary metric drops.</li>
+  <li><strong>Custom Scaling Templates:</strong> Stabilization parameters can be configured explicitly under the HPA <code>behavior</code> spec block:
+    <pre><code>behavior:
+  scaleDown:
+    stabilizationWindowSeconds: 300
+    policies:
+    - type: Percent
+      value: 10
+      periodSeconds: 60</code></pre>
+    This constraints downscale actions to a maximum of 10% capacity reduction per minute, dampening network oscillation.</li>
+</ol>
+            `
+          },
+          {
+            badge: "Airbnb Platform Architect",
+            question: "Why do HPA and Vertical Pod Autoscaler (VPA) conflict when operating on CPU/Memory metrics simultaneously? Under what architectural patterns can both autoscalers coexist safely?",
+            answer: `
+<p>HPA and VPA conflict because they attempt opposing actions on the same resource constraints, leading to scheduling deadlocks:</p>
+<ul>
+  <li><strong>Resource Mismatch:</strong> If a deployment experiences high load, HPA attempts to scale the number of pods horizontally (e.g. 2 -> 5). Simultaneously, VPA reads the same metrics and attempts to increase the CPU/Memory requests of the active pods by editing the deployment specification in-place.</li>
+  <li><strong>Deadlock Loop:</strong> Editing the pod spec triggers container restarts, which drops the active pod count, causing HPA to spin up more pods, while VPA continues to claim more memory until resource limits are reached.</li>
+  <li><strong>Coexistence Architecture:</strong> Both systems can coexist safely only if they evaluate **completely separate metric vectors**:
+    <ol>
+      <li>Use **HPA** to scale replicas horizontally based on custom traffic metrics (e.g. HTTP throughput, Kafka queue lag).</li>
+      <li>Use **VPA** in <code>Off</code> or <code>RecommendationOnly</code> mode, applying recommendations manually or during quiet maintenance windows.</li>
+    </ol>
+  </li>
+</ul>
+            `
+          },
+          {
+            badge: "Lyft Cloud Infrastructure",
+            question: "How does Karpenter bypass the legacy Kubernetes Cluster Autoscaler architecture to achieve sub-minute worker node provisioning under FAANG-scale workloads?",
+            answer: `
+<p>Karpenter improves autoscaling performance by eliminating legacy abstractions and integrating directly with the host scheduler:</p>
+<ul>
+  <li><strong>Legacy Bottleneck (Cluster Autoscaler):</strong> Traditional autoscalers monitor **Node Groups** (AWS ASGs). When a pod is unschedulable, CA queries ASG controllers, wait for group scaling limits, provisions hosts, and relies on Kube-Scheduler to pick nodes. This process takes 3–5 minutes.</li>
+  <li><strong>Karpenter Just-in-Time Model:</strong> Karpenter bypasses Node Groups entirely. It acts as an internal scheduler controller, querying the API Server's unschedulable pod queues directly. It computes scheduling requirements, selects the optimal instance classes (e.g., matching CPU/RAM/AZ/Spot constraints), makes **direct calls to the cloud APIs to provision instances in seconds**, and binds pods directly to the new nodes, reducing scale-up latency under 45 seconds.</li>
+</ul>
+            `
+          }
+        ],
+        tip: "Explicitly configure HPA scaling behaviors in production workloads. Use a conservative scale-down stabilization window (300s) to prevent cluster thrashing and node flapping during micro-spikes in network traffic!"
+      },
+      {
+        id: 6,
+        title: "RBAC, Security Contexts, & NetworkPolicies",
+        level: "expert",
+        category: "Cluster Security",
+        def: "Establish enterprise security frameworks using RBAC least-privilege, container security contexts, Pod Security Standards, and NetworkPolicy ingress/egress firewalls.",
+        machinery: "Kubernetes secures applications across administrative layers: <br>1. <strong>Least-Privilege RBAC:</strong> Restricts cluster access. A <code>Role</code> (namespaced) or <code>ClusterRole</code> (cluster-scoped) defines permissible actions (verbs) against specific API resources. They are mapped to identities using <code>RoleBinding</code> or <code>ClusterRoleBinding</code>. Avoid wildcards (<code>*</code>) in production cluster definitions.<br>2. <strong>Security Contexts:</strong> Control OS kernel isolation parameters. Containers should explicitly drop all Linux capabilities (<code>capabilities.drop: ['ALL']</code>), set <code>allowPrivilegeEscalation: false</code>, set <code>readOnlyRootFilesystem: true</code> to prevent write mutations, and enforce non-root runtime environments using <code>runAsNonRoot: true</code>.<br>3. <strong>Pod Security Standards (PSS):</strong> Replaces PodSecurityPolicies. Cluster namespaces enforce strict profiles: <code>Privileged</code> (no restrictions), <code>Baseline</code> (prevents known privilege escalations), and <code>Restricted</code> (enforces strict hardening guidelines, blocking privileged execution paths).<br>4. <strong>NetworkPolicies:</strong> Act as layer-3/4 packet firewalls. They operate in a default-allow state. Once a NetworkPolicy is applied, access defaults to deny, permitting connections only to pods that explicitly match label constraints.",
+        scenarios: [
+          {
+            title: "Scenario A: Building an RBAC Audit Engine to Detect Over-Privileged Cluster Permissions",
+            expl: "We write a security scanning controller that lists cluster-wide role bindings. It analyzes bindings to alert on the use of security wildcards or high-risk administrative verb permissions.",
+            diagram: `
++------------------- RBAC Security Scanner --------------------+
+|                                                              |
+|  1. Pull active ClusterRoleBindings and Role definitions     |
+|  2. Scan for wildcard verbs: ["*"]                           |
+|  3. Scan for critical write resource privileges              |
+|                                                              |
++--------------------------------+------------------------------+
+                                 v Audit Violations Alerted!
++----------------------- Security Console ---------------------+
+|                                                              |
+|   [CRITICAL] Admin wildcard found: "cluster-admin" bind      |
+|   [WARNING] Write permissions allowed on: "secrets"          |
++--------------------------------------------------------------+`,
+            jsCode: `// Programmatic scan of cluster RBAC Role Bindings for security audit (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const rbacApi = kc.makeApiClient(k8s.RbacAuthorizationV1Api);
+
+async function auditRbacPrivileges() {
+  try {
+    console.log("Starting security audit of active ClusterRoleBindings...");
+    const res = await rbacApi.listClusterRoleBinding();
+    
+    res.body.items.forEach(binding => {
+      const subjectNames = binding.subjects ? binding.subjects.map(s => s.name).join(", ") : "None";
+      console.log(\`ClusterRoleBinding: \${binding.metadata.name} (Bound to: \${subjectNames})\`);
+      
+      // Flags administrative roles
+      if (binding.roleRef.name === "cluster-admin") {
+        console.warn(\`  [CRITICAL ALERT] Service or user has full 'cluster-admin' root credentials!\`);
+      }
+    });
+  } catch (err) {
+    console.error("RBAC scan failed:", err.message);
+  }
+}
+
+auditRbacPrivileges();`,
+            pyCode: `# Programmatic audit scan of cluster-wide RBAC role bindings (Python)
+from kubernetes import client, config
+
+def scan_cluster_rbac_violations():
+    config.load_kube_config()
+    api = client.RbacAuthorizationV1Api()
+    
+    try:
+        print("Analyzing active ClusterRoleBindings for authorization leaks...")
+        bindings = api.list_cluster_role_binding()
+        
+        for binding in bindings.items:
+            role_name = binding.role_ref.name
+            subjects = [s.name for s in binding.subjects] if binding.subjects else []
+            
+            print(f"Role: {role_name} -> Subjects: {subjects}")
+            
+            # Audit wildcard authorizations
+            if "admin" in role_name.lower() or "system" in role_name.lower():
+                print(f"  [SECURITY FLAG] Highly privileged binding detected: {role_name}")
+                
+    except Exception as e:
+        print(f"Audit analysis failed: {e}")
+
+if __name__ == '__main__':
+    scan_cluster_rbac_violations()`
+          },
+          {
+            title: "Scenario B: Verifying Pod Security Contexts for Restricted Compliance",
+            expl: "We build a runtime security verification controller. It scans active pod configurations, flagging containers running as host root or failing to enforce read-only filesystems.",
+            diagram: `
++------------------- Pod Security Context --------------------+
+|                                                             |
+|   Active Pod -> spec.containers[0].securityContext:         |
+|     * runAsNonRoot: false   ---> [SECURITY VIOLATION]       |
+|     * readOnlyRootFilesystem: false ---> [SECURITY WARNING] |
+|                                                             |
++------------------------------+------------------------------+
+                               v Real-Time Compliance Audit
++---------------------- Security Audit Log --------------------+
+|                                                             |
+|  * Pod database-0 fails: Read-only root not active          |
+|  * Pod backend-web-0 fails: Running as root UID 0           |
++--------------------------------------------------------------+`,
+            jsCode: `// Runtime audit verification of container SecurityContext parameters (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const coreApi = kc.makeApiClient(k8s.CoreV1Api);
+
+async function verifySecurityContexts(namespace = "default") {
+  try {
+    console.log(\`Evaluating security compliance in namespace: \${namespace}...\`);
+    const res = await coreApi.listNamespacedPod(namespace);
+    
+    res.body.items.forEach(pod => {
+      pod.spec.containers.forEach(container => {
+        const sc = container.securityContext;
+        console.log(\`Pod: \${pod.metadata.name} | Container: \${container.name}\`);
+        
+        if (!sc) {
+          console.warn("  [CRITICAL VIOLATION] SecurityContext is completely absent!");
+          return;
+        }
+
+        if (sc.runAsNonRoot !== true) {
+          console.warn("  [VIOLATION] runAsNonRoot is not set to true. Pod can execute as root user!");
+        }
+        
+        if (sc.readOnlyRootFilesystem !== true) {
+          console.warn("  [WARNING] readOnlyRootFilesystem is not set to true. Write access permitted.");
+        }
+
+        if (sc.allowPrivilegeEscalation !== false) {
+          console.warn("  [WARNING] allowPrivilegeEscalation is not set to false. Privilege escalation possible!");
+        }
+      });
+    });
+  } catch (err) {
+    console.error("Pod security check failed:", err.message);
+  }
+}
+
+verifySecurityContexts();`,
+            pyCode: `# Audit validation program checking container security configurations (Python)
+from kubernetes import client, config
+
+def audit_pod_security_parameters(namespace="default"):
+    config.load_kube_config()
+    api = client.CoreV1Api()
+    
+    try:
+        print(f"Scanning Pod security parameters in namespace: {namespace}...")
+        pods = api.list_namespaced_pod(namespace)
+        
+        for pod in pods.items:
+            for container in pod.spec.containers:
+                sc = container.security_context
+                print(f"Pod: {pod.metadata.name} | Container: {container.name}")
+                
+                if not sc:
+                    print("  [ALERT] SecurityContext completely missing. Container runs with dangerous defaults!")
+                    continue
+                    
+                if sc.run_as_non_root is not True:
+                    print("  [VIOLATION] Container runs as root. Non-root enforcement required!")
+                if sc.read_only_root_filesystem is not True:
+                    print("  [WARNING] Write permissions allowed on container filesystem.")
+                if sc.allow_privilege_escalation is not False:
+                    print("  [WARNING] Privilege escalation paths enabled.")
+                    
+    except Exception as e:
+        print(f"Failed to query Pod configurations: {e}")
+
+if __name__ == '__main__':
+    audit_pod_security_parameters()`
+          },
+          {
+            title: "Scenario C: Provisioning Strict Network Policies to Isolate Application Tiers",
+            expl: "We write an automation script that provisions a NetworkPolicy. This blocks all default namespace traffic, opening ports solely to database pods matching explicit client labels.",
+            diagram: `
++--------------------- Network Policy Isolation ---------------------+
+|                                                                    |
+|   Frontend Pod (Label: role=frontend)                              |
+|     * Attempt direct egress to DB ---> [BLOCKED by Default Deny]    |
+|                                                                    |
+|   Backend Pod (Label: role=backend)                                |
+|     * Attempt egress to DB ---> [ALLOWED by ingress PodSelector]   |
+|                                                                    |
++---------------------------------+----------------------------------+
+                                  v Restricts DB Ingress
++----------------------- Database Pod (role=db) ---------------------+
+|                                                                    |
+|  NetworkPolicy applied: Ingress allowed only from label role=backend|
++--------------------------------------------------------------------+`,
+            jsCode: `// Programmatic provisioning of strict NetworkPolicies (Node.js)
+const k8s = require('@kubernetes/client-node');
+
+const kc = new k8s.KubeConfig();
+kc.loadFromDefault();
+const networkApi = kc.makeApiClient(k8s.NetworkingV1Api);
+
+async function applyDbIsolationPolicy(namespace = "default") {
+  const policy = {
+    apiVersion: "networking.k8s.io/v1",
+    kind: "NetworkPolicy",
+    metadata: {
+      name: "restrict-db-access",
+      namespace: namespace
+    },
+    spec: {
+      podSelector: {
+        matchLabels: {
+          role: "db" // target DB pods
+        }
+      },
+      policyTypes: ["Ingress"],
+      ingress: [{
+        from: [{
+          podSelector: {
+            matchLabels: {
+              role: "backend" // allow backend only
+            }
+          }
+        }],
+        ports: [{
+          protocol: "TCP",
+          port: 5432 // PostgreSQL port
+        }]
+      }]
+    }
+  };
+
+  try {
+    console.log("Applying DB tier isolation NetworkPolicy...");
+    await networkApi.createNamespacedNetworkPolicy(namespace, policy);
+    console.log("DB isolation NetworkPolicy active. Access restricted.");
+  } catch (err) {
+    console.error("Failed to apply NetworkPolicy:", err.body ? err.body.message : err.message);
+  }
+}
+
+applyDbIsolationPolicy();`,
+            pyCode: `# Automating NetworkPolicy injection for microservice isolation (Python)
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+
+def create_database_network_policy(namespace="default"):
+    config.load_kube_config()
+    api = client.NetworkingV1Api()
+    
+    # Configure NetworkPolicy specifications
+    policy_body = client.V1NetworkPolicy(
+        api_version="networking.k8s.io/v1",
+        kind="NetworkPolicy",
+        metadata=client.V1ObjectMeta(name="restrict-db-access", namespace=namespace),
+        spec=client.V1NetworkPolicySpec(
+            pod_selector=client.V1LabelSelector(match_labels={"role": "db"}),
+            policy_types=["Ingress"],
+            ingress=[
+                client.V1NetworkPolicyIngressRule(
+                    _from=[
+                        client.V1NetworkPolicyPeer(
+                            pod_selector=client.V1LabelSelector(match_labels={"role": "backend"})
+                        )
+                    ],
+                    ports=[
+                        client.V1NetworkPolicyPort(protocol="TCP", port=5432)
+                    ]
+                )
+            ]
+        )
+    )
+    
+    try:
+        print("Injecting NetworkPolicy specifications to API Server...")
+        api.create_namespaced_network_policy(namespace, policy_body)
+        print("Database network tier isolated. Rules applied successfully.")
+    except ApiException as e:
+        print(f"Failed to generate NetworkPolicy: {e.reason} - {e.body}")
+
+if __name__ == '__main__':
+    create_database_network_policy()`
+          }
+        ],
+        questions: [
+          {
+            badge: "Salesforce Security Loop",
+            question: "Explain the threat model of ServiceAccount token leakage inside Kubernetes pods, and how automountServiceAccountToken settings mitigate host escalation vectors.",
+            answer: `
+<p>ServiceAccount token leakage constitutes a critical privilege escalation threat vector inside Kubernetes clusters:</p>
+<ol>
+  <li><strong>The Threat Model:</strong> By default, Kubernetes mounts a unique ServiceAccount token JWT inside every container at <code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>. If an application (e.g., a vulnerable web app) is compromised via Remote Code Execution (RCE), the attacker can read this token. Using standard tools (or curl), they can query the cluster API Server directly.</li>
+  <li><strong>Privilege Escalation:</strong> If the cluster administrator has bound overly permissive roles (like wildcard writes) to the namespace's default ServiceAccount, the attacker can execute administrative changes (e.g., creating backdoored privileged containers, reading other namespaces' secrets), taking over the cluster.</li>
+  <li><strong>Mitigation Strategy:</strong>
+    <ul>
+      <li>Close the threat vector by explicitly setting <code>automountServiceAccountToken: false</code> on pod and service account specifications that do not need to query the API server.</li>
+      <li>Restrict ServiceAccount credentials using minimal namespace Role scopes and avoid ClusterRole binds.</li>
+    </ul>
+  </li>
+</ol>
+            `
+          },
+          {
+            badge: "Zoom Security Operations",
+            question: "Why should default Linux Capabilities be dropped inside a container's SecurityContext spec, and what is the difference between dropping default capabilities vs running a privileged container?",
+            answer: `
+<p>Dropping Linux Capabilities inside container specifications restricts OS kernel privilege vectors:</p>
+<ul>
+  <li><strong>Default Linux Capabilities:</strong> When a container starts, the host kernel grants a default set of capabilities (like <code>chown, dac_override, net_raw, sys_chroot</code>) to allow basic initialization tasks. However, these capabilities can be exploited during sandbox escape attempts.</li>
+  <li><strong>Dropping Capabilities:</strong> By configuring:
+    <pre><code>securityContext:
+  capabilities:
+    drop:
+    - ALL</code></pre>
+    We block these system calls, preventing attackers from modifying file ownership or exploiting low-level networking sockets even if they gain root access inside the container.</li>
+  <li><strong>Contrast with Privileged:</strong> Running in <code>--privileged</code> mode completely disables all namespaces, namespaces isolation systems, AppArmor profiles, and seccomp filters, exposing all host system devices directly to the container process.</li>
+</ul>
+            `
+          },
+          {
+            badge: "Coinbase Infrastructure Team",
+            question: "Explain the default-allow behavior of Kubernetes NetworkPolicies, and how to construct a reliable namespace-wide Default-Deny ingress and egress posture.",
+            answer: `
+<p>By default, Kubernetes networking operates under a **Default-Allow** model. In this state, any pod in the cluster can open TCP/UDP sockets to any other pod, even across namespace boundaries, unless explicit firewalls restrict traffic.</p>
+<p>To secure a production namespace, you must implement a strict **Default-Deny** security posture:</p>
+<ol>
+  <li><strong>Default Deny Ingress:</strong> Apply a NetworkPolicy that selects all pods (empty podSelector <code>{}</code>) and defines an empty ingress policy array:
+    <pre><code>spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress</code></pre>
+    This instantly blocks all inbound traffic.</li>
+  <li><strong>Default Deny Egress:</strong> Similarly, block outbound connections:
+    <pre><code>spec:
+  podSelector: {}
+  policyTypes:
+  - Egress</code></pre>
+  This prevents compromised pods from initiating outbound egress connections (e.g. data exfiltration).</li>
+  <li>Once applied, write granular, label-specific policies to permit verified backend connections.</li>
+</ol>
+            `
+          }
+        ],
+        tip: "Enforce strict SecurityContext controls: always set allowPrivilegeEscalation: false and runAsNonRoot: true in production templates to block containers from executing host escalation vectors during software exploits!"
+      }
+    ];
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function filterQ() {
+      const val = document.querySelector('.search').value.toLowerCase();
+      const items = document.querySelectorAll('.q-item');
+      items.forEach(item => {
+        const title = item.querySelector('.q-title').textContent.toLowerCase();
+        const cat = item.dataset.category.toLowerCase();
+        if (title.includes(val) || cat.includes(val)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    function updateProgress() {
+      const total = topics.length;
+      const completed = completedTopics.length;
+      const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressPercent').textContent = pct + '%';
+      
+      // Update status tags
+      document.querySelectorAll('.q-item').forEach(item => {
+        const id = parseInt(item.dataset.id);
+        if (completedTopics.includes(id)) {
+          item.classList.add('completed');
+        } else {
+          item.classList.remove('completed');
+        }
+      });
+    }
+
+    function toggleTopicCompletion(id) {
+      id = parseInt(id);
+      if (completedTopics.includes(id)) {
+        completedTopics = completedTopics.filter(t => t !== id);
+      } else {
+        completedTopics.push(id);
+      }
+      localStorage.setItem('completed_k8s_topics', JSON.stringify(completedTopics));
+      updateProgress();
+    }
+
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.code-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      // Refresh current active view
+      const activeItem = document.querySelector('.q-item.active');
+      if (activeItem) {
+        loadTopic(activeItem.dataset.id);
+      }
+    }
+
+    function toggleScenario(index) {
+      const container = document.querySelectorAll('.scenario-container')[index];
+      container.classList.toggle('open');
+    }
+
+    function loadTopic(id) {
+      id = parseInt(id);
+      const topic = topics.find(t => t.id === id);
+      if (!topic) return;
+
+      // Set sidebar active status
+      document.querySelectorAll('.q-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.dataset.id) === id);
+      });
+
+      document.getElementById('welcomeScreen').style.display = 'none';
+      const ansCard = document.getElementById('ansCard');
+      ansCard.style.display = 'block';
+
+      const isCompleted = completedTopics.includes(id);
+
+      // Render scenarios
+      let scenariosHTML = '';
+      topic.scenarios.forEach((sc, idx) => {
+        const codeText = currentLang === 'py' ? sc.pyCode : sc.jsCode;
+        const codeLang = currentLang === 'py' ? 'python' : 'javascript';
+        
+        scenariosHTML += `
+          <div class="scenario-container">
+            <div class="scenario-header" onclick="toggleScenario(${idx})">
+              <div class="scenario-title">
+                <span>Scenario ${idx + 1}</span> ${sc.title}
+              </div>
+              <div class="scenario-arrow">▼</div>
+            </div>
+            <div class="scenario-body">
+              <div class="scenario-expl">${sc.expl}</div>
+              <div class="visual-wrap">${sc.diagram.trim()}</div>
+              
+              <div class="code-wrap">
+                <div class="code-header">
+                  <div class="code-lang">${codeLang}</div>
+                </div>
+                <div class="code-body">${highlight(codeText.trim(), codeLang)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Render interview questions
+      let questionsHTML = '';
+      topic.questions.forEach((q, idx) => {
+        questionsHTML += `
+          <div class="qa-box">
+            <div class="qa-badge">${q.badge}</div>
+            <h4 class="qa-question">Q: ${q.question}</h4>
+            <div class="qa-answer">${q.answer}</div>
+          </div>
+        `;
+      });
+
+      ansCard.innerHTML = `
+        <div class="ans-header">
+          <div class="header-info">
+            <span class="ans-level level-${topic.level}">${topic.level}</span>
+            <h2 class="ans-title">${topic.title}</h2>
+            <div class="ans-def">${topic.def}</div>
+          </div>
+          <div class="completion-action" onclick="toggleTopicCompletion(${topic.id})">
+            <input type="checkbox" id="chkComplete" ${isCompleted ? 'checked' : ''} onchange="event.stopPropagation(); toggleTopicCompletion(${topic.id})">
+            <label for="chkComplete">Mark as Completed</label>
+          </div>
+        </div>
+
+        <div class="sec-title">Internal Machinery & Distributed Design</div>
+        <div class="expl-list">
+          <div class="expl-item">${topic.machinery}</div>
+        </div>
+
+        <div class="code-control">
+          <div class="sec-title" style="margin: 0;">Enterprise Scenarios & Code Integration</div>
+          <div class="code-tabs">
+            <button class="code-tab ${currentLang === 'py' ? 'active' : ''}" data-lang="py" onclick="switchLang('py')">Python (kubernetes-py)</button>
+            <button class="code-tab ${currentLang === 'js' ? 'active' : ''}" data-lang="js" onclick="switchLang('js')">Node.js (client-node)</button>
+          </div>
+        </div>
+        <div style="margin-top: 1.5rem;">
+          ${scenariosHTML}
+        </div>
+
+        <div class="sec-title">MNC & FAANG Interview Questions</div>
+        <div class="qa-group">
+          ${questionsHTML}
+        </div>
+
+        <div class="tip-box">
+          <div class="tip-text">
+            <strong>EXPERT DESIGN RECOMMENDATION:</strong> ${topic.tip}
+          </div>
+        </div>
+      `;
+
+      // Auto-open first scenario
+      setTimeout(() => {
+        const firstScenario = document.querySelector('.scenario-container');
+        if (firstScenario) firstScenario.classList.add('open');
+      }, 50);
+
+      // On mobile, close sidebar after selection
+      if (window.innerWidth <= 960) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    function init() {
+      const qList = document.getElementById('qList');
+      let currentCategory = '';
+      let html = '';
+
+      topics.forEach(t => {
+        if (t.category !== currentCategory) {
+          if (currentCategory !== '') {
+            html += '</div>'; // close cat-group
+          }
+          currentCategory = t.category;
+          html += `
+            <div class="cat-group">
+              <div class="cat-title">${currentCategory}</div>
+          `;
+        }
+
+        const isCompleted = completedTopics.includes(t.id);
+
+        html += `
+          <div class="q-item ${isCompleted ? 'completed' : ''}" data-id="${t.id}" data-category="${t.category}" onclick="loadTopic(${t.id})">
+            <div class="q-title-wrap">
+              <div class="q-title">${t.title}</div>
+              <div class="q-meta">
+                <span class="level-dot" style="background-color: var(--${t.level})"></span>
+                <span class="level-text">${t.level}</span>
+              </div>
+            </div>
+            <span class="status-check">✓</span>
+          </div>
+        `;
+      });
+
+      if (currentCategory !== '') {
+        html += '</div>';
+      }
+
+      qList.innerHTML = html;
+      updateProgress();
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
