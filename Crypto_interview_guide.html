@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pi42 Interview Prep — Satendra Kumar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f17;
+    --bg2: #121824;
+    --bg3: #1a2233;
+    --bg4: #1e2940;
+    --green: #00d68f;
+    --green-dim: rgba(0,214,143,0.12);
+    --amber: #f0a500;
+    --amber-dim: rgba(240,165,0,0.12);
+    --red: #ff5c5c;
+    --red-dim: rgba(255,92,92,0.1);
+    --blue: #4da6ff;
+    --blue-dim: rgba(77,166,255,0.1);
+    --text: #c8d6e5;
+    --text-dim: #6b7f96;
+    --text-bright: #e8f2ff;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(0,214,143,0.25);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+  /* HEADER */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-pill {
+    background: var(--green);
+    color: #000;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+  }
+  .header-title { font-size: 15px; font-weight: 500; color: var(--text-bright); }
+  .header-sub { font-size: 12px; color: var(--text-dim); font-family: var(--mono); margin-top: 2px; }
+  .header-badge {
+    font-size: 12px; font-family: var(--mono);
+    background: var(--amber-dim); color: var(--amber);
+    border: 1px solid rgba(240,165,0,0.2);
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* TABS */
+  .tabs {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    padding: 0 32px;
+    gap: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+
+  /* CONTENT */
+  .content { max-width: 1000px; margin: 0 auto; padding: 28px 32px 60px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* SECTION HEADINGS */
+  .section-group { margin-bottom: 36px; }
+  .section-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--green-dim);
+  }
+
+  /* CARD */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .card:hover { border-color: rgba(255,255,255,0.13); }
+  .card.open { border-color: var(--border-accent); }
+
+  .card-header {
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    user-select: none;
+  }
+  .card-q {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-bright);
+    line-height: 1.5;
+  }
+  .card-arrow {
+    font-size: 12px;
+    color: var(--text-dim);
+    transition: transform 0.2s;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .card.open .card-arrow { transform: rotate(180deg); color: var(--green); }
+
+  .card-body {
+    display: none;
+    padding: 0 18px 18px;
+    border-top: 1px solid var(--border);
+  }
+  .card.open .card-body { display: block; }
+
+  .card-body p { margin-top: 12px; font-size: 14px; color: var(--text); line-height: 1.7; }
+  .card-body ul { margin-top: 10px; padding-left: 20px; }
+  .card-body li { font-size: 14px; color: var(--text); line-height: 1.7; margin-bottom: 4px; }
+  .card-body strong { color: var(--text-bright); font-weight: 500; }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .tag-hard { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,92,92,0.2); }
+  .tag-med { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(240,165,0,0.2); }
+  .tag-easy { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,214,143,0.2); }
+  .tag-domain { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(77,166,255,0.2); }
+
+  /* CODE */
+  pre {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 6px;
+    padding: 16px;
+    margin-top: 12px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #a8c8e8;
+  }
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .cmt { color: #546e7a; font-style: italic; }
+  .num { color: var(--amber); }
+  .cls { color: #ffcb6b; }
+  .key { color: var(--green); }
+
+  /* ANSWER BLOCKS */
+  .answer-block {
+    background: var(--bg3);
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    border-left: 3px solid var(--blue);
+  }
+  .answer-block.green { border-left-color: var(--green); }
+  .answer-block.amber { border-left-color: var(--amber); }
+  .answer-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  /* GRID */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  @media(max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+  .mini-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+  }
+  .mini-card-title { font-size: 12px; font-weight: 600; color: var(--text-bright); font-family: var(--mono); margin-bottom: 6px; }
+  .mini-card p { font-size: 13px; color: var(--text); margin-top: 4px; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+  th { background: var(--bg3); color: var(--text-bright); font-weight: 500; padding: 8px 12px; text-align: left; border: 1px solid var(--border); font-family: var(--mono); font-size: 11px; }
+  td { padding: 8px 12px; border: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:hover td { background: var(--bg3); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; margin-top: 10px; }
+  .checklist li { padding: 6px 0; font-size: 14px; display: flex; align-items: flex-start; gap: 10px; }
+  .checklist li::before { content: '◆'; color: var(--green); font-size: 8px; margin-top: 6px; flex-shrink: 0; }
+
+  /* SYSTEM DESIGN DIAGRAM */
+  .arch-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .arch-green { color: var(--green); }
+  .arch-amber { color: var(--amber); }
+  .arch-blue { color: var(--blue); }
+
+  /* HIGHLIGHT NOTE */
+  .note {
+    background: var(--amber-dim);
+    border: 1px solid rgba(240,165,0,0.2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--amber);
+  }
+  .note strong { color: var(--amber); }
+
+  .tip {
+    background: var(--green-dim);
+    border: 1px solid rgba(0,214,143,0.2);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--green);
+  }
+
+  /* PROGRESS BAR */
+  .progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .progress-label { font-size: 13px; color: var(--text); width: 220px; flex-shrink: 0; }
+  .progress-bar { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; }
+  .progress-pct { font-family: var(--mono); font-size: 12px; color: var(--text-dim); width: 36px; text-align: right; }
+
+  /* INTRO PANEL */
+  .intro-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 28px; }
+  @media(max-width:640px){ .intro-grid { grid-template-columns: 1fr; } }
+  .intro-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .intro-card-label { font-size: 10px; font-family: var(--mono); color: var(--text-dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .intro-card-val { font-size: 22px; font-weight: 600; color: var(--text-bright); font-family: var(--mono); }
+  .intro-card-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  hr.divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <span class="logo-pill">Pi42</span>
+    <div>
+      <div class="header-title">Lead Full-Stack Engineer — Interview Prep</div>
+      <div class="header-sub">Satendra Kumar · crypto futures exchange · Bengaluru</div>
+    </div>
+  </div>
+  <div class="header-badge">5 sections · 40+ questions</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab" onclick="switchTab('programming')">Programming</button>
+  <button class="tab" onclick="switchTab('sysdesign')">System Design</button>
+  <button class="tab" onclick="switchTab('domain')">Trading Domain</button>
+  <button class="tab" onclick="switchTab('behavioral')">Behavioral</button>
+  <button class="tab" onclick="switchTab('quickref')">Quick Reference</button>
+</div>
+
+<!-- ═══════════════════════════════════ OVERVIEW ══════════════════════════════════ -->
+<div class="content">
+<div id="panel-overview" class="panel active">
+
+  <div class="intro-grid">
+    <div class="intro-card">
+      <div class="intro-card-label">Role</div>
+      <div class="intro-card-val" style="font-size:16px;margin-top:4px">Lead Full-Stack</div>
+      <div class="intro-card-sub">Individual contributor, no people mgmt</div>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-label">Your fit score</div>
+      <div class="intro-card-val" style="color:var(--amber)">68%</div>
+      <div class="intro-card-sub">Strong domain, Node.js gap</div>
+    </div>
+    <div class="intro-card">
+      <div class="intro-card-label">Expected rounds</div>
+      <div class="intro-card-val">3 – 4</div>
+      <div class="intro-card-sub">DSA · Full-stack · System design · Culture</div>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Your strengths going in</div>
+    <div class="progress-row"><span class="progress-label">Trading systems domain</span><div class="progress-bar"><div class="progress-fill" style="width:92%;background:var(--green)"></div></div><span class="progress-pct">92%</span></div>
+    <div class="progress-row"><span class="progress-label">React.js / Frontend</span><div class="progress-bar"><div class="progress-fill" style="width:88%;background:var(--green)"></div></div><span class="progress-pct">88%</span></div>
+    <div class="progress-row"><span class="progress-label">WebSockets / Real-time</span><div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--green)"></div></div><span class="progress-pct">85%</span></div>
+    <div class="progress-row"><span class="progress-label">Python / FastAPI / async</span><div class="progress-bar"><div class="progress-fill" style="width:80%;background:var(--green)"></div></div><span class="progress-pct">80%</span></div>
+    <div class="progress-row"><span class="progress-label">PostgreSQL / System design</span><div class="progress-bar"><div class="progress-fill" style="width:72%;background:var(--amber)"></div></div><span class="progress-pct">72%</span></div>
+    <div class="progress-row"><span class="progress-label">Node.js (backend)</span><div class="progress-bar"><div class="progress-fill" style="width:38%;background:var(--red)"></div></div><span class="progress-pct">38%</span></div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">What Pi42 will actually test</div>
+    <table>
+      <tr><th>Round</th><th>What they test</th><th>Your prep priority</th></tr>
+      <tr><td>Round 1 — DSA / coding</td><td>Data structures, async patterns, maybe a live coding problem (order book, rate limiter)</td><td><span class="tag tag-hard">High</span></td></tr>
+      <tr><td>Round 2 — Full-stack deep dive</td><td>React patterns, Node.js event loop, WebSocket implementation, DB schema design</td><td><span class="tag tag-hard">High</span></td></tr>
+      <tr><td>Round 3 — System design</td><td>Design an order matching engine or real-time P&L service. Scale, reliability, correctness</td><td><span class="tag tag-hard">High</span></td></tr>
+      <tr><td>Round 4 — Culture / leadership</td><td>End-to-end ownership, incident handling, cross-functional collaboration, technical decisions</td><td><span class="tag tag-med">Medium</span></td></tr>
+    </table>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">The Node.js gap — your bridging strategy</div>
+    <div class="note"><strong>⚠ Critical:</strong> Pi42 will ask Node.js-specific questions. Your honest answer: "My primary backend is Python/FastAPI, but I understand async event-driven architecture deeply — the patterns are identical, the syntax differs." Then pivot to your async Python depth + real-time trading work.</div>
+    <div class="tip">✓ Study the Node.js event loop cold. Know Promise.all vs allSettled, clustering, streams backpressure. These show async architectural understanding that transfers directly from Python asyncio.</div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Your best stories to tell</div>
+    <ul class="checklist">
+      <li><strong>96% latency reduction</strong> on the BI platform — perfect for "tell me about a performance problem you solved"</li>
+      <li><strong>Automated Options Trading Platform</strong> at Analogyx — real production trading system with WebSockets, stop-loss, distributed workers</li>
+      <li><strong>Delta Trading Bot</strong> — crypto options on ETH, OTM/ITM sell strategy, hedge layer, async FastAPI scheduler</li>
+      <li><strong>React trading dashboards</strong> with real-time execution monitoring — directly relevant to Pi42's frontend needs</li>
+    </ul>
+  </div>
+
+</div><!-- /panel-overview -->
+
+
+<!-- ═══════════════════════════════════ PROGRAMMING ══════════════════════════════════ -->
+<div id="panel-programming" class="panel">
+
+  <div class="section-group">
+    <div class="section-title">JavaScript &amp; Node.js</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Explain the Node.js event loop in detail. How does it handle async I/O?<span class="tag tag-hard">Must know</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>Node.js is <strong>single-threaded</strong> but non-blocking. The event loop has these phases in order:</p>
+        <pre><span class="cmt">// Event loop phases (each iteration = one "tick")</span>
+<span class="num">1.</span> <span class="key">timers</span>        — executes setTimeout / setInterval callbacks due now
+<span class="num">2.</span> <span class="key">pending I/O</span>   — I/O callbacks deferred from previous iteration
+<span class="num">3.</span> <span class="key">idle/prepare</span>  — internal Node use
+<span class="num">4.</span> <span class="key">poll</span>          — retrieves new I/O events; executes their callbacks
+<span class="num">5.</span> <span class="key">check</span>         — setImmediate() callbacks run here
+<span class="num">6.</span> <span class="key">close</span>         — close events (socket.on('close', ...))
+
+<span class="cmt">// Between each phase: process ALL microtasks first</span>
+<span class="cmt">// Microtasks = Promise .then() / .catch() + queueMicrotask()</span>
+<span class="cmt">// process.nextTick() runs before microtasks</span></pre>
+        <p>Heavy CPU tasks block the event loop — use <strong>worker_threads</strong> for CPU-intensive work (e.g. computing Greeks across thousands of positions). I/O is handled by libuv's thread pool (default 4 threads), callback returns to poll phase.</p>
+        <div class="tip">✓ For Pi42: explain that in a trading platform you'd never block the event loop with computation. Real-time tick processing and order execution stay async; heavy analytics go to worker threads.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Promise.all vs Promise.allSettled vs Promise.race vs Promise.any<span class="tag tag-med">Common</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <pre><span class="cmt">// Promise.all — waits for ALL, short-circuits on first rejection</span>
+<span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">all</span>([fetchBalance(), fetchPositions(), fetchOrders()])
+<span class="cmt">// Use when ALL results are needed (e.g. load dashboard data in parallel)</span>
+
+<span class="cmt">// Promise.allSettled — waits for ALL to finish regardless</span>
+<span class="kw">const</span> results = <span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">allSettled</span>([riskCheck(), marginCheck()])
+results.<span class="fn">forEach</span>(r => r.status === <span class="str">'fulfilled'</span> ? r.value : r.reason)
+<span class="cmt">// Use when partial failure is acceptable</span>
+
+<span class="cmt">// Promise.race — first one to settle wins (resolve OR reject)</span>
+<span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">race</span>([fetchMarketData(), <span class="fn">timeout</span>(<span class="num">2000</span>)])
+<span class="cmt">// Classic timeout pattern for latency-sensitive order APIs</span>
+
+<span class="cmt">// Promise.any — first SUCCESSFUL resolve wins</span>
+<span class="kw">await</span> <span class="cls">Promise</span>.<span class="fn">any</span>([primaryFeed(), backupFeed(), tertiaryFeed()])
+<span class="cmt">// Great for redundant market data feeds with failover</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How would you handle 50,000 concurrent WebSocket connections in Node.js?<span class="tag tag-hard">High value</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p><strong>Architecture approach:</strong></p>
+        <ul>
+          <li><strong>Horizontal scaling:</strong> Multiple Node.js instances behind a load balancer. Use sticky sessions (IP hash) so a client always hits the same node.</li>
+          <li><strong>Redis Pub/Sub:</strong> When a trade happens on node-1, publish to Redis. All other nodes subscribe and push to their connected clients.</li>
+          <li><strong>uWebSockets.js</strong> instead of the ws library — 10x lower memory per connection, written in C++.</li>
+          <li><strong>Connection housekeeping:</strong> Ping/pong heartbeats every 30s, terminate dead connections. Track subscriptions per connection (don't send BTC data to ETH traders).</li>
+          <li><strong>Message batching:</strong> Don't send one message per tick. Batch updates every 50–100ms per connection — reduces CPU, network, and client re-renders.</li>
+        </ul>
+        <pre><span class="cmt">// Redis pub/sub pattern across Node.js instances</span>
+<span class="kw">const</span> publisher  = redis.<span class="fn">createClient</span>()
+<span class="kw">const</span> subscriber = redis.<span class="fn">createClient</span>()
+
+<span class="cmt">// On trade execution</span>
+publisher.<span class="fn">publish</span>(<span class="str">'market:ETH-USDT'</span>, <span class="cls">JSON</span>.<span class="fn">stringify</span>(tradeData))
+
+<span class="cmt">// Each WS node subscribes and fans out to its local connections</span>
+subscriber.<span class="fn">subscribe</span>(<span class="str">'market:ETH-USDT'</span>, (msg) => {
+  localClients.forEach(ws => ws.<span class="fn">send</span>(msg))
+})</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">What are streams and backpressure in Node.js?<span class="tag tag-med">Relevant</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>Backpressure occurs when a <strong>writable stream</strong> can't consume data as fast as a readable produces it. Without handling it, buffers grow unboundedly — memory leak / crash.</p>
+        <pre><span class="cmt">// pipe() handles backpressure automatically</span>
+readable.<span class="fn">pipe</span>(writable)
+
+<span class="cmt">// Manual handling</span>
+<span class="kw">const</span> canWrite = writable.<span class="fn">write</span>(chunk)
+<span class="kw">if</span> (!canWrite) {
+  readable.<span class="fn">pause</span>()                       <span class="cmt">// stop producing</span>
+  writable.<span class="fn">once</span>(<span class="str">'drain'</span>, () => readable.<span class="fn">resume</span>()) <span class="cmt">// resume when clear</span>
+}</pre>
+        <p><strong>Trading relevance:</strong> If you're writing tick data to PostgreSQL slower than WebSocket ticks arrive, backpressure management prevents data loss. In practice: buffer in Redis or Kafka (not memory), process in batches.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How does the Node.js 'crypto' module work? Implement HMAC signing for API requests.<span class="tag tag-hard">Domain Critical</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>The <code>crypto</code> module provides cryptographic functionality that includes a set of wrappers for OpenSSL's hash, HMAC, cipher, decipher, sign, and verify functions.</p>
+        <pre><span class="kw">const</span> crypto = <span class="fn">require</span>(<span class="str">'crypto'</span>);
+
+<span class="cmt">// 1. Hashing (e.g. for generating deterministic IDs)</span>
+<span class="kw">const</span> hash = crypto.<span class="fn">createHash</span>(<span class="str">'sha256'</span>)
+                   .<span class="fn">update</span>(<span class="str">'data'</span>)
+                   .<span class="fn">digest</span>(<span class="str">'hex'</span>);
+
+<span class="cmt">// 2. HMAC Signing (Essential for Exchange API Auth)</span>
+<span class="kw">function</span> <span class="fn">signRequest</span>(payload, secret) {
+  <span class="kw">return</span> crypto.<span class="fn">createHmac</span>(<span class="str">'sha256'</span>, secret)
+               .<span class="fn">update</span>(<span class="cls">JSON</span>.<span class="fn">stringify</span>(payload))
+               .<span class="fn">digest</span>(<span class="str">'hex'</span>);
+}
+
+<span class="cmt">// 3. Secure Random Bytes (for salts, session tokens)</span>
+<span class="kw">const</span> salt = crypto.<span class="fn">randomBytes</span>(<span class="num">16</span>).<span class="fn">toString</span>(<span class="str">'hex'</span>);</pre>
+        <div class="tip">✓ For Pi42: Mention that for low-latency signing, you might use <code>crypto.sign</code> with Ed25519 keys (common in crypto) which is faster than RSA and more secure for small payloads.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Buffers and TypedArrays: Why use them for trading systems?<span class="tag tag-med">Performance</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>Buffers are used to handle <strong>binary data</strong> directly. In a trading system, WebSocket ticks or binary protocols (like Protobuf or FIX) are often processed as Buffers to avoid the overhead of string conversion.</p>
+        <pre><span class="cmt">// Allocating memory outside the V8 heap (more stable for large data)</span>
+<span class="kw">const</span> buf = <span class="cls">Buffer</span>.<span class="fn">allocUnsafe</span>(<span class="num">1024</span>); <span class="cmt">// faster but contains old data</span>
+
+<span class="cmt">// Fast binary parsing</span>
+<span class="kw">const</span> price = buf.<span class="fn">readDoubleBE</span>(<span class="num">0</span>);
+<span class="kw">const</span> quantity = buf.<span class="fn">readDoubleBE</span>(<span class="num">8</span>);
+
+<span class="cmt">// TypedArrays for mathematical operations (Greeks, Indicators)</span>
+<span class="kw">const</span> priceHistory = <span class="kw">new</span> <span class="cls">Float64Array</span>(<span class="num">1000</span>);</pre>
+        <p><strong>Benefits:</strong> Zero-copy operations, reduced Garbage Collection (GC) pressure, and direct memory access for high-speed network I/O.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Implement a rate limiter using the Token Bucket algorithm<span class="tag tag-hard">Live coding</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>Token bucket: bucket has capacity N. Tokens refill at rate R per second. Each request consumes 1 token. Request rejected if bucket empty.</p>
+        <pre><span class="kw">class</span> <span class="cls">TokenBucketRateLimiter</span> {
+  <span class="fn">constructor</span>(capacity, refillRatePerSec) {
+    <span class="kw">this</span>.capacity = capacity
+    <span class="kw">this</span>.tokens   = capacity
+    <span class="kw">this</span>.refillRate  = refillRatePerSec
+    <span class="kw">this</span>.lastRefillTs = <span class="cls">Date</span>.<span class="fn">now</span>()
+  }
+
+  <span class="fn">consume</span>() {
+    <span class="kw">this</span>.<span class="fn">_refill</span>()
+    <span class="kw">if</span> (<span class="kw">this</span>.tokens &lt; <span class="num">1</span>) <span class="kw">return false</span>   <span class="cmt">// reject</span>
+    <span class="kw">this</span>.tokens -= <span class="num">1</span>
+    <span class="kw">return true</span>
+  }
+
+  <span class="fn">_refill</span>() {
+    <span class="kw">const</span> now     = <span class="cls">Date</span>.<span class="fn">now</span>()
+    <span class="kw">const</span> elapsed = (now - <span class="kw">this</span>.lastRefillTs) / <span class="num">1000</span>
+    <span class="kw">const</span> added   = elapsed * <span class="kw">this</span>.refillRate
+    <span class="kw">this</span>.tokens   = <span class="cls">Math</span>.<span class="fn">min</span>(<span class="kw">this</span>.capacity, <span class="kw">this</span>.tokens + added)
+    <span class="kw">this</span>.lastRefillTs = now
+  }
+}
+
+<span class="cmt">// For distributed rate limiting: store tokens in Redis (INCR + TTL)</span>
+<span class="cmt">// Use Lua script for atomic check-and-decrement</span></pre>
+      </div>
+    </div>
+
+  </div><!-- /js section -->
+
+  <div class="section-group">
+    <div class="section-title">React &amp; Frontend</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">useMemo vs useCallback — when to use each, and the performance traps<span class="tag tag-med">Common</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <pre><span class="cmt">// useMemo — memoizes a COMPUTED VALUE</span>
+<span class="kw">const</span> totalPnl = <span class="fn">useMemo</span>(() =>
+  positions.<span class="fn">reduce</span>((sum, p) => sum + p.unrealizedPnl, <span class="num">0</span>),
+  [positions]   <span class="cmt">// only recomputes when positions array changes</span>
+)
+
+<span class="cmt">// useCallback — memoizes a FUNCTION REFERENCE</span>
+<span class="kw">const</span> handleCancel = <span class="fn">useCallback</span>((orderId) => {
+  <span class="fn">cancelOrder</span>(orderId)
+}, [cancelOrder])  <span class="cmt">// stable reference → child wrapped in React.memo won't re-render</span>
+
+<span class="cmt">// ⚠ Trap: both have COST (comparison work every render)</span>
+<span class="cmt">// Only use when: (1) expensive computation or (2) preventing child re-renders</span>
+<span class="cmt">// Don't wrap every value/function — profile first</span></pre>
+        <div class="tip">✓ For a trading dashboard: useMemo for portfolio P&amp;L aggregation across 1000 positions. useCallback for order action handlers passed to virtualized order book rows.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How do you build a real-time order book UI that updates 50 times/sec without freezing?<span class="tag tag-hard">Pi42-specific</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>This is exactly what Pi42 needs. Your answer should cover four layers:</p>
+        <ul>
+          <li><strong>1. Virtual scrolling:</strong> Only render visible rows. Use react-virtual or react-window. Rendering 200 DOM nodes vs 10,000 is ~20x faster.</li>
+          <li><strong>2. Throttled WebSocket → state:</strong> Don't setState on every tick. Buffer updates in a ref, flush to state via requestAnimationFrame at 60fps max.</li>
+          <li><strong>3. React.memo + stable keys:</strong> Wrap row component in React.memo with price-level key. Only rows whose data changed re-render.</li>
+          <li><strong>4. Immutable update pattern:</strong> Use shallow copy for changed rows only — structural sharing keeps reconciliation O(changed) not O(all).</li>
+        </ul>
+        <pre><span class="kw">const</span> wsBuffer = <span class="fn">useRef</span>([])
+
+<span class="fn">useEffect</span>(() => {
+  <span class="kw">const</span> ws = <span class="kw">new</span> <span class="cls">WebSocket</span>(<span class="str">'wss://api.pi42.com/orderbook'</span>)
+  ws.onmessage = (e) => wsBuffer.current.<span class="fn">push</span>(<span class="cls">JSON</span>.<span class="fn">parse</span>(e.data))
+
+  <span class="kw">const</span> rafId = <span class="fn">requestAnimationFrame</span>(<span class="kw">function</span> <span class="fn">flush</span>() {
+    <span class="kw">if</span> (wsBuffer.current.length > <span class="num">0</span>) {
+      <span class="fn">setOrderBook</span>(prev => <span class="fn">applyUpdates</span>(prev, wsBuffer.current))
+      wsBuffer.current = []
+    }
+    <span class="fn">requestAnimationFrame</span>(flush)
+  })
+  <span class="kw">return</span> () => { ws.<span class="fn">close</span>(); <span class="fn">cancelAnimationFrame</span>(rafId) }
+}, [])</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How does React reconciliation work? What triggers unnecessary re-renders?<span class="tag tag-med">Common</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>React builds a <strong>virtual DOM tree</strong>. On state change, it creates a new tree and <strong>diffs</strong> it against the previous (reconciliation). Differences get applied to real DOM (commit phase).</p>
+        <p><strong>Unnecessary re-render triggers:</strong></p>
+        <ul>
+          <li>Parent re-renders → all children re-render unless wrapped in React.memo</li>
+          <li>New object/array/function reference in props on every render (common with inline <code>{ }</code> or <code>() =&gt; {}</code>)</li>
+          <li>Context value changing reference even if data is the same</li>
+          <li>Wrong key — using array index as key causes full re-mount when list order changes</li>
+        </ul>
+        <div class="tip">✓ For an order book: use price level as key (e.g. "52000.50"), not index. Price levels are stable; their quantities change — React updates only the quantity text node, not the whole row.</div>
+      </div>
+    </div>
+
+  </div><!-- /react section -->
+
+  <div class="section-group">
+    <div class="section-title">Database &amp; SQL (PostgreSQL)</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Design a PostgreSQL schema for a high-volume trades table. How do you keep queries fast?<span class="tag tag-hard">Live design</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <pre><span class="cmt">-- Range partition by month — keeps each partition small & manageable</span>
+<span class="kw">CREATE TABLE</span> trades (
+  id          <span class="fn">BIGSERIAL</span>,
+  symbol      <span class="fn">VARCHAR</span>(<span class="num">20</span>)    <span class="kw">NOT NULL</span>,
+  user_id     <span class="fn">BIGINT</span>        <span class="kw">NOT NULL</span>,
+  order_id    <span class="fn">BIGINT</span>        <span class="kw">NOT NULL</span>,
+  side        <span class="fn">VARCHAR</span>(<span class="num">4</span>)     <span class="kw">NOT NULL</span>,  <span class="cmt">-- 'buy' | 'sell'</span>
+  price       <span class="fn">NUMERIC</span>(<span class="num">20</span>,<span class="num">8</span>) <span class="kw">NOT NULL</span>,
+  quantity    <span class="fn">NUMERIC</span>(<span class="num">20</span>,<span class="num">8</span>) <span class="kw">NOT NULL</span>,
+  fee         <span class="fn">NUMERIC</span>(<span class="num">20</span>,<span class="num">8</span>) <span class="kw">NOT NULL</span>,
+  created_at  <span class="fn">TIMESTAMPTZ</span>   <span class="kw">NOT NULL DEFAULT NOW</span>(),
+  <span class="kw">PRIMARY KEY</span> (id, created_at)
+) <span class="kw">PARTITION BY RANGE</span> (created_at);
+
+<span class="kw">CREATE TABLE</span> trades_2025_05 <span class="kw">PARTITION OF</span> trades
+  <span class="kw">FOR VALUES FROM</span> (<span class="str">'2025-05-01'</span>) <span class="kw">TO</span> (<span class="str">'2025-06-01'</span>);
+
+<span class="cmt">-- Indexes (on the parent — cascade to all partitions)</span>
+<span class="kw">CREATE INDEX</span> idx_trades_user_time  <span class="kw">ON</span> trades (user_id, created_at <span class="kw">DESC</span>);
+<span class="kw">CREATE INDEX</span> idx_trades_sym_time   <span class="kw">ON</span> trades (symbol, created_at <span class="kw">DESC</span>);
+
+<span class="cmt">-- For P&L queries: use NUMERIC not FLOAT (exact decimal arithmetic)</span>
+<span class="cmt">-- For mark price: store separately, never derived from trades table</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Explain transaction isolation levels. Which do you use for balance/margin updates?<span class="tag tag-med">Important</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <table>
+          <tr><th>Level</th><th>Dirty Read</th><th>Non-repeatable Read</th><th>Phantom Read</th></tr>
+          <tr><td>Read Uncommitted</td><td>❌ Possible</td><td>❌</td><td>❌</td></tr>
+          <tr><td>Read Committed (PG default)</td><td>✓ Safe</td><td>❌ Possible</td><td>❌</td></tr>
+          <tr><td>Repeatable Read</td><td>✓</td><td>✓</td><td>❌ Possible</td></tr>
+          <tr><td>Serializable</td><td>✓</td><td>✓</td><td>✓ Safe</td></tr>
+        </table>
+        <p style="margin-top:12px"><strong>For trading systems:</strong> Use <strong>SERIALIZABLE</strong> or <strong>SELECT FOR UPDATE</strong> (row-lock) for balance deductions and margin checks. Never allow a race condition where two orders both pass a margin check simultaneously and both consume the same collateral.</p>
+        <pre><span class="kw">BEGIN</span>;
+<span class="kw">SELECT</span> available_margin <span class="kw">FROM</span> accounts
+  <span class="kw">WHERE</span> user_id = <span class="num">123</span>
+  <span class="kw">FOR UPDATE</span>;          <span class="cmt">-- locks this row until transaction ends</span>
+<span class="cmt">-- check if margin sufficient</span>
+<span class="kw">UPDATE</span> accounts <span class="kw">SET</span> available_margin = available_margin - :required
+  <span class="kw">WHERE</span> user_id = <span class="num">123</span>;
+<span class="kw">COMMIT</span>;</pre>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Algorithms &amp; Data Structures</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Implement an in-memory order book data structure with O(log n) insertions<span class="tag tag-hard">Live coding</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p>Use a sorted map (price → queue of orders). Bids descending, asks ascending.</p>
+        <pre><span class="kw">class</span> <span class="cls">OrderBook</span> {
+  <span class="fn">constructor</span>() {
+    <span class="kw">this</span>.bids = <span class="kw">new</span> <span class="cls">Map</span>()  <span class="cmt">// price → [orders] — sorted desc externally</span>
+    <span class="kw">this</span>.asks = <span class="kw">new</span> <span class="cls">Map</span>()  <span class="cmt">// price → [orders] — sorted asc</span>
+    <span class="kw">this</span>.bidPrices = []    <span class="cmt">// sorted desc</span>
+    <span class="kw">this</span>.askPrices = []    <span class="cmt">// sorted asc</span>
+  }
+
+  <span class="fn">addOrder</span>(order) {
+    <span class="kw">const</span> book = order.side === <span class="str">'buy'</span> ? <span class="kw">this</span>.bids : <span class="kw">this</span>.asks
+    <span class="kw">if</span> (!book.<span class="fn">has</span>(order.price)) {
+      book.<span class="fn">set</span>(order.price, [])
+      <span class="kw">this</span>.<span class="fn">_insertSorted</span>(order.side, order.price)
+    }
+    book.<span class="fn">get</span>(order.price).<span class="fn">push</span>(order)  <span class="cmt">// price-time priority: FIFO per level</span>
+  }
+
+  <span class="fn">getBestBid</span>() { <span class="kw">return this</span>.bidPrices[<span class="num">0</span>] }
+  <span class="fn">getBestAsk</span>() { <span class="kw">return this</span>.askPrices[<span class="num">0</span>] }
+  <span class="fn">getSpread</span>()  { <span class="kw">return this</span>.<span class="fn">getBestAsk</span>() - <span class="kw">this</span>.<span class="fn">getBestBid</span>() }
+
+  <span class="fn">match</span>(incomingOrder) {
+    <span class="kw">const</span> oppSide = incomingOrder.side === <span class="str">'buy'</span> ? <span class="kw">this</span>.asks : <span class="kw">this</span>.bids
+    <span class="kw">const</span> prices  = incomingOrder.side === <span class="str">'buy'</span> ? <span class="kw">this</span>.askPrices : <span class="kw">this</span>.bidPrices
+    <span class="kw">const</span> trades  = []
+    <span class="kw">let</span>   remaining = incomingOrder.quantity
+
+    <span class="kw">while</span> (remaining > <span class="num">0</span> && prices.length > <span class="num">0</span>) {
+      <span class="kw">const</span> bestPrice = prices[<span class="num">0</span>]
+      <span class="kw">if</span> (incomingOrder.side === <span class="str">'buy'</span>  && bestPrice > incomingOrder.price) <span class="kw">break</span>
+      <span class="kw">if</span> (incomingOrder.side === <span class="str">'sell'</span> && bestPrice < incomingOrder.price) <span class="kw">break</span>
+
+      <span class="kw">const</span> queue = oppSide.<span class="fn">get</span>(bestPrice)
+      <span class="kw">while</span> (queue.length > <span class="num">0</span> && remaining > <span class="num">0</span>) {
+        <span class="kw">const</span> resting = queue[<span class="num">0</span>]
+        <span class="kw">const</span> fillQty = <span class="cls">Math</span>.<span class="fn">min</span>(remaining, resting.quantity)
+        trades.<span class="fn">push</span>({ price: bestPrice, quantity: fillQty, <span class="str">...</span> })
+        resting.quantity -= fillQty
+        remaining       -= fillQty
+        <span class="kw">if</span> (resting.quantity === <span class="num">0</span>) queue.<span class="fn">shift</span>()
+      }
+      <span class="kw">if</span> (queue.length === <span class="num">0</span>) { oppSide.<span class="fn">delete</span>(bestPrice); prices.<span class="fn">shift</span>() }
+    }
+    <span class="kw">return</span> trades
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Calculate an Exponential Moving Average (EMA) in a streaming fashion (no full history needed)<span class="tag tag-med">Algo</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <pre><span class="cmt">// EMA formula: EMA(t) = price(t) * k + EMA(t-1) * (1 - k)</span>
+<span class="cmt">// k = 2 / (period + 1)   — smoothing factor</span>
+<span class="cmt">// O(1) per tick, O(1) memory — no sliding window needed</span>
+
+<span class="kw">class</span> <span class="cls">EMA</span> {
+  <span class="fn">constructor</span>(period) {
+    <span class="kw">this</span>.k   = <span class="num">2</span> / (period + <span class="num">1</span>)
+    <span class="kw">this</span>.ema = <span class="kw">null</span>
+  }
+
+  <span class="fn">update</span>(price) {
+    <span class="kw">if</span> (<span class="kw">this</span>.ema === <span class="kw">null</span>) { <span class="kw">this</span>.ema = price; <span class="kw">return this</span>.ema }
+    <span class="kw">this</span>.ema = price * <span class="kw">this</span>.k + <span class="kw">this</span>.ema * (<span class="num">1</span> - <span class="kw">this</span>.k)
+    <span class="kw">return this</span>.ema
+  }
+}
+
+<span class="kw">const</span> ema20 = <span class="kw">new</span> <span class="cls">EMA</span>(<span class="num">20</span>)
+ticks.<span class="fn">forEach</span>(t => ema20.<span class="fn">update</span>(t.close))</pre>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /panel-programming -->
+
+
+<!-- ═══════════════════════════════════ SYSTEM DESIGN ══════════════════════════════════ -->
+<div id="panel-sysdesign" class="panel">
+
+  <div class="section-group">
+    <div class="section-title">Design questions — approach framework</div>
+    <div class="answer-block green">
+      <div class="answer-label">Use this structure for every system design answer</div>
+      <p>1. <strong>Clarify requirements</strong> — ask: scale (users, TPS), latency SLA, consistency vs availability tradeoff, read/write ratio</p>
+      <p>2. <strong>High-level components</strong> — sketch the boxes first, talk through data flow</p>
+      <p>3. <strong>Data model</strong> — schema, data types, partitioning strategy</p>
+      <p>4. <strong>Deep-dive bottlenecks</strong> — where is the hot path? how do you scale it?</p>
+      <p>5. <strong>Failure modes</strong> — what happens if component X dies? how do you recover?</p>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Question 1 — Design an Order Matching Engine</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Design Pi42's core order matching engine. Handle 10,000 orders/sec, sub-millisecond matching.<span class="tag tag-hard">Most likely asked</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="arch-box"><span class="arch-green">┌─────────────────────────────────────────────────────────────────┐
+│                        ORDER INGRESS                            │
+│   REST / WS API  →  Auth + Rate Limit  →  Order Validator       │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │  validated order
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    MESSAGE QUEUE (Kafka)                         │
+│   Topic: orders.{symbol}   (partitioned by symbol for ordering) │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              MATCHING ENGINE  (one process per symbol)          │</span>
+│   In-memory Order Book (TreeMap bid/ask)                        │
+<span class="arch-amber">│   Price-Time Priority (FIFO per price level)                    │</span>
+│   On match → emit TradeEvent to Kafka trades.{symbol}           │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │  TradeEvents
+           ┌───────────────┼───────────────┐
+           ▼               ▼               ▼
+<span class="arch-blue">  Position Service    Balance Service   Market Data Feed
+  (update positions)  (deduct margin)   (push to WS clients)</span>
+</div>
+        <p><strong>Key design decisions to mention:</strong></p>
+        <ul>
+          <li><strong>Single-threaded per symbol:</strong> The matching engine for ETH-USDT is one process. No locks needed — sequential processing guarantees correctness. Scale by adding processes for new symbols.</li>
+          <li><strong>In-memory order book:</strong> All active orders in memory. PostgreSQL is the persistent store — write order on creation, update on fill/cancel. Recovery: replay Kafka log from last checkpoint to rebuild in-memory state.</li>
+          <li><strong>Kafka partitioned by symbol:</strong> Guarantees ordered delivery per symbol. Consumers (matching engine) process in sequence — no race conditions.</li>
+          <li><strong>Separate balance check from matching:</strong> Balance/margin pre-checked at ingress. Matching engine trusts it. Balance service deducts atomically after trade event.</li>
+          <li><strong>Mark price vs last trade price:</strong> Liquidation checks use mark price (index-based average of spot exchanges) to prevent manipulation. Stored and updated separately from the order book.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Question 2 — Real-time P&amp;L Calculation Service</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Design a service that shows every user their live unrealized P&L as price moves<span class="tag tag-hard">High value</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p><strong>Core formula:</strong></p>
+        <pre><span class="cmt">-- Unrealized P&L (long position)</span>
+unrealized_pnl = (mark_price - avg_entry_price) × qty × contract_multiplier
+
+<span class="cmt">-- Realized P&L (on close)</span>
+realized_pnl = (exit_price - avg_entry_price) × closed_qty × multiplier - fees</pre>
+        <p><strong>Architecture:</strong></p>
+        <ul>
+          <li><strong>Price tick source:</strong> Kafka topic <code>market.price.{symbol}</code> updated every 100ms from aggregated index.</li>
+          <li><strong>P&L service:</strong> Consumes price ticks. For each tick, fetches all open positions for that symbol from Redis (not DB — too slow). Computes P&L, writes result to Redis hash: <code>user:{id}:pnl:{symbol}</code>.</li>
+          <li><strong>WebSocket push:</strong> Separate WS service. Subscribes to Redis keyspace notifications. When P&L key updates, pushes delta to connected user.</li>
+          <li><strong>Cold path:</strong> PostgreSQL for historical P&L, end-of-day reports, audit trail.</li>
+        </ul>
+        <div class="answer-block amber">
+          <div class="answer-label">Interviewer follow-up: what if 1M users all have open ETH positions?</div>
+          <p>Batch compute: one price tick triggers one Redis pipeline that updates all 1M users' P&L in a single round-trip. Push only if delta > threshold (e.g. 0.01% change) to avoid flooding WebSocket clients. Use Redis cluster — shard by user_id.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Question 3 — Risk &amp; Margin System</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How do you design a margin check and liquidation system that's both fast and correct?<span class="tag tag-hard">Correctness critical</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p><strong>Two-path design — fast path + safe path:</strong></p>
+        <div class="two-col">
+          <div class="mini-card">
+            <div class="mini-card-title">Fast path — order placement</div>
+            <p>Redis for available margin check. Atomic DECRBY. If result is negative, reject. Redis is ~0.1ms vs PostgreSQL ~5ms. Acceptable for 10k orders/sec.</p>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">Safe path — reconciliation</div>
+            <p>Every 500ms, compare Redis margin with PostgreSQL ground truth. If drift detected (crash recovery, race), PostgreSQL wins. Correct Redis. Alert on large discrepancies.</p>
+          </div>
+        </div>
+        <p><strong>Liquidation engine:</strong></p>
+        <ul>
+          <li>Monitor margin ratio = maintenance_margin / account_equity continuously</li>
+          <li>When ratio falls below threshold: place liquidation market order, cancel all open orders first</li>
+          <li>Use mark price, not last traded price — prevents liquidation cascades from manipulated spot trades</li>
+          <li>Insurance fund absorbs losses when liquidation price is worse than bankruptcy price</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-sysdesign -->
+
+
+<!-- ═══════════════════════════════════ TRADING DOMAIN ══════════════════════════════════ -->
+<div id="panel-domain" class="panel">
+
+  <div class="section-group">
+    <div class="section-title">Order types — know all of these</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Explain every major order type. When does a trader use each?<span class="tag tag-domain">Domain</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <table>
+          <tr><th>Order Type</th><th>Behaviour</th><th>Use case</th></tr>
+          <tr><td><strong>Market</strong></td><td>Execute immediately at best available price</td><td>Fast entry/exit. Guaranteed fill, uncertain price.</td></tr>
+          <tr><td><strong>Limit</strong></td><td>Execute only at specified price or better. Goes to book if not immediately fillable.</td><td>Controlled entry. May not fill if price doesn't reach.</td></tr>
+          <tr><td><strong>Stop-Market</strong></td><td>When mark price hits stop price → place market order</td><td>Stop-loss: cut losses automatically</td></tr>
+          <tr><td><strong>Stop-Limit</strong></td><td>When price hits stop → place limit order</td><td>Stop-loss with price control. Risk: may not fill in fast market.</td></tr>
+          <tr><td><strong>OCO</strong></td><td>Two orders linked. First fill cancels other.</td><td>Take-profit + stop-loss simultaneously</td></tr>
+          <tr><td><strong>Post-Only</strong></td><td>Cancels if it would execute as taker. Always goes to book as maker.</td><td>Market makers ensuring they earn rebates, not pay fees</td></tr>
+          <tr><td><strong>Reduce-Only</strong></td><td>Can only reduce existing position, never increase</td><td>Prevents accidentally doubling position on stop-loss</td></tr>
+          <tr><td><strong>IOC</strong></td><td>Immediate or Cancel — fill what you can now, cancel remainder</td><td>Algorithmic trading needing partial fills acceptable</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Options — your strength from Delta bot</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Explain calls, puts, ITM, OTM, ATM — and how your Delta bot strategy works<span class="tag tag-domain">Your story</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="two-col">
+          <div class="mini-card">
+            <div class="mini-card-title">Call option</div>
+            <p>Right to BUY the underlying at the strike price. Profitable if price goes UP above strike.</p>
+            <p>ITM Call: ETH at $3500, strike $3000 → has $500 intrinsic value</p>
+            <p>OTM Call: ETH at $3500, strike $4000 → pure time value only</p>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">Put option</div>
+            <p>Right to SELL at strike price. Profitable if price goes DOWN below strike.</p>
+            <p>ITM Put: ETH at $3500, strike $4000 → has $500 intrinsic value</p>
+            <p>OTM Put: ETH at $3500, strike $3000 → pure time value only</p>
+          </div>
+        </div>
+        <div class="answer-block green">
+          <div class="answer-label">Your Delta bot strategy — how to explain it</div>
+          <p>"We looked at the recent N-hour high and low as a range. We sold OTM call and put options (short straddle / strangle) — collecting premium from both sides. We placed buy orders above and below to define maximum loss (the hedge). As time passed and ETH stayed within range, options decayed to zero (theta decay) and we kept the premium. This is a defined-risk, theta-positive strategy."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">What are the Greeks? Which one matters most for your Delta bot strategy?<span class="tag tag-domain">Domain depth</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <table>
+          <tr><th>Greek</th><th>What it measures</th><th>Practical meaning</th></tr>
+          <tr><td><strong>Delta (Δ)</strong></td><td>Option price change per $1 move in underlying</td><td>Call delta: 0 to 1. Put delta: -1 to 0. ATM ≈ 0.5</td></tr>
+          <tr><td><strong>Gamma (Γ)</strong></td><td>Rate of delta change per $1 move</td><td>High near expiry. Risk of delta swings accelerating</td></tr>
+          <tr><td><strong>Theta (Θ)</strong></td><td>Time decay per day</td><td>Always negative for buyers, POSITIVE for sellers. Your bot profits from this.</td></tr>
+          <tr><td><strong>Vega (V)</strong></td><td>Sensitivity to implied volatility</td><td>Rising IV increases option price. Sellers want low/falling IV.</td></tr>
+          <tr><td><strong>Rho (ρ)</strong></td><td>Interest rate sensitivity</td><td>Less relevant for short-dated crypto options</td></tr>
+        </table>
+        <div class="tip">✓ Your bot is primarily <strong>Theta positive</strong> — you sold options and profit from time decay. The hedge caps your Gamma risk (unlimited loss risk if ETH moves massively).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Crypto Futures &amp; Perpetuals — Pi42's core product</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">How do perpetual futures differ from regular futures? What is the funding rate?<span class="tag tag-domain">Pi42-specific</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="two-col">
+          <div class="mini-card">
+            <div class="mini-card-title">Regular futures</div>
+            <p>Fixed expiry date. Price converges to spot at expiry. Settlement in cash or physical delivery. Basis = futures price − spot price, shrinks to zero at expiry.</p>
+          </div>
+          <div class="mini-card">
+            <div class="mini-card-title">Perpetual futures</div>
+            <p>No expiry. Can hold forever. Funding rate mechanism replaces convergence — keeps perp price anchored to spot index price.</p>
+          </div>
+        </div>
+        <p><strong>Funding rate mechanics:</strong></p>
+        <ul>
+          <li>Calculated every 8 hours (or 1 hour on some exchanges)</li>
+          <li>If perp price > spot: funding is positive → longs PAY shorts (discourages buying, pulls price down)</li>
+          <li>If perp price &lt; spot: funding is negative → shorts PAY longs (discourages selling, pushes price up)</li>
+          <li>Rate = (perp − spot) / spot × dampening factor</li>
+        </ul>
+        <div class="note"><strong>Pi42 interview relevance:</strong> Pi42 is a crypto futures exchange. Understanding funding rates, mark price, and liquidation is core product knowledge — not just bonus.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">Explain margin, leverage, and liquidation in crypto futures with numbers<span class="tag tag-domain">Must know</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <pre><span class="cmt">// Example: ETH at $3000, 10x leverage, 1 ETH long position</span>
+
+Position value   = $3,000
+Initial margin   = $3,000 / 10x = <span class="key">$300</span>      <span class="cmt">// collateral deposited</span>
+Maint. margin    = $3,000 × 0.5% = <span class="key">$15</span>       <span class="cmt">// minimum to stay open</span>
+
+Liquidation price = entry − (initial_margin − maint_margin) / qty
+                  = $3000 − ($300 − $15) / 1
+                  = <span class="key">$2,715</span>
+
+<span class="cmt">// If ETH drops to $2,715 → liquidation</span>
+<span class="cmt">// Bankruptcy price = $3000 − $300 = $2700 (full loss)</span>
+<span class="cmt">// Insurance fund covers gap between $2,715 and $2,700</span></pre>
+        <p><strong>Cross margin vs Isolated margin:</strong></p>
+        <ul>
+          <li><strong>Isolated:</strong> Only the allocated margin for this position is at risk. Liquidated position cannot drain your whole account.</li>
+          <li><strong>Cross:</strong> All account equity is available as margin. Harder to get liquidated but whole account at risk.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">What is mark price? Why use it instead of last traded price for liquidations?<span class="tag tag-domain">Domain depth</span></div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <p><strong>Mark price</strong> = index price (weighted average of ETH price across major spot exchanges) + EMA of basis (perp − spot). It is designed to be manipulation-resistant.</p>
+        <p><strong>Why not use last traded price for liquidations?</strong></p>
+        <ul>
+          <li>A large trader could place a large market sell on the exchange to briefly crash last traded price</li>
+          <li>This could trigger thousands of stop-losses and liquidations</li>
+          <li>Those liquidations cascade and crash the price further (cascade liquidation event)</li>
+          <li>Mark price cannot be manipulated easily — it's anchored to global spot prices across exchanges</li>
+        </ul>
+        <div class="tip">✓ This is exactly why your Delta bot used mark price for trigger logic, not last traded price.</div>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /panel-domain -->
+
+
+<!-- ═══════════════════════════════════ BEHAVIORAL ══════════════════════════════════ -->
+<div id="panel-behavioral" class="panel">
+
+  <div class="section-group">
+    <div class="section-title">Framework — use STAR for every answer</div>
+    <div class="answer-block green">
+      <div class="answer-label">STAR structure</div>
+      <p><strong>S</strong>ituation — context, constraints, what was at stake</p>
+      <p><strong>T</strong>ask — what specifically you were responsible for</p>
+      <p><strong>A</strong>ction — what YOU did (not the team)</p>
+      <p><strong>R</strong>esult — quantified outcome</p>
+    </div>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Prepared answers — your stories</div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"Tell me about a time you owned a complex technical system end-to-end"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block green">
+          <div class="answer-label">Your answer — Automated Options Trading Platform</div>
+          <p><strong>S:</strong> "At Analogyx, I was a solo engineer responsible for the entire automated trading platform — there was no separate backend or frontend team."</p>
+          <p><strong>T:</strong> "I owned everything: architecture design, backend execution engine, real-time market data pipeline, and the monitoring dashboard. Also production support when it broke at 9am when markets opened."</p>
+          <p><strong>A:</strong> "I designed a Flask + Celery distributed architecture for order execution. Built WebSocket microservices for high-frequency tick ingestion. Built a stop-loss monitoring system that ran in a separate Celery worker so it could never be blocked by order placement. React.js dashboard for live position monitoring."</p>
+          <p><strong>R:</strong> "System ran live on NSE Options with real capital. Stop-loss system successfully eliminated execution slippage during high-volatility sessions — the original manual approach had missed stops twice."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"Describe a significant performance problem you solved"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block green">
+          <div class="answer-label">Your answer — 96% latency reduction</div>
+          <p><strong>S:</strong> "Our enterprise BI platform was running analytics reports that took 40 minutes to complete. Some clients had SLA requirements and were threatening to churn."</p>
+          <p><strong>T:</strong> "I was asked to investigate — turned out nobody had profiled the backend before, it had grown organically."</p>
+          <p><strong>A:</strong> "Used PostgreSQL EXPLAIN ANALYZE to identify N+1 query patterns — we were making hundreds of small queries inside loops. Rewrote with JOINs and CTEs. Added database-level indexes on the most frequent filter columns. Moved heavy aggregation from Python into SQL window functions. On the frontend, added pagination and lazy-loaded expensive chart data separately from the main report."</p>
+          <p><strong>R:</strong> "Total execution time dropped from 40 minutes to under 90 seconds — a 96% reduction. Zero code infrastructure change, pure query and data access pattern optimization."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"How do you approach correctness vs speed in a financial system?"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block green">
+          <div class="answer-label">Your answer</div>
+          <p>"I think of them as two separate layers. Correctness is non-negotiable for anything involving money — trade execution, balance mutations, P&L. For these, I use serializable transactions or row-level locking. I'd rather queue a few orders than let two orders both pass a margin check simultaneously and both draw from the same collateral."</p>
+          <p>"Speed matters for the presentation layer — the live price feed, the unrealized P&L display. These can be eventually consistent. I'd compute them in Redis, push over WebSocket, and reconcile with the ground truth in PostgreSQL every few seconds. A trader seeing their P&L 50ms later is fine. A trader being under-collateralized because we skipped a lock is not."</p>
+          <p>"In my trading platform at Analogyx, the stop-loss monitor ran in a completely isolated Celery worker. Even if the order placement worker was saturated, stop-losses would never miss their trigger."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"Tell me about a production incident and how you handled it"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block green">
+          <div class="answer-label">Your answer — adapt this to a real incident you recall</div>
+          <p><strong>S:</strong> "During high volatility on NSE options expiry day, the WebSocket tick ingestion service started dropping ticks — market data was 2-3 seconds stale. Live orders were executing on wrong prices."</p>
+          <p><strong>T:</strong> "I was the only engineer on the system. Had to triage, communicate, and fix under live market conditions."</p>
+          <p><strong>A:</strong> "First, halted automated order placement (safety first). Checked system metrics — the WebSocket reconnect logic had a bug where it wasn't exponentially backing off, and the repeated reconnects were exhausting TCP connections. Hot-patched the reconnect logic with exponential backoff + jitter. Also added a staleness check: if last tick timestamp is > 500ms, pause order placement and alert."</p>
+          <p><strong>R:</strong> "Service recovered in under 3 minutes. Post-incident: added tick staleness monitoring as a first-class alert, and added integration tests for the reconnect path."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"Your backend is Python but we use Node.js — how do you see that transition?"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block amber">
+          <div class="answer-label">Address this directly — don't dodge it</div>
+          <p>"Honestly, my primary backend language is Python — FastAPI and Flask. I've worked with Node.js on side projects and understand the event loop model well, but I won't pretend I have years of production Node.js. What I'd say is: the architecture patterns for async, event-driven, real-time systems are identical between Python asyncio and Node.js. The learning curve is syntax and ecosystem, not mental model."</p>
+          <p>"I built the same WebSocket tick ingestion patterns, the same async background worker patterns, the same rate limiting logic in Python that I'd be building in Node. I'd expect to be productive in Node.js within a couple of weeks, and I'd invest in getting there fast."</p>
+          <p>"What I bring that's rare is the combination of real production trading system experience plus full-stack ownership — that's harder to find than someone who knows Node.js but has never shipped a trading platform."</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header" onclick="toggleCard(this.parentElement)">
+        <div class="card-q">"Why Pi42 specifically?"</div>
+        <div class="card-arrow">▼</div>
+      </div>
+      <div class="card-body">
+        <div class="answer-block green">
+          <div class="answer-label">Your answer</div>
+          <p>"The work I found most energizing at Analogyx was the trading platform — the combination of real-time systems, correctness under pressure, and the domain itself. I built an automated NSE options trading system and a crypto options bot on Delta Exchange. I understand order books, margin systems, and WebSocket market data feeds from having built them in production."</p>
+          <p>"Pi42 is one of the few places where that specific combination of full-stack + trading infrastructure is the core of the role, not a side project. That's the direction I want to go."</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Questions to ask Pi42</div>
+    <ul class="checklist">
+      <li>What does the current matching engine stack look like — is it Node.js, Golang, something else? Any plans to migrate?</li>
+      <li>How do you handle the correctness vs latency tradeoff in your margin check flow today?</li>
+      <li>What's the biggest engineering challenge you're facing in the next 6 months?</li>
+      <li>How is the team structured — is the full-stack role expected to be closer to product features or closer to exchange infrastructure?</li>
+      <li>What does the on-call rotation look like for production incidents?</li>
+    </ul>
+  </div>
+
+</div><!-- /panel-behavioral -->
+
+
+<!-- ═══════════════════════════════════ QUICK REFERENCE ══════════════════════════════════ -->
+<div id="panel-quickref" class="panel">
+
+  <div class="section-group">
+    <div class="section-title">Trading terms cheat sheet</div>
+    <table>
+      <tr><th>Term</th><th>Definition</th></tr>
+      <tr><td><strong>Order book</strong></td><td>List of all pending buy (bid) and sell (ask) orders at each price level</td></tr>
+      <tr><td><strong>Bid / Ask</strong></td><td>Best bid = highest buy price. Best ask = lowest sell price. Spread = ask − bid.</td></tr>
+      <tr><td><strong>Maker / Taker</strong></td><td>Maker adds liquidity (limit order to book). Taker removes it (market order). Makers pay lower/negative fees.</td></tr>
+      <tr><td><strong>Mark price</strong></td><td>Manipulation-resistant price for margin/liquidation. Derived from spot index + EMA basis.</td></tr>
+      <tr><td><strong>Liquidation</strong></td><td>Forced position close when margin ratio hits maintenance threshold</td></tr>
+      <tr><td><strong>Funding rate</strong></td><td>Periodic payment between perp longs and shorts to keep perp price near spot</td></tr>
+      <tr><td><strong>Open interest</strong></td><td>Total number of unsettled contracts (measures market size, not volume)</td></tr>
+      <tr><td><strong>Basis</strong></td><td>Futures price − spot price. Positive = futures premium, negative = backwardation</td></tr>
+      <tr><td><strong>Greeks</strong></td><td>Delta (price sensitivity), Theta (time decay), Vega (vol sensitivity), Gamma (delta acceleration)</td></tr>
+      <tr><td><strong>P&L</strong></td><td>Unrealized P&L = open position gain/loss. Realized = locked-in after close.</td></tr>
+      <tr><td><strong>Slippage</strong></td><td>Difference between expected price and actual execution price (high in low liquidity)</td></tr>
+      <tr><td><strong>Scalping</strong></td><td>Trading strategy targeting small price changes for frequent small profits</td></tr>
+      <tr><td><strong>Whale</strong></td><td>Entity holding large enough amounts of crypto to influence market price</td></tr>
+    </table>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Advanced Exchange Concepts</div>
+    <table>
+      <tr><th>Concept</th><th>Definition / Importance</th></tr>
+      <tr><td><strong>Matching Engine</strong></td><td>The core "brain" that matches buy and sell orders based on priority rules.</td></tr>
+      <tr><td><strong>Colocation</strong></td><td>Placing servers in the same data center as the exchange to reduce latency to microseconds.</td></tr>
+      <tr><td><strong>FIX Protocol</strong></td><td>Financial Information eXchange — industry standard for electronic trading messages.</td></tr>
+      <tr><td><strong>L1 / L2 / L3 Data</strong></td><td>L1: Best bid/ask. L2: Full order book depth. L3: Individual order details (used by HFT).</td></tr>
+      <tr><td><strong>Smart Order Router</strong></td><td>Algorithm that splits large orders across multiple exchanges to get the best price.</td></tr>
+      <tr><td><strong>Wash Trading</strong></td><td>Illegal practice of buying and selling to oneself to create fake volume.</td></tr>
+    </table>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Node.js cheat sheet — key differences from Python</div>
+    <table>
+      <tr><th>Concept</th><th>Python (asyncio)</th><th>Node.js equivalent</th></tr>
+      <tr><td>Async def / await</td><td><code>async def fn(): await something()</code></td><td><code>async function fn() { await something() }</code></td></tr>
+      <tr><td>Event loop run</td><td><code>asyncio.run(main())</code></td><td>Automatic — starts on process start</td></tr>
+      <tr><td>HTTP server</td><td>FastAPI / uvicorn</td><td>Express.js / Fastify / NestJS</td></tr>
+      <tr><td>Background tasks</td><td>Celery workers</td><td>Bull / BullMQ (Redis-backed queues)</td></tr>
+      <tr><td>CPU offload</td><td>multiprocessing</td><td>worker_threads module</td></tr>
+      <tr><td>WebSocket</td><td>websockets / FastAPI WS</td><td>ws / socket.io / uWebSockets</td></tr>
+      <tr><td>ORM</td><td>SQLAlchemy</td><td>Prisma / TypeORM / Drizzle</td></tr>
+      <tr><td>Package manager</td><td>pip / poetry</td><td>npm / yarn / pnpm</td></tr>
+    </table>
+  </div>
+
+  <div class="section-group">
+    <div class="section-title">Day before interview — checklist</div>
+    <ul class="checklist">
+      <li>Re-read your resume — every bullet should have a 2-min story ready</li>
+      <li>Know the Delta Trading Bot strategy cold — high chance they ask about it</li>
+      <li>Practice the order book implementation on paper (not IDE)</li>
+      <li>Review Node.js event loop phases — will be asked</li>
+      <li>Revise PostgreSQL EXPLAIN ANALYZE output reading</li>
+      <li>Check Pi42.com — understand what pairs they offer, their fee structure, any recent news</li>
+      <li>Prepare your "Node.js gap" answer — don't wait to be put on the spot</li>
+      <li>Bring 3 questions for the interviewer (listed in Behavioral tab)</li>
+    </ul>
+  </div>
+
+</div><!-- /panel-quickref -->
+</div><!-- /content -->
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+  event.target.classList.add('active')
+  document.getElementById('panel-' + name).classList.add('active')
+}
+function toggleCard(card) {
+  card.classList.toggle('open')
+}
+</script>
+</body>
+</html>
