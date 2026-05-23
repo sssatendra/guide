@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Frontend System Design — Professional Prep Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05070c;
+  --sb:#090d16;
+  --card:#0f1424;
+  --card2:#151a30;
+  --border:#1f2647;
+  --border-hover:#2d3766;
+  --text:#f3f4f6;
+  --muted:#5e6b8c;
+  --ts:#3178c6;
+  --react:#06b6d4;
+  --accent:#8b5cf6;
+  --accent-glow:rgba(139,92,246,0.25);
+  --green:#10b981;
+  --amber:#f59e0b;
+  --red:#ef4444;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1f2647;border-radius:4px}
+
+.topbar{position:fixed;top:0;left:0;right:0;z-index:500;background:rgba(5,7,12,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.55rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-size:.9rem;font-weight:800;letter-spacing:-.02em}.logo .l1{color:var(--accent)}.logo .l2{color:#fff}.logo .l3{color:var(--muted);font-weight:400;font-size:.65rem;margin-left:.3rem}
+.badge-top{background:var(--accent-glow);border:1px solid rgba(139,92,246,.3);border-radius:8px;padding:.3rem .75rem;font-size:.7rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:.35rem}
+.tbr{display:flex;gap:.3rem;align-items:center}.tbtn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:.28rem .55rem;color:var(--muted);font-size:.65rem;cursor:pointer;transition:all .13s;font-weight:600}.tbtn:hover{color:var(--accent);border-color:var(--accent)}
+.mob-toggle{display:none;background:var(--accent);border:none;border-radius:6px;padding:.3rem .6rem;color:#fff;font-size:.7rem;cursor:pointer;font-weight:700}
+
+.layout{display:flex;margin-top:46px;min-height:calc(100vh - 46px)}
+.sidebar{width:270px;min-width:270px;background:var(--sb);border-right:1px solid var(--border);height:calc(100vh - 46px);overflow-y:auto;position:sticky;top:46px;display:flex;flex-direction:column}
+.sb-progress{padding:.55rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.prog-label{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+.prog-bar{background:rgba(255,255,255,.05);border-radius:3px;height:4px}.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--react));border-radius:3px;transition:width .4s}
+.sb-section{padding:.35rem 0;border-bottom:1px solid var(--border)}.sb-sect-title{font-size:.6rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;padding:.25rem .7rem .15rem}
+.nav-item{display:flex;align-items:center;gap:.4rem;padding:.42rem .65rem;cursor:pointer;border:1px solid transparent;border-radius:6px;margin:.05rem .3rem;transition:all .12s}
+.nav-item:hover{background:rgba(255,255,255,.03);border-color:var(--border)}.nav-item.active{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.2);border-left:2px solid var(--accent)}
+.nav-ic{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}.nav-txt{font-size:.71rem;font-weight:600;flex:1}.nav-item.active .nav-txt{color:#d8b4fe}.nav-badge{font-size:.57rem;padding:1px 5px;border-radius:5px;font-weight:700;background:rgba(139,92,246,.2);color:var(--accent)}
+
+.main{flex:1;overflow-y:auto;min-width:0}.content{padding:1.2rem 1.8rem 3rem;max-width:960px}
+.sect-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.3rem;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.sect-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--react))}
+.sh-title{font-size:1.2rem;font-weight:900;margin-bottom:.3rem;color:#f8fafc}.sh-sub{font-size:.8rem;color:var(--muted);line-height:1.7}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;transition:border-color 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+.card:hover{border-color:var(--border-hover)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:.75rem .95rem;cursor:pointer;transition:background .13s;user-select:none}.card-h:hover{background:rgba(255,255,255,.02)}
+.card-hl{display:flex;align-items:center;gap:.5rem}.card-ic{font-size:.9rem;width:24px;text-align:center}.card-ti{font-size:.8rem;font-weight:700}
+.card-ar{color:var(--muted);transition:transform .22s;font-size:.7rem}.card.open .card-ar{transform:rotate(90deg)}
+.card-body{display:none;border-top:1px solid var(--border);padding:1rem}.card.open .card-body{display:block}
+
+.def-box{background:rgba(139,92,246,.07);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.65rem .9rem;font-size:.8rem;line-height:1.75;color:#d8b4fe;margin-bottom:.8rem}.def-box strong{color:var(--accent)}
+.cb{background:#04060b;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:.6rem 0}
+.cbh{display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.cblang{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cbody{padding:.8rem 1rem;overflow-x:auto}
+pre{font-family:'Cascadia Code',monospace;font-size:.73rem;line-height:1.75;color:#c9d1d9;white-space:pre;tab-size:2}
+.output{background:#020408;border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:.65rem .85rem;margin:.4rem 0;font-family:monospace;font-size:.72rem;color:#6ee7b7;line-height:1.65}
+.tip{border-left:3px solid var(--amber);background:rgba(245,158,11,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fde68a;margin:.55rem 0}
+.danger{border-left:3px solid var(--red);background:rgba(239,68,68,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fca5a5;margin:.55rem 0}
+.success{border-left:3px solid var(--green);background:rgba(16,185,129,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#86efac;margin:.55rem 0}
+
+.welcome-screen{padding:1.5rem 1.8rem 2rem;max-width:960px}.wh{font-size:1.8rem;font-weight:900;line-height:1.2;margin-bottom:.5rem}
+.wh .em1{color:var(--accent)}.wh .em2{color:var(--react)}.wh .em3{color:#fff}
+.wsub{font-size:.83rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;max-width:580px}
+.copy-btn{padding:.15rem .45rem;font-size:.58rem;text-transform:uppercase;border-radius:4px;margin-left:auto;background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-weight:600}.copy-btn:hover{color:#fff}
+
+.diagram-wrapper{background:rgba(6,10,18,0.7);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem 0;display:flex;justify-content:center;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 10px 30px rgba(0,0,0,0.5);overflow:hidden;position:relative;backdrop-filter:blur(10px)}
+.diagram-wrapper svg{width:100%;height:auto;max-height:450px;display:block}
+
+/* Welcome page cards */
+.welcome-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem;margin-bottom:2rem}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.9rem;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;box-shadow:0 4px 10px rgba(0,0,0,0.2)}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--react))}
+.tc:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 20px rgba(139,92,246,0.15)}
+.tc-icon{font-size:1.4rem;margin-bottom:.4rem}
+.tc-title{font-size:.76rem;font-weight:700;margin-bottom:.2rem;color:#f8fafc}
+.tc-sub{font-size:.65rem;color:var(--muted);line-height:1.5}
+
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:46px;left:0;width:100%;height:calc(100vh - 46px);z-index:400}
+  .sidebar.open{display:flex}
+  .mob-toggle{display:block}
+  .content,.welcome-screen{padding:.85rem .8rem 2rem}
+  .welcome-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Topics</button>
+    <div class="logo"><span class="l1">Frontend</span> <span class="l2">System</span><span class="l3">Design Mastery</span></div>
+  </div>
+  <div class="badge-top"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:.3rem;animation:pulse 1.5s infinite;"></span>Expert Prep Hub</div>
+  <div class="tbr">
+    <button class="tbtn" onclick="window.scrollTo(0,0)">↑ Top</button>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar" id="sb">
+  <div class="sb-progress">
+    <div class="prog-label"><span>System Design Progress</span><span id="prog-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="sb-content" style="flex:1;overflow-y:auto"></div>
+</div>
+
+<div class="main" id="main">
+  <div id="welcome-screen" class="welcome-screen">
+    <div class="wh">Frontend <span class="em1">System</span> <span class="em2">Design</span> <span class="em3">Mastery</span></div>
+    <p class="wsub">Industry-level architectural blueprints, high-fidelity data flow diagrams, clean custom React hooks, and strict production explanations to crush frontend system loops. 🚀</p>
+    
+    <div class="welcome-grid" id="topic-grid"></div>
+    
+    <div class="tip"><strong>Interview Golden Rule:</strong> Frontend system design isn't just about rendering UI. You must cover Network optimization (batching, caching, retry), Performance metrics (CLS, LCP, DOM size), Memory allocations (node virtualization, cleanup), and offline-first persistence models!</div>
+  </div>
+  <div id="content-area" class="content" style="display:none"></div>
+</div>
+</div>
+
+<script>
+
+const TOPICS = [
+{
+  id: 'autocomplete',
+  icon: '🔍',
+  title: '1. Search Autocomplete (Typeahead)',
+  group: 'Core Components',
+  desc: 'Scale autocomplete components to hundreds of requests per second with safe memory caching, input debouncing, and list virtualization.',
+  sections: [
+    {
+      id: 'auto-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Build a highly responsive, keyboard-navigable autocomplete search bar. Must support request debouncing, local caching (LRU/Memory), concurrent request cancellation via AbortController, and retry buffers for unreliable networks.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background grids -->
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- User Input -->
+            <rect x="20" y="110" width="120" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="80" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">User Keypress</text>
+            
+            <!-- Debouncer (200ms) -->
+            <rect x="180" y="110" width="120" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="240" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Debounce (200ms)</text>
+            
+            <!-- Cache layer -->
+            <polygon points="380,80 470,135 380,190 290,135" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-width="2"/>
+            <text x="380" y="138" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Cache Hit?</text>
+            
+            <!-- Memory/Local Cache Storage -->
+            <rect x="320" y="240" width="120" height="45" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="380" y="267" fill="#86efac" font-size="10" font-weight="bold" text-anchor="middle">Memory Cache Map</text>
+            
+            <!-- API Network Call -->
+            <rect x="520" y="110" width="130" height="50" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="2"/>
+            <text x="585" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Fetch API (Abortable)</text>
+            
+            <!-- UI Viewport Render -->
+            <rect x="690" y="110" width="90" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="735" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Render Grid</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-autocomplete" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Arrows -->
+            <path d="M140 135 L172 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-autocomplete)"/>
+            <path d="M300 135 L282 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-autocomplete)"/>
+            <path d="M380 190 L380 232" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-autocomplete)"/>
+            <path d="M470 135 L512 135" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-autocomplete)">
+              <animate attributeName="stroke-dasharray" values="5,5;10,5;5,5" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M380 80 L380 50 L735 50 L735 102" stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrow-autocomplete)"/>
+            <path d="M650 135 L682 135" stroke="#ec4899" stroke-width="2" marker-end="url(#arrow-autocomplete)"/>
+            
+            <text x="495" y="125" fill="#fca5a5" font-size="9" text-anchor="middle">Miss</text>
+            <text x="560" y="42" fill="#86efac" font-size="9" text-anchor="middle">Hit (Instant Render)</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Keyboard Navigation:</strong> Keep accessibility in mind. Users must be able to focus, select options using <code>ArrowDown</code>, <code>ArrowUp</code>, <code>Enter</code> to select, and <code>Escape</code> to dismiss the list, keeping keyboard focus managed.</li>
+            <li><strong>Memory virtualizer:</strong> If results exceed 100+ items, do not render all DOM elements! Limit list items using viewport virtualization to prevent main thread rendering pauses.</li>
+            <li><strong>Race Conditions:</strong> If request A is fired at 0ms, and request B is fired at 200ms, request A could return *after* request B. Fix this using <code>AbortController</code> to instantly cancel request A upon new inputs.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'auto-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef, useCallback } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── CUSTOM DEBOUNCE HOOK ──────────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useDebounce</span>&lt;<span class="tp">T</span>&gt;(value: <span class="tp">T</span>, delay: <span class="tp">number</span> = <span class="num">250</span>): <span class="tp">T</span> {
+  <span class="kw">const</span> [debouncedValue, setDebouncedValue] = useState&lt;<span class="tp">T</span>&gt;(value);
+
+  useEffect(() => {
+    <span class="kw">const</span> handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    <span class="kw">return</span> () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  <span class="kw">return</span> debouncedValue;
+}
+
+<span class="cmt">// ─── MAIN COMPONENT ────────────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">SearchItem</span> {
+  id: <span class="tp">string</span>;
+  title: <span class="tp">string</span>;
+}
+
+<span class="kw">export const</span> <span class="cls">Autocomplete</span>: React.FC = () => {
+  <span class="kw">const</span> [query, setQuery] = useState(<span class="str">''</span>);
+  <span class="kw">const</span> [results, setResults] = useState&lt;<span class="cls">SearchItem</span>[]&gt;([]);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">false</span>);
+  <span class="kw">const</span> [focusedIndex, setFocusedIndex] = useState(-<span class="num">1</span>);
+  
+  <span class="kw">const</span> cache = useRef&lt;<span class="cls">Map</span>&lt;<span class="tp">string</span>, <span class="cls">SearchItem</span>[]&gt;&gt;(<span class="kw">new</span> Map());
+  <span class="kw">const</span> debouncedQuery = <span class="fn">useDebounce</span>(query, <span class="num">200</span>);
+  <span class="kw">const</span> abortControllerRef = useRef&lt;AbortController | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="cmt">// Fetch function</span>
+  <span class="kw">const</span> fetchResults = useCallback(<span class="kw">async</span> (searchQuery: <span class="tp">string</span>) => {
+    <span class="kw">if</span> (!searchQuery) {
+      setResults([]);
+      <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// LRU / Memory Cache Check</span>
+    <span class="kw">if</span> (cache.current.has(searchQuery)) {
+      setResults(cache.current.get(searchQuery)!);
+      <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// Abort active concurrent request</span>
+    <span class="kw">if</span> (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = <span class="kw">new</span> AbortController();
+
+    setLoading(<span class="kw">true</span>);
+    <span class="kw">try</span> {
+      <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">\`/api/search?q=\${encodeURIComponent(searchQuery)}\`</span>, {
+        signal: abortControllerRef.current.signal
+      });
+      <span class="kw">const</span> data: <span class="cls">SearchItem</span>[] = <span class="kw">await</span> response.json();
+      
+      <span class="cmt">// Save in Cache</span>
+      cache.current.set(searchQuery, data);
+      setResults(data);
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">if</span> ((err <span class="kw">as</span> Error).name !== <span class="str">'AbortError'</span>) {
+        console.error(<span class="str">'Search failure:'</span>, err);
+      }
+    } <span class="kw">finally</span> {
+      setLoading(<span class="kw">false</span>);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchResults(debouncedQuery);
+  }, [debouncedQuery, fetchResults]);
+
+  <span class="cmt">// Keyboard controls</span>
+  <span class="kw">const</span> handleKeyDown = (e: React.KeyboardEvent) => {
+    <span class="kw">if</span> (e.key === <span class="str">'ArrowDown'</span>) {
+      e.preventDefault();
+      setFocusedIndex(prev => Math.min(prev + <span class="num">1</span>, results.length - <span class="num">1</span>));
+    } <span class="kw">else</span> <span class="kw">if</span> (e.key === <span class="str">'ArrowUp'</span>) {
+      e.preventDefault();
+      setFocusedIndex(prev => Math.max(prev - <span class="num">1</span>, -<span class="num">1</span>));
+    } <span class="kw">else</span> <span class="kw">if</span> (e.key === <span class="str">'Enter'</span>) {
+      <span class="kw">if</span> (focusedIndex >= <span class="num">0</span> && focusedIndex &lt; results.length) {
+        setQuery(results[focusedIndex].title);
+        setResults([]);
+      }
+    } <span class="kw">else</span> <span class="kw">if</span> (e.key === <span class="str">'Escape'</span>) {
+      setResults([]);
+    }
+  };
+
+  <span class="kw">return</span> (
+    &lt;div className="search-container" onKeyDown={handleKeyDown}&gt;
+      &lt;input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="Type to search..."
+        type="text"
+      /&gt;
+      {loading && &lt;div className="spinner"&gt;Loading...&lt;/div&gt;}
+      {results.length > <span class="num">0</span> && (
+        &lt;ul className="dropdown"&gt;
+          {results.map((item, i) => (
+            &lt;li
+              key={item.id}
+              className={i === focusedIndex ? <span class="str">'focused'</span> : <span class="str">''</span>}
+              onClick={() => {
+                setQuery(item.title);
+                setResults([]);
+              }}
+            &gt;
+              {item.title}
+            &lt;/li&gt;
+          ))}
+        &lt;/ul&gt;
+      )}
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'auto-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Keyboard Navigation Selection):</strong><br>
+              📥 <strong>Input Variable Trigger:</strong> User enters <code>"re"</code> -> focus dropdown -> triggers keypress <code>ArrowDown</code> followed by <code>Enter</code>.<br>
+              📤 <strong>Expected UI Output:</strong> The input value updates instantly to the selected row, e.g., <code>"React Native"</code>, and results dropdown is hidden.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Race Condition Cancellation):</strong><br>
+              📥 <strong>Action Sequence:</strong> User types <code>"react"</code> (fires request A), then instantly deletes a character typing <code>"reac"</code> (fires request B) within 50ms.<br>
+              📤 <strong>Expected Behavior:</strong> Request A's <code>AbortController.abort()</code> cancels network request A instantly before it arrives, avoiding replacing B's results with stale data.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Memory Cache Hit):</strong><br>
+              📥 <strong>Action Sequence:</strong> User searches for <code>"react"</code> -> API results returned. User types <code>"react native"</code> -> then deletes characters back to <code>"react"</code>.<br>
+              📤 <strong>Expected Behavior:</strong> Dropdown populates instantly from the local memory cache map without initiating any network requests, eliminating server query overhead.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'calendar',
+  icon: '📅',
+  title: '2. Google Calendar Design',
+  group: 'Core Components',
+  desc: 'Create an offline-first calendar schedule system that manages optimistic tasks updates, IndexedDB cache storage, and multi-client event conflict resolutions.',
+  sections: [
+    {
+      id: 'cal-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a calendar handling events scheduling with reliable offline capabilities. Employs optimistic state updates for lag-free performance, IndexedDB for persistent local storage, and a vector clock or timestamp-based reconciliation engine for conflict resolution upon reconnection.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- User Interface Events Grid -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Calendar UI Grid</text>
+            
+            <!-- Optimistic State Manager -->
+            <rect x="200" y="110" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="265" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Optimistic State</text>
+            <text x="265" y="148" fill="#5e6b8c" font-size="8.5" text-anchor="middle">(Immediate Render)</text>
+            
+            <!-- Queue + Sync Controller -->
+            <polygon points="430,70 510,135 430,200 350,135" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-width="2"/>
+            <text x="430" y="139" fill="#fff" font-size="10.5" font-weight="bold" text-anchor="middle">Online State?</text>
+            
+            <!-- IndexedDB Persistent Queue -->
+            <rect x="370" y="240" width="120" height="45" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="430" y="267" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">IndexedDB Queue</text>
+            
+            <!-- Sync / Reconciler Engine -->
+            <rect x="560" y="110" width="120" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="620" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Conflict Resolver</text>
+            <text x="620" y="148" fill="#86efac" font-size="9" text-anchor="middle">(Vector Clocks)</text>
+            
+            <!-- Remote Server DB -->
+            <rect x="715" y="110" width="70" height="50" rx="6" fill="#3178c6" fill-opacity="0.15" stroke="#3178c6" stroke-width="2"/>
+            <text x="750" y="140" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Server DB</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-calendar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Data Flow Connections -->
+            <path d="M150 135 L192 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-calendar)"/>
+            <path d="M330 135 L342 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-calendar)"/>
+            <path d="M430 200 L430 232" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-calendar)"/>
+            <path d="M510 135 L552 135" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-calendar)"/>
+            <path d="M680 135 L707 135" stroke="#3178c6" stroke-width="2" marker-end="url(#arrow-calendar)"/>
+            
+            <!-- Backtracking Fail/Success -->
+            <path d="M490 262 L560 262 L596 168" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#arrow-calendar)"/>
+            
+            <text x="400" y="210" fill="#fca5a5" font-size="9">Offline</text>
+            <text x="530" y="125" fill="#86efac" font-size="9">Online</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Optimistic Updates:</strong> Keep the calendar lag-free. Upon event drag, update local states immediately, trigger the network request in the background, and dynamically rollback if the API responds with a failure.</li>
+            <li><strong>Conflict Resolution (Last Write Wins vs Vector Clocks):</strong> In collaborative calendar schedules, clients might edit the same event offline. We resolve conflicts by tracking <code>lastModified</code> timestamps and checking version revisions.</li>
+            <li><strong>IndexedDB Persistence:</strong> Leverage IndexedDB as it supports high volumes of JSON tasks/events structured locally for offline reads.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'cal-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── TYPES & INTERFACES ─────────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">CalendarEvent</span> {
+  id: <span class="tp">string</span>;
+  title: <span class="tp">string</span>;
+  start: <span class="tp">string</span>; <span class="cmt">// ISO String</span>
+  end: <span class="tp">string</span>;
+  version: <span class="tp">number</span>;
+  updatedAt: <span class="tp">number</span>; <span class="cmt">// Timestamp</span>
+}
+
+<span class="cmt">// ─── CLIENT SYNC EVENT CONTROLLER ────────────────────────────────────</span>
+<span class="kw">export class</span> <span class="cls">CalendarDB</span> {
+  <span class="kw">private</span> dbName = <span class="str">'CalendarCache'</span>;
+  <span class="kw">private</span> storeName = <span class="str">'events'</span>;
+
+  <span class="kw">public async</span> <span class="fn">init</span>(): <span class="cls">Promise</span>&lt;IDBDatabase&gt; {
+    <span class="kw">return new</span> <span class="cls">Promise</span>((resolve, reject) => {
+      <span class="kw">const</span> request = indexedDB.open(<span class="kw">this</span>.dbName, <span class="num">1</span>);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore(<span class="kw">this</span>.storeName, { keyPath: <span class="str">'id'</span> });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  <span class="kw">public async</span> <span class="fn">saveEvent</span>(event: <span class="cls">CalendarEvent</span>): <span class="cls">Promise</span>&lt;<span class="tp">void</span>&gt; {
+    <span class="kw">const</span> db = <span class="kw">await this</span>.init();
+    <span class="kw">return new</span> <span class="cls">Promise</span>((resolve, reject) => {
+      <span class="kw">const</span> transaction = db.transaction(<span class="kw">this</span>.storeName, <span class="str">'readwrite'</span>);
+      <span class="kw">const</span> store = transaction.objectStore(<span class="kw">this</span>.storeName);
+      store.put(event);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    });
+  }
+
+  <span class="kw">public async</span> <span class="fn">getAllEvents</span>(): <span class="cls">Promise</span>&lt;<span class="cls">CalendarEvent</span>[]&gt; {
+    <span class="kw">const</span> db = <span class="kw">await this</span>.init();
+    <span class="kw">return new</span> <span class="cls">Promise</span>((resolve, reject) => {
+      <span class="kw">const</span> transaction = db.transaction(<span class="kw">this</span>.storeName, <span class="str">'readonly'</span>);
+      <span class="kw">const</span> store = transaction.objectStore(<span class="kw">this</span>.storeName);
+      <span class="kw">const</span> req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.onerror);
+    });
+  }
+}
+
+<span class="cmt">// ─── CALENDAR STATE CONTAINER HOOK ────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useCalendarEvents</span>() {
+  <span class="kw">const</span> [events, setEvents] = useState&lt;<span class="cls">CalendarEvent</span>[]&gt;([]);
+  <span class="kw">const</span> [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  <span class="kw">const</span> db = useRef(<span class="kw">new</span> <span class="cls">CalendarDB</span>());
+  <span class="kw">const</span> pendingSyncQueue = useRef&lt;<span class="cls">CalendarEvent</span>[]&gt;([]);
+
+  useEffect(() => {
+    <span class="kw">const</span> handleOnline = () => {
+      setIsOnline(<span class="kw">true</span>);
+      <span class="fn">syncOfflineData</span>();
+    };
+    <span class="kw">const</span> handleOffline = () => setIsOnline(<span class="kw">false</span>);
+
+    window.addEventListener(<span class="str">'online'</span>, handleOnline);
+    window.addEventListener(<span class="str">'offline'</span>, handleOffline);
+    
+    <span class="cmt">// Load Local Cache initially</span>
+    db.current.getAllEvents().then(setEvents);
+
+    <span class="kw">return</span> () => {
+      window.removeEventListener(<span class="str">'online'</span>, handleOnline);
+      window.removeEventListener(<span class="str">'offline'</span>, handleOffline);
+    };
+  }, []);
+
+  <span class="cmt">// Sync offline entries</span>
+  <span class="kw">const</span> syncOfflineData = <span class="kw">async</span> () => {
+    <span class="kw">if</span> (pendingSyncQueue.current.length === <span class="num">0</span>) <span class="kw">return</span>;
+    
+    <span class="kw">for</span> (<span class="kw">const</span> event <span class="kw">of</span> pendingSyncQueue.current) {
+      <span class="kw">try</span> {
+        <span class="cmt">// Conflict Resolution request (Send server event to check version clock)</span>
+        <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">'/api/events/sync'</span>, {
+          method: <span class="str">'POST'</span>,
+          headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+          body: JSON.stringify(event)
+        });
+        <span class="kw">const</span> resolved: <span class="cls">CalendarEvent</span> = <span class="kw">await</span> response.json();
+        <span class="kw">await</span> db.current.saveEvent(resolved);
+      } <span class="kw">catch</span> (err) {
+        console.error(<span class="str">'Sync failure for event:'</span>, event.id, err);
+      }
+    }
+    pendingSyncQueue.current = [];
+    db.current.getAllEvents().then(setEvents);
+  };
+
+  <span class="cmt">// Optimistic event mutation</span>
+  <span class="kw">const</span> updateEvent = useCallback(<span class="kw">async</span> (updatedEvent: <span class="cls">CalendarEvent</span>) => {
+    <span class="cmt">// 1. Save in state instantly (Optimistic Update)</span>
+    <span class="kw">const</span> previousState = [...events];
+    setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+
+    <span class="cmt">// 2. Persist in Local Cache</span>
+    <span class="kw">await</span> db.current.saveEvent(updatedEvent);
+
+    <span class="cmt">// 3. Dispatch to network or queue offline</span>
+    <span class="kw">if</span> (isOnline) {
+      <span class="kw">try</span> {
+        <span class="kw">await</span> fetch(<span class="str">\`/api/events/\${updatedEvent.id}\`</span>, {
+          method: <span class="str">'PUT'</span>,
+          headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+          body: JSON.stringify(updatedEvent)
+        });
+      } <span class="kw">catch</span> (e) {
+        <span class="cmt">// Rollback on failure</span>
+        setEvents(previousState);
+        console.error(<span class="str">'Server save failed, rolling back'</span>);
+      }
+    } <span class="kw">else</span> {
+      pendingSyncQueue.current.push(updatedEvent);
+    }
+  }, [events, isOnline]);
+
+  <span class="kw">return</span> { events, updateEvent, isOnline };
+}</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'cal-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Optimistic Drag & Drop Time Change):</strong><br>
+              📥 <strong>Action Event:</strong> User drags calendar event A from 10:00 AM to 2:00 PM while offline.<br>
+              📤 <strong>Expected UI Output:</strong> The card moves instantly to 2:00 PM with zero delay. The mutation is saved in IndexedDB and added to the network pending queue buffer.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Network Failure & Rollback):</strong><br>
+              📥 <strong>Action Sequence:</strong> User edits event B while online. The server network connection drops mid-request and responds with a HTTP <code>500 Server Error</code>.<br>
+              📤 <strong>Expected UI Output:</strong> Calendar UI instantly reverts B to its original time slot, populating a small error Toast warning alerting "Changes could not be saved".
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Dynamic Sync Conflict Resolution LWW):</strong><br>
+              📥 <strong>Conflict Scenario:</strong> Client 1 modifications (offline timestamp 1829000, version 2) and Server's master model (timestamp 1829500, version 3) clash upon reconnecting.<br>
+              📤 <strong>Expected Action:</strong> Reconciler detects Server has higher version/timestamp. The local client's IndexedDB is overwritten by the server's record, updating the local UI state safely.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'product-feed',
+  icon: '🛍️',
+  title: '3. Infinite Scroll Product Feed',
+  group: 'Core Components',
+  desc: 'Scale infinite feeds and swipers using Intersection Observers, layout shift prevention, lazy image decodes, and DOM garbage recycling loops.',
+  sections: [
+    {
+      id: 'feed-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Construct a heavy, high-performance product list or swiper feed. Avoids UI performance drops using Intersection Observer viewport boundaries, layout shift prevention (CLS), progressive image loading, and DOM recycling (keeping only items near the viewport inside the DOM tree).</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Viewport Window border -->
+            <rect x="250" y="30" width="300" height="260" rx="10" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="6,4"/>
+            <text x="400" y="24" fill="#a78bfa" font-size="10" font-weight="bold" text-anchor="middle">ACTIVE USER VIEWPORT (RENDER BUFFER)</text>
+            
+            <!-- Virtual Items -->
+            <!-- Off-screen Top (Recycled) -->
+            <rect x="275" y="-50" width="250" height="60" rx="6" fill="#5e6b8c" fill-opacity="0.1" stroke="#5e6b8c" stroke-width="1.5"/>
+            <text x="400" y="-15" fill="#5e6b8c" font-size="11" text-anchor="middle">Item 1 (Recycled / Empty Placeholder)</text>
+            
+            <!-- Visible Items -->
+            <rect x="275" y="45" width="250" height="65" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="400" y="82" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Product Item 2 (Visible)</text>
+            
+            <rect x="275" y="125" width="250" height="65" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="400" y="162" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Product Item 3 (Visible)</text>
+            
+            <rect x="275" y="205" width="250" height="65" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="400" y="242" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Product Item 4 (Visible)</text>
+            
+            <!-- Intersection observer target trigger -->
+            <rect x="275" y="280" width="250" height="15" rx="3" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="1.5"/>
+            <text x="400" y="291" fill="#fde68a" font-size="9" font-weight="bold" text-anchor="middle">Sentinel Node (Intersection Observer Target)</text>
+            
+            <!-- Off-screen Bottom (Recycled) -->
+            <rect x="275" y="310" width="250" height="60" rx="6" fill="#5e6b8c" fill-opacity="0.1" stroke="#5e6b8c" stroke-width="1.5"/>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-feed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Connection flow indicator -->
+            <path d="M570 155 L622 155" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-feed)"/>
+            
+            <!-- Trigger Action box -->
+            <rect x="635" y="125" width="140" height="60" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="705" y="152" fill="#86efac" font-size="10.5" font-weight="bold" text-anchor="middle">Observer Intersection</text>
+            <text x="705" y="167" fill="#86efac" font-size="9.5" text-anchor="middle">Fetch Next Page (API)</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Intersection Observer:</strong> Avoid binding laggy window scroll listeners! Set a sentinel element at the bottom of the feed and use the browser's native API to fetch next pages efficiently.</li>
+            <li><strong>Preventing Cumulative Layout Shift (CLS):</strong> Unbounded image loading shifts layouts unexpectedly. Set strict aspect ratio sizing limits on image wrappers (e.g. <code>aspect-ratio: 16/9</code>) or display skeletons.</li>
+            <li><strong>Memory virtualizer:</strong> Browser DOM trees degrade in scrolling speed when containing thousands of cards. Virtualize the container by unmounting far off-screen elements.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'feed-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef, useCallback } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── INTERSECTION OBSERVER HOOK ─────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useIntersectionObserver</span>(
+  targetRef: React.RefObject&lt;Element&gt;,
+  onIntersect: () => <span class="tp">void</span>,
+  options?: IntersectionObserverInit
+) {
+  useEffect(() => {
+    <span class="kw">const</span> target = targetRef.current;
+    <span class="kw">if</span> (!target) <span class="kw">return</span>;
+
+    <span class="kw">const</span> observer = <span class="kw">new</span> IntersectionObserver((entries) => {
+      <span class="kw">const</span> entry = entries[<span class="num">0</span>];
+      <span class="kw">if</span> (entry.isIntersecting) {
+        <span class="fn">onIntersect</span>();
+      }
+    }, options);
+
+    observer.observe(target);
+    <span class="kw">return</span> () => {
+      observer.unobserve(target);
+    };
+  }, [targetRef, onIntersect, options]);
+}
+
+<span class="cmt">// ─── FEED CONTAINER COMPONENT ────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">Product</span> {
+  id: <span class="tp">number</span>;
+  title: <span class="tp">string</span>;
+  price: <span class="tp">number</span>;
+  image: <span class="tp">string</span>;
+}
+
+<span class="kw">export const</span> <span class="cls">InfiniteProductFeed</span>: React.FC = () => {
+  <span class="kw">const</span> [products, setProducts] = useState&lt;<span class="cls">Product</span>[]&gt;([]);
+  <span class="kw">const</span> [page, setPage] = useState(<span class="num">1</span>);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">false</span>);
+  <span class="kw">const</span> [hasMore, setHasMore] = useState(<span class="kw">true</span>);
+
+  <span class="kw">const</span> sentinelRef = useRef&lt;HTMLDivElement&gt;(<span class="kw">null</span>);
+
+  <span class="kw">const</span> fetchProducts = useCallback(<span class="kw">async</span> () => {
+    <span class="kw">if</span> (loading || !hasMore) <span class="kw">return</span>;
+    setLoading(<span class="kw">true</span>);
+    
+    <span class="kw">try</span> {
+      <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">\`/api/products?page=\${page}&limit=12\`</span>);
+      <span class="kw">const</span> data: <span class="cls">Product</span>[] = <span class="kw">await</span> res.json();
+      
+      <span class="kw">if</span> (data.length === <span class="num">0</span>) {
+        setHasMore(<span class="kw">false</span>);
+      } <span class="kw">else</span> {
+        setProducts(prev => [...prev, ...data]);
+        setPage(prev => prev + <span class="num">1</span>);
+      }
+    } <span class="kw">catch</span> (err) {
+      console.error(<span class="str">'Failed loading feed products'</span>, err);
+    } <span class="kw">finally</span> {
+      setLoading(<span class="kw">false</span>);
+    }
+  }, [page, loading, hasMore]);
+
+  <span class="cmt">// Trigger observer hooks</span>
+  <span class="fn">useIntersectionObserver</span>(sentinelRef, fetchProducts, {
+    rootMargin: <span class="str">'300px'</span> <span class="cmt">// Pre-fetch before user hits the bottom</span>
+  });
+
+  <span class="kw">return</span> (
+    &lt;div className="feed-wrapper"&gt;
+      &lt;div className="products-grid"&gt;
+        {products.map(product => (
+          &lt;div key={product.id} className="product-card"&gt;
+            {<span class="cmt">/* Prevent CLS with aspect-ratio wrapper */</span>}
+            &lt;div className="img-wrapper" style={{ aspectRatio: <span class="str">'16/10'</span>, overflow: <span class="str">'hidden'</span> }}&gt;
+              &lt;img
+                src={product.image}
+                alt={product.title}
+                loading="lazy" <span class="cmt">/* Progressive Image Loading */</span>
+                style={{ width: <span class="str">'100%'</span>, height: <span class="str">'100%'</span>, objectFit: <span class="str">'cover'</span> }}
+              /&gt;
+            &lt;/div&gt;
+            &lt;h4&gt;{product.title}&lt;/h4&gt;
+            &lt;p&gt;\${product.price}&lt;/p&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+      
+      <span class="cmt">/* Sentinel Trigger Element */</span>
+      &lt;div ref={sentinelRef} style={{ height: <span class="str">'20px'</span>, background: <span class="str">'transparent'</span> }}&gt;
+        {loading && &lt;p className="feed-loader"&gt;Retrieving items...&lt;/p&gt;}
+        {!hasMore && &lt;p className="feed-end"&gt;End of feed items.&lt;/p&gt;}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'feed-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Sentinel In-Viewport Intersection):</strong><br>
+              📥 <strong>Viewport Scroll:</strong> User scrolls down to page bottom -> Sentinel element enters viewport frame boundary.<br>
+              📤 <strong>Expected Event Loop Actions:</strong> Intersection observer fires its handler immediately, triggering API request page 2 while keeping viewport scrolling fluid.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Aspect-ratio Preventing CLS Shifts):</strong><br>
+              📥 <strong>Slow Network Scenario:</strong> API yields data arrays, but image resources load with a high latency (e.g. 3G speeds).<br>
+              📤 <strong>Expected Layout Behavior:</strong> Viewport skeleton cards remain perfectly in place due to defined <code>aspect-ratio: 16/10</code> placeholders, resulting in a Cumulative Layout Shift (CLS) rating of exactly <code>0.0</code>.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Scroll Throttle Safeguard):</strong><br>
+              📥 <strong>Rapid Scrolling Action:</strong> User quickly scrolls past multiple pages in a fraction of a second.<br>
+              📤 <strong>Expected System Action:</strong> The loading state checks prevent overlapping duplicate fetch calls. The system serializes requests in sequence.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'datatable',
+  icon: '📊',
+  title: '4. Virtualized Data Table',
+  group: 'Core Components',
+  desc: 'Design virtual grids capable of processing 100,000+ data items, utilizing dynamic cell heights, header sorting, and collateral collapsible rows.',
+  sections: [
+    {
+      id: 'table-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a high-performance grid table supporting hundreds of thousands of dynamic rows with collapsing detail modules. To achieve 60FPS fluid scroll, we virtualize the table by rendering only elements visible inside the viewport, applying absolute positioning offsets, and recycling elements.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Viewport scroll bounds -->
+            <rect x="250" y="30" width="300" height="260" rx="10" fill="none" stroke="#8b5cf6" stroke-width="2.5" stroke-dasharray="6,4"/>
+            <text x="400" y="24" fill="#a78bfa" font-size="10" font-weight="bold" text-anchor="middle">ACTIVE USER VIEWPORT (VIRTUAL SLICE)</text>
+            
+            <!-- Virtual Items mapping -->
+            <!-- Top Spacer (Calculated offset padding) -->
+            <rect x="270" y="40" width="260" height="25" rx="3" fill="#ec4899" fill-opacity="0.1" stroke="#ec4899" stroke-width="1" stroke-dasharray="3,3"/>
+            <text x="400" y="56" fill="#fca5a5" font-size="8" font-weight="bold" text-anchor="middle">Top Spacer (Absolute offset = scrollY = 1200px)</text>
+            
+            <!-- Rendered Nodes -->
+            <rect x="270" y="80" width="260" height="35" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="290" y="101" fill="#fff" font-size="9.5" font-weight="bold">Row 31 [Name: Satendra | Value: $400k]</text>
+            
+            <rect x="270" y="125" width="260" height="35" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="290" y="146" fill="#fff" font-size="9.5" font-weight="bold">Row 32 [Name: Alice | Value: $120k]</text>
+            
+            <!-- Expanded Row details card -->
+            <rect x="270" y="170" width="260" height="60" rx="4" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="290" y="191" fill="#86efac" font-size="9" font-weight="bold">Row 33 [Name: Bob (Expanded detail)]</text>
+            <text x="290" y="206" fill="#86efac" font-size="8">└ Tasks history, billing logs, index keys mapping</text>
+            
+            <rect x="270" y="240" width="260" height="35" rx="4" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="290" y="261" fill="#fff" font-size="9.5" font-weight="bold">Row 34 [Name: Charlie | Value: $200k]</text>
+            
+            <!-- Bottom Spacer offset padding -->
+            <rect x="270" y="285" width="260" height="15" rx="3" fill="#ec4899" fill-opacity="0.1" stroke="#ec4899" stroke-width="1" stroke-dasharray="3,3"/>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-table" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <text x="120" y="145" fill="#d8b4fe" font-size="10.5" font-weight="bold" text-anchor="middle">Scroll Y offset</text>
+            <path d="M120 160 L120 212" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow-table)"/>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Dynamic Spacer Pads (Transform Translates):</strong> To virtualize rows, you need a high-scroll parent box with total height set to <code>totalItems * rowHeight</code>. As the viewport scrolls, calculate top offset spacer padding using <code>transform: translateY(scrollY)</code> to position items seamlessly.</li>
+            <li><strong>Collapsible Rows Height Recalculation:</strong> Expanded modules change element heights! Ensure your virtualization hook recalculates offsets when rows are dynamically expanded.</li>
+            <li><strong>V8 DOM Thrashing Prevention:</strong> Avoid layout modifications during paint phases. Use stable unique keys for rows to prevent DOM elements recycling lag.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'table-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useRef, useMemo, UIEvent } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── VIRTUAL TABLE COMPONENT ──────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">RowData</span> {
+  id: <span class="tp">number</span>;
+  name: <span class="tp">string</span>;
+  role: <span class="tp">string</span>;
+  salary: <span class="tp">string</span>;
+}
+
+<span class="kw">export const</span> <span class="cls">VirtualizedTable</span>: React.FC = () => {
+  <span class="cmt">// 100,000 mock rows</span>
+  <span class="kw">const</span> rawData = useMemo((): <span class="cls">RowData</span>[] => {
+    <span class="kw">return</span> Array.from({ length: <span class="num">100000</span> }, (_, idx) => ({
+      id: idx,
+      name: <span class="str">\`Employee \${idx}\`</span>,
+      role: idx % <span class="num">2</span> === <span class="num">0</span> ? <span class="str">'Senior Engineer'</span> : <span class="str">'Staff Architect'</span>,
+      salary: <span class="str">\`\$\${100 + (idx % 200)}k\`</span>
+    }));
+  }, []);
+
+  <span class="kw">const</span> [scrollTop, setScrollTop] = useState(<span class="num">0</span>);
+  <span class="kw">const</span> [expandedIds, setExpandedIds] = useState&lt;<span class="cls">Set</span>&lt;<span class="tp">number</span>&gt;&gt;(<span class="kw">new</span> Set());
+
+  <span class="kw">const</span> viewportHeight = <span class="num">400</span>; <span class="cmt">// Visible Box viewport height</span>
+  <span class="kw">const</span> rowHeight = <span class="num">45</span>;       <span class="cmt">// Single Row height</span>
+  <span class="kw">const</span> buffer = <span class="num">5</span>;           <span class="cmt">// Top/bottom buffering safety margin</span>
+
+  <span class="cmt">// Range calculation</span>
+  <span class="kw">const</span> totalRows = rawData.length;
+  <span class="kw">const</span> totalHeight = totalRows * rowHeight;
+
+  <span class="kw">const</span> startIndex = Math.max(<span class="num">0</span>, Math.floor(scrollTop / rowHeight) - buffer);
+  <span class="kw">const</span> endIndex = Math.min(totalRows - <span class="num">1</span>, Math.floor((scrollTop + viewportHeight) / rowHeight) + buffer);
+
+  <span class="kw">const</span> visibleRows = useMemo(() => {
+    <span class="kw">return</span> rawData.slice(startIndex, endIndex + <span class="num">1</span>);
+  }, [rawData, startIndex, endIndex]);
+
+  <span class="cmt">// Calculate vertical top offset positioning translation</span>
+  <span class="kw">const</span> offsetY = startIndex * rowHeight;
+
+  <span class="kw">const</span> toggleExpand = (id: <span class="tp">number</span>) => {
+    <span class="kw">const</span> next = <span class="kw">new</span> Set(expandedIds);
+    <span class="kw">if</span> (next.has(id)) next.delete(id);
+    <span class="kw">else</span> next.add(id);
+    setExpandedIds(next);
+  };
+
+  <span class="kw">const</span> handleScroll = (e: UIEvent&lt;HTMLDivElement&gt;) => {
+    setScrollTop(e.currentTarget.scrollTop);
+  };
+
+  <span class="kw">return</span> (
+    &lt;div 
+      className="table-scroll-container" 
+      onScroll={handleScroll}
+      style={{ height: viewportHeight, overflowY: <span class="str">'auto'</span>, position: <span class="str">'relative'</span>, border: <span class="str">'1px solid var(--border)'</span> }}
+    &gt;
+      &lt;div className="table-total-spacer" style={{ height: totalHeight, width: <span class="str">'100%'</span>, position: <span class="str">'relative'</span> }}&gt;
+        &lt;div 
+          className="table-rendered-viewport" 
+          style={{ transform: <span class="str">\`translateY(\${offsetY}px)\`</span>, position: <span class="str">'absolute'</span>, left: <span class="num">0</span>, right: <span class="num">0</span>, top: <span class="num">0</span> }}
+        &gt;
+          {visibleRows.map(row => {
+            <span class="kw">const</span> isExpanded = expandedIds.has(row.id);
+            <span class="kw">return</span> (
+              &lt;div key={row.id} className="virtual-row-group"&gt;
+                &lt;div 
+                  className="table-row-grid"
+                  onClick={() => toggleExpand(row.id)}
+                  style={{ height: rowHeight, display: <span class="str">'flex'</span>, alignItems: <span class="str">'center'</span>, cursor: <span class="str">'pointer'</span> }}
+                &gt;
+                  &lt;div style={{ width: <span class="str">'10%'</span> }}&gt;{isExpanded ? <span class="str">'▼'</span> : <span class="str">'▶'</span>}&lt;/div&gt;
+                  &lt;div style={{ width: <span class="str">'30%'</span> }}&gt;{row.name}&lt;/div&gt;
+                  &lt;div style={{ width: <span class="str">'40%'</span> }}&gt;{row.role}&lt;/div&gt;
+                  &lt;div style={{ width: <span class="str">'20%'</span> }}&gt;{row.salary}&lt;/div&gt;
+                &lt;/div&gt;
+                
+                {isExpanded && (
+                  &lt;div className="expanded-row-detail" style={{ background: <span class="str">'var(--card2)'</span>, padding: <span class="str">'10px'</span> }}&gt;
+                    &lt;p&gt;&lt;strong&gt;Metadata Record ID:&lt;/strong&gt; {row.id}&lt;/p&gt;
+                    &lt;p&gt;└ Security Clearance Level 4, transaction auditing locks verified.&lt;/p&gt;
+                  &lt;/div&gt;
+                )}
+              &lt;/div&gt;
+            );
+          })}
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'table-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Scrolling Virtual Re-slice Bounds):</strong><br>
+              📥 <strong>Trigger Scroll Action:</strong> User scrolls table scroll viewport dynamically down to exactly <code>1000px</code>.<br>
+              📤 <strong>Expected Offset Calculations:</strong> <code>startIndex</code> resolves to 17. The component instantly slices rows 17 to 31, rendering only 15 active nodes instead of 100,000, maintaining high rendering performance.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Collapsible Row Height Extension):</strong><br>
+              📥 <strong>Action Event:</strong> User clicks Row 33 to expand its detail card view module panel.<br>
+              📤 <strong>Expected Rendering:</strong> Cell details render smoothly. In production-grade virtualization systems, total list height bounds are recalculated dynamically on the fly to prevent content cutting.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Viewport Node Recycling):</strong><br>
+              📥 <strong>Velocity Scroll Action:</strong> User rapidly flings table list, scrolling past 5,000 rows in 200ms.<br>
+              📤 <strong>Expected GPU Behavior:</strong> GPU paints the recycled view containers smoothly. CPU workload remains completely stable, keeping memory heap locked at ~25MB.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'chat-websocket',
+  icon: '💬',
+  title: '5. Real-Time Chat System',
+  group: 'Core Components',
+  desc: 'Scale chat clients handling WebSockets connection lifecycles, heartbeat ping-pong intervals, offline queue buffers, and State store sync loops.',
+  sections: [
+    {
+      id: 'chat-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a real-time web-socket chat dashboard client. Must handle connection lifecycles, ping-pong heartbeat intervals (detecting silent half-open disconnect states), local IndexedDB message stores, message buffers for offline periods, and sync triggers on reconnection.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Client App Interface -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Zustand Chat Store</text>
+            
+            <!-- Gateway Reconnector -->
+            <rect x="210" y="110" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="275" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">WS Connection Mgr</text>
+            <text x="275" y="148" fill="#5e6b8c" font-size="9" text-anchor="middle">(Heartbeat & Reconnect)</text>
+            
+            <!-- Connection State -->
+            <polygon points="430,70 510,135 430,200 350,135" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-width="2"/>
+            <text x="430" y="139" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Socket Open?</text>
+            
+            <!-- Offline Buffer queue -->
+            <rect x="370" y="240" width="120" height="45" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="430" y="267" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">Offline Message Queue</text>
+            
+            <!-- Network Gateway Router -->
+            <rect x="560" y="110" width="100" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="610" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Gateway / LB</text>
+            
+            <!-- Server Broker Cluster -->
+            <rect x="715" y="110" width="70" height="50" rx="6" fill="#3178c6" fill-opacity="0.15" stroke="#3178c6" stroke-width="2"/>
+            <text x="750" y="140" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Broker</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-chat" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Links -->
+            <path d="M150 135 L202 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-chat)"/>
+            <path d="M340 135 L342 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-chat)"/>
+            <path d="M430 200 L430 232" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-chat)"/>
+            <path d="M510 135 L552 135" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-chat)">
+              <animate attributeName="stroke-dasharray" values="5,5;10,5;5,5" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M660 135 L707 135" stroke="#3178c6" stroke-width="2" marker-end="url(#arrow-chat)"/>
+            
+            <text x="395" y="210" fill="#fca5a5" font-size="9">No</text>
+            <text x="535" y="125" fill="#86efac" font-size="9">Yes</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Reconnection Strategy with Exponential Backoff:</strong> Do not slam your server with reconnections! If the connection fails, retry at 1s, then 2s, 4s, 8s up to a cap (e.g., 30s) adding jitter values.</li>
+            <li><strong>Heartbeat mechanism (Ping-Pong):</strong> Browsers might fail to identify sudden physical disconnections (silent disconnects). Set a ping setInterval timer every 30s. If the client gets no server pong response within 5s, close the connection and enter retry mode.</li>
+            <li><strong>Offline Buffer Flush:</strong> Local client messages sent offline should be buffered in an IndexedDB memory store. Upon reconnection, flush these messages in absolute sequence order to avoid messages arriving out of order.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'chat-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef, useCallback } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── TYPED CHAT MESSAGE PROTOCOL ─────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">ChatMessage</span> {
+  id: <span class="tp">string</span>;
+  sender: <span class="tp">string</span>;
+  content: <span class="tp">string</span>;
+  timestamp: <span class="tp">number</span>;
+}
+
+<span class="cmt">// ─── CUSTOM WEBSOCKET CLIENT HOOK ────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useWebSocketChat</span>(url: <span class="tp">string</span>) {
+  <span class="kw">const</span> [messages, setMessages] = useState&lt;<span class="cls">ChatMessage</span>[]&gt;([]);
+  <span class="kw">const</span> [status, setStatus] = useState&lt;<span class="str">'connecting'</span> | <span class="str">'open'</span> | <span class="str">'closed'</span>&gt;(<span class="str">'closed'</span>);
+  
+  <span class="kw">const</span> ws = useRef&lt;WebSocket | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> retryCount = useRef(<span class="num">0</span>);
+  <span class="kw">const</span> pingInterval = useRef&lt;<span class="cls">ReturnType</span>&lt;<span class="kw">typeof</span> setInterval&gt;&gt;(<span class="kw">null</span>!);
+  <span class="kw">const</span> offlineQueue = useRef&lt;<span class="cls">ChatMessage</span>[]&gt;([]);
+
+  <span class="kw">const</span> connect = useCallback(() => {
+    setStatus(<span class="str">'connecting'</span>);
+    ws.current = <span class="kw">new</span> WebSocket(url);
+
+    ws.current.onopen = () => {
+      setStatus(<span class="str">'open'</span>);
+      retryCount.current = <span class="num">0</span>;
+      <span class="fn">startHeartbeat</span>();
+      <span class="fn">flushOfflineQueue</span>();
+    };
+
+    ws.current.onmessage = (e) => {
+      <span class="kw">const</span> data = JSON.parse(e.data);
+      <span class="kw">if</span> (data.type === <span class="str">'pong'</span>) <span class="kw">return</span>; <span class="cmt">// Heartbeat ignore</span>
+      
+      setMessages(prev => [...prev, data]);
+    };
+
+    ws.current.onclose = () => {
+      setStatus(<span class="str">'closed'</span>);
+      <span class="fn">stopHeartbeat</span>();
+      <span class="fn">reconnect</span>();
+    };
+
+    ws.current.onerror = () => {
+      ws.current?.close();
+    };
+  }, [url]);
+
+  <span class="cmt">// Ping/Pong Heartbeat</span>
+  <span class="kw">const</span> startHeartbeat = () => {
+    pingInterval.current = setInterval(() => {
+      <span class="kw">if</span> (ws.current?.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify({ type: <span class="str">'ping'</span> }));
+      }
+    }, <span class="num">30000</span>);
+  };
+
+  <span class="kw">const</span> stopHeartbeat = () => {
+    clearInterval(pingInterval.current);
+  };
+
+  <span class="cmt">// Exponential Reconnect Loop</span>
+  <span class="kw">const</span> reconnect = () => {
+    <span class="kw">const</span> delay = Math.min(<span class="num">1000</span> * Math.pow(<span class="num">2</span>, retryCount.current), <span class="num">30000</span>);
+    retryCount.current += <span class="num">1</span>;
+    setTimeout(() => {
+      console.log(<span class="str">'Reconnecting socket...'</span>);
+      <span class="fn">connect</span>();
+    }, delay);
+  };
+
+  <span class="cmt">// Message Sending & Buffering</span>
+  <span class="kw">const</span> sendMessage = useCallback((content: <span class="tp">string</span>, sender: <span class="tp">string</span>) => {
+    <span class="kw">const</span> msg: <span class="cls">ChatMessage</span> = {
+      id: <span class="str">\`msg_\${Date.now()}_\${Math.random().toString(36).substr(2, 9)}\`</span>,
+      sender,
+      content,
+      timestamp: Date.now()
+    };
+
+    <span class="cmt">// Optimistic render in client list</span>
+    setMessages(prev => [...prev, msg]);
+
+    <span class="kw">if</span> (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(msg));
+    } <span class="kw">else</span> {
+      offlineQueue.current.push(msg);
+    }
+  }, []);
+
+  <span class="kw">const</span> flushOfflineQueue = () => {
+    <span class="kw">if</span> (offlineQueue.current.length === <span class="num">0</span>) <span class="kw">return</span>;
+    offlineQueue.current.forEach(msg => {
+      ws.current?.send(JSON.stringify(msg));
+    });
+    offlineQueue.current = [];
+  };
+
+  useEffect(() => {
+    <span class="fn">connect</span>();
+    <span class="kw">return</span> () => {
+      <span class="fn">stopHeartbeat</span>();
+      ws.current?.close();
+    };
+  }, [connect]);
+
+  <span class="kw">return</span> { messages, sendMessage, status };
+}</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'chat-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Instant Heartbeat Reconnect Trigger):</strong><br>
+              📥 <strong>Signal Trigger:</strong> Browser drops physical network connection -> ping timer triggers with no pong response from server within 5 seconds.<br>
+              📤 <strong>Expected Connection Action:</strong> Connection manager closes the socket, triggers status update to <code>"connecting"</code>, and attempts reconnection at 1000ms.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Offline Message Queue Buffering):</strong><br>
+              📥 <strong>Offline Input Actions:</strong> User types and dispatches 3 chat messages while socket connection is in <code>"closed"</code> state.<br>
+              📤 <strong>Expected Queue Action:</strong> Messages render optimistically in local message thread container, and are queued in <code>offlineQueue</code> array preserving correct relative timestamps.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Reconnection Queue Flush):</strong><br>
+              📥 <strong>Trigger Network Reconnect:</strong> WS state transitions from <code>"connecting"</code> back to <code>"open"</code> state.<br>
+              📤 <strong>Expected Gateway Update:</strong> Heartbeat restarts and the offline queue is flushed in absolute sequence order, ensuring zero lost messages or messages arriving out of order on the server.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'add-to-cart',
+  icon: '🛒',
+  title: '6. E-Commerce Add To Cart',
+  group: 'Core Components',
+  desc: 'Design e-commerce checkout structures utilizing optimistic updates, client-side request serialization queues, and instant layout rollbacks.',
+  sections: [
+    {
+      id: 'cart-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a checkout checkout system that responds instantly to user additions. Employs optimistic state updates to update the local cart UI instantly, an action serialization request queue to handle rapid clicks sequentially, and rollback actions to handle server stock verification errors.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Click actions -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Click Add / Add</text>
+            
+            <!-- Optimistic Mutator -->
+            <rect x="210" y="110" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="275" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Optimistic Cart state</text>
+            <text x="275" y="148" fill="#86efac" font-size="8.5" text-anchor="middle">(Instant +1 Render)</text>
+            
+            <!-- Serialized Queue (Adjusted coordinates to avoid overlapping diamond) -->
+            <rect x="350" y="110" width="120" height="50" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="2"/>
+            <text x="410" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">FIFO Action Queue</text>
+            <text x="410" y="148" fill="#5e6b8c" font-size="8" text-anchor="middle">(Serializes Requests)</text>
+            
+            <!-- Server verification -->
+            <polygon points="590,70 680,135 590,200 500,135" fill="#ec4899" fill-opacity="0.1" stroke="#ec4899" stroke-width="2"/>
+            <text x="590" y="139" fill="#fff" font-size="10.5" font-weight="bold" text-anchor="middle">Stock Available?</text>
+            
+            <!-- Success/Fail rollback paths -->
+            <rect x="715" y="60" width="70" height="35" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="1.5"/>
+            <text x="750" y="82" fill="#86efac" font-size="10.5" font-weight="bold" text-anchor="middle">Commit</text>
+            
+            <rect x="715" y="170" width="70" height="35" rx="6" fill="#ef4444" fill-opacity="0.15" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="750" y="192" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">Rollback</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-cart" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Connectors -->
+            <path d="M150 135 L202 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-cart)"/>
+            <path d="M340 135 L342 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-cart)"/>
+            <path d="M470 135 L492 135" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-cart)"/>
+            
+            <path d="M590 70 L590 40 L745 40 L745 52" stroke="#10b981" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#arrow-cart)"/>
+            <path d="M590 200 L590 230 L745 230 L745 212" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3" fill="none" marker-end="url(#arrow-cart)"/>
+            
+            <text x="635" y="55" fill="#86efac" font-size="9">Yes</text>
+            <text x="635" y="220" fill="#fca5a5" font-size="9">No</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Action Serialization Queue (FIFO):</strong> Rapid user clicking "Add to Cart" (+1, +1, +1) within 200ms causes concurrent update server API conflicts. Use a sequential request queue to resolve changes one by one.</li>
+            <li><strong>State Snapshot Rollbacks:</strong> If a user increments item count above available store stock, the server rejects the request. Have a clone of the local cache state ready to perform a clean rollback instantly.</li>
+            <li><strong>Request Deduplication:</strong> Combine multiple rapid increments of the same product into a single debounced server request after a quiet period to reduce server traffic.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'cart-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useRef, useCallback } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── CART STATE SCHEMAS ──────────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">CartItem</span> {
+  productId: <span class="tp">number</span>;
+  quantity: <span class="tp">number</span>;
+}
+
+<span class="cmt">// ─── OPTIMISTIC SYNC CONTEXT HOOK ────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useAddToCart</span>() {
+  <span class="kw">const</span> [cart, setCart] = useState&lt;<span class="cls">CartItem</span>[]&gt;([]);
+  <span class="kw">const</span> [syncing, setSyncing] = useState(<span class="kw">false</span>);
+  
+  <span class="kw">const</span> cartStateRef = useRef&lt;<span class="cls">CartItem</span>[]&gt;(cart);
+  <span class="kw">const</span> requestQueue = useRef&lt;(() => <span class="cls">Promise</span>&lt;<span class="tp">void</span>&gt;)[]&gt;([]);
+  
+  <span class="cmt">// Keep ref updated</span>
+  cartStateRef.current = cart;
+
+  <span class="cmt">// FIFO Queue Execution Loop</span>
+  <span class="kw">const</span> processQueue = <span class="kw">async</span> () => {
+    <span class="kw">if</span> (syncing || requestQueue.current.length === <span class="num">0</span>) <span class="kw">return</span>;
+    
+    setSyncing(<span class="kw">true</span>);
+    <span class="kw">const</span> activeTask = requestQueue.current[<span class="num">0</span>];
+    
+    <span class="kw">try</span> {
+      <span class="kw">await</span> <span class="fn">activeTask</span>();
+    } <span class="kw">finally</span> {
+      requestQueue.current.shift();
+      setSyncing(<span class="kw">false</span>);
+      <span class="fn">processQueue</span>(); <span class="cmt">// Process next sequential item</span>
+    }
+  };
+
+  <span class="cmt">// Optimistic mutator action</span>
+  <span class="kw">const</span> addToCart = useCallback((productId: <span class="tp">number</span>, increment: <span class="tp">number</span> = <span class="num">1</span>) => {
+    <span class="cmt">// 1. Take state snapshot before changes</span>
+    <span class="kw">const</span> previousSnapshot = [...cartStateRef.current];
+
+    <span class="cmt">// 2. Optimistically update state</span>
+    setCart(prev => {
+      <span class="kw">const</span> existing = prev.find(item => item.productId === productId);
+      <span class="kw">if</span> (existing) {
+        <span class="kw">return</span> prev.map(item => 
+          item.productId === productId ? { ...item, quantity: item.quantity + increment } : item
+        );
+      }
+      <span class="kw">return</span> [...prev, { productId, quantity: increment }];
+    });
+
+    <span class="cmt">// 3. Queue network task</span>
+    <span class="kw">const</span> networkTask = <span class="kw">async</span> () => {
+      <span class="kw">try</span> {
+        <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">'/api/cart'</span>, {
+          method: <span class="str">'POST'</span>,
+          headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+          body: JSON.stringify({ productId, quantity: increment })
+        });
+        
+        <span class="kw">if</span> (!response.ok) {
+          <span class="kw">throw new</span> <span class="cls">Error</span>(<span class="str">'Out of stock or server error'</span>);
+        }
+      } <span class="kw">catch</span> (err) {
+        <span class="cmt">// Rollback cart state instantly on failure</span>
+        setCart(previousSnapshot);
+        console.error(<span class="str">'Rollback triggered for product:'</span>, productId, err);
+      }
+    };
+
+    requestQueue.current.push(networkTask);
+    <span class="fn">processQueue</span>();
+  }, [syncing]);
+
+  <span class="kw">return</span> { cart, addToCart, syncing };
+}</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'cart-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Instant Counter Increment):</strong><br>
+              📥 <strong>Action Event:</strong> User clicks "Add to Cart" on a product. The network speed is delayed (1.5s latency).<br>
+              📤 <strong>Expected UI Output:</strong> The item count badge in the header instantly jumps from <code>"0"</code> to <code>"1"</code> with no layout flashes or loaders.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Out-of-Stock Rollback):</strong><br>
+              📥 <strong>Action Event:</strong> User tries to add an item that has no remaining inventory. Server rejects request with a HTTP <code>400 Bad Request</code>.<br>
+              📤 <strong>Expected UI Output:</strong> The cart badge drops back to its original state, and a warning notification appears: <code>"Selected item is out of stock"</code>.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Sequential Multi-Click Processing):</strong><br>
+              📥 <strong>Action Event:</strong> User clicks the quantity button 4 times in 200ms (+1, +1, +1, +1).<br>
+              📤 <strong>Expected Action:</strong> The FIFO queue serializes all 4 requests sequentially in order without overlaps, preventing concurrent database lock conflicts.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'sse-streaming',
+  icon: '🤖',
+  title: '7. ChatGPT Streaming Interface',
+  group: 'Advanced Interfaces',
+  desc: 'Engineer dynamic chat flows using Server-Sent Events (SSE) stream parsers, auto-scrolling viewport logic, and markdown rendering containers.',
+  sections: [
+    {
+      id: 'sse-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a real-time conversational interface similar to ChatGPT. Employs Server-Sent Events (SSE) over HTTP/2 to stream chunks, a lightweight JS chunk reader to parse packets incrementally, auto-scrolling container logic, and markdown support.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- User Prompt Input -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Prompt Submission</text>
+            
+            <!-- Server Gateway -->
+            <rect x="200" y="110" width="120" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="260" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">LLM / Server API</text>
+            
+            <!-- SSE Chunk Stream -->
+            <rect x="365" y="105" width="140" height="60" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="2"/>
+            <text x="435" y="130" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">SSE Stream Reader</text>
+            <text x="435" y="145" fill="#fde68a" font-size="9" text-anchor="middle">(Uint8Array Parsing)</text>
+            
+            <!-- Text accumulator buffer -->
+            <rect x="545" y="110" width="105" height="50" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="2"/>
+            <text x="597" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Text Buffer</text>
+            <text x="597" y="148" fill="#5e6b8c" font-size="8.5" text-anchor="middle">(React state update)</text>
+            
+            <!-- Auto-scroll locked UI -->
+            <rect x="690" y="110" width="95" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="737" y="132" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Markdown View</text>
+            <text x="737" y="145" fill="#86efac" font-size="8.5" text-anchor="middle">(Auto Scroll Y)</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-sse" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Arrows -->
+            <path d="M150 135 L192 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-sse)"/>
+            <path d="M320 135 L357 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-sse)">
+              <animate attributeName="stroke-dasharray" values="5,5;10,5;5,5" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M505 135 L537 135" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-sse)"/>
+            <path d="M650 135 L682 135" stroke="#ec4899" stroke-width="2" marker-end="url(#arrow-sse)"/>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Chunk-by-Chunk Stream Parsing:</strong> Use <code>window.fetch</code> paired with <code>ReadableStreamDefaultReader</code>. Read incoming byte chunks as <code>Uint8Array</code>, decode them with <code>TextDecoder</code>, and parse <code>data: { ... }</code> lines sequentially.</li>
+            <li><strong>Auto-Scroll Locking (Smart Scrolling):</strong> Auto-scroll viewports can annoy users who scroll up manually to read earlier messages. Only auto-scroll down if the user's scrollbar is already resting near the bottom.</li>
+            <li><strong>AbortController Support:</strong> Always allow users to stop stream responses. Firing <code>abort()</code> cancels the streaming connection instantly, halting text generations.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'sse-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── CUSTOM STREAM READING HOOK ─────────────────────────────────────</span>
+<span class="kw">export function</span> <span class="fn">useSSEStream</span>() {
+  <span class="kw">const</span> [text, setText] = useState(<span class="str">''</span>);
+  <span class="kw">const</span> [streaming, setStreaming] = useState(<span class="kw">false</span>);
+  
+  <span class="kw">const</span> abortControllerRef = useRef&lt;AbortController | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="kw">const</span> startStream = <span class="kw">async</span> (prompt: <span class="tp">string</span>) => {
+    setText(<span class="str">''</span>);
+    setStreaming(<span class="kw">true</span>);
+
+    abortControllerRef.current = <span class="kw">new</span> AbortController();
+    <span class="kw">try</span> {
+      <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">'/api/chat/stream'</span>, {
+        method: <span class="str">'POST'</span>,
+        headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+        body: JSON.stringify({ prompt }),
+        signal: abortControllerRef.current.signal
+      });
+
+      <span class="kw">if</span> (!response.body) <span class="kw">throw new</span> <span class="cls">Error</span>(<span class="str">'No response body stream'</span>);
+
+      <span class="kw">const</span> reader = response.body.getReader();
+      <span class="kw">const</span> decoder = <span class="kw">new</span> TextDecoder();
+      
+      <span class="kw">while</span> (<span class="kw">true</span>) {
+        <span class="kw">const</span> { value, done } = <span class="kw">await</span> reader.read();
+        <span class="kw">if</span> (done) <span class="kw">break</span>;
+
+        <span class="cmt">// Decode chunk byte logs</span>
+        <span class="kw">const</span> chunk = decoder.decode(value);
+        <span class="kw">const</span> lines = chunk.split(<span class="str">'\n'</span>);
+        
+        lines.forEach(line => {
+          <span class="kw">if</span> (line.startsWith(<span class="str">'data: '</span>)) {
+            <span class="kw">try</span> {
+              <span class="kw">const</span> parsed = JSON.parse(line.substring(<span class="num">6</span>));
+              setText(prev => prev + (parsed.choices[<span class="num">0</span>].delta.content || <span class="str">''</span>));
+            } <span class="kw">catch</span> (e) {
+              <span class="cmt">// Handlers for incomplete JSON structures</span>
+            }
+          }
+        });
+      }
+    } <span class="kw">catch</span> (err) {
+      <span class="kw">if</span> ((err <span class="kw">as</span> Error).name !== <span class="str">'AbortError'</span>) {
+        console.error(<span class="str">'Stream reading failure:'</span>, err);
+      }
+    } <span class="kw">finally</span> {
+      setStreaming(<span class="kw">false</span>);
+    }
+  };
+
+  <span class="kw">const</span> cancelStream = () => {
+    abortControllerRef.current?.abort();
+    setStreaming(<span class="kw">false</span>);
+  };
+
+  <span class="kw">return</span> { text, streaming, startStream, cancelStream };
+}
+
+<span class="cmt">// ─── CHAT INTERFACE PANEL ───────────────────────────────────────────</span>
+<span class="kw">export const</span> <span class="cls">ChatGPTInterface</span>: React.FC = () => {
+  <span class="kw">const</span> [input, setInput] = useState(<span class="str">''</span>);
+  <span class="kw">const</span> { text, streaming, startStream, cancelStream } = <span class="fn">useSSEStream</span>();
+  
+  <span class="kw">const</span> scrollAreaRef = useRef&lt;HTMLDivElement&gt;(<span class="kw">null</span>);
+
+  <span class="cmt">// Smart Auto-Scrolling</span>
+  useEffect(() => {
+    <span class="kw">const</span> area = scrollAreaRef.current;
+    <span class="kw">if</span> (!area) <span class="kw">return</span>;
+
+    <span class="cmt">// Check if scroll position is close to the bottom (within 80px)</span>
+    <span class="kw">const</span> threshold = <span class="num">80</span>;
+    <span class="kw">const</span> isNearBottom = area.scrollHeight - area.scrollTop - area.clientHeight &lt;= threshold;
+
+    <span class="kw">if</span> (isNearBottom) {
+      area.scrollTop = area.scrollHeight;
+    }
+  }, [text]);
+
+  <span class="kw">return</span> (
+    &lt;div className="chat-window"&gt;
+      &lt;div ref={scrollAreaRef} className="chat-messages-container" style={{ height: <span class="str">'300px'</span>, overflowY: <span class="str">'auto'</span> }}&gt;
+        &lt;div className="message-bubble bot"&gt;
+          {text || &lt;span className="placeholder"&gt;Waiting for response...&lt;/span&gt;}
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className="chat-input-controls"&gt;
+        &lt;textarea value={input} onChange={e => setInput(e.target.value)} /&gt;
+        {streaming ? (
+          &lt;button onClick={cancelStream}&gt;Cancel Generation&lt;/button&gt;
+        ) : (
+          &lt;button onClick={() => startStream(input)}&gt;Send Message&lt;/button&gt;
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'sse-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Stream Chunk Accumulation):</strong><br>
+              📥 <strong>Byte stream:</strong> <code>data: {"choices":[{"delta":{"content":"Hello"}}]}</code> followed by next chunk.<br>
+              📤 <strong>Expected UI Output:</strong> The characters appear incrementally on the screen, updating the chat bubble instantly to read <code>"Hello"</code>.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (User Initiated Cancel):</strong><br>
+              📥 <strong>Action Event:</strong> User clicks "Cancel Generation" button halfway through a long system response stream.<br>
+              📤 <strong>Expected UI Output:</strong> The stream stops appending characters immediately. The HTTP network request is canceled, saving CPU resources.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Manual Scroll Interruption Override):</strong><br>
+              📥 <strong>User Action:</strong> User manually scrolls up the text area container to read preceding messages while new text is still streaming.<br>
+              📤 <strong>Expected Behavior:</strong> Auto-scrolling is bypassed instantly to prevent disrupting the user's manual scroll, keeping viewport scroll position locked.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'stock-trading',
+  icon: '📈',
+  title: '8. Stock Trading Platform',
+  group: 'Advanced Interfaces',
+  desc: 'Build trading dashboards processing high-frequency data streams, applying animation frame buffers, Canvas renders, and frame rate lockers.',
+  sections: [
+    {
+      id: 'stock-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a real-time trading dashboard client processing high-frequency tick streams. Employs binary websockets, rendering batch queues (buffering tick events under requestAnimationFrame at 16ms), and high-performance Canvas charts.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Tick Source Stream -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="135" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">WS Stocks Feed</text>
+            <text x="85" y="148" fill="#5e6b8c" font-size="9" text-anchor="middle">(~100 updates/sec)</text>
+            
+            <!-- ArrayBuffer Parser -->
+            <rect x="195" y="110" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="260" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Binary Decoder</text>
+            <text x="260" y="148" fill="#22d3ee" font-size="8.5" text-anchor="middle">(Protobuf / ArrayBuffer)</text>
+            
+            <!-- Rendering Queue Buffer -->
+            <rect x="360" y="105" width="145" height="60" rx="6" fill="#f59e0b" fill-opacity="0.15" stroke="#f59e0b" stroke-width="2"/>
+            <text x="432.5" y="130" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Tick Batcher Queue</text>
+            <text x="432.5" y="145" fill="#fca5a5" font-size="9" text-anchor="middle">(requestAnimationFrame)</text>
+            
+            <!-- Canvas Painting Render Engine -->
+            <rect x="545" y="110" width="110" height="50" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="2"/>
+            <text x="600" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Canvas Painter</text>
+            <text x="600" y="148" fill="#fca5a5" font-size="8.5" text-anchor="middle">(60FPS Draw Loop)</text>
+            
+            <!-- UI Tick Panel -->
+            <rect x="690" y="110" width="95" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="737" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Stock Grid UI</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-stock" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Arrows -->
+            <path d="M150 135 L187 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-stock)"/>
+            <path d="M325 135 L352 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-stock)">
+              <animate attributeName="stroke-dasharray" values="5,5;10,5;5,5" dur="1s" repeatCount="indefinite"/>
+            </path>
+            <path d="M505 135 L537 135" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrow-stock)"/>
+            <path d="M655 135 L682 135" stroke="#ec4899" stroke-width="2" marker-end="url(#arrow-stock)"/>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Avoid Main-Thread UI Locking:</strong> Pushing ~100 raw stock updates/second directly to React state triggers too many re-renders, causing browser UI freeze. Batch updates and flush them at 16.7ms intervals using <code>requestAnimationFrame</code>.</li>
+            <li><strong>ArrayBuffer Binary Streams:</strong> Minimize network payloads by parsing binary stock feeds (ArrayBuffer or Protobuf structures) instead of heavy text-based JSON.</li>
+            <li><strong>Canvas Chart Rendering:</strong> Avoid heavy SVG DOM nodes for fast-moving charts! Use a single HTML5 <code>&lt;canvas&gt;</code> to paint stock charts directly onto pixel canvases at 60 FPS.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'stock-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── BINARY DATA SCHEMAS ─────────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">StockTick</span> {
+  symbol: <span class="tp">string</span>;
+  price: <span class="tp">number</span>;
+  timestamp: <span class="tp">number</span>;
+}
+
+<span class="cmt">// ─── DYNAMIC FRAME BATCHING CHART COMPONENT ──────────────────────────</span>
+<span class="kw">export const</span> <span class="cls">StockChartCanvas</span>: React.FC&lt;{ symbol: <span class="tp">string</span> }&gt; = ({ symbol }) => {
+  <span class="kw">const</span> canvasRef = useRef&lt;HTMLCanvasElement&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> tickQueueRef = useRef&lt;<span class="cls">StockTick</span>[]&gt;([]);
+  <span class="kw">const</span> historicalTicks = useRef&lt;<span class="tp">number</span>[]&gt;([]);
+
+  <span class="cmt">// simulated binary stock feed over WS</span>
+  useEffect(() => {
+    <span class="kw">let</span> active = <span class="kw">true</span>;
+    <span class="kw">let</span> wsConnection: WebSocket | <span class="kw">null</span> = <span class="kw">null</span>;
+
+    <span class="kw">const</span> connectFeed = () => {
+      wsConnection = <span class="kw">new</span> WebSocket(<span class="str">'wss://api.exchange.com/stocks'</span>);
+      wsConnection.binaryType = <span class="str">'arraybuffer'</span>; <span class="cmt">// Receive Binary Data</span>
+      
+      wsConnection.onmessage = (e) => {
+        <span class="kw">if</span> (!active) <span class="kw">return</span>;
+        
+        <span class="cmt">// Decode binary structure manually (Float64 layout)</span>
+        <span class="kw">const</span> view = <span class="kw">new</span> DataView(e.data);
+        <span class="kw">const</span> price = view.getFloat64(<span class="num">0</span>, <span class="kw">true</span>); <span class="cmt">// Little Endian</span>
+        
+        <span class="kw">const</span> tick: <span class="cls">StockTick</span> = {
+          symbol,
+          price,
+          timestamp: Date.now()
+        };
+        
+        <span class="cmt">// Batch incoming ticks into the queue</span>
+        tickQueueRef.current.push(tick);
+      };
+    };
+
+    <span class="fn">connectFeed</span>();
+
+    <span class="kw">return</span> () => {
+      active = <span class="kw">false</span>;
+      wsConnection?.close();
+    };
+  }, [symbol]);
+
+  <span class="cmt">// requestAnimationFrame Render Loop</span>
+  useEffect(() => {
+    <span class="kw">let</span> animationFrameId: <span class="tp">number</span>;
+
+    <span class="kw">const</span> drawChart = () => {
+      <span class="kw">const</span> canvas = canvasRef.current;
+      <span class="kw">if</span> (!canvas) <span class="kw">return</span>;
+
+      <span class="kw">const</span> ctx = canvas.getContext(<span class="str">'2d'</span>);
+      <span class="kw">if</span> (!ctx) <span class="kw">return</span>;
+
+      <span class="cmt">// 1. Flush and process batched ticks</span>
+      <span class="kw">if</span> (tickQueueRef.current.length > <span class="num">0</span>) {
+        <span class="kw">const</span> latestTicks = [...tickQueueRef.current];
+        tickQueueRef.current = [];
+        
+        latestTicks.forEach(tick => {
+          historicalTicks.current.push(tick.price);
+          <span class="kw">if</span> (historicalTicks.current.length > <span class="num">100</span>) {
+            historicalTicks.current.shift(); <span class="cmt">// Keep sliding window of 100 points</span>
+          }
+        });
+      }
+
+      <span class="cmt">// 2. Paint Stage</span>
+      ctx.clearRect(<span class="num">0</span>, <span class="num">0</span>, canvas.width, canvas.height);
+      ctx.strokeStyle = <span class="str">'#10b981'</span>;
+      ctx.lineWidth = <span class="num">2</span>;
+      ctx.beginPath();
+
+      <span class="kw">const</span> points = historicalTicks.current;
+      <span class="kw">const</span> step = canvas.width / <span class="num">100</span>;
+      
+      points.forEach((val, idx) => {
+        <span class="cmt">// Map values to Canvas coordinates</span>
+        <span class="kw">const</span> x = idx * step;
+        <span class="kw">const</span> y = canvas.height - ((val - <span class="num">100</span>) * <span class="num">5</span>); <span class="cmt">// Map around base price 100</span>
+        
+        <span class="kw">if</span> (idx === <span class="num">0</span>) ctx.moveTo(x, y);
+        <span class="kw">else</span> ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      animationFrameId = requestAnimationFrame(drawChart);
+    };
+
+    animationFrameId = requestAnimationFrame(drawChart);
+    <span class="kw">return</span> () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  <span class="kw">return</span> (
+    &lt;div className="canvas-wrapper"&gt;
+      &lt;canvas ref={canvasRef} width={<span class="num">600</span>} height={<span class="num">200</span>} style={{ background: <span class="str">'#030508'</span> }} /&gt;
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'stock-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (High Frequency Tick Batching):</strong><br>
+              📥 <strong>Incoming Feed Stream:</strong> Socket receives 15 binary message tick packets within a single 16.7ms window frame.<br>
+              📤 <strong>Expected UI Output:</strong> The rendering queue batches the ticks, processing and painting all of them in a single canvas frame update, keeping browser frame rate at 60 FPS.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Canvas Redraw sliding viewport window):</strong><br>
+              📥 <strong>Action Sequence:</strong> Tick feed grows beyond 100 historical records during an active trading session.<br>
+              📤 <strong>Expected GPU Rendering:</strong> The oldest records are shifted out of the array. The canvas redrafts the graph with the new dataset without DOM tree degradation.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Binary Data Buffering):</strong><br>
+              📥 <strong>Incoming Socket Frame:</strong> Socket client receives a raw binary message (Float64 array) rather than an uncompacted JSON string.<br>
+              📤 <strong>Expected Action:</strong> DataView decodes the bytes instantly in milliseconds, reducing parse overhead and garbage collection cycles in memory.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'comments-tree',
+  icon: '🌿',
+  title: '9. Recursive Comment Tree',
+  group: 'Advanced Interfaces',
+  desc: 'Create highly responsive, infinite-nested comment trees utilizing normalized hash map schemas, lazy branch rendering, and optimistic edits.',
+  sections: [
+    {
+      id: 'tree-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a recursive nested comment tree system. Employs a flat normalized hash-map schema (indexed by ID) to prevent deep nesting lookup delays, lazy-loading sub-branches, and collapsible branch options.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- Flat Normalized State Database -->
+            <rect x="20" y="80" width="160" height="150" rx="8" fill="#8b5cf6" fill-opacity="0.1" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="100" y="105" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Flat Normal DB Store</text>
+            <text x="40" y="130" fill="#a78bfa" font-size="9.5">"1": { text: "Hi", child: ["2"] }</text>
+            <text x="40" y="150" fill="#a78bfa" font-size="9.5">"2": { text: "Hey", child: ["3"] }</text>
+            <text x="40" y="170" fill="#a78bfa" font-size="9.5">"3": { text: "Yo", child: [] }</text>
+            <text x="100" y="210" fill="#5e6b8c" font-size="8" text-anchor="middle">(Zustand O(1) Updates)</text>
+            
+            <!-- Recursive Tree Walker -->
+            <rect x="235" y="130" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="300" y="155" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Recursive Node Walker</text>
+            <text x="300" y="168" fill="#22d3ee" font-size="8.5" text-anchor="middle">(Lazy Rendering)</text>
+            
+            <!-- Viewport Rendering Canvas -->
+            <rect x="420" y="30" width="350" height="260" rx="10" fill="none" stroke="#10b981" stroke-width="2.5" stroke-dasharray="6,4"/>
+            <text x="595" y="24" fill="#86efac" font-size="10" font-weight="bold" text-anchor="middle">RECURSIVE RENDER VIEWPORT</text>
+            
+            <!-- Visible Comment Nodes -->
+            <rect x="440" y="45" width="310" height="40" rx="4" fill="#0f1424" stroke="#1f2647" stroke-width="1.5"/>
+            <text x="455" y="68" fill="#fff" font-size="10" font-weight="bold">► Comment #1: "Hi"</text>
+            
+            <!-- Nesting Level 1 -->
+            <rect x="475" y="95" width="275" height="40" rx="4" fill="#151a30" stroke="#1f2647" stroke-width="1.5"/>
+            <text x="490" y="118" fill="#fff" font-size="10" font-weight="bold">▼ Comment #2: "Hey" (Level 1)</text>
+            
+            <!-- Nesting Level 2 -->
+            <rect x="510" y="145" width="240" height="40" rx="4" fill="#151a30" stroke="#1f2647" stroke-width="1.5"/>
+            <text x="525" y="168" fill="#fff" font-size="10" font-weight="bold">● Comment #3: "Yo" (Level 2)</text>
+            
+            <line x1="455" y1="85" x2="455" y2="105" stroke="#5e6b8c" stroke-width="1" stroke-dasharray="3,3"/>
+            <line x1="490" y1="135" x2="490" y2="155" stroke="#5e6b8c" stroke-width="1" stroke-dasharray="3,3"/>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-comments" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Connecting Arrow -->
+            <path d="M180 155 L227 155" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-comments)"/>
+            <path d="M365 155 L402 155" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-comments)"/>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Normalized HashMap Schema:</strong> Avoid deep nested objects! Finding and updating a comment at level 7 in nested trees requires expensive recursive sweeps. By flat mapping comments as <code>Record&lt;string, CommentNode&gt;</code>, updates occur in <code>O(1)</code> time.</li>
+            <li><strong>Lazy Rendering of Nested Sub-Trees:</strong> Do not load nested threads deeper than 3 levels automatically. Offer a "Load more replies" sentinel element to fetch replies lazily.</li>
+            <li><strong>Collapsible Branches:</strong> Give users simple layout toggles. Toggling branch collapse hides parent-child structures and frees viewport space cleanly.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'tree-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useMemo } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── NORMALIZED TYPES DEFINITIONS ────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">CommentNode</span> {
+  id: <span class="tp">string</span>;
+  parentId: <span class="tp">string</span> | <span class="kw">null</span>;
+  author: <span class="tp">string</span>;
+  content: <span class="tp">string</span>;
+  childrenIds: <span class="tp">string</span>[];
+}
+
+<span class="kw">type</span> <span class="cls">CommentMap</span> = Record&lt;<span class="tp">string</span>, <span class="cls">CommentNode</span>&gt;;
+
+<span class="cmt">// ─── RECURSIVE NODE RENDERER ──────────────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">CommentNodeProps</span> {
+  commentId: <span class="tp">string</span>;
+  commentMap: <span class="cls">CommentMap</span>;
+  onAddReply: (parentId: <span class="tp">string</span>, text: <span class="tp">string</span>) => <span class="tp">void</span>;
+  depth: <span class="tp">number</span>;
+}
+
+<span class="kw">export const</span> <span class="cls">CommentNodeItem</span>: React.FC&lt;<span class="cls">CommentNodeProps</span>&gt; = ({
+  commentId, commentMap, onAddReply, depth
+}) => {
+  <span class="kw">const</span> comment = commentMap[commentId];
+  <span class="kw">const</span> [isCollapsed, setIsCollapsed] = useState(<span class="kw">false</span>);
+  <span class="kw">const</span> [replyText, setReplyText] = useState(<span class="str">''</span>);
+  <span class="kw">const</span> [showReplyInput, setShowReplyInput] = useState(<span class="kw">false</span>);
+
+  <span class="kw">if</span> (!comment) <span class="kw">return</span> <span class="kw">null</span>;
+
+  <span class="kw">const</span> handleSubmitReply = () => {
+    <span class="kw">if</span> (!replyText.trim()) <span class="kw">return</span>;
+    onAddReply(comment.id, replyText);
+    setReplyText(<span class="str">''</span>);
+    setShowReplyInput(<span class="kw">false</span>);
+  };
+
+  <span class="kw">return</span> (
+    &lt;div 
+      className="comment-node" 
+      style={{ marginLeft: depth > <span class="num">0</span> ? <span class="str">'20px'</span> : <span class="str">'0px'</span>, borderLeft: depth > <span class="num">0</span> ? <span class="str">'1px dashed var(--border)'</span> : <span class="str">'none'</span>, paddingLeft: <span class="str">'10px'</span>, marginY: <span class="str">'8px'</span> }}
+    &gt;
+      &lt;div className="comment-card" style={{ background: <span class="str">'rgba(255,255,255,0.02)'</span>, padding: <span class="str">'8px'</span>, borderRadius: <span class="str">'6px'</span> }}&gt;
+        &lt;div className="comment-header" style={{ display: <span class="str">'flex'</span>, gap: <span class="str">'10px'</span>, fontSize: <span class="str">'0.65rem'</span>, color: <span class="str">'var(--muted)'</span> }}&gt;
+          &lt;span style={{ fontWeight: <span class="num">700</span>, color: <span class="str">'#fff'</span> }}&gt;{comment.author}&lt;/span&gt;
+          &lt;span onClick={() => setIsCollapsed(!isCollapsed)} style={{ cursor: <span class="str">'pointer'</span> }}&gt;
+            {isCollapsed ? <span class="str">'[Expand]'</span> : <span class="str">'[Collapse]'</span>}
+          &lt;/span&gt;
+        &lt;/div&gt;
+        
+        {!isCollapsed && (
+          &lt;div className="comment-content" style={{ fontSize: <span class="str">'0.75rem'</span>, marginTop: <span class="str">'4px'</span> }}&gt;
+            &lt;p&gt;{comment.content}&lt;/p&gt;
+            &lt;button 
+              onClick={() => setShowReplyInput(!showReplyInput)}
+              style={{ background: <span class="str">'transparent'</span>, border: <span class="str">'none'</span>, color: <span class="str">'var(--accent)'</span>, fontSize: <span class="str">'0.65rem'</span>, cursor: <span class="str">'pointer'</span>, marginTop: <span class="str">'4px'</span> }}
+            &gt;
+              Reply
+            &lt;/button&gt;
+          &lt;/div&gt;
+        )}
+      &lt;/div&gt;
+
+      {showReplyInput && (
+        &lt;div className="reply-form" style={{ marginTop: <span class="str">'6px'</span>, display: <span class="str">'flex'</span>, gap: <span class="str">'6px'</span> }}&gt;
+          &lt;input 
+            value={replyText} 
+            onChange={e => setReplyText(e.target.value)} 
+            placeholder="Type reply..."
+            style={{ flex: <span class="num">1</span>, fontSize: <span class="str">'0.68rem'</span>, background: <span class="str">'#030508'</span>, color: <span class="str">'#fff'</span>, border: <span class="str">'1px solid var(--border)'</span> }}
+          /&gt;
+          &lt;button onClick={handleSubmitReply} style={{ padding: <span class="str">'2px 8px'</span>, fontSize: <span class="str">'0.65rem'</span> }}&gt;Send&lt;/button&gt;
+        &lt;/div&gt;
+      )}
+
+      {<span class="cmt">/* Recursive Render Children */</span>}
+      {!isCollapsed && comment.childrenIds.length > <span class="num">0</span> && (
+        &lt;div className="comment-children-list"&gt;
+          {comment.childrenIds.map(childId => (
+            &lt;CommentNodeItem
+              key={childId}
+              commentId={childId}
+              commentMap={commentMap}
+              onAddReply={onAddReply}
+              depth={depth + <span class="num">1</span>}
+            /&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'tree-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Collision Free Reply Injections):</strong><br>
+              📥 <strong>Action Event:</strong> User posts a reply text <code>"I agree!"</code> under nested comment <code>"msg_293"</code> at level 5.<br>
+              📤 <strong>Expected Store Mutations:</strong> A new flat node is injected at the map root, and its ID is appended to <code>msg_293.childrenIds</code>, avoiding recursive search overhead.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Accordion Collapse Unmounting):</strong><br>
+              📥 <strong>Action Event:</strong> User collapses parent comment node <code>"msg_100"</code> containing 45 children nodes spread across sub-branches.<br>
+              📤 <strong>Expected UI Behavior:</strong> The children comments are unmounted instantly. 45 DOM elements are pruned, freeing browser memory.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Dynamic Depth Limit Visualizations):</strong><br>
+              📥 <strong>Nesting limit trigger:</strong> Comment tree reaches depth level 10 during an active conversation thread.<br>
+              📤 <strong>Expected Layout Adjustments:</strong> The indentation scale is capped to keep replies readable and prevent text elements from collapsing off-screen on mobile devices.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+},
+{
+  id: 'multistep-form',
+  icon: '📝',
+  title: '10. Multi-Step Form (Autosave)',
+  group: 'Advanced Interfaces',
+  desc: 'Design high-fidelity multi-stage forms using state context, IndexedDB draft storage, auto-save idle triggers, and dynamic schema validators.',
+  sections: [
+    {
+      id: 'form-arch',
+      title: 'Architectural Data Flow & Explanations',
+      icon: '🏗️',
+      content: `
+        <div class="def-box"><strong>Design Objective:</strong> Design a robust multi-stage step wizard form. Must support client-side state mapping, local draft persistence in IndexedDB, save-on-idle debounced autosave events, schema validation, and retry queues for network losses.</div>
+        
+        <div class="diagram-wrapper">
+          <svg viewBox="0 0 800 320" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100%" height="100%" fill="none"/>
+            <!-- User inputs fields -->
+            <rect x="20" y="110" width="130" height="50" rx="6" fill="#8b5cf6" fill-opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+            <text x="85" y="140" fill="#fff" font-size="12" font-weight="bold" text-anchor="middle">Wizard Form inputs</text>
+            
+            <!-- Step Context -->
+            <rect x="200" y="110" width="130" height="50" rx="6" fill="#06b6d4" fill-opacity="0.15" stroke="#06b6d4" stroke-width="2"/>
+            <text x="265" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Step State Context</text>
+            <text x="265" y="148" fill="#22d3ee" font-size="8.5" text-anchor="middle">(Current step draft)</text>
+            
+            <!-- Idle autosave checker -->
+            <polygon points="430,70 510,135 430,200 350,135" fill="#f59e0b" fill-opacity="0.1" stroke="#f59e0b" stroke-width="2"/>
+            <text x="430" y="135" fill="#fff" font-size="10.5" font-weight="bold" text-anchor="middle">Idle 1000ms?</text>
+            <text x="430" y="147" fill="#fde68a" font-size="8" text-anchor="middle">(Debouncer)</text>
+            
+            <!-- IndexedDB draft backups -->
+            <rect x="370" y="240" width="120" height="45" rx="6" fill="#ec4899" fill-opacity="0.15" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="4,4"/>
+            <text x="430" y="267" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">IndexedDB Drafts</text>
+            
+            <!-- Server Sync Router -->
+            <rect x="560" y="110" width="120" height="50" rx="6" fill="#10b981" fill-opacity="0.15" stroke="#10b981" stroke-width="2"/>
+            <text x="620" y="135" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Autosave REST API</text>
+            <text x="620" y="148" fill="#86efac" font-size="8.5" text-anchor="middle">(Saves Current step)</text>
+            
+            <!-- Final Server Database -->
+            <rect x="715" y="110" width="70" height="50" rx="6" fill="#3178c6" fill-opacity="0.15" stroke="#3178c6" stroke-width="2"/>
+            <text x="750" y="140" fill="#fff" font-size="11" font-weight="bold" text-anchor="middle">Main DB</text>
+            
+            <!-- Markers definition -->
+            <defs>
+              <marker id="arrow-form" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#94a3b8"/>
+              </marker>
+            </defs>
+
+            <!-- Arrows -->
+            <path d="M150 135 L192 135" stroke="#a78bfa" stroke-width="2" marker-end="url(#arrow-form)"/>
+            <path d="M330 135 L342 135" stroke="#22d3ee" stroke-width="2" marker-end="url(#arrow-form)"/>
+            <path d="M430 200 L430 232" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow-form)"/>
+            <path d="M510 135 L552 135" stroke="#10b981" stroke-width="2" marker-end="url(#arrow-form)">
+              <animate attributeName="stroke-dasharray" values="5,5;10,5;5,5" dur="2s" repeatCount="indefinite"/>
+            </path>
+            <path d="M680 135 L707 135" stroke="#3178c6" stroke-width="2" marker-end="url(#arrow-form)"/>
+            
+            <text x="390" y="210" fill="#fca5a5" font-size="9">Active Typing</text>
+            <text x="530" y="125" fill="#86efac" font-size="9">Idle (AutoSave)</text>
+          </svg>
+        </div>
+        
+        <div class="tip">
+          <strong>Key Interview Focus Areas:</strong>
+          <ul>
+            <li><strong>Auto-Save on Idle Loops:</strong> Triggering an API request on every keystroke slams the server. Implement a debounced context save that executes only after the user has stopped typing for a brief period (e.g. 1000ms).</li>
+            <li><strong>Progress Recovery:</strong> Forms can be long. Save form states in IndexedDB at each step so if the user accidentally closes the tab, they can pick up right where they left off.</li>
+            <li><strong>Step-by-step Progressive Validation:</strong> Do not wait until the final submit to validate! Check inputs and show error messages on each step before allowing the user to click Next.</li>
+          </ul>
+        </div>
+      `
+    },
+    {
+      id: 'form-code',
+      title: 'Production-Grade React Implementation',
+      icon: '💻',
+      content: `
+        <div class="cb">
+          <div class="cbh"><span class="cblang">TypeScript React Snippet</span><button class="copy-btn" onclick="cp(this)">Copy</button></div>
+          <div class="cbody">
+            <pre><span class="kw">import</span> React, { useState, useEffect, useRef } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── DATA LAYOUT AND STATE CONTEXTS ──────────────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">FormState</span> {
+  name: <span class="tp">string</span>;
+  email: <span class="tp">string</span>;
+  address: <span class="tp">string</span>;
+  comments: <span class="tp">string</span>;
+}
+
+<span class="kw">export const</span> <span class="cls">AutoSavingWizard</span>: React.FC = () => {
+  <span class="kw">const</span> [step, setStep] = useState(<span class="num">1</span>);
+  <span class="kw">const</span> [formData, setFormData] = useState&lt;<span class="cls">FormState</span>&gt;({
+    name: <span class="str">''</span>, email: <span class="str">''</span>, address: <span class="str">''</span>, comments: <span class="str">''</span>
+  });
+  <span class="kw">const</span> [savingStatus, setSavingStatus] = useState&lt;<span class="str">'idle'</span> | <span class="str">'saving'</span> | <span class="str">'saved'</span>&gt;(<span class="str">'idle'</span>);
+  <span class="kw">const</span> [errors, setErrors] = useState&lt;<span class="cls">Record</span>&lt;<span class="tp">string</span>, <span class="tp">string</span>&gt;&gt;({});
+
+  <span class="kw">const</span> autoSaveTimerRef = useRef&lt;<span class="cls">ReturnType</span>&lt;<span class="kw">typeof</span> setTimeout&gt;&gt;(null!);
+
+  <span class="cmt">// Load draft data from localStorage/IndexedDB on startup</span>
+  useEffect(() => {
+    <span class="kw">const</span> savedDraft = localStorage.getItem(<span class="str">'wizard_draft'</span>);
+    <span class="kw">if</span> (savedDraft) {
+      setFormData(JSON.parse(savedDraft));
+    }
+  }, []);
+
+  <span class="cmt">// Debounced Auto-Save Trigger</span>
+  <span class="kw">const</span> triggerAutoSave = (updatedData: <span class="cls">FormState</span>) => {
+    setSavingStatus(<span class="str">'idle'</span>);
+    clearTimeout(autoSaveTimerRef.current);
+
+    autoSaveTimerRef.current = setTimeout(<span class="kw">async</span> () => {
+      setSavingStatus(<span class="str">'saving'</span>);
+      
+      <span class="cmt">// Save to local backup</span>
+      localStorage.setItem(<span class="str">'wizard_draft'</span>, JSON.stringify(updatedData));
+      
+      <span class="kw">try</span> {
+        <span class="cmt">// Send to REST API</span>
+        <span class="kw">await</span> fetch(<span class="str">'/api/form/autosave'</span>, {
+          method: <span class="str">'POST'</span>,
+          headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+          body: JSON.stringify(updatedData)
+        });
+        setSavingStatus(<span class="str">'saved'</span>);
+      } <span class="kw">catch</span> (e) {
+        setSavingStatus(<span class="str">'idle'</span>);
+        console.error(<span class="str">'Auto-save failed'</span>);
+      }
+    }, <span class="num">1000</span>); <span class="cmt">// Debounce autosave 1 second</span>
+  };
+
+  <span class="kw">const</span> handleFieldChange = (field: <span class="kw">keyof</span> <span class="cls">FormState</span>, value: <span class="tp">string</span>) => {
+    <span class="kw">const</span> next = { ...formData, [field]: value };
+    setFormData(next);
+    <span class="fn">triggerAutoSave</span>(next);
+  };
+
+  <span class="cmt">// Step-by-step progressive validation</span>
+  <span class="kw">const</span> validateStep = (): <span class="tp">boolean</span> => {
+    <span class="kw">const</span> errs: <span class="cls">Record</span>&lt;<span class="tp">string</span>, <span class="tp">string</span>&gt; = {};
+    <span class="kw">if</span> (step === <span class="num">1</span>) {
+      <span class="kw">if</span> (!formData.name.trim()) errs.name = <span class="str">'Name is required'</span>;
+      <span class="kw">if</span> (!formData.email.includes(<span class="str">'@'</span>)) errs.email = <span class="str">'Invalid email'</span>;
+    } <span class="kw">else</span> <span class="kw">if</span> (step === <span class="num">2</span>) {
+      <span class="kw">if</span> (!formData.address.trim()) errs.address = <span class="str">'Address is required'</span>;
+    }
+    setErrors(errs);
+    <span class="kw">return</span> Object.keys(errs).length === <span class="num">0</span>;
+  };
+
+  <span class="kw">const</span> handleNext = () => {
+    <span class="kw">if</span> (<span class="fn">validateStep</span>()) {
+      setStep(prev => prev + <span class="num">1</span>);
+    }
+  };
+
+  <span class="kw">return</span> (
+    &lt;div className="wizard-form-box"&gt;
+      &lt;div className="step-tracker"&gt;Step {step} of 3&lt;/div&gt;
+      
+      &lt;div className="autosave-status" style={{ fontSize: <span class="str">'0.65rem'</span>, color: <span class="str">'var(--muted)'</span> }}&gt;
+        {savingStatus === <span class="str">'saving'</span> && <span class="str">'Auto-saving...'</span>}
+        {savingStatus === <span class="str">'saved'</span> && <span class="str">'All changes saved locally ✓'</span>}
+      &lt;/div&gt;
+
+      &lt;div className="form-fields-wrapper" style={{ marginTop: <span class="str">'15px'</span> }}&gt;
+        {step === <span class="num">1</span> && (
+          &lt;&gt;
+            &lt;div className="form-group"&gt;
+              &lt;label&gt;Name&lt;/label&gt;
+              &lt;input value={formData.name} onChange={e => handleFieldChange(<span class="str">'name'</span>, e.target.value)} /&gt;
+              {errors.name && &lt;span style={{ color: <span class="str">'var(--red)'</span>, fontSize: <span class="str">'0.68rem'</span> }}&gt;{errors.name}&lt;/span&gt;}
+            &lt;/div&gt;
+            &lt;div className="form-group" style={{ marginTop: <span class="str">'10px'</span> }}&gt;
+              &lt;label&gt;Email&lt;/label&gt;
+              &lt;input value={formData.email} onChange={e => handleFieldChange(<span class="str">'email'</span>, e.target.value)} /&gt;
+              {errors.email && &lt;span style={{ color: <span class="str">'var(--red)'</span>, fontSize: <span class="str">'0.68rem'</span> }}&gt;{errors.email}&lt;/span&gt;}
+            &lt;/div&gt;
+          &lt;/&gt;
+        )}
+        
+        {step === <span class="num">2</span> && (
+          &lt;div className="form-group"&gt;
+            &lt;label&gt;Address&lt;/label&gt;
+            &lt;input value={formData.address} onChange={e => handleFieldChange(<span class="str">'address'</span>, e.target.value)} /&gt;
+            {errors.address && &lt;span style={{ color: <span class="str">'var(--red)'</span>, fontSize: <span class="str">'0.68rem'</span> }}&gt;{errors.address}&lt;/span&gt;}
+          &lt;/div>
+        )}
+
+        {step === <span class="num">3</span> && (
+          &lt;div className="form-group"&gt;
+            &lt;label&gt;Comments&lt;/label&gt;
+            &lt;textarea value={formData.comments} onChange={e => handleFieldChange(<span class="str">'comments'</span>, e.target.value)} /&gt;
+          &lt;/div&gt;
+        )}
+      &lt;/div&gt;
+
+      &lt;div className="wizard-navigation" style={{ marginTop: <span class="str">'20px'</span>, display: <span class="str">'flex'</span>, gap: <span class="str">'10px'</span> }}&gt;
+        {step > <span class="num">1</span> && (
+          &lt;button onClick={() => setStep(prev => prev - <span class="num">1</span>)}&gt;Back&lt;/button&gt;
+        )}
+        {step &lt; <span class="num">3</span> ? (
+          &lt;button onClick={handleNext}&gt;Next&lt;/button&gt;
+        ) : (
+          &lt;button onClick={() => alert(<span class="str">'Submitted!'</span>)}&gt;Submit Form&lt;/button&gt;
+        )}
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};</pre>
+          </div>
+        </div>
+      `
+    },
+    {
+      id: 'form-examples',
+      title: '📋 System Input & Output Scenarios',
+      icon: '📊',
+      content: `
+        <div class="success">
+          <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+          <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 1 (Idle AutoSave Trigger):</strong><br>
+              📥 <strong>Action Event:</strong> User fills out <code>"Satendra"</code> into the name input field, then stops typing for 1000ms.<br>
+              📤 <strong>Expected UI Output:</strong> The save timer completes, writing the draft value to localStorage and updating status label: <code>"All changes saved locally ✓"</code>.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 2 (Tab Recovery Load):</strong><br>
+              📥 <strong>Action Sequence:</strong> User completes Step 1, closes browser window accidentally, and returns to the URL 10 minutes later.<br>
+              📤 <strong>Expected Restore Actions:</strong> The <code>useEffect</code> draft hook parses the draft on mount, restoring form state to step 1 values instantly.
+            </div>
+            <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+              <strong>Example 3 (Step Navigation Lock):</strong><br>
+              📥 <strong>User Action:</strong> User leaves email blank and attempts to click "Next" button on Step 1.<br>
+              📤 <strong>Expected Form Behavior:</strong> Navigation is blocked. The validation hook updates errors dictionary, showing warning: <code>"Invalid email"</code>.
+            </div>
+          </div>
+        </div>
+      `
+    }
+  ]
+}
+];
+
+let currentTopic = null;
+let completedSections = {};
+
+function cp(btn) {
+  const pre = btn.closest('.cb').querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+
+function openMob() {
+  document.getElementById('sb').classList.add('open');
+}
+
+function closeMob() {
+  document.getElementById('sb').classList.remove('open');
+}
+
+function initSidebar() {
+  const sbContent = document.getElementById('sb-content');
+  const mobBody = document.getElementById('sb-content'); // shared
+  
+  const groups = {};
+  TOPICS.forEach(topic => {
+    if (!groups[topic.group]) groups[topic.group] = [];
+    groups[topic.group].push(topic);
+  });
+  
+  let html = '';
+  Object.entries(groups).forEach(([groupName, topics]) => {
+    html += `<div class="sb-section">
+      <div class="sb-sect-title">${groupName}</div>`;
+    topics.forEach(t => {
+      html += `<div class="nav-item" id="nav-${t.id}" onclick="showTopic('${t.id}')">
+        <div class="nav-ic">${t.icon}</div>
+        <div class="nav-txt">${t.title}</div>
+        <div class="nav-badge" id="badge-${t.id}" style="display:none">✓</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  
+  if (sbContent) sbContent.innerHTML = html;
+}
+
+function initWelcomeScreen() {
+  const grid = document.getElementById('topic-grid');
+  if (!grid) return;
+  
+  let html = '';
+  TOPICS.forEach(topic => {
+    html += `<div class="tc" onclick="showTopic('${topic.id}')">
+      <div class="tc-icon">${topic.icon}</div>
+      <div class="tc-title">${topic.title}</div>
+      <div class="tc-sub">${topic.desc || ''}</div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function showTopic(topicId) {
+  currentTopic = topicId;
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic) return;
+  
+  closeMob();
+  
+  document.getElementById('welcome-screen').style.display = 'none';
+  const contentArea = document.getElementById('content-area');
+  contentArea.style.display = 'block';
+  
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.getElementById(`nav-${topicId}`);
+  if (activeNav) activeNav.classList.add('active');
+  
+  let tagsHtml = '';
+  if (topic.tags) {
+    topic.tags.forEach(tag => {
+      tagsHtml += `<span class="nav-badge" style="margin-right:4px">${tag}</span>`;
+    });
+  }
+  
+  let sectionsHtml = '';
+  topic.sections.forEach(sec => {
+    sectionsHtml += `
+      <div class="card" id="sec-${sec.id}">
+        <div class="card-h" onclick="toggleCard(this, '${topicId}', '${sec.id}')">
+          <div class="card-hl">
+            <div class="card-ic">${sec.icon}</div>
+            <div class="card-ti">${sec.title}</div>
+          </div>
+          <div class="card-ar">›</div>
+        </div>
+        <div class="card-body">
+          ${sec.content}
+        </div>
+      </div>
+    `;
+  });
+  
+  contentArea.innerHTML = `
+    <div class="sect-hero">
+      <div class="sh-title">${topic.icon} ${topic.title}</div>
+      <div class="sh-sub" style="margin-bottom:8px">${topic.desc || ''}</div>
+      <div class="sh-tags">${tagsHtml}</div>
+    </div>
+    <div>${sectionsHtml}</div>
+  `;
+  
+  // Auto open first card
+  const firstCard = contentArea.querySelector('.card');
+  if (firstCard) {
+    firstCard.classList.add('open');
+    firstCard.querySelector('.card-body').style.display = 'block';
+  }
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleCard(header, topicId, secId) {
+  const card = header.closest('.card');
+  if (!card) return;
+  
+  const isCurrentlyOpen = card.classList.contains('open');
+  card.classList.toggle('open');
+  
+  const body = card.querySelector('.card-body');
+  if (body) {
+    body.style.display = isCurrentlyOpen ? 'none' : 'block';
+  }
+  
+  markCompleted(topicId, secId);
+}
+
+function markCompleted(topicId, secId) {
+  const key = `${topicId}-${secId}`;
+  completedSections[key] = true;
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalSections = TOPICS.reduce((sum, t) => sum + t.sections.length, 0);
+  const completed = Object.keys(completedSections).length;
+  const pct = totalSections > 0 ? Math.round((completed / totalSections) * 100) : 0;
+  
+  const fill = document.getElementById('prog-fill');
+  const pctText = document.getElementById('prog-pct');
+  if (fill) fill.style.width = pct + '%';
+  if (pctText) pctText.textContent = pct + '%';
+  
+  TOPICS.forEach(topic => {
+    const allDone = topic.sections.every(sec => completedSections[`${topic.id}-${sec.id}`]);
+    const badge = document.getElementById(`badge-${topic.id}`);
+    if (badge) {
+      badge.style.display = allDone ? 'block' : 'none';
+      badge.style.color = 'var(--green)';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initWelcomeScreen();
+  updateProgress();
+});
+</script>
+</body>
+</html>
