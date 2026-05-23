@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Prep Guide — Complete Study Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#06090f;--sb:#0a0e1a;--card:#0d1321;--card2:#111827;--border:#1a2540;--text:#e8edf8;--muted:#5a7090;--amber:#fbbf24;--blue:#3b82f6;--green:#10b981;--purple:#a855f7;--cyan:#06b6d4;--red:#ef4444;--pink:#ec4899;--orange:#f97316;--js:#f7df1e;--ts:#3178c6;--react:#61dafb;}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#1a2540;border-radius:4px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:500;background:rgba(6,9,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.55rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-size:.95rem;font-weight:800;letter-spacing:-.02em}.logo .l1{color:var(--js)}.logo .l2{color:var(--ts)}.logo .l3{color:var(--react)}.logo .l4{color:var(--muted);font-weight:400;font-size:.7rem;margin-left:.3rem}
+.countdown{background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(251,191,36,.15));border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:.3rem .75rem;font-size:.72rem;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:.35rem}
+.tbr{display:flex;gap:.3rem;align-items:center}.tbtn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:.28rem .55rem;color:var(--muted);font-size:.65rem;cursor:pointer;transition:all .13s;font-weight:600}.tbtn:hover{color:var(--amber);border-color:var(--amber)}
+.mob-toggle{display:none;background:var(--blue);border:none;border-radius:6px;padding:.3rem .6rem;color:#fff;font-size:.7rem;cursor:pointer;font-weight:700}
+.layout{display:flex;margin-top:46px;min-height:calc(100vh - 46px)}
+.sidebar{width:260px;min-width:260px;background:var(--sb);border-right:1px solid var(--border);height:calc(100vh - 46px);overflow-y:auto;position:sticky;top:46px;display:flex;flex-direction:column}
+.sb-progress{padding:.55rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.prog-label{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+.prog-bar{background:rgba(255,255,255,.05);border-radius:3px;height:4px}.prog-fill{height:100%;background:linear-gradient(90deg,var(--js),var(--green));border-radius:3px;transition:width .4s}
+.sb-section{padding:.35rem 0;border-bottom:1px solid var(--border)}.sb-sect-title{font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;padding:.25rem .7rem .15rem}
+.nav-item{display:flex;align-items:center;gap:.4rem;padding:.42rem .65rem;cursor:pointer;border:1px solid transparent;border-radius:6px;margin:.05rem .3rem;transition:all .12s}
+.nav-item:hover{background:rgba(255,255,255,.03);border-color:var(--border)}.nav-item.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);border-left:2px solid var(--blue)}
+.nav-ic{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}.nav-txt{font-size:.71rem;font-weight:600;flex:1}.nav-item.active .nav-txt{color:#93c5fd}.nav-badge{font-size:.57rem;padding:1px 5px;border-radius:5px;font-weight:700;background:rgba(59,130,246,.2);color:var(--blue)}
+.main{flex:1;overflow-y:auto;min-width:0}.content{padding:1.2rem 1.8rem 3rem;max-width:960px}
+.sect-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.3rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.sect-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--hero-grad,linear-gradient(90deg,#f7df1e,#3178c6))}
+.sh-title{font-size:1.3rem;font-weight:900;margin-bottom:.3rem}.sh-sub{font-size:.8rem;color:var(--muted);line-height:1.7}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:.75rem .95rem;cursor:pointer;transition:background .13s;user-select:none}.card-h:hover{background:rgba(255,255,255,.02)}
+.card-hl{display:flex;align-items:center;gap:.5rem}.card-ic{font-size:.9rem;width:24px;text-align:center}.card-ti{font-size:.8rem;font-weight:700}
+.card-ar{color:var(--muted);transition:transform .22s;font-size:.7rem}.card.open .card-ar{transform:rotate(90deg)}
+.card-body{display:none;border-top:1px solid var(--border);padding:1rem}.card.open .card-body{display:block}
+.def-box{background:rgba(59,130,246,.07);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:.65rem .9rem;font-size:.8rem;line-height:1.75;color:#b0c4de;margin-bottom:.8rem}.def-box strong{color:var(--blue)}
+.cb{background:#050810;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:.6rem 0}
+.cbh{display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.cblang{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cbody{padding:.8rem 1rem;overflow-x:auto}
+pre{font-family:'Cascadia Code',monospace;font-size:.73rem;line-height:1.75;color:#c9d1d9;white-space:pre;tab-size:2}
+.output{background:#020408;border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:.65rem .85rem;margin:.4rem 0;font-family:monospace;font-size:.72rem;color:#6ee7b7;line-height:1.65}
+.tip{border-left:3px solid var(--amber);background:rgba(251,191,36,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fde68a;margin:.55rem 0}
+.danger{border-left:3px solid var(--red);background:rgba(239,68,68,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fca5a5;margin:.55rem 0}
+.welcome-screen{padding:1.5rem 1.8rem 2rem;max-width:960px}.wh{font-size:1.8rem;font-weight:900;line-height:1.2;margin-bottom:.5rem}
+.wh .em1{color:var(--js)}.wh .em2{color:var(--ts)}.wh .em3{color:var(--react)}
+.wsub{font-size:.83rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;max-width:580px}
+.copy-btn{padding:.15rem .45rem;font-size:.58rem;text-transform:uppercase;border-radius:4px;margin-left:auto}
+.diagram-wrapper{background:rgba(10,14,26,0.6);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem 0;display:flex;justify-content:center;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 10px 30px rgba(0,0,0,0.5);overflow:hidden;position:relative;backdrop-filter:blur(10px)}
+.diagram-wrapper svg{width:100%;height:auto;max-height:450px;display:block}
+@media(max-width:768px){.sidebar{display:none}.mob-toggle{display:block}.content,.welcome-screen{padding:.85rem .8rem 2rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Topics</button>
+    <div class="logo"><span class="l1">JS</span> <span class="l2">TS</span> <span class="l3">React</span><span class="l4">Interview Prep</span></div>
+  </div>
+  <div class="countdown"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:.3rem;animation:pulse 1.5s infinite;"></span>Interview: Monday 3PM</div>
+  <div class="tbr">
+    <button class="tbtn" onclick="window.scrollTo(0,0)">↑ Top</button>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar" id="sb">
+  <div class="sb-progress">
+    <div class="prog-label"><span>📊 Study Progress</span><span id="prog-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="sb-content"></div>
+</div>
+
+<div class="main" id="main">
+  <div id="welcome-screen">
+    <div class="welcome-screen">
+      <div class="wh"><span class="em1">JavaScript</span> · <span class="em2">TypeScript</span> · <span class="em3">React</span></div>
+      <div class="wh" style="font-size:1.1rem;color:var(--muted);font-weight:500;margin-top:.2rem">Complete Interview Preparation Guide</div>
+      <p class="wsub">You've got this! 💪 This guide covers every topic from your interview brief with detailed explanations, code examples, and interview-specific tips. Select a topic from the left sidebar to begin.</p>
+    </div>
+  </div>
+  <div id="topic-view" style="display:none"></div>
+</div>
+</div>
+
+<script>
+// --- INTERACTIVE DIAGRAM GENERATORS ---
+function simulateGC() {
+  const svg = document.getElementById('gcSvg');
+  if (!svg) return;
+  svg.classList.add('swept');
+  setTimeout(() => {
+    svg.classList.remove('swept');
+  }, 3500);
+}
+
+function buildClosureDiagram() {
+  return `
+  <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="stackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.25"/>
+      </linearGradient>
+      <linearGradient id="heapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.25"/>
+      </linearGradient>
+      <linearGradient id="activeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#10b981" stop-opacity="0.4"/>
+      </linearGradient>
+      <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="6" result="blur" />
+        <feMerge>
+          <feMergeNode in="blur" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <style>
+      .title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      .sub { font-family: system-ui, sans-serif; font-size: 12px; fill: #5a7090; }
+      .node-title { font-family: system-ui, sans-serif; font-weight: bold; font-size: 14px; fill: #e8edf8; }
+      .node-text { font-family: 'Cascadia Code', monospace; font-size: 11px; fill: #b0c4de; }
+      .val-text { font-family: 'Cascadia Code', monospace; font-size: 11px; fill: #fbbf24; font-weight: bold; }
+      .link-path { stroke: #3b82f6; stroke-width: 2.5; stroke-dasharray: 4 4; fill: none; animation: dash 30s linear infinite; }
+      .link-arrow { fill: #3b82f6; }
+      .active-link { stroke: #10b981; stroke-width: 3; fill: none; filter: url(#neonGlow); }
+      .active-arrow { fill: #10b981; filter: url(#neonGlow); }
+      .popped-frame { stroke: #5a7090; stroke-width: 1.5; stroke-dasharray: 6 4; fill: rgba(255,255,255,0.02); }
+      .frame { stroke: #1a2540; stroke-width: 2; fill: url(#stackGrad); transition: all 0.3s; }
+      .frame:hover { stroke: #3b82f6; fill: rgba(59,130,246,0.2); }
+      .heap-box { stroke: #fbbf24; stroke-width: 2; fill: url(#heapGrad); transition: all 0.3s; filter: drop-shadow(0 4px 10px rgba(251,191,36,0.15)); }
+      .heap-box:hover { stroke: #fbbf24; fill: rgba(251,191,36,0.2); }
+      .active-frame { stroke: #10b981; stroke-width: 2.5; fill: url(#activeGrad); filter: drop-shadow(0 0 8px rgba(16,185,129,0.3)); }
+      .pulse-circle { fill: #10b981; animation: pulseGlow 2s infinite; }
+      @keyframes dash { to { stroke-dashoffset: -1000; } }
+      @keyframes pulseGlow { 0% { r: 4; opacity: 1; } 100% { r: 12; opacity: 0; } }
+    </style>
+
+    <text x="20" y="30" class="title">Execution Stack vs Heap Lexical Scopes</text>
+    <text x="20" y="50" class="sub">How Closures retain Heap Scope after Stack Frames are popped</text>
+
+    <!-- CALL STACK -->
+    <g transform="translate(40, 70)">
+      <rect x="0" y="0" width="280" height="250" rx="10" fill="#0d1321" stroke="#1a2540" stroke-width="2" />
+      <text x="15" y="25" class="node-title" fill="#3b82f6">Call Stack (LIFO)</text>
+      
+      <!-- Popped Frame -->
+      <g transform="translate(15, 45)">
+        <rect x="0" y="0" width="250" height="50" rx="6" class="popped-frame" />
+        <text x="15" y="22" class="node-title" fill="#5a7090">createSecureStore()</text>
+        <text x="15" y="40" class="sub" fill="#5a7090">Execution Context — POPPED/DEAD</text>
+      </g>
+      
+      <!-- Active Frame -->
+      <g transform="translate(15, 110)">
+        <rect x="0" y="0" width="250" height="50" rx="6" class="active-frame" />
+        <text x="15" y="22" class="node-title" fill="#10b981">store.increment()</text>
+        <text x="15" y="40" class="node-text" fill="#a7f3d0">Executing frame... (Active)</text>
+      </g>
+
+      <!-- Global Context -->
+      <g transform="translate(15, 175)">
+        <rect x="0" y="0" width="250" height="60" rx="6" class="frame" />
+        <text x="15" y="25" class="node-title" fill="#e8edf8">Global Context</text>
+        <text x="15" y="45" class="node-text" fill="#5a7090">store = Object { increment, getKey }</text>
+      </g>
+    </g>
+
+    <!-- CONNECTIONS -->
+    <path d="M 305 140 Q 380 120 465 145" class="link-path" />
+    <polygon points="465,145 455,140 458,150" class="link-arrow" />
+    
+    <path d="M 305 205 Q 380 230 460 215" class="active-link" />
+    <circle cx="305" cy="205" r="5" fill="#10b981" />
+    <circle cx="305" cy="205" r="4" class="pulse-circle" />
+    <polygon points="465,215 455,210 457,220" class="active-arrow" />
+
+    <!-- HEAP MEMORY -->
+    <g transform="translate(480, 70)">
+      <rect x="0" y="0" width="280" height="250" rx="10" fill="#0d1321" stroke="#1a2540" stroke-width="2" />
+      <text x="15" y="25" class="node-title" fill="#fbbf24">Heap Memory (Long-Lived)</text>
+      
+      <!-- Retained Environment -->
+      <g transform="translate(15, 45)">
+        <rect x="0" y="0" width="250" height="180" rx="8" class="heap-box" />
+        
+        <rect x="10" y="10" width="230" height="30" rx="4" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.2)" />
+        <text x="20" y="30" class="node-title" fill="#fbbf24" style="font-size:12px;">LexicalEnvironment [createSecureStore]</text>
+        
+        <g transform="translate(15, 60)">
+          <text x="5" y="20" class="node-text">secretKey:</text>
+          <text x="110" y="20" class="val-text">"db-access-token-12345"</text>
+          <line x1="5" y1="30" x2="215" y2="30" stroke="#1a2540" />
+
+          <text x="5" y="55" class="node-text">counter:</text>
+          <text x="110" y="55" class="val-text" fill="#10b981">2</text>
+          <line x1="5" y1="65" x2="215" y2="65" stroke="#1a2540" />
+          
+          <text x="5" y="90" class="sub" fill="#5a7090" style="font-size:10px;">[[Scopes]] pointer retains this</text>
+          <text x="5" y="105" class="sub" fill="#5a7090" style="font-size:10px;">lexical record in the Heap. Exempt</text>
+          <text x="5" y="120" class="sub" fill="#5a7090" style="font-size:10px;">from Garbage Collection (GC)!</text>
+        </g>
+      </g>
+    </g>
+  </svg>
+  `;
+}
+
+function buildScopeChainDiagram() {
+  return `
+  <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="globalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.05"/>
+        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.15"/>
+      </linearGradient>
+      <linearGradient id="parentGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.05"/>
+        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.15"/>
+      </linearGradient>
+      <linearGradient id="childGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#ec4899" stop-opacity="0.08"/>
+        <stop offset="100%" stop-color="#ec4899" stop-opacity="0.2"/>
+      </linearGradient>
+    </defs>
+    <style>
+      .scope-title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 14px; fill: #e8edf8; }
+      .scope-text { font-family: 'Cascadia Code', monospace; font-size: 11px; fill: #b0c4de; }
+      .val { font-family: 'Cascadia Code', monospace; font-size: 11px; fill: #f97316; font-weight: bold; }
+      .lookup-arrow { stroke: #ec4899; stroke-width: 2.5; stroke-dasharray: 5 3; fill: none; animation: lookupAnimation 20s linear infinite; }
+      .lookup-line { stroke: #fbbf24; stroke-width: 2; fill: none; stroke-dasharray: 4 4; }
+      .scope-card { stroke: #1a2540; stroke-width: 2; rx: 12; transition: all 0.3s; }
+      .scope-card.global { fill: url(#globalGrad); stroke: #3b82f6; }
+      .scope-card.parent { fill: url(#parentGrad); stroke: #fbbf24; }
+      .scope-card.child { fill: url(#childGrad); stroke: #ec4899; }
+      .scope-card.global:hover { stroke-width: 3; stroke: #60a5fa; }
+      .scope-card.parent:hover { stroke-width: 3; stroke: #fcd34d; }
+      .scope-card.child:hover { stroke-width: 3; stroke: #f472b6; }
+      .shadow-badge { font-family: system-ui, sans-serif; font-size: 10px; font-weight: bold; fill: #ef4444; }
+      @keyframes lookupAnimation { to { stroke-dashoffset: -1000; } }
+    </style>
+
+    <text x="20" y="30" class="scope-title" style="font-size:16px;">Lexical Scope Chain & Variable Shadowing</text>
+    <text x="20" y="50" class="scope-text" style="fill:#5a7090;">Engine climbs upward through Outer Environment pointers to resolve identifiers</text>
+
+    <!-- Scope Chain Nested Diagram -->
+    <g transform="translate(40, 70)">
+      
+      <!-- GLOBAL SCOPE (OUTERMOST) -->
+      <rect x="0" y="0" width="720" height="260" class="scope-card global" />
+      <text x="20" y="25" class="scope-title" fill="#60a5fa">Global Scope [Outer Environment: null]</text>
+      <text x="20" y="45" class="scope-text">const environment = <text class="val" fill="#60a5fa">"production"</text></text>
+
+      <!-- PARENT SCOPE -->
+      <g transform="translate(40, 60)">
+        <rect x="0" y="0" width="640" height="180" class="scope-card parent" />
+        <text x="20" y="25" class="scope-title" fill="#fcd34d">parent() Scope [Outer Environment: Global]</text>
+        <text x="20" y="45" class="scope-text">const tier = <text class="val" fill="#fcd34d">"middle"</text></text>
+
+        <!-- CHILD SCOPE (INNERMOST) -->
+        <g transform="translate(40, 60)">
+          <rect x="0" y="0" width="560" height="100" class="scope-card child" />
+          <text x="20" y="25" class="scope-title" fill="#f472b6">child() Scope [Outer Environment: parent()]</text>
+          
+          <text x="20" y="50" class="scope-text">const level = <text class="val" fill="#f472b6">"inner"</text></text>
+          
+          <!-- Shadowing Variable -->
+          <text x="20" y="75" class="scope-text">const environment = <text class="val" fill="#ef4444">"local-staging"</text></text>
+          <text x="320" y="75" class="shadow-badge">⚠️ Variable Shadowing (Prevents lookup of global "environment")</text>
+        </g>
+      </g>
+    </g>
+
+    <!-- Traverse Scope Paths -->
+    <path d="M 140 215 Q 110 215 110 215" class="lookup-line" />
+    
+    <path d="M 220 250 Q 220 185 115 185" class="lookup-arrow" />
+    <circle cx="220" cy="250" r="4" fill="#ec4899" />
+    <polygon points="115,185 125,189 123,180" fill="#ec4899" />
+    <text x="230" y="220" font-family="system-ui, sans-serif" font-size="10px" font-weight="bold" fill="#ec4899">Climbing chain to parent() for "tier"</text>
+
+    <path d="M 120 265 L 120 280" stroke="#10b981" stroke-width="2.5" fill="none" stroke-dasharray="3 3" />
+    <circle cx="120" cy="265" r="4" fill="#10b981" />
+    <polygon points="120,280 117,272 123,272" fill="#10b981" />
+    <text x="135" y="280" font-family="system-ui, sans-serif" font-size="10px" font-weight="bold" fill="#10b981">Local hit for "environment"</text>
+
+  </svg>
+  `;
+}
+
+function buildHoistingDiagram() {
+  return `
+  <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="tdzStripes" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="20" stroke="#ef4444" stroke-width="4" stroke-opacity="0.15" />
+      </pattern>
+      <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#10b981" stop-opacity="0.05"/>
+        <stop offset="100%" stop-color="#10b981" stop-opacity="0.2"/>
+      </linearGradient>
+      <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.05"/>
+        <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.2"/>
+      </linearGradient>
+    </defs>
+    <style>
+      .main-title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      .lbl { font-family: system-ui, sans-serif; font-weight: 700; font-size: 11px; fill: #b0c4de; }
+      .code-font { font-family: 'Cascadia Code', monospace; font-size: 10px; fill: #e8edf8; }
+      .arrow { stroke: #5a7090; stroke-width: 2; fill: none; }
+      .timeline-track { stroke: #1a2540; stroke-width: 6; stroke-linecap: round; }
+      .tdz-rect { fill: url(#tdzStripes); stroke: #ef4444; stroke-width: 1; stroke-dasharray: 4 2; }
+      .phase-line { stroke: #3b82f6; stroke-width: 2; stroke-dasharray: 6 4; }
+      .phase-text { font-family: system-ui, sans-serif; font-weight: bold; font-size: 12px; fill: #3b82f6; text-anchor: middle; }
+    </style>
+
+    <text x="20" y="30" class="main-title">Hoisting Mechanics & Temporal Dead Zone (TDZ)</text>
+    <text x="20" y="50" font-family="system-ui, sans-serif" font-size="12px" fill="#5a7090">Compilation Variable Registration vs Execution Lifecycles</text>
+
+    <!-- Phase Splitter -->
+    <line x1="300" y1="70" x2="300" y2="330" class="phase-line" />
+    <text x="160" y="85" class="phase-text" fill="#5a7090">1. CREATION PHASE (Compilation)</text>
+    <text x="540" y="85" class="phase-text" fill="#3b82f6">2. EXECUTION PHASE (Run Time)</text>
+
+    <!-- Let / Const Track -->
+    <g transform="translate(40, 105)">
+      <text x="0" y="25" class="lbl" fill="#f472b6">let / const</text>
+      <line x1="120" y1="20" x2="700" y2="20" class="timeline-track" />
+      
+      <rect x="120" y="8" width="320" height="24" rx="4" class="tdz-rect" />
+      <text x="280" y="24" font-family="system-ui, sans-serif" font-weight="bold" font-size="10px" fill="#fca5a5" text-anchor="middle">TEMPORAL DEAD ZONE (TDZ)</text>
+      
+      <circle cx="120" cy="20" r="6" fill="#ef4444" />
+      <text x="120" y="45" class="code-font" style="font-size:9px;" fill="#ef4444" text-anchor="middle">Registered (Uninitialized)</text>
+      
+      <circle cx="440" cy="20" r="6" fill="#10b981" />
+      <text x="440" y="45" class="code-font" style="font-size:9px;" fill="#10b981" text-anchor="middle">let x = 42 (Initialized)</text>
+      
+      <text x="250" y="-3" font-family="system-ui, sans-serif" font-weight="bold" font-size="9px" fill="#ef4444">❌ Access = ReferenceError!</text>
+      <text x="560" y="-3" font-family="system-ui, sans-serif" font-weight="bold" font-size="9px" fill="#10b981">✅ Access Allowed</text>
+    </g>
+
+    <!-- Var Track -->
+    <g transform="translate(40, 185)">
+      <text x="0" y="25" class="lbl" fill="#fbbf24">var</text>
+      <line x1="120" y1="20" x2="700" y2="20" class="timeline-track" />
+      
+      <rect x="120" y="8" width="320" height="24" rx="4" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="1" />
+      <text x="280" y="24" font-family="system-ui, sans-serif" font-weight="bold" font-size="10px" fill="#93c5fd" text-anchor="middle">Initialized as "undefined"</text>
+      
+      <circle cx="120" cy="20" r="6" fill="#3b82f6" />
+      <text x="120" y="45" class="code-font" style="font-size:9px;" fill="#3b82f6" text-anchor="middle">Registered & Initialized</text>
+      
+      <circle cx="440" cy="20" r="6" fill="#10b981" />
+      <text x="440" y="45" class="code-font" style="font-size:9px;" fill="#10b981" text-anchor="middle">var y = "Alice" (Assigned)</text>
+      
+      <text x="220" y="-3" font-family="system-ui, sans-serif" font-weight="bold" font-size="9px" fill="#fbbf24">⚠️ Access returns "undefined"</text>
+      <text x="560" y="-3" font-family="system-ui, sans-serif" font-weight="bold" font-size="9px" fill="#10b981">✅ Access returns "Alice"</text>
+    </g>
+
+    <!-- Function declarations Track -->
+    <g transform="translate(40, 265)">
+      <text x="0" y="25" class="lbl" fill="#10b981">function</text>
+      <line x1="120" y1="20" x2="700" y2="20" class="timeline-track" />
+      
+      <rect x="120" y="8" width="580" height="24" rx="4" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="1" />
+      <text x="410" y="24" font-family="system-ui, sans-serif" font-weight="bold" font-size="10px" fill="#6ee7b7" text-anchor="middle">FULLY HOISTED & CALLABLE</text>
+      
+      <circle cx="120" cy="20" r="6" fill="#10b981" />
+      <text x="120" y="45" class="code-font" style="font-size:9px;" fill="#10b981" text-anchor="middle">Fully Allocated in Memory</text>
+      
+      <text x="560" y="-3" font-family="system-ui, sans-serif" font-weight="bold" font-size="9px" fill="#10b981">✅ Safe execution at any line</text>
+    </g>
+
+  </svg>
+  `;
+}
+
+function buildEventLoopDiagram() {
+  return `
+  <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="loopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981"/>
+        <stop offset="50%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#a855f7"/>
+      </linearGradient>
+      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="5" result="blur" />
+        <feComponentTransfer in="blur" result="glow1">
+          <feFuncA type="linear" slope="0.6"/>
+        </feComponentTransfer>
+        <feMerge>
+          <feMergeNode in="glow1" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+    <style>
+      .el-title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      .el-sub { font-family: system-ui, sans-serif; font-size: 12px; fill: #5a7090; }
+      .box { fill: #0d1321; stroke: #1a2540; stroke-width: 2; rx: 8; transition: all 0.3s; }
+      .box:hover { stroke: #3b82f6; fill: rgba(59,130,246,0.1); }
+      .header-text { font-family: system-ui, sans-serif; font-weight: 800; font-size: 12px; fill: #e8edf8; text-transform: uppercase; letter-spacing: 0.05em; }
+      .inner-lbl { font-family: 'Cascadia Code', monospace; font-size: 10px; fill: #b0c4de; }
+      .spinner { transform-origin: 395px 160px; animation: spin 16s linear infinite; }
+      .flow-dot { fill: #10b981; animation: flow 3s infinite linear; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+      @keyframes flow {
+        0% { stroke-dashoffset: 24; }
+        100% { stroke-dashoffset: 0; }
+      }
+      .animated-path { stroke-dasharray: 8 4; animation: flow 10s infinite linear; }
+    </style>
+
+    <text x="20" y="30" class="el-title">The JavaScript Concurrency & Event Loop Model</text>
+    <text x="20" y="50" class="el-sub">The single-threaded execution, scheduling queue priority, and render repaint cycle</text>
+
+    <!-- CALL STACK (Left) -->
+    <g transform="translate(40, 70)">
+      <rect x="0" y="0" width="180" height="240" class="box" stroke="#fbbf24" stroke-width="2.5" />
+      <text x="15" y="25" class="header-text" fill="#fbbf24">Call Stack (LIFO)</text>
+      
+      <g transform="translate(15, 45)">
+        <rect x="0" y="0" width="150" height="35" rx="4" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)" />
+        <text x="10" y="22" class="inner-lbl" fill="#fcd34d">console.log()</text>
+      </g>
+      <g transform="translate(15, 90)">
+        <rect x="0" y="0" width="150" height="35" rx="4" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.3)" />
+        <text x="10" y="22" class="inner-lbl" fill="#fcd34d">promiseCallback()</text>
+      </g>
+      <g transform="translate(15, 135)">
+        <rect x="0" y="0" width="150" height="35" rx="4" fill="rgba(251,191,36,0.05)" stroke="#1a2540" />
+        <text x="10" y="22" class="inner-lbl">setTimeout()</text>
+      </g>
+      <g transform="translate(15, 180)">
+        <rect x="0" y="0" width="150" height="45" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1a2540" />
+        <text x="10" y="20" class="inner-lbl">anonymous()</text>
+        <text x="10" y="35" class="el-sub" style="font-size:9px;">Global Execution</text>
+      </g>
+    </g>
+
+    <!-- WEB APIS (Right) -->
+    <g transform="translate(580, 70)">
+      <rect x="0" y="0" width="180" height="240" class="box" stroke="#06b6d4" stroke-width="2.5" />
+      <text x="15" y="25" class="header-text" fill="#06b6d4">Web APIs (Host)</text>
+      
+      <g transform="translate(15, 45)">
+        <rect x="0" y="0" width="150" height="40" rx="4" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" />
+        <text x="10" y="20" class="inner-lbl" fill="#22d3ee">DOM Events</text>
+        <text x="10" y="32" class="el-sub" style="font-size:9px;">click listener</text>
+      </g>
+      <g transform="translate(15, 95)">
+        <rect x="0" y="0" width="150" height="40" rx="4" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" />
+        <text x="10" y="20" class="inner-lbl" fill="#22d3ee">Timer (setTimeout)</text>
+        <text x="10" y="32" class="el-sub" style="font-size:9px;">0ms delay</text>
+      </g>
+      <g transform="translate(15, 145)">
+        <rect x="0" y="0" width="150" height="40" rx="4" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" />
+        <text x="10" y="20" class="inner-lbl" fill="#22d3ee">Fetch API</text>
+        <text x="10" y="32" class="el-sub" style="font-size:9px;">HTTP asynchronous I/O</text>
+      </g>
+    </g>
+
+    <!-- MICRO AND MACRO QUEUES (Bottom) -->
+    <g transform="translate(240, 275)">
+      <rect x="0" y="0" width="320" height="45" rx="6" fill="#0d1321" stroke="#10b981" stroke-width="1.5" />
+      <text x="10" y="18" class="header-text" fill="#10b981" style="font-size:10px;">Microtask Queue (Promises, queueMicrotask)</text>
+      <g transform="translate(15, 23)">
+        <rect x="0" y="0" width="80" height="16" rx="2" fill="rgba(16,185,129,0.1)" />
+        <text x="5" y="11" font-family="monospace" font-size="8px" fill="#10b981">Promise .then()</text>
+      </g>
+      <g transform="translate(105, 23)">
+        <rect x="0" y="0" width="80" height="16" rx="2" fill="rgba(16,185,129,0.1)" />
+        <text x="5" y="11" font-family="monospace" font-size="8px" fill="#10b981">Promise .then()</text>
+      </g>
+    </g>
+
+    <g transform="translate(240, 325)">
+      <rect x="0" y="0" width="320" height="45" rx="6" fill="#0d1321" stroke="#ef4444" stroke-width="1.5" />
+      <text x="10" y="18" class="header-text" fill="#ef4444" style="font-size:10px;">Macrotask Queue (setTimeout, setInterval)</text>
+      <g transform="translate(15, 23)">
+        <rect x="0" y="0" width="80" height="16" rx="2" fill="rgba(239,68,68,0.1)" />
+        <text x="5" y="11" font-family="monospace" font-size="8px" fill="#ef4444">timerCallback</text>
+      </g>
+    </g>
+
+    <!-- EVENT LOOP SPINNER (Center) -->
+    <g class="spinner" id="evSpinner">
+      <circle cx="395" cy="160" r="45" fill="none" stroke="url(#loopGrad)" stroke-width="6" stroke-linecap="round" filter="url(#glow)" />
+      <polygon points="440,160 450,145 446,170" fill="#a855f7" filter="url(#glow)" />
+      <polygon points="350,160 340,175 344,150" fill="#10b981" filter="url(#glow)" />
+    </g>
+    <text x="395" y="165" font-family="system-ui, sans-serif" font-weight="900" font-size="10px" fill="#e8edf8" text-anchor="middle">EVENT</text>
+    <text x="395" y="177" font-family="system-ui, sans-serif" font-weight="900" font-size="10px" fill="#e8edf8" text-anchor="middle">LOOP</text>
+
+    <!-- PATHS & ARROWS -->
+    <path d="M 220 120 L 580 120" stroke="#06b6d4" stroke-width="2" fill="none" class="animated-path" />
+    
+    <path d="M 670 310 L 670 345 Q 670 350 660 350 L 565 350" stroke="#ef4444" stroke-width="2" fill="none" />
+    <polygon points="565,350 575,346 575,354" fill="#ef4444" />
+    <text x="615" y="338" font-family="system-ui, sans-serif" font-size="8px" fill="#ef4444" text-anchor="middle">Timeout Resolved</text>
+
+    <path d="M 230 160 Q 230 250 250 250 L 250 270" stroke="#10b981" stroke-width="2" fill="none" />
+    
+    <path d="M 395 270 L 395 210" stroke="#10b981" stroke-width="2.5" fill="none" stroke-dasharray="4 2" />
+    <path d="M 350 160 Q 240 160 225 160" stroke="#fbbf24" stroke-width="2.5" fill="none" />
+    <polygon points="225,160 235,156 235,164" fill="#fbbf24" />
+
+  </svg>
+  `;
+}
+
+function buildVDomDiagram() {
+  return `
+  <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="fiberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#61dafb" stop-opacity="0.1"/>
+        <stop offset="100%" stop-color="#61dafb" stop-opacity="0.25"/>
+      </linearGradient>
+    </defs>
+    <style>
+      .title-text { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      .sec-text { font-family: system-ui, sans-serif; font-weight: bold; font-size: 11px; fill: #5a7090; text-anchor: middle; }
+      .fiber-node { stroke: #61dafb; stroke-width: 2; fill: url(#fiberGrad); rx: 6; transition: all 0.3s; }
+      .fiber-node:hover { stroke-width: 3.5; stroke: #a5f3fc; fill: rgba(97,218,251,0.25); }
+      .fiber-title { font-family: system-ui, sans-serif; font-weight: bold; font-size: 11px; fill: #e8edf8; text-anchor: middle; }
+      .fiber-lbl { font-family: 'Cascadia Code', monospace; font-size: 9px; fill: #b0c4de; text-anchor: middle; }
+      .link-line { stroke: #1a2540; stroke-width: 2; }
+      .sibling-line { stroke: #a855f7; stroke-width: 1.5; stroke-dasharray: 4 2; }
+      .diff-changed { stroke: #fbbf24; stroke-width: 2.5; fill: rgba(251,191,36,0.15); filter: drop-shadow(0 0 6px rgba(251,191,36,0.4)); }
+      .diff-deleted { stroke: #ef4444; stroke-width: 2; fill: rgba(239,68,68,0.1); stroke-dasharray: 3 3; }
+      .arrow-patch { stroke: #fbbf24; stroke-width: 2; stroke-dasharray: 5 3; fill: none; }
+      .patch-badge { font-family: system-ui, sans-serif; font-size: 9px; font-weight: bold; fill: #fbbf24; }
+    </style>
+
+    <text x="20" y="30" class="title-text">React Fiber Reconciliation & Diffing Heuristics</text>
+    <text x="20" y="50" font-family="system-ui, sans-serif" font-size="12px" fill="#5a7090">Diffing Current vs WorkInProgress Fiber trees to compute exact minimal updates</text>
+
+    <!-- SECTION LABELS -->
+    <text x="140" y="80" class="sec-text" fill="#61dafb">1. CURRENT FIBER TREE</text>
+    <text x="440" y="80" class="sec-text" fill="#fbbf24">2. WORK-IN-PROGRESS TREE (DIFF)</text>
+    <text x="690" y="80" class="sec-text" fill="#10b981">3. REAL BROWSER DOM</text>
+
+    <!-- TREE 1 -->
+    <g transform="translate(20, 90)">
+      <g transform="translate(80, 20)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node" />
+        <text x="40" y="20" class="fiber-title">&lt;div&gt;</text>
+        <text x="40" y="32" class="fiber-lbl">id: "root"</text>
+      </g>
+      <line x1="120" y1="60" x2="60" y2="110" class="link-line" />
+      <line x1="60" y1="130" x2="180" y2="130" class="sibling-line" />
+      <g transform="translate(20, 110)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node" />
+        <text x="40" y="20" class="fiber-title">&lt;Header&gt;</text>
+        <text x="40" y="32" class="fiber-lbl">props: {title}</text>
+      </g>
+      <g transform="translate(140, 110)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node" />
+        <text x="40" y="20" class="fiber-title">&lt;Counter&gt;</text>
+        <text x="40" y="32" class="fiber-lbl">state: 0</text>
+      </g>
+    </g>
+
+    <!-- TREE 2 -->
+    <g transform="translate(320, 90)">
+      <g transform="translate(80, 20)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node" />
+        <text x="40" y="20" class="fiber-title">&lt;div&gt;</text>
+        <text x="40" y="32" class="fiber-lbl">id: "root"</text>
+      </g>
+      <line x1="120" y1="60" x2="60" y2="110" class="link-line" />
+      <line x1="60" y1="130" x2="180" y2="130" class="sibling-line" />
+      <g transform="translate(20, 110)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node" />
+        <text x="40" y="20" class="fiber-title">&lt;Header&gt;</text>
+        <text x="40" y="32" class="fiber-lbl">Unchanged</text>
+      </g>
+      <g transform="translate(140, 110)">
+        <rect x="0" y="0" width="80" height="40" class="fiber-node diff-changed" />
+        <text x="40" y="20" class="fiber-title" fill="#fbbf24">&lt;Counter&gt;</text>
+        <text x="40" y="32" class="fiber-lbl" fill="#fcd34d">state: 1 [CHANGED]</text>
+      </g>
+    </g>
+
+    <!-- DOM -->
+    <g transform="translate(610, 90)">
+      <rect x="0" y="0" width="150" height="180" rx="10" fill="#06090f" stroke="#1a2540" stroke-width="2" />
+      <text x="75" y="25" class="fiber-title" fill="#10b981">DOM Nodes</text>
+      <g transform="translate(15, 45)">
+        <rect x="0" y="0" width="120" height="30" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1a2540" />
+        <text x="10" y="18" font-family="monospace" font-size="9px" fill="#5a7090">&lt;div id="root"&gt;</text>
+      </g>
+      <g transform="translate(15, 85)">
+        <rect x="0" y="0" width="120" height="30" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1a2540" />
+        <text x="10" y="18" font-family="monospace" font-size="9px" fill="#5a7090">&nbsp;&nbsp;&lt;h1&gt;Study Guide&lt;/h1&gt;</text>
+      </g>
+      <g transform="translate(15, 125)">
+        <rect x="0" y="0" width="120" height="35" rx="4" fill="rgba(16,185,129,0.05)" stroke="#10b981" stroke-width="1.5" />
+        <text x="10" y="18" font-family="monospace" font-size="9px" fill="#10b981" font-weight="bold">&nbsp;&nbsp;&lt;span&gt;Count: 1&lt;/span&gt;</text>
+        <text x="10" y="28" font-family="system-ui, sans-serif" font-size="7px" fill="#52525b">Minimal DOM updates!</text>
+      </g>
+    </g>
+
+    <path d="M 545 220 Q 575 220 620 230" class="arrow-patch" />
+    <polygon points="620,230 610,226 612,235" fill="#fbbf24" />
+    <text x="580" y="210" class="patch-badge" text-anchor="middle">BATCH PATCH</text>
+
+  </svg>
+  `;
+}
+
+function buildMemoryLeakDiagram() {
+  return `
+  <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" id="gcSvg">
+    <defs>
+      <linearGradient id="rootGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#3b82f6"/>
+        <stop offset="100%" stop-color="#60a5fa"/>
+      </linearGradient>
+      <linearGradient id="activeNodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981"/>
+        <stop offset="100%" stop-color="#34d399"/>
+      </linearGradient>
+      <linearGradient id="detachedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#ef4444"/>
+        <stop offset="100%" stop-color="#f87171"/>
+      </linearGradient>
+      <linearGradient id="leakedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#fbbf24"/>
+        <stop offset="100%" stop-color="#fbbf24"/>
+      </linearGradient>
+    </defs>
+    <style>
+      #gcSvg .title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      #gcSvg .sub { font-family: system-ui, sans-serif; font-size: 12px; fill: #5a7090; }
+      #gcSvg .node-lbl { font-family: system-ui, sans-serif; font-weight: bold; font-size: 12px; fill: #e8edf8; text-anchor: middle; }
+      #gcSvg .node-desc { font-family: system-ui, sans-serif; font-size: 9px; fill: #b0c4de; text-anchor: middle; }
+      #gcSvg .link { stroke: #1a2540; stroke-width: 2.5; fill: none; transition: stroke 0.5s; }
+      #gcSvg .mark-path { stroke: #10b981; stroke-width: 3; }
+      #gcSvg .btn-bg { fill: #3b82f6; cursor: pointer; transition: fill 0.2s; }
+      #gcSvg .btn-bg:hover { fill: #2563eb; }
+      #gcSvg .btn-text { font-family: system-ui, sans-serif; font-weight: bold; font-size: 12px; fill: #fff; text-anchor: middle; cursor: pointer; pointer-events: none; }
+      #gcSvg .sweepable { transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+      #gcSvg.swept .sweepable { opacity: 0; transform: scale(0.3) translate(200px, 100px); pointer-events: none; }
+      #gcSvg.swept .sweepable-link { opacity: 0; stroke: transparent; }
+      #gcSvg .leaked-node { stroke: #fbbf24; animation: pulseLeak 1.5s infinite alternate; }
+      @keyframes pulseLeak { 
+        0% { filter: drop-shadow(0 0 2px rgba(251,191,36,0.3)); } 
+        100% { filter: drop-shadow(0 0 10px rgba(251,191,36,0.8)); } 
+      }
+    </style>
+
+    <text x="20" y="30" class="title">Garbage Collection Mark-and-Sweep Reachability</text>
+    <text x="20" y="50" class="sub">How unreachable variables are garbage collected vs how dangling references leak memory</text>
+
+    <!-- GC SCAN BUTTON -->
+    <g transform="translate(620, 15)">
+      <rect x="0" y="0" width="160" height="35" rx="6" class="btn-bg" onclick="simulateGC()" />
+      <text x="80" y="22" class="btn-text">⚡ Trigger GC Scan</text>
+    </g>
+
+    <!-- GLOBAL ROOT -->
+    <g transform="translate(360, 80)">
+      <circle cx="40" cy="40" r="32" fill="url(#rootGrad)" stroke="#2563eb" stroke-width="2.5" />
+      <text x="40" y="44" class="node-lbl">ROOT</text>
+      <text x="40" y="85" class="sub" font-weight="bold" fill="#3b82f6" text-anchor="middle">(Global/Window)</text>
+    </g>
+
+    <!-- CONNECTIONS -->
+    <path d="M 370 150 L 220 200" class="link mark-path" />
+    <path d="M 400 155 L 400 200" class="link sweepable-link" stroke-dasharray="4 4" />
+    <text x="410" y="180" font-family="system-ui, sans-serif" font-size="9px" fill="#ef4444" class="sweepable-link">No reference link</text>
+
+    <path d="M 430 150 L 580 200" class="link mark-path" />
+    <text x="525" y="175" font-family="system-ui, sans-serif" font-size="9px" fill="#10b981">window.addEventListener</text>
+
+    <g transform="translate(140, 200)">
+      <rect x="0" y="0" width="130" height="60" rx="8" fill="url(#activeNodeGrad)" stroke="#10b981" stroke-width="2" />
+      <text x="65" y="25" class="node-lbl">Active DOM Node</text>
+      <text x="65" y="42" class="node-desc">Connected to document</text>
+      <text x="65" y="52" class="node-desc" font-weight="bold" fill="#ecfdf5">🟢 REACHABLE (KEPT)</text>
+    </g>
+
+    <g transform="translate(330, 200)" class="sweepable">
+      <rect x="0" y="0" width="140" height="60" rx="8" fill="url(#detachedGrad)" stroke="#ef4444" stroke-width="2" />
+      <text x="70" y="25" class="node-lbl">Detached DOM Node</text>
+      <text x="70" y="42" class="node-desc">Removed from tree</text>
+      <text x="70" y="52" class="node-desc" font-weight="bold" fill="#fef2f2">🔴 UNREACHABLE (SWEPT)</text>
+    </g>
+
+    <g transform="translate(520, 200)">
+      <rect x="0" y="0" width="150" height="60" rx="8" fill="url(#leakedGrad)" stroke="#fbbf24" stroke-width="2" class="leaked-node" />
+      <text x="75" y="25" class="node-lbl" fill="#0d1321">Leaked Context Node</text>
+      <text x="75" y="42" class="node-desc" fill="#3f2b0f">Dangling Event Handler</text>
+      <text x="75" y="52" class="node-desc" font-weight="bold" fill="#78350f">⚠️ LEAKED (RETAINED)</text>
+    </g>
+
+    <text x="400" y="320" font-family="system-ui, sans-serif" font-size="11px" fill="#b0c4de" text-anchor="middle">
+      * Click "Trigger GC Scan" to run the Garbage Collector sweep pass.
+    </text>
+  </svg>
+  `;
+}
+
+function buildBoxModelDiagram() {
+  return `
+  <svg viewBox="0 0 800 370" xmlns="http://www.w3.org/2000/svg">
+    <style>
+      .box-title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 16px; fill: #e8edf8; }
+      .box-desc { font-family: system-ui, sans-serif; font-size: 12px; fill: #5a7090; }
+      .box-rect { fill: none; stroke-width: 2; rx: 4; transition: all 0.3s; }
+      .margin-box { fill: rgba(249,115,22,0.06); stroke: #f97316; stroke-dasharray: 4 2; }
+      .border-box { fill: rgba(156,163,175,0.08); stroke: #9ca3af; }
+      .padding-box { fill: rgba(59,130,246,0.08); stroke: #3b82f6; }
+      .content-box { fill: rgba(236,72,153,0.12); stroke: #ec4899; stroke-width: 2.5; }
+      .box-lbl { font-family: 'Cascadia Code', monospace; font-size: 10px; font-weight: bold; }
+      .axis-arrow { stroke: #10b981; stroke-width: 2.5; fill: none; }
+      .axis-head { fill: #10b981; }
+      .axis-lbl { font-family: system-ui, sans-serif; font-weight: 800; font-size: 10px; fill: #10b981; }
+      .equation { font-family: 'Cascadia Code', monospace; font-size: 11px; fill: #e8edf8; text-anchor: middle; }
+    </style>
+
+    <text x="20" y="30" class="box-title">The CSS Box Model, Dimensions & Flex Axes</text>
+    <text x="20" y="50" class="box-desc">Visualizing Margin offsets, Border edges, Padding spaces, and Content layout calculations</text>
+
+    <!-- BOX LAYERS (Centered) -->
+    <g transform="translate(180, 70)">
+      
+      <!-- MARGIN BOX (Outer) -->
+      <rect x="0" y="0" width="440" height="220" class="box-rect margin-box" />
+      <text x="15" y="20" class="box-lbl" fill="#f97316">MARGIN (Collapsible Space)</text>
+      
+      <!-- BORDER BOX -->
+      <g transform="translate(25, 20)">
+        <rect x="0" y="0" width="390" height="180" class="box-rect border-box" />
+        <text x="15" y="20" class="box-lbl" fill="#9ca3af">BORDER (Stroke boundary: 5px)</text>
+        
+        <!-- PADDING BOX -->
+        <g transform="translate(25, 20)">
+          <rect x="0" y="0" width="340" height="140" class="box-rect padding-box" />
+          <text x="15" y="20" class="box-lbl" fill="#3b82f6">PADDING (Inner cushion: 20px)</text>
+          
+          <!-- CONTENT BOX -->
+          <g transform="translate(25, 20)">
+            <rect x="0" y="0" width="290" height="100" class="box-rect content-box" />
+            <text x="15" y="20" class="box-lbl" fill="#ec4899">CONTENT (Core Box: 250px x 60px)</text>
+            
+            <text x="145" y="55" font-family="system-ui, sans-serif" font-size="11px" font-weight="bold" fill="#ec4899" text-anchor="middle">width: 250px</text>
+            <text x="145" y="70" font-family="system-ui, sans-serif" font-size="9px" fill="#b0c4de" text-anchor="middle">height: 60px</text>
+          </g>
+        </g>
+      </g>
+    </g>
+
+    <!-- MATH EQUATION (Bottom) -->
+    <rect x="230" y="305" width="340" height="28" rx="6" fill="#0d1321" stroke="#1a2540" stroke-width="1.5" />
+    <text x="400" y="323" class="equation">
+      Total rendered width = <tspan fill="#ec4899">250px</tspan> + <tspan fill="#3b82f6">40px</tspan> + <tspan fill="#9ca3af">10px</tspan> = <tspan fill="#10b981" font-weight="bold">300px</tspan>
+    </text>
+
+    <!-- FLEX LAYOUT COORDINATE AXES (Left) -->
+    <g transform="translate(30, 100)">
+      <path d="M 0 50 L 100 50" class="axis-arrow" />
+      <polygon points="100,50 90,45 92,55" class="axis-head" />
+      <text x="0" y="40" class="axis-lbl">MAIN AXIS (flex-direction: row)</text>
+      
+      <path d="M 10 50 L 10 170" class="axis-arrow" />
+      <polygon points="10,170 5,160 15,160" class="axis-head" />
+      <text x="18" y="160" class="axis-lbl" transform="rotate(-90 18 160)">CROSS AXIS (align-items)</text>
+    </g>
+
+  </svg>
+  `;
+}
+
+// All interview topics data
+const TOPICS = [
+  {id:'closures',icon:'🔒',title:'Closures & Scope',cat:'JavaScript',color:'#f7df1e',sub:'Lexical scope, scope chain, IIFE, memoization, currying, data privacy',sections:[
+    {id:'def',title:'What is a Closure?',icon:'📖',def:'A closure is a function that retains access to variables from its outer lexical scope, even after that outer function has finished executing.',content:'Closures are possible in JavaScript because of <strong>Lexical Scoping</strong>: a function\'s scope is determined by its physical location in the source code during compilation. When a function is defined, it binds its surrounding variables in a closure, shielding them from Garbage Collection as long as a reference to the inner function exists. Under the hood in the V8 engine, this is represented by the internal <code>[[Scopes]]</code> property of the function object, which links to the active Lexical Environment record. As long as this function is callable, the outer scope remains resident in Heap memory.',diagram:buildClosureDiagram(),code:`function createSecureStore() {
+  const secretKey = 'db-access-token-12345';
+  let counter = 0;
+
+  // The returned object\'s methods form closures over "secretKey" and "counter"
+  return {
+    increment() {
+      counter++;
+      return counter;
+    },
+    getKey() {
+      return secretKey;
+    }
+  };
+}
+
+const store = createSecureStore();
+console.log(store.increment()); // 1
+console.log(store.increment()); // 2
+console.log(store.getKey()); // "db-access-token-12345"
+// secretKey and counter are shielded from global access`,lang:'JavaScript',example:'The counter and secretKey variables exist in the Lexical Environment of createSecureStore and remain active via the returned object\'s closures.',tip:'🎯 Interview tip: Explain that closures exempt outer variables from garbage collection, which is why excessive closures without cleanup can lead to memory retention.'},
+    {id:'scope',title:'Scope Types & Lexical Scoping',icon:'🔗',def:'JavaScript features static (lexical) scoping, meaning variable lookup is governed by compilation geography, not dynamic call hierarchy.',content:'JavaScript has four scope tiers: 1) Global Scope, 2) Function/Local Scope, 3) Block Scope (let/const inside curly braces), and 4) Module Scope (isolated files in ES6 modules). Lexical scoping constructs a nesting cascade of scopes known as the Scope Chain. When looking up a variable, the engine traverses this list of environment records upwards until it finds the identifier or hits the global object, throwing a ReferenceError if unresolved.',diagram:buildScopeChainDiagram(),code:`const environment = 'production';
+
+function parent() {
+  const tier = 'middle';
+  
+  function child() {
+    const level = 'inner';
+    // Variable Shadowing Example
+    const environment = 'local-staging';
+    
+    // Scope Chain traversal: child -> parent -> global
+    console.log(level); // "inner" (local)
+    console.log(tier); // "middle" (parent enclosure)
+    console.log(environment); // "local-staging" (shadows the outer "environment")
+  }
+  return child;
+}
+const childFn = parent();
+childFn();`,lang:'JavaScript',tip:'💡 Block scope is created by { } brackets with let/const. var declarations ignore block scope and leak to the nearest function context.',danger:'⚠️ var variables are hoisted as undefined, making them accessible before definition, whereas let/const throw ReferenceError due to the TDZ.'},
+    {id:'closure-loop',title:'Classic Loop Pitfall (var vs let)',icon:'🐛',def:'Using var inside loops creates a single shared memory cell, causing async callbacks to capture identical trailing values.',content:'This is the quintessential JS interview question. Since var has function scope rather than block scope, a loop using var shares the exact same variable i across all iterations. By the time setTimeout fires, the loop is finished and i is at its maximum value.',code:`// ❌ WRONG: Prints 3, 3, 3 after 100ms
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+
+// ✅ RIGHT: Prints 0, 1, 2 (let creates a unique block-scope binding per loop iteration)
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100);
+}
+
+// ✅ IIFE WORKAROUND (Historical ES5 standard):
+for (var i = 0; i < 3; i++) {
+  (function(capturedVal) {
+    setTimeout(() => console.log(capturedVal), 100);
+  })(i);
+}`,lang:'JavaScript',output:'First logs: 3, 3, 3<br/>Second logs: 0, 1, 2<br/>Third logs: 0, 1, 2',tip:'🎯 Explain that let binds a completely new variable for each iteration behind the scenes, capturing the state correctly.'},
+    {id:'memoize',title:'Advanced Memoization Pattern',icon:'⚡',def:'An optimization technique that caches function results based on arguments to prevent expensive recalculations.',content:'A standard memoization function stores results inside a closed cache object. To support arbitrary arguments (objects, arrays, strings), we must design a robust serializer to map argument arrays to unique keys, and include checks for cyclical dependencies to prevent infinite loops.',code:`function memoize(fn, resolver) {
+  const cache = new Map();
+  
+  return function(...args) {
+    // Generate key: use resolver if provided, otherwise fallback to JSON
+    const key = resolver ? resolver(...args) : JSON.stringify(args);
+    
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+// Product usage: expensive computation (e.g. Fibonacci)
+const recursiveFib = (n) => (n <= 1 ? n : recursiveFib(n - 1) + recursiveFib(n - 2));
+const memoizedFib = memoize(recursiveFib);
+
+console.time('First Call');
+memoizedFib(35);
+console.timeEnd('First Call'); // ~70ms
+
+console.time('Second Call (Cached)');
+memoizedFib(35);
+console.timeEnd('Second Call (Cached)'); // ~0.02ms`,lang:'JavaScript',tip:'⚡ Always mention cache invalidation and memory usage: a memoize cache lives forever in memory unless bounded or cleared.',danger:'🐛 Watch out: mapping complex circular objects to JSON keys will crash JSON.stringify.'},
+    {id:'currying',title:'Currying & Partial Application',icon:'🍛',def:'Currying translates a function calling f(a, b, c) into a chain of functions f(a)(b)(c).',content:'Currying allows partial application of arguments. In production, this lets you build highly reusable config-driven utilities (like custom loggers, validators, and math operators) by locking in default parameters.',code:`// Generic Curry function (supports dynamic arity)
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);
+    }
+    return function(...nextArgs) {
+      return curried.apply(this, args.concat(nextArgs));
+    };
+  };
+}
+
+// Usage Example:
+const multiply = (a, b, c) => a * b * c;
+const curriedMult = curry(multiply);
+
+console.log(curriedMult(2)(3)(4)); // 24
+const doubleAndTriple = curriedMult(2)(3); // Locks in a=2, b=3
+console.log(doubleAndTriple(5)); // 30 (2 * 3 * 5)`,lang:'JavaScript',tip:'🎯 Difference to watch: Currying transforms arity to unary chains. Partial application fixes a subset of arguments returning a function of remaining arity.'}
+  ]},
+  {id:'hoisting',icon:'⬆️',title:'Hoisting & TDZ',cat:'JavaScript',color:'#f97316',sub:'Var vs let vs const, function hoisting, compilation phases, temporal dead zone',sections:[
+    {id:'hoist-def',title:'Under the Hood: Hoisting Mechanics',icon:'🧠',def:'Hoisting is a direct side effect of the JavaScript Engine\'s two-phase compilation: the Creation Phase and the Execution Phase.',content:'Before executing code line-by-line, the JS Engine allocates memory space for all variables and functions. 1) Function declarations are hoisted with full definitions. 2) var variables are hoisted but initialized as undefined. 3) let and const are registered in memory but kept uninitialized in the Temporal Dead Zone.',diagram:buildHoistingDiagram(),code:`// Execution Phase
+console.log(greet); // [Function: greet] - Fully Hoisted!
+console.log(nameVar); // undefined - Declaration hoisted, value ignored!
+try {
+  console.log(nameLet); // ReferenceError: Cannot access 'nameLet' before initialization
+} catch (e) {
+  console.log(e.message);
+}
+
+// Variable registration
+function greet() { return 'Hello!'; }
+var nameVar = 'Alice';
+let nameLet = 'Bob';`,lang:'JavaScript',tip:'🎯 Function expressions (const greet = () => {}) behave according to their variable rules (const keeps them uninitialized in the TDZ).'},
+    {id:'tdz',title:'The Temporal Dead Zone (TDZ)',icon:'🛡️',def:'The safety window inside a block scope, spanning from the entry into scope to the physical declaration of a let/const variable.',content:'TDZ makes JavaScript safer by raising errors instead of failing silently with undefined. It eliminates temporal sequencing bugs where variables are read before they are defined.',code:`{
+  // Block scope starts
+  // x enters the TDZ here
+  
+  const read = () => console.log(x); // Lexically allowed, but execution inside TDZ will fail!
+  
+  try {
+    read(); // Throws ReferenceError because x is not yet initialized!
+  } catch (e) {
+    console.log('Flipped: ' + e.message);
+  }
+  
+  let x = 42; // TDZ ends! x is initialized.
+  read(); // Logs 42 - perfectly valid!
+}`,lang:'JavaScript',output:'Flipped: Cannot access \'x\' before initialization<br/>42',danger:'⚠️ The TDZ exists at runtime: the order is temporal (time-based), not spatial (line-based).'},
+    {id:'collision',title:'Declaration Collisions & Precedence',icon:'⚖️',def:'How the engine resolves namespace conflicts when a variable and a function share the same name.',content:'Function declarations are hoisted first, followed by variable declarations. However, duplicate var declarations are ignored, while duplicate function declarations override previous ones. When the execution phase runs, variable assignments overwrite any hoisted function declarations.',code:`var test = 'Original';
+
+function test() {
+  return 'Am I a function?';
+}
+
+console.log(typeof test); // "string"
+// During compilation: "test" is registered as a function.
+// During execution: "test" variable assignment overwrites it with the string "Original"!
+
+function another() {
+  return 'First declaration';
+}
+function another() {
+  return 'Second declaration';
+}
+console.log(another()); // "Second declaration" - duplicate function overrides!`,lang:'JavaScript',tip:'💡 Standardizing on "let" and "const" avoids name collision issues as duplicate declarations will trigger syntax errors.'}
+  ]},
+  {id:'eventloop',icon:'🔄',title:'Event Loop & Async',cat:'JavaScript',color:'#10b981',sub:'Call stack, microtasks, macrotasks, promises, concurrency, requestAnimationFrame',sections:[
+    {id:'el-def',title:'The Concurrency Model & Tick Cycle',icon:'⚙️',def:'The Event Loop coordinates stack-based execution, microtask queues, macrotask queues, and layout rendering paints.',content:'JavaScript is single-threaded. Async tasks are delegated to Web APIs (browser host) or worker threads (Node.js). <strong>The Event Loop Cycle:</strong> 1) Execute sync code in Call Stack until empty. 2) Drain the entire <strong>Microtask Queue</strong> (Promises, queueMicrotask, MutationObserver). If microtasks schedule more microtasks, they execute in the same tick, potentially starving the screen. 3) Pick exactly ONE <strong>Macrotask</strong> (setTimeout, setInterval, requestAnimationFrame, I/O). 4) Check if render repaint is needed (typically every 16.7ms for 60fps). 5) Repeat.',diagram:buildEventLoopDiagram(),code:`console.log('1. Sync Start');
+
+setTimeout(() => {
+  console.log('5. Macrotask (setTimeout)');
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('3. Microtask (Promise)');
+}).then(() => {
+  console.log('4. Microtask Chain');
+});
+
+requestAnimationFrame(() => {
+  console.log('6. Animation Frame');
+});
+
+console.log('2. Sync End');`,lang:'JavaScript',output:'1. Sync Start<br/>2. Sync End<br/>3. Microtask (Promise)<br/>4. Microtask Chain<br/>5. Macrotask (setTimeout)<br/>6. Animation Frame',tip:'⚡ Microtasks have absolute priority over layout paints and macrotasks. Recursively calling queueMicrotask will lock the browser UI.'},
+    {id:'async-await',title:'Promises & Async/Await Internals',icon:'⏳',def:'Promises handle eventually-resolved asynchronous actions. Async/await converts promise chaining into synchronized code structures.',content:'Under the hood, <code>async/await</code> is syntactical sugar built on top of <strong>Generators</strong> and <strong>Promises</strong>. When the engine encounters <code>await</code>, it pauses the local function context, packages the remainder of the function into a microtask callback, and yields control back to the caller thread, maintaining asynchronous efficiency.',code:`async function fetchWithRetry(url, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(\`HTTP \${response.status}\`);
+      return await response.json();
+    } catch (err) {
+      const isLast = i === retries - 1;
+      if (isLast) throw err;
+      console.warn(\`Attempt \${i + 1} failed. Retrying...\`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}`,lang:'JavaScript',tip:'🎯 Await works step-by-step. To execute asynchronous commands concurrently, load and trigger their promises simultaneously, then await them all in a batch.'},
+    {id:'promise-combinators',title:'Promise Combinators',icon:'🧩',def:'Strategies for coordinating multiple asynchronous promises concurrently.',content:'You must know these four combinators for interviews: 1) Promise.all (all or nothing), 2) Promise.allSettled (resilient parallel mapping), 3) Promise.race (returns fastest resolver/rejecter), 4) Promise.any (returns fastest successful resolver).',code:`const fetchAPI1 = () => new Promise(res => setTimeout(() => res('A'), 100));
+const fetchAPI2 = () => new Promise((_, rej) => setTimeout(() => rej(new Error('Fail B')), 50));
+
+async function executeParallel() {
+  // 1. allSettled: Resilient, never crashes the whole array
+  const settled = await Promise.allSettled([fetchAPI1(), fetchAPI2()]);
+  console.log(settled);
+  
+  // 2. all: Fails instantly because API2 rejects
+  try {
+    await Promise.all([fetchAPI1(), fetchAPI2()]);
+  } catch (err) {
+    console.log('Failed:', err.message);
+  }
+}
+
+executeParallel();`,lang:'JavaScript',tip:'💡 Standardize on Promise.allSettled when loading critical widgets independently to avoid a single network crash from breaking the entire page.'}
+  ]},
+  {id:'arrays',icon:'📚',title:'Array Methods & Polyfills',cat:'JavaScript',color:'#06b6d4',sub:'Polyfills, custom logic generators, array manipulations, cloning structures',sections:[
+    {id:'polyfills',title:'Vanilla JS Method Polyfills',icon:'🔨',def:'Writing native polyfills demonstrates understanding of prototypes, element iteration, execution scopes, and callback invocation.',content:'These functions recreate modern JS APIs by binding directly onto prototype schemas.',code:`// 1. Array.prototype.map Polyfill
+Array.prototype.myMap = function(callback, thisArg) {
+  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');
+  
+  const O = Object(this);
+  const len = O.length >>> 0; // Unsigned right shift to force 32-bit integer length
+  const result = new Array(len);
+  
+  for (let k = 0; k < len; k++) {
+    if (k in O) {
+      result[k] = callback.call(thisArg, O[k], k, O);
+    }
+  }
+  return result;
+};
+
+// 2. Array.prototype.filter Polyfill
+Array.prototype.myFilter = function(callback, thisArg) {
+  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');
+  
+  const O = Object(this);
+  const len = O.length >>> 0;
+  const result = [];
+  
+  for (let k = 0; k < len; k++) {
+    if (k in O) {
+      const val = O[k];
+      if (callback.call(thisArg, val, k, O)) {
+        result.push(val);
+      }
+    }
+  }
+  return result;
+};
+
+// 3. Array.prototype.reduce Polyfill
+Array.prototype.myReduce = function(callback, initialValue) {
+  if (typeof callback !== 'function') throw new TypeError(callback + ' is not a function');
+  
+  const O = Object(this);
+  const len = O.length >>> 0;
+  let k = 0;
+  let accumulator;
+  
+  if (arguments.length >= 2) {
+    accumulator = initialValue;
+  } else {
+    // Find first real index if no initial value passed
+    let kPresent = false;
+    while (k < len && !kPresent) {
+      kPresent = k in O;
+      if (kPresent) accumulator = O[k];
+      k++;
+    }
+    if (!kPresent) throw new TypeError('Reduce of empty array with no initial value');
+  }
+  
+  for (; k < len; k++) {
+    if (k in O) {
+      accumulator = callback(accumulator, O[k], k, O);
+    }
+  }
+  return accumulator;
+};`,lang:'JavaScript',tip:'🎯 Key checks: Check typeof first, force array boundaries using "in" keys to skip sparse array holes, and manage call contextual bounds.'},
+    {id:'promise-polyfills',title:'Promise Polyfills',icon:'🧩',def:'Implementing asynchronous combinators from scratch demonstrates deep understanding of Promise lifecycles.',content:'Writing Promise.all and Promise.allSettled from scratch are standard live coding challenges. They require tracking resolution counts, mapping indices, and completing the lifecycle.',code:`// 1. Promise.all Polyfill
+function myPromiseAll(promises) {
+  return new Promise((resolve, reject) => {
+    const list = Array.from(promises);
+    const results = new Array(list.length);
+    let resolvedCount = 0;
+    
+    if (list.length === 0) return resolve([]);
+    
+    list.forEach((promise, index) => {
+      Promise.resolve(promise).then(
+        (value) => {
+          results[index] = value;
+          resolvedCount++;
+          if (resolvedCount === list.length) {
+            resolve(results);
+          }
+        },
+        (error) => reject(error) // Reject instantly on first error
+      );
+    });
+  });
+}
+
+// 2. Promise.allSettled Polyfill
+function myPromiseAllSettled(promises) {
+  return new Promise((resolve) => {
+    const list = Array.from(promises);
+    const results = new Array(list.length);
+    let completedCount = 0;
+    
+    if (list.length === 0) return resolve([]);
+    
+    list.forEach((promise, index) => {
+      Promise.resolve(promise).then(
+        (value) => {
+          results[index] = { status: 'fulfilled', value };
+          completedCount++;
+          if (completedCount === list.length) resolve(results);
+        },
+        (reason) => {
+          results[index] = { status: 'rejected', reason };
+          completedCount++;
+          if (completedCount === list.length) resolve(results);
+        }
+      );
+    });
+  });
+}`,lang:'JavaScript',tip:'⚡ Always wrap input in Promise.resolve(promise) to safely handle plain values passed inside the array.'},
+    {id:'flatten-arrays',title:'Deep Flatten Polyfills',icon:'📐',def:'Converting nested multidimensional arrays into a unified flat representation.',content:'A standard coding puzzle that is solved either recursively with depth bounds or iteratively with a processing stack.',code:`// 1. Recursive Flatten with depth boundary
+function flattenRecursive(arr, depth = 1) {
+  if (depth < 1) return arr.slice();
+  
+  return arr.reduce((acc, val) => {
+    if (Array.isArray(val)) {
+      acc.push(...flattenRecursive(val, depth - 1));
+    } else {
+      acc.push(val);
+    }
+    return acc;
+  }, []);
+}
+
+// 2. Iterative (Stack-based) Infinite Flatten (Safe from stack overflow!)
+function flattenIterative(arr) {
+  const stack = [...arr];
+  const res = [];
+  while (stack.length) {
+    const next = stack.pop();
+    if (Array.isArray(next)) {
+      stack.push(...next);
+    } else {
+      res.push(next);
+    }
+  }
+  return res.reverse();
+}
+
+const nested = [1, [2, [3, [4]]]];
+console.log(flattenRecursive(nested, 2)); // [1, 2, 3, [4]]
+console.log(flattenIterative(nested)); // [1, 2, 3, 4]`,lang:'JavaScript',tip:'💡 Recursive approaches can cause Call Stack Overflows for extremely deep arrays. For robust production code, write an iterative stack-based solution.'},
+    {id:'rate-limiters',title:'Rate Limiters: Debounce & Throttle',icon:'⏱️',def:'Performance utility wrappers that govern function execution rates.',content:'Debounce halts call execution until a duration has elapsed. Throttle forces a cooling period where repeated trigger actions are blocked.',code:`// Debounce Polyfill (With leading and trailing options)
+function debounce(fn, delay, options = { leading: false, trailing: true }) {
+  let timeoutId = null;
+  
+  return function(...args) {
+    const context = this;
+    const isLeadingCall = options.leading && !timeoutId;
+    
+    clearTimeout(timeoutId);
+    
+    timeoutId = setTimeout(() => {
+      timeoutId = null;
+      if (options.trailing && !isLeadingCall) {
+        fn.apply(context, args);
+      }
+    }, delay);
+    
+    if (isLeadingCall) {
+      fn.apply(context, args);
+    }
+  };
+}
+
+// Throttle Polyfill (Ensures execution happens at most once per period)
+function throttle(fn, limit) {
+  let inThrottle = false;
+  let lastFn = null;
+  
+  return function(...args) {
+    const context = this;
+    
+    if (!inThrottle) {
+      fn.apply(context, args);
+      inThrottle = true;
+      
+      setTimeout(() => {
+        inThrottle = false;
+        if (lastFn) {
+          lastFn();
+          lastFn = null;
+        }
+      }, limit);
+    } else {
+      // Capture the trailing edge execution call
+      lastFn = () => fn.apply(context, args);
+    }
+  };
+}`,lang:'JavaScript',tip:'⚡ Debouncing is ideal for search autocomplete inputs, throttling is ideal for heavy resize or scroll tracking loops.'},
+    {id:'cloning',title:'Deep Clone Utility',icon:'🧬',def:'Deep cloning clones an object recursively, generating a new object with completely separate references.',content:'Writing a deep clone utility is a popular live coding challenge. It requires recursive iteration and tracking processed objects in a map to prevent infinite loops from circular references.',code:`function deepClone(obj, map = new WeakMap()) {
+  // Primitive or null check
+  if (obj === null || typeof obj !== 'object') return obj;
+  
+  // Date and RegExp overrides
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj.source, obj.flags);
+  
+  // Handle circular references
+  if (map.has(obj)) return map.get(obj);
+  
+  const clone = Array.isArray(obj) ? [] : {};
+  map.set(obj, clone);
+  
+  // Iterate keys including symbols and non-enumerables
+  Reflect.ownKeys(obj).forEach(key => {
+    clone[key] = deepClone(obj[key], map);
+  });
+  
+  return clone;
+}`,lang:'JavaScript',tip:'🎯 Highlight that StructuredClone() is now natively supported in modern browsers, but explain how to implement it manually to demonstrate recursive expertise.'}
+  ]},
+  {id:'memory',icon:'🧠',title:'Memory Leaks & Debugging',cat:'JavaScript',color:'#ef4444',sub:'Garbage collection mechanics, mark-and-sweep, detached DOM nodes, memory leak vectors',sections:[
+    {id:'mem-def',title:'Memory Lifecycle & GC',icon:'📖',def:'A memory leak occurs when variables or objects occupy memory despite no longer being needed by application logic, because a live reference prevents the Garbage Collector from cleaning them up.',content:'Modern browsers use the <strong>Mark-and-Sweep</strong> algorithm. Starting from root nodes (global, document), the garbage collector traverses references. Any object that cannot be reached through active pointer links is swept and deleted from memory. Leaks occur when unwanted references keep objects reachable.',diagram:buildMemoryLeakDiagram(),code:`// Garbage Collection Reachability Trace
+// Global Root -> Active DOM -> Event Handler -> [Captured Context Variables]
+// If you delete DOM nodes without cleaning handlers, active pointers remain!`,lang:'JavaScript',tip:'🎯 Always discuss Heap vs Stack: variables declared via scope reside on the Call Stack, dynamic object structures live in the memory Heap.'},
+    {id:'leaks',title:'Common Memory Leaks with Safe & Unsafe Diffs',icon:'🔍',def:'Comparing leak patterns with corrected code to highlight safe patterns.',content:'Modern single-page applications are highly prone to memory leaks since the page lives forever without a refresh. The four most common leak vectors are outlined below:',code:`// --- VECTOR 1: Uncleared Timers ---
+// ❌ UNSAFE: keeps tracking state even if widget is removed from DOM
+setInterval(() => {
+  console.log('Poll API');
+}, 1000);
+
+// ✅ SAFE: clear timer when component unmounts
+const intervalId = setInterval(() => {
+  console.log('Poll API');
+}, 1000);
+clearInterval(intervalId);
+
+
+// --- VECTOR 2: Detached DOM Nodes ---
+// ❌ UNSAFE: btn variable holds the DOM node in memory even after removal
+let btn = document.getElementById('btn');
+document.body.removeChild(btn); 
+// btn still holds a reference to the element! Node is detached, but not garbage collected.
+
+// ✅ SAFE: clear memory references
+let element = document.getElementById('btn');
+document.body.removeChild(element);
+element = null; // Reachability severed, safe!
+
+
+// --- VECTOR 3: Global Event Listeners ---
+// ❌ UNSAFE: Event handler keeps capturing component variables
+window.addEventListener('resize', () => {
+  this.handleResize(window.innerWidth);
+});
+
+// ✅ SAFE: Auto cleanup references
+const handler = () => this.handleResize(window.innerWidth);
+window.addEventListener('resize', handler);
+window.removeEventListener('resize', handler);
+
+// --- VECTOR 4: Closures in Outer Objects ---
+// ❌ UNSAFE: Every tick, the dynamic function closure retains a reference to the large object
+let leakObject = null;
+function runLeak() {
+  let oldLeakObject = leakObject;
+  let unusedClosure = function () {
+    if (oldLeakObject) console.log("Still holding!");
+  };
+  leakObject = {
+    longStr: new Array(1000000).join("*"),
+    someMethod: function () {
+      console.log("Active method");
+    }
+  };
+}
+setInterval(runLeak, 100);`,lang:'JavaScript',tip:'💡 In React, always clean up timers and listeners in the return block of useEffect hooks.'}
+  ]},
+  {id:'typescript',icon:'🔷',title:'TypeScript Essentials',cat:'TypeScript',color:'#3178c6',sub:'Types vs Interfaces, Generics, Custom Type Guards, Utility and Mapped Types',sections:[
+    {id:'ts-basics',title:'Types vs Interfaces',icon:'📖',def:'Interfaces describe object structures and support declaration merging. Type aliases define shape combinations, unions, and primitives.',content:'Interfaces are generally preferred for public APIs and object types because declaration merging allows other developers to easily extend them. Type aliases are more flexible and are required for complex types like union, intersection, and utility mappings.',code:`// INTERFACE (Object specifications with extension capabilities)
+interface User {
+  id: number;
+  name: string;
+}
+
+// Declaration Merging (Interfaces only)
+interface User {
+  role: 'member' | 'admin';
+}
+
+const user: User = { id: 1, name: 'Alice', role: 'admin' };
+
+// TYPE ALIAS (Unions, primitives, intersections)
+type Identifier = string | number;
+
+type Employee = User & {
+  employeeId: Identifier;
+};`,lang:'TypeScript',tip:'🎯 Interview Rule of Thumb: Use interface by default for object structures, and type when you need unions, intersections, or utility helper mappings.'},
+    {id:'ts-guards',title:'Type Guards & Narrowing',icon:'🛡️',def:'Narrowing down values within a code block using explicit type assertions or runtime validation check guards.',content:'Use standard checks (typeof, instanceof, in operator), discriminated unions, and custom type predicates (`x is Type`) to write type-safe code.',code:`interface SuccessResponse {
+  type: 'success';
+  data: string;
+}
+interface ErrorResponse {
+  type: 'error';
+  message: string;
+}
+type Response = SuccessResponse | ErrorResponse;
+
+// 1. Discriminated Union Narrowing
+function handleResponse(res: Response) {
+  if (res.type === 'success') {
+    console.log(res.data); // Safe! res is SuccessResponse
+  } else {
+    console.log(res.message); // Safe! res is ErrorResponse
+  }
+}
+
+// 2. Custom Type Predicate Guard
+function isSuccess(res: Response): res is SuccessResponse {
+  return res.type === 'success';
+}
+
+function process(res: Response) {
+  if (isSuccess(res)) {
+    return res.data;
+  }
+}`,lang:'TypeScript',tip:'⚡ Custom type predicates use the "parameterName is Type" return signature, ensuring runtime assertions map correctly to compiler types.'},
+    {id:'ts-generics',title:'Generics & Constraints',icon:'🧬',def:'Generics allow you to write reusable components that work with a variety of types, while preserving precise type safety at compile time.',content:'Use constraints (`extends`) to limit what types can be passed to a generic parameter.',code:`interface Identifiable {
+  id: string | number;
+}
+
+// Generic function with constraint
+function fetchRecord<T extends Identifiable>(items: T[], targetId: string | number): T | undefined {
+  return items.find(item => item.id === targetId);
+}
+
+const db = [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }];
+const match = fetchRecord(db, 1); // Automatically infers T as { id: number, name: string }
+console.log(match?.name); // "Alice"`,lang:'TypeScript',tip:'💡 Generics are highly powerful for reusable components like state containers, fetch engines, and custom hook wrappers.'},
+    {id:'ts-utilities',title:'Advanced Utility Types',icon:'🛠️',def:'Transform existing types into new configurations using built-in utility types and mapped type expressions.',content:'Understand core utility types like Pick, Omit, Partial, and ReturnType for interviews.',code:`interface Product {
+  id: string;
+  name: string;
+  price: number;
+  tags: string[];
+}
+
+// Partial: Makes all fields optional
+type UpdateProductInput = Partial<Product>;
+
+// Pick: Selects specific keys
+type ProductPreview = Pick<Product, 'id' | 'name'>;
+
+// Omit: Excludes specific keys
+type CatalogEntry = Omit<Product, 'tags'>;
+
+// Custom Polyfill for Pick under the hood (Mapped Type)
+type MyPick<T, K extends keyof T> = {
+  [P in K]: T[P];
+};
+
+// Custom Polyfill for Omit
+type MyOmit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+
+// Custom Polyfill for ReturnType
+type MyReturnType<T extends (...args: any) => any> = T extends (...args: any) => infer R ? R : any;`,lang:'TypeScript',tip:'🎯 Interview checklist: Be prepared to write Partial, Readonly, and Pick mapped types on the whiteboard.'}
+  ]},
+  {id:'react-hooks',icon:'⚛️',title:'React Hooks & Internals',cat:'React',color:'#61dafb',sub:'Hook internals, Virtual DOM, Fiber Reconciliation, Performance optimization, Custom Hooks',sections:[
+    {id:'vdom',title:'Virtual DOM & Fiber Reconciliation',icon:'🌳',def:'The process React uses to manage browser updates efficiently. It maintains a Virtual DOM structure and compares changes using a diffing algorithm during reconciliation.',content:'Reconciliation in modern React is powered by the <strong>Fiber Architecture</strong>. Fiber nodes form a linked list structure representing the component tree. Reconciliation runs in two phases: 1) The Render Phase (asynchronous, builds the work tree, can be paused/aborted), 2) The Commit Phase (synchronous, applies changes to the actual DOM).',diagram:buildVDomDiagram(),code:`// Reconciliation Diffing Heuristics:
+// 1. Different element types -> Unmount entire old tree, build new tree.
+// 2. Same element types -> Update changed attributes, keep DOM node.
+// 3. Child iteration -> React matches elements based on 'key' values.
+
+// ❌ BAD: using array indices as keys
+// If the array reorders, React mismatches indices, forcing expensive re-renders and breaking component state!
+items.map((item, idx) => <Widget key={idx} />);
+
+// ✅ GOOD: using unique stable IDs
+items.map(item => <Widget key={item.id} />);`,lang:'JSX',tip:'🎯 Stable, unique keys allow React to reorder elements without recreating the underlying DOM nodes.'},
+    {id:'hooks-stale-closures',title:'useState Mechanics & Stale Closures',icon:'🪝',def:'Hook values are scoped to individual render closures. When variables inside async callbacks reference state, they can capture stale values from previous renders.',content:'State updates are batch-scheduled. Passing state values directly to state setters will use the value from the current render closure, which can lead to bugs if multiple updates are queued.',code:`function Counter() {
+  const [count, setCount] = useState(0);
+
+  const triggerBad = () => {
+    setCount(count + 1);
+    setCount(count + 1); // ❌ count is still 0! Both set call to state + 1
+  };
+
+  const triggerGood = () => {
+    setCount(prev => prev + 1);
+    setCount(prev => prev + 1); // ✅ updates state using latest queued value
+  };
+
+  const handleAsyncAlert = () => {
+    // ❌ Captures count from current render closure
+    setTimeout(() => {
+      alert('Stale Count: ' + count);
+    }, 3000);
+  };
+}`,lang:'JSX',tip:'💡 If you need to access the absolute latest value of a variable inside an async closure, store the value in a mutable ref (`useRef`).'},
+    {id:'performance-hooks',title:'Optimization: Memoization Rules',icon:'⚡',def:'React.memo, useMemo, and useCallback are tools for optimizing render performance by preventing unnecessary calculations and component re-renders.',content:'Only optimize when you have measurable performance issues: optimization adds overhead from dependency checks.',code:`import React, { useState, useCallback, useMemo } from 'react';
+
+// Parent Component
+function Dashboard() {
+  const [data, setData] = useState([]);
+  const [query, setQuery] = useState('');
+
+  // useCallback: Keeps function reference stable to prevent Child re-renders
+  const handleAction = useCallback((id) => {
+    console.log('Action on:', id);
+  }, []);
+
+  // useMemo: Prevents expensive calculation on every render
+  const filteredData = useMemo(() => {
+    return data.filter(item => item.name.includes(query));
+  }, [data, query]);
+
+  return (
+    <div>
+      <input onChange={e => setQuery(e.target.value)} />
+      <ExpensiveList items={filteredData} onAction={handleAction} />
+    </div>
+  );
+}
+
+// Child Component optimized with React.memo
+const ExpensiveList = React.memo(({ items, onAction }) => {
+  console.log('List rendered!'); // Only prints when items or onAction reference changes
+  return (
+    <ul>
+      {items.map(item => (
+        <li key={item.id} onClick={() => onAction(item.id)}>{item.name}</li>
+      ))}
+    </ul>
+  );
+});`,lang:'JSX',tip:'🎯 A child component optimized with React.memo will still re-render if any of its props change referential equality (which is why useCallback and useMemo are crucial).'},
+    {id:'custom-hooks',title:'Reusable Custom Hooks',icon:'🪝',def:'Custom hooks extract stateful component logic into reusable functions.',content:'Create custom hooks to share common behaviors like data fetching, tracking window dimensions, and persisting state to local storage.',code:`// 1. usePrevious: Tracks state value from the previous render
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  }, [value]); // Runs AFTER render, capturing value before next update
+  return ref.current;
+}
+
+// 2. useEventListener: Attaches event listener and cleans up automatically
+function useEventListener(eventName, handler, element = window) {
+  const savedHandler = useRef();
+  
+  useEffect(() => {
+    savedHandler.current = handler;
+  }, [handler]);
+  
+  useEffect(() => {
+    if (!element.addEventListener) return;
+    
+    const eventListener = (event) => savedHandler.current(event);
+    element.addEventListener(eventName, eventListener);
+    
+    return () => {
+      element.removeEventListener(eventName, eventListener);
+    };
+  }, [eventName, element]);
+}`,lang:'JavaScript',tip:'⚡ Always store callback handlers in a mutable ref inside your custom hooks to prevent event listeners from repeatedly tearing down on every render.'}
+  ]},
+  {id:'css',icon:'🎨',title:'HTML & CSS Live coding',cat:'HTML/CSS',color:'#ec4899',sub:'Box model, Positioning offset rules, Flexbox grid structures, Accessible layouts',sections:[
+    {id:'boxmodel',title:'The CSS Box Model & Sizing',icon:'📦',def:'Every element is rendered as a rectangular box. Sizing is governed by: Content Width -> Padding -> Border -> Margin.',content:'Use `box-sizing: border-box` to include padding and borders in an element\'s total width and height. Margins fall outside this calculation: vertical adjacent margins can collapse together.',diagram:buildBoxModelDiagram(),code:`/* Predictable border sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.card {
+  width: 300px;
+  padding: 20px;
+  border: 5px solid black;
+  /* Total rendered width is exactly 300px (Content width is 250px) */
+}
+
+/* Default Box Sizing (content-box) */
+.card-content-box {
+  box-sizing: content-box;
+  width: 300px;
+  padding: 20px;
+  border: 5px solid black;
+  /* Total rendered width is 350px! (300 + 40 + 10) */
+}`,lang:'CSS',tip:'🎯 Adjacent vertical margins collapse into a single margin equal to the largest of the two margin sizes.'},
+    {id:'positioning',title:'Element Positioning Rules',icon:'📍',def:'governing layout offsets relative to normal flow, parent ancestors, or the browser viewport.',content:'Understand the core positioning schemes: 1) Static (default normal flow), 2) Relative (offset from normal position without affecting siblings), 3) Absolute (removed from flow, offset relative to nearest positioned ancestor), 4) Fixed (fixed relative to viewport), 5) Sticky (relative until scrolling crosses threshold, then fixed).',code:`/* Sticky Header Pattern */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+}
+
+/* Absolute centering within parent */
+.parent {
+  position: relative; /* Positioned anchor */
+  width: 400px;
+  height: 400px;
+}
+
+.child {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Adjust offset by own dimensions */
+}`,lang:'CSS',tip:'💡 Absolute positioned elements look for the nearest ancestor with a position other than static (usually relative) to act as their anchor.',danger:'⚠️ Sticky positioning will fail if any parent container has overflow: hidden set.'},
+    {id:'flexbox',title:'Flexbox Layout Layouts',icon:'📐',def:'A one-dimensional layout model for aligning elements along a single row or column.',content:'Flexbox distributes space along a main axis (governed by justify-content) and a cross axis (governed by align-items). Use flex properties to control item sizing.',code:`.container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between; /* aligns along main axis */
+  align-items: center; /* aligns along cross axis */
+  gap: 15px; /* modern element spacing */
+}
+
+.child-grow {
+  flex: 1; /* Shorthand: flex-grow: 1, flex-shrink: 1, flex-basis: 0% */
+}
+
+.child-fixed {
+  flex: 0 0 200px; /* Don't grow, don't shrink, fix width to 200px */
+}`,lang:'CSS',tip:'🎯 flex: 1 allocates all remaining free space proportionally among growing flex items.'},
+    {id:'grid',title:'CSS Grid Layouts',icon:'🔲',def:'A powerful two-dimensional grid layout model for organizing content in both columns and rows.',content:'CSS Grid is ideal for overall page layouts and complex repeating grids. Use grid-template-areas for visual layout design.',code:`.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  /* Automatically wraps items into responsive columns without requiring media queries! */
+}
+
+.complex-layout {
+  display: grid;
+  grid-template-areas: 
+    "nav header"
+    "nav main"
+    "nav footer";
+  grid-template-columns: 200px 1fr;
+}
+.sidebar { grid-area: nav; }
+.main-content { grid-area: main; }`,lang:'CSS',tip:'⚡ auto-fit fits existing columns into the grid space, while auto-fill creates columns even if they are empty.'},
+    {id:'accessibility',title:'Accessibility (A11y) Checklist',icon:'♿',def:'Designing interfaces that are usable by everyone, including individuals who rely on keyboard navigation or screen readers.',content:'Semantic HTML, clear focus states, high color contrast, and proper ARIA relationships are essential for accessibility.',code:`<!-- 1. Semantic DOM structure (Better than div soup) -->
+<header>
+  <nav aria-label="Main Navigation">
+    <ul>...</ul>
+  </nav>
+</header>
+
+<main id="main-content">
+  <article>
+    <h1>Article Title</h1>
+    <p>Content...</p>
+  </article>
+</main>
+
+<!-- 2. Interactive triggers: buttons should always have labels -->
+<button aria-label="Close modal">✕</button>
+
+<!-- 3. Accessible Form mapping -->
+<div class="form-group">
+  <label for="user-email">Email Address</label>
+  <input id="user-email" type="email" required aria-describedby="email-hint" />
+  <span id="email-hint">We will never share your email address.</span>
+</div>`,lang:'HTML',tip:'🎯 Keyboard Rule: Users must be able to navigate and trigger all interactive elements on the page using only the Tab and Enter keys.',danger:'⚠️ Avoid outline: none! Removing focus outlines makes a site unusable for keyboard-only users.'}
+  ]},
+  {id:'system-design',icon:'🏗️',title:'Frontend System Design',cat:'System Design',color:'#a855f7',sub:'Performance Metrics, State Management Topologies, Asset caching, CSR vs SSR vs SSG vs ISR',sections:[
+    {id:'webvitals',title:'Performance Optimization: Web Vitals',icon:'⚡',def:'A set of metrics defined by Google to measure user experience, page load speed, interactivity, and visual stability.',content:'Optimize these three Core Web Vitals to improve performance and SEO:',code:`// --- CORE WEB VITALS ---
+// 1. LCP (Largest Contentful Paint) - Loading speed. Measures when the largest main element is rendered.
+//    - target: < 2.5s
+//    - Optimization: Optimize images, defer non-critical JS/CSS, use CDNs.
+
+// 2. INP (Interaction to Next Paint) - Responsiveness. Replaced FID, measuring latency for all user interactions.
+//    - target: < 200ms
+//    - Optimization: Break up long tasks with requestIdleCallback, defer state updates.
+
+// 3. CLS (Cumulative Layout Shift) - Visual stability. Measures unexpected layout shifts.
+//    - target: < 0.1
+//    - Optimization: Set explicit width and height sizes on images, reserve space for dynamic ads.`,lang:'JavaScript',tip:'🎯 Use requestIdleCallback or setTimeout(fn, 0) to split CPU-heavy calculations, keeping the main thread responsive.'},
+    {id:'state-topography',title:'State Management Topologies',icon:'🧩',def:'Choosing the right state management strategy based on application size and complexity.',content:'Understand the trade-offs between different state patterns:',code:`// 1. Local State (useState/useReducer)
+//    - Best for: Isolated UI state (e.g., dropdown open/closed, form values).
+
+// 2. Context API
+//    - Best for: Low-frequency updates (e.g., themes, user locales).
+//    - Danger: Every context value update re-renders all consuming children, regardless of which properties they use.
+
+// 3. Global Store managers (Redux / Zustand)
+//    - Best for: High-frequency updates and complex, shared data trees.
+//    - Benefit: Selector-based subscription models prevent unnecessary re-renders.
+
+// 4. Server Cache (React Query / SWR)
+//    - Best for: Managing server state, auto-fetching, caching, and loading indicators.`,lang:'JSX',tip:'💡 Standardize on Zustand for a simpler, less boilerplate alternative to Redux for global state.'},
+    {id:'rendering-patterns',title:'CSR vs SSR vs SSG vs ISR',icon:'🌍',def:'Strategies for rendering web applications and delivering assets to users.',content:'Choose the right rendering pattern based on your application\'s SEO, dynamic content, and load performance requirements:',code:`// 1. CSR (Client-Side Rendering)
+//    - Process: Server returns a bare HTML wrapper; browser downloads JS to render UI.
+//    - Trade-off: Slow initial load, fast subsequent navigation, poor SEO.
+
+// 2. SSR (Server-Side Rendering)
+//    - Process: Server renders HTML dynamically on every request.
+//    - Trade-off: Fast initial load, excellent SEO, higher server loads and cost.
+
+// 3. SSG (Static Site Generation)
+//    - Process: HTML pages are pre-built at compile time.
+//    - Trade-off: Instant load times, high CDN cacheability, poor for highly dynamic data.
+
+// 4. ISR (Incremental Static Regeneration)
+//    - Process: Rebuilds individual static pages in the background as requests come in.
+//    - Trade-off: Best of both worlds - static speeds with dynamic updates.`,lang:'JavaScript',tip:'🎯 Edge Caching: Serve static assets (SSG) from a CDN geographically close to your users to minimize latency.'}
+  ]},
+  {id:'strategy',icon:'🎯',title:'Interview Strategy',cat:'Strategy',color:'#fbbf24',sub:'Structured problem solving, technical communication, whiteboard coding, production patterns',sections:[
+    {id:'star',title:'Live Coding Problem Solving Strategy',icon:'🏆',def:'A structured framework for approaching coding challenges to demonstrate analytical thinking and technical execution.',content:'Do not start writing code immediately. Follow this step-by-step approach to demonstrate strong communication and problem-solving skills:',code:`// --- THE CODING INTERVIEW FRAMEWORK ---
+// 1. CLARIFY: Ask clarifying questions about inputs, outputs, constraints, and edge cases.
+//    - "Can inputs contain negative numbers?" "What is the maximum array size?"
+
+// 2. PLAN: Explain your approach and outline your algorithm before you start typing.
+//    - Discuss the time and space complexity of your planned solution.
+
+// 3. BRUTE FORCE: If the optimal solution is not immediately clear, explain a brute-force approach first.
+//    - "We can solve this in O(n²) time using nested loops, but we can optimize this..."
+
+// 4. OPTIMIZE: Refine your approach using optimal data structures (e.g., hash maps, sliding windows).
+
+// 5. CODE: Write clean, well-structured, readable code with descriptive variable names.
+
+// 6. TEST: Walk through your code step-by-step using example inputs, including edge cases.`,lang:'JavaScript',tip:'🎯 Think out loud! Interviewers are testing your collaborative approach and thought process, not just your ability to memorize syntax.'},
+    {id:'green-flags',title:'Communication & Green Flags',icon:'💬',def:'Showing team cooperation and engineering maturity during interviews.',content:'Avoid common pitfalls and demonstrate collaborative engineering skills during the interview:',code:`// 🟢 GREEN FLAGS:
+// - Explaining your thought process clearly before typing.
+// - Actively clarifying scope constraints and requirements.
+// - Proposing multiple design patterns and comparing their trade-offs.
+// - Testing your code with edge cases (empty inputs, large values).
+// - Openly receiving feedback and hints from the interviewer.
+
+// 🔴 RED FLAGS:
+// - Coding in complete silence for long stretches.
+// - Jumping straight into writing code without confirming requirements.
+// - Ignoring hints or becoming defensive about suggestions.
+// - Asserting that your first solution is optimal without analyzing complexities.`,lang:'JavaScript',tip:'🎯 Treat the interviewer as a peer you are pairing with to solve a production problem.'}
+  ]}
+];
+
+let currentTopic = null;
+let topicProgress = {};
+
+function copyCode(btn, event) {
+  if (event) event.stopPropagation();
+  const pre = btn.closest('.cb').querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+
+function initSidebar() {
+  const sbContent = document.getElementById('sb-content');
+  
+  // Group topics by category
+  const byCategory = {};
+  TOPICS.forEach(t => {
+    if (!byCategory[t.cat]) byCategory[t.cat] = [];
+    byCategory[t.cat].push(t);
+  });
+  
+  // Render sidebar
+  let html = '';
+  Object.entries(byCategory).forEach(([cat, topics]) => {
+    html += `<div class="sb-section">
+      <div class="sb-sect-title">${cat}</div>`;
+    topics.forEach(topic => {
+      html += `<div class="nav-item" id="nav-${topic.id}" onclick="showTopic('${topic.id}')">
+        <div class="nav-ic">${topic.icon}</div>
+        <div class="nav-txt">${topic.title}</div>
+        <div class="nav-badge" id="badge-${topic.id}" style="display:none">✓</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  sbContent.innerHTML = html;
+}
+
+function showTopic(topicId) {
+  currentTopic = topicId;
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic) return;
+  
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('topic-view').style.display = 'block';
+  
+  // Mark as active
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.getElementById(`nav-${topicId}`);
+  if (activeNav) activeNav.classList.add('active');
+  
+  let html = `<div class="sect-hero" style="--hero-grad:linear-gradient(90deg,${topic.color},#3b82f6)">
+    <div class="sh-title">${topic.icon} ${topic.title}</div>
+    <div class="sh-sub">${topic.sub}</div>
+  </div>`;
+  
+  topic.sections.forEach((section, idx) => {
+    let bodyContent = '';
+    if (section.def) bodyContent += `<div class="def-box"><strong>Definition:</strong> ${section.def}</div>`;
+    if (section.content) bodyContent += `<div style="font-size:.8rem;line-height:1.7;color:#b0c4de;margin-bottom:.8rem">${section.content}</div>`;
+    if (section.diagram) bodyContent += `<div class="diagram-wrapper">${section.diagram}</div>`;
+    if (section.code) bodyContent += `<div class="cb"><div class="cbh"><div class="cblang">${section.lang || 'JS'}</div><button class="tbtn copy-btn" onclick="copyCode(this, event)">Copy</button></div><div class="cbody"><pre>${section.code}</pre></div></div>`;
+    if (section.example) bodyContent += `<div style="font-size:.8rem;color:#fde68a;margin:.6rem 0;padding:.6rem;background:rgba(251,191,36,.08);border-radius:6px"><strong>Example:</strong> ${section.example}</div>`;
+    if (section.tip) bodyContent += `<div class="tip">${section.tip}</div>`;
+    if (section.danger) bodyContent += `<div class="danger">${section.danger}</div>`;
+    if (section.output) bodyContent += `<div class="output"><strong>Output:</strong><br>${section.output}</div>`;
+    
+    html += `<div class="card">
+      <div class="card-h" onclick="this.parentElement.classList.toggle('open')">
+        <div class="card-hl">
+          <div class="card-ic">${section.icon}</div>
+          <div class="card-ti">${section.title}</div>
+        </div>
+        <div class="card-ar">›</div>
+      </div>
+      <div class="card-body">
+        ${bodyContent}
+      </div>
+    </div>`;
+  });
+  
+  document.getElementById('topic-view').innerHTML = html;
+  updateProgress();
+}
+
+function updateProgress() {
+  if (currentTopic) {
+    topicProgress[currentTopic] = true;
+  }
+  const completed = Object.keys(topicProgress).length;
+  const total = TOPICS.length;
+  const pct = Math.round((completed / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+  initSidebar();
+  // Show first topic by default
+  if (TOPICS.length > 0) {
+    showTopic(TOPICS[0].id);
+  }
+});
+</script>
+
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+</style>
+</body>
+</html>

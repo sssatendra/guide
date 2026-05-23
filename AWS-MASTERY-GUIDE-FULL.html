@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AWS Ultimate Mastery: The Complete Reference & Solutions Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary: #ff9900;
+    --primary-dim: #ff990015;
+    --bg: #0b0d11;
+    --card: #151921;
+    --border: #242b38;
+    --text: #ffffff;
+    --text-dim: #cbd5e1;
+    --muted: #64748b;
+    --accent: #facc15;
+    --success: #10b981;
+    --danger: #ef4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ── LAYOUT ── */
+.topbar {
+    background: var(--card);
+    border-bottom: 2px solid var(--primary);
+    padding: 0.8rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+.logo { font-size: 1.1rem; font-weight: 700; color: var(--primary); letter-spacing: 0.05em; }
+.logo span { color: var(--text-dim); font-weight: 400; font-size: 0.8rem; margin-left: 0.75rem; }
+
+.layout { display: flex; height: calc(100vh - 60px); }
+.sidebar {
+    width: 350px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+.main { flex: 1; overflow-y: auto; padding: 2.5rem; }
+.content-wrap { max-width: 1100px; margin: 0 auto; }
+
+/* ── SIDEBAR NAV ── */
+.search-box { margin-bottom: 1.5rem; }
+.search-box input {
+    width: 100%;
+    background: #1e2535;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    outline: none;
+}
+.search-box input:focus { border-color: var(--primary); }
+
+.nav-section { margin-bottom: 2rem; }
+.nav-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    font-weight: 700;
+}
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.82rem;
+    margin-bottom: 0.3rem;
+    border: 1px solid transparent;
+    color: var(--text-dim);
+}
+.nav-item:hover { background: var(--border); color: var(--text); }
+.nav-item.active {
+    background: var(--primary-dim);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+}
+.nav-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    opacity: 0.5;
+    width: 25px;
+    flex-shrink: 0;
+}
+
+/* ── CONTENT BOXES ── */
+.service-card { display: none; animation: slideUp 0.3s ease-out; }
+.service-card.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+h1 { font-size: 2.2rem; margin-bottom: 1rem; color: var(--primary); }
+h2 { font-size: 1.8rem; margin: 2rem 0 1rem; border-bottom: 3px solid var(--primary); display: inline-block; padding-bottom: 0.3rem; }
+h3 { font-size: 1.3rem; margin: 2.5rem 0 1rem; color: var(--accent); }
+
+.def-box {
+    background: var(--primary-dim);
+    border-left: 5px solid var(--primary);
+    padding: 1.5rem;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+/* ── SCENARIO BOX ── */
+.scenario-box {
+    background: #1a1f2e;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2.5rem 0;
+}
+.problem-head { color: var(--danger); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; margin-bottom: 0.5rem; }
+.solution-head { color: var(--success); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.problem-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
+.solution-text { color: var(--text-dim); margin-bottom: 1.5rem; }
+
+/* ── DIAGRAMS ── */
+.diagram {
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    white-space: pre;
+    color: var(--success);
+    line-height: 1.4;
+}
+
+/* ── CODE ── */
+.code-wrap { position: relative; margin: 1.5rem 0; }
+.code-label {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: var(--primary);
+    color: #000;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+pre {
+    background: #000;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+}
+code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #e2e8f0; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+.card h4 { color: var(--primary); margin-bottom: 0.5rem; font-size: 1rem; }
+
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+}
+.badge-scratch { background: #3b82f6; color: #fff; }
+.badge-detailed { background: #8b5cf6; color: #fff; }
+.badge-expert { background: #ef4444; color: #fff; }
+
+ul { margin: 1rem 0; padding-left: 1.5rem; }
+li { margin-bottom: 0.5rem; }
+
+@media (max-width: 768px) {
+    .layout { flex-direction: column; }
+    .sidebar { width: 100%; height: auto; max-height: 300px; }
+    .main { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="logo">AWS ULTIMATE<span>Mastery: Ref & Solutions</span></div>
+    <div style="font-size: 0.8rem; color: var(--muted);">Complete 80 Modules + Scenarios v6.0</div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="search-box">
+            <input type="text" id="topicSearch" placeholder="Search 80 modules..." onkeyup="filterTopics()">
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Mission Control</div>
+            <div class="nav-item active" onclick="showSection('welcome', event)">🚀 Mastery Hub</div>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-title">Expert Deep Dives</div>
+            <div class="nav-item" onclick="showSection('iam-sec', event)">🔐 IAM Mastery</div>
+            <div class="nav-item" onclick="showSection('ec2-sec', event)">⚙️ EC2 Mastery</div>
+            <div class="nav-item" onclick="showSection('s3-sec', event)">📦 S3 Mastery</div>
+            <div class="nav-item" onclick="showSection('containers-sec', event)">🐳 Containers (ECS/EKS)</div>
+        </div>
+
+        <div class="nav-section" id="roadmap-list">
+            <div class="nav-title">80-Module Roadmap</div>
+            <!-- Dynamic topics here -->
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="content-wrap" id="main-content">
+            
+            <!-- WELCOME -->
+            <div id="welcome" class="service-card active">
+                <h1>The Complete AWS Mastery</h1>
+                <div class="def-box">
+                    Welcome to the definitive AWS resource. This guide combines <strong>foundational definitions</strong> for the entire 80-module ecosystem with <strong>battle-tested architectural solutions</strong> for high-stakes business problems.
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h4>1. 80 Foundational Reference</h4>
+                        <p>Fully searchable 80-module curriculum covering Global Infra to GenAI with definitions, diagrams, and key concepts.</p>
+                    </div>
+                    <div class="card">
+                        <h4>2. Problem-Solution Playbook</h4>
+                        <p>Real-world high-stakes scenarios with diagrams, architectural strategies, and implementation code for core services.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- IAM SECTION -->
+            <div id="iam-sec" class="service-card">
+                <h2>IAM: Identity & Access Management</h2>
+                <div class="def-box">
+                    <strong>Definition:</strong> AWS IAM is a global service that helps you securely control access to AWS resources. It controls who is <em>authenticated</em> (signed in) and <em>authorized</em> (has permissions) to use resources.
+                </div>
+
+                <div class="section">
+                    <h3><span class="badge badge-scratch">Scratch</span> Hierarchy & Identities</h3>
+                    <ul>
+                        <li><strong>Root User:</strong> Complete control. Never use for daily tasks.</li>
+                        <li><strong>Users:</strong> Persistent identities for people or apps.</li>
+                        <li><strong>Roles:</strong> Temporary identities for services (EC2, Lambda) or cross-account access.</li>
+                        <li><strong>Policies:</strong> JSON documents defining "Who can do what".</li>
+                    </ul>
+                    <div class="diagram">
+[ User ] --(Identity Policy)--> [ Action ] <-- (Resource Policy) -- [ S3 Bucket ]</div>
+                </div>
+
+                <div class="scenario-box">
+                    <div class="problem-head">The Problem (Scenario)</div>
+                    <div class="problem-text">"Our third-party auditor needs access to our logs, but we cannot create a permanent IAM user for them due to security compliance."</div>
+                    
+                    <div class="solution-head">The Solution (Architectural Implementation)</div>
+                    <div class="solution-text">Implement <strong>Cross-Account IAM Roles with External ID</strong>. This uses a Trust Relationship to allow the auditor's account to assume a role in your account securely.</div>
+                    <div class="code-wrap"><div class="code-label">Trust Policy (JSON)</div>
+<pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Principal": { "AWS": "arn:aws:iam::AUDITOR_ID:root" },
+    "Action": "sts:AssumeRole",
+    "Condition": { "StringEquals": { "sts:ExternalId": "Secret_Audit_2026" } }
+  }]
+}</code></pre></div>
+                </div>
+            </div>
+
+            <!-- EC2 SECTION -->
+            <div id="ec2-sec" class="service-card">
+                <h2>EC2: Elastic Compute Cloud</h2>
+                <div class="def-box">
+                    <strong>Definition:</strong> Amazon EC2 provides resizable compute capacity in the cloud. It eliminates your need to invest in hardware up front, allowing you to deploy virtual servers (instances) on-demand.
+                </div>
+
+                <div class="section">
+                    <h3><span class="badge badge-detailed">Detailed</span> Storage & Networking</h3>
+                    <ul>
+                        <li><strong>EBS:</strong> Persistent network storage. Survives instance termination.</li>
+                        <li><strong>Instance Store:</strong> Ephemeral, high-speed physical storage. Lost on stop/terminate.</li>
+                        <li><strong>Nitro System:</strong> Hardware-based virtualization for 100% performance efficiency.</li>
+                    </ul>
+                </div>
+
+                <div class="scenario-box">
+                    <div class="problem-head">The Problem (Scenario)</div>
+                    <div class="problem-text">"CPU usage is low, but our processing backlog is growing in SQS. Traditional scaling is too slow to react to incoming message bursts."</div>
+                    
+                    <div class="solution-head">The Solution (Architectural Implementation)</div>
+                    <div class="solution-text">Use <strong>Target Tracking Scaling based on SQS Queue Depth</strong>. By calculating the "Backlog Per Instance," the ASG launches instances before the queue becomes a bottleneck.</div>
+                    <div class="code-wrap"><div class="code-label">AWS CLI Scaling Policy</div>
+<pre><code>aws autoscaling put-scaling-policy \
+  --auto-scaling-group-name video-proc-asg \
+  --policy-name sqs-target-tracking \
+  --policy-type TargetTrackingScaling \
+  --target-tracking-configuration '{"CustomizedMetricSpecification": {"MetricName": "BacklogPerInstance","Namespace": "App/Metrics","Statistic": "Average"},"TargetValue": 10.0}'</code></pre></div>
+                </div>
+            </div>
+
+            <!-- S3 SECTION -->
+            <div id="s3-sec" class="service-card">
+                <h2>S3: Simple Storage Service</h2>
+                <div class="def-box">
+                    <strong>Definition:</strong> Amazon S3 is object storage built to store and retrieve any amount of data from anywhere. It offers 99.999999999% (11 9s) of durability.
+                </div>
+
+                <div class="scenario-box">
+                    <div class="problem-head">The Problem (Scenario)</div>
+                    <div class="problem-text">"Financial regulations require all documents to be replicated to a different region within 15 minutes, with full audit metrics."</div>
+                    
+                    <div class="solution-head">The Solution (Architectural Implementation)</div>
+                    <div class="solution-text">Deploy <strong>S3 Cross-Region Replication (CRR) with Replication Time Control (RTC)</strong>. RTC provides an SLA-backed 15-minute window and publishes metrics to CloudWatch.</div>
+                    <div class="diagram">
+[ Primary: US-East-1 ] -- (RTC: 15 min SLA) --> [ Secondary: US-West-2 ]
+                                                      |
+                                             [ CloudWatch Metrics ]</div>
+                </div>
+            </div>
+
+            <!-- CONTAINERS SECTION -->
+            <div id="containers-sec" class="service-card">
+                <h2>Containers: ECR, ECS & EKS</h2>
+                <div class="def-box">
+                    <strong>Expert Strategy:</strong> Containers on AWS involve artifact management (**ECR**) and orchestration (**ECS** for simplicity, **EKS** for open-standard Kubernetes).
+                </div>
+
+                <div class="scenario-box">
+                    <div class="problem-head">The Problem (Scenario)</div>
+                    <div class="problem-text">"Deployment updates are causing downtime. A buggy image crashed our fleet last night. We need zero-downtime, safe updates."</div>
+                    
+                    <div class="solution-head">The Solution (Architectural Implementation)</div>
+                    <div class="solution-text">Use <strong>ECS Blue/Green Deployments with AWS CodeDeploy</strong>. This launches a "Green" version, runs health checks on a test port, and then shifts traffic from "Blue" to "Green" automatically.</div>
+                    <div class="code-wrap"><div class="code-label">CodeDeploy AppSpec</div>
+<pre><code>version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "arn:aws:ecs:id:task-def/app:2"
+        LoadBalancerInfo: {ContainerName: "web", ContainerPort: 80}</code></pre></div>
+                </div>
+            </div>
+
+            <!-- DYNAMIC MODULE -->
+            <div id="dynamic-module" class="service-card"></div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+const topics = [
+  {id:1, title:"Cloud Computing Fundamentals & AWS Global Infra", cat:"basic", level:"Foundation", def: "On-demand delivery of IT resources with pay-as-you-go pricing.", expl: ["Region: Physical location with AZs.", "AZ: Discrete data centers.", "Edge Location: CloudFront caching points."]},
+  {id:2, title:"Regions, Availability Zones (AZs) & Edge Locations", cat:"basic", level:"Foundation", def: "The structural pillars of AWS availability.", expl: ["Multi-AZ for high availability.", "Cross-Region for disaster recovery."]},
+  {id:3, title:"IAM Deep Dive: Users, Groups & Policies", cat:"basic", level:"Security", def: "Identity & Access Management fundamentals.", expl: ["Users, Groups, Roles.", "JSON Policies."]},
+  {id:4, title:"IAM Roles: Cross-Account & Service Execution", cat:"basic", level:"Security", def: "Roles for temporary access.", expl: ["Trust Policies.", "AssumeRole function."]},
+  {id:5, title:"AWS CLI, SDKs & Access Keys", cat:"basic", level:"Tools", def: "Programmatic access to AWS.", expl: ["AWS CLI configuration.", "Access Keys vs Instance Profiles."]},
+  {id:6, title:"AWS Organizations & Control Tower", cat:"basic", level:"Management", def: "Managing multiple AWS accounts.", expl: ["SCPs (Service Control Policies).", "Consolidated Billing."]},
+  {id:7, title:"AWS SSO / IAM Identity Center", cat:"basic", level:"Security", def: "Centralized login.", expl: ["SSO Directory.", "Permission Sets."]},
+  {id:8, title:"AWS STS (Security Token Service)", cat:"basic", level:"Security", def: "Temporary credentials.", expl: ["Token expiration.", "Session Policies."]},
+  {id:9, title:"Billing, Budgets & Cost Explorer", cat:"basic", level:"Management", def: "Cost management.", expl: ["Budgets vs Alarms.", "Cost Allocation Tags."]},
+  {id:10, title:"AWS Trusted Advisor & Well-Architected Tool", cat:"basic", level:"Best Practices", def: "Operational excellence.", expl: ["The 6 Pillars.", "Automated checks."]},
+  {id:11, title:"VPC Fundamentals: CIDR, Subnets & Route Tables", cat:"basic", level:"Networking", def: "Logically isolated network.", expl: ["Public vs Private subnets.", "Route Tables traffic flow."]},
+  {id:12, title:"Internet Gateways (IGW) & NAT Gateways", cat:"basic", level:"Networking", def: "Network entry/exit.", expl: ["IGW for internet access.", "NAT Gateway for private subnet outbound."]},
+  {id:13, title:"Security Groups vs Network ACLs (NACLs)", cat:"basic", level:"Security", def: "Firewalls in VPC.", expl: ["Stateful Security Groups.", "Stateless NACLs."]},
+  {id:14, title:"VPC Peering & Transit Gateway", cat:"intermediate", level:"Networking", def: "Connecting VPCs.", expl: ["Peering (1:1).", "Transit Gateway (hub-and-spoke)."]},
+  {id:15, title:"VPC Endpoints (Gateway vs Interface)", cat:"intermediate", level:"Networking", def: "Private AWS service access.", expl: ["S3/DynamoDB Gateway endpoints.", "PrivateLink Interface endpoints."]},
+  {id:16, title:"AWS VPN & Direct Connect", cat:"advanced", level:"Networking", def: "Hybrid connectivity.", expl: ["Site-to-Site VPN.", "Dedicated Direct Connect lines."]},
+  {id:17, title:"Route 53: DNS, Routing Policies & Alias Records", cat:"intermediate", level:"Networking", def: "Managed DNS.", expl: ["Failover routing.", "Latency-based routing."]},
+  {id:18, title:"CloudFront (CDN) & Edge Functions", cat:"intermediate", level:"Networking", def: "Global content delivery.", expl: ["Edge caching.", "Lambda@Edge."]},
+  {id:19, title:"AWS Global Accelerator", cat:"advanced", level:"Networking", def: "IP-level acceleration.", expl: ["Anycast IPs.", "TCP/UDP optimizations."]},
+  {id:20, title:"Elastic Load Balancing (ALB, NLB, GLB)", cat:"intermediate", level:"Compute", def: "Distributing traffic.", expl: ["ALB (HTTP).", "NLB (TCP/Ultra-low latency)."]},
+  {id:21, title:"EC2 Instances: Types, AMIs & Purchasing Options", cat:"intermediate", level:"Compute", def: "Virtual servers.", expl: ["t-series (burstable).", "c-series (compute)."]},
+  {id:22, title:"EBS (Elastic Block Store) & Instance Store", cat:"intermediate", level:"Storage", def: "EC2 block storage.", expl: ["EBS (Network).", "Instance Store (Local/Ephemeral)."]},
+  {id:23, title:"Auto Scaling Groups (ASG) & Launch Templates", cat:"intermediate", level:"Compute", def: "Automatic fleet scaling.", expl: ["Dynamic scaling.", "Predictive scaling."]},
+  {id:24, title:"Elastic Beanstalk (PaaS)", cat:"intermediate", level:"Compute", def: "Platform for apps.", expl: ["No-infra management.", "Code deployment focus."]},
+  {id:25, title:"Docker on AWS: Elastic Container Registry (ECR)", cat:"intermediate", level:"Containers", def: "Artifact storage.", expl: ["Private repos.", "Image scanning."]},
+  {id:26, title:"Elastic Container Service (ECS) & Task Definitions", cat:"intermediate", level:"Containers", def: "Native AWS orchestration.", expl: ["Tasks vs Services.", "Task execution roles."]},
+  {id:27, title:"AWS Fargate: Serverless Compute for Containers", cat:"advanced", level:"Containers", def: "No-server compute.", expl: ["Container-level billing.", "Security isolation."]},
+  {id:28, title:"Elastic Kubernetes Service (EKS): Control Plane & Nodes", cat:"advanced", level:"Containers", def: "Managed K8s.", expl: ["Managed control plane.", "Worker node groups."]},
+  {id:29, title:"AWS App Runner", cat:"intermediate", level:"Containers", def: "Simple container apps.", expl: ["Auto-scaling.", "Direct code/image deploy."]},
+  {id:30, title:"AWS Outposts & Local Zones", cat:"advanced", level:"Hybrid Cloud", def: "On-prem AWS.", expl: ["Outposts (Hardware).", "Local Zones (Edge compute)."]},
+  {id:31, title:"S3 Deep Dive: Buckets, Objects & Storage Classes", cat:"basic", level:"Storage", def: "Object storage basics.", expl: ["Bucket policies.", "Standard/IA/Glacier classes."]},
+  {id:32, title:"S3 Security: Bucket Policies, ACLs & Presigned URLs", cat:"intermediate", level:"Security", def: "Securing S3.", expl: ["Block Public Access.", "Object ownership."]},
+  {id:33, title:"S3 Advanced: Versioning, Lifecycle Rules & Replication", cat:"intermediate", level:"Storage", def: "S3 management.", expl: ["Transition to Glacier.", "Cross-region replication."]},
+  {id:34, title:"Elastic File System (EFS)", cat:"intermediate", level:"Storage", def: "Shared NFS storage.", expl: ["Multi-AZ mounting.", "Scaling throughput."]},
+  {id:35, title:"Amazon FSx (Windows, Lustre, NetApp)", cat:"advanced", level:"Storage", def: "Specialized file systems.", expl: ["Windows File Server.", "Lustre for HPC."]},
+  {id:36, title:"AWS Storage Gateway", cat:"advanced", level:"Hybrid Storage", def: "Bridge to S3.", expl: ["File Gateway.", "Volume Gateway."]},
+  {id:37, title:"AWS DataSync & Transfer Family", cat:"advanced", level:"Migration", def: "Data movement.", expl: ["FTP/SFTP to S3.", "Fast data sync."]},
+  {id:38, title:"AWS Snow Family: Snowcone, Snowball, Snowmobile", cat:"advanced", level:"Migration", def: "Physical data transfer.", expl: ["Edge computing.", "Exabyte-scale transfer."]},
+  {id:39, title:"AWS Backup: Centralized Backup Policies", cat:"intermediate", level:"Storage", def: "Automated backups.", expl: ["Cross-service backups.", "Retention policies."]},
+  {id:40, title:"Disaster Recovery & AWS Elastic Disaster Recovery", cat:"advanced", level:"Architecture", def: "Continuous replication.", expl: ["Pilot Light.", "Warm Standby."]},
+  {id:41, title:"RDS: Multi-AZ, Read Replicas & Backups", cat:"intermediate", level:"Database", def: "Managed SQL.", expl: ["Multi-AZ (HA).", "Read Replicas (Scaling)."]},
+  {id:42, title:"Amazon Aurora: Serverless & Global Databases", cat:"advanced", level:"Database", def: "Cloud-native SQL.", expl: ["Auto-scaling compute.", "Global clusters."]},
+  {id:43, title:"DynamoDB: Partition Keys, RCUs/WCUs & GSI/LSI", cat:"intermediate", level:"Database", def: "Serverless NoSQL.", expl: ["Partition Keys.", "Secondary Indexes."]},
+  {id:44, title:"DynamoDB Streams & DAX", cat:"advanced", level:"Database", def: "Advanced DynamoDB.", expl: ["Real-time streams.", "In-memory cache."]},
+  {id:45, title:"ElastiCache (Redis vs Memcached)", cat:"intermediate", level:"Database", def: "In-memory datastores.", expl: ["Redis (complex data).", "Memcached (simplicity)."]},
+  {id:46, title:"Amazon Redshift (Data Warehousing)", cat:"advanced", level:"Analytics", def: "Columnar storage OLAP.", expl: ["Spectrum (S3 query).", "Serverless Redshift."]},
+  {id:47, title:"Amazon Athena & Glue (Serverless Analytics)", cat:"advanced", level:"Analytics", def: "SQL on S3.", expl: ["Glue ETL.", "Athena SQL queries."]},
+  {id:48, title:"Amazon EMR (Hadoop/Spark Big Data)", cat:"advanced", level:"Analytics", def: "Managed big data clusters.", expl: ["Spark/Hive/Presto.", "Spot instance savings."]},
+  {id:49, title:"Amazon Kinesis (Data Streams, Firehose)", cat:"advanced", level:"Analytics", def: "Real-time data.", expl: ["Data Streams (custom).", "Firehose (delivery)."]},
+  {id:50, title:"DocumentDB, Neptune, QLDB & Timestream", cat:"advanced", level:"Database", def: "Specialized NoSQL.", expl: ["MongoDB compatible.", "Graph/Ledger/Time-series."]},
+  {id:51, title:"AWS Lambda: Execution Context & Triggers", cat:"intermediate", level:"Serverless", def: "Function-as-a-Service.", expl: ["Triggers (S3, API GW).", "Provisioned Concurrency."]},
+  {id:52, title:"API Gateway: REST, HTTP, WebSocket & Auth", cat:"intermediate", level:"Serverless", def: "Managed APIs.", expl: ["Cognito Auth.", "Throttling/Usage plans."]},
+  {id:53, title:"Amazon SQS: Standard vs FIFO Queues", cat:"intermediate", level:"Integration", def: "Message queuing.", expl: ["Standard (high throughput).", "FIFO (order guaranteed)."]},
+  {id:54, title:"Amazon SNS: Topics, Subscriptions & Fanout", cat:"intermediate", level:"Integration", def: "Pub/Sub messaging.", expl: ["Topic subscriptions.", "Email/SMS/Lambda endpoints."]},
+  {id:55, title:"EventBridge (CloudWatch Events) & Schemas", cat:"intermediate", level:"Integration", def: "Serverless Event Bus.", expl: ["Event routing.", "Schema Registry."]},
+  {id:56, title:"AWS Step Functions: State Machines & Orchestration", cat:"advanced", level:"Serverless", def: "Orchestrating Lambda.", expl: ["Wait/Retry logic.", "Visual workflows."]},
+  {id:57, title:"Amazon Cognito: User Pools vs Identity Pools", cat:"intermediate", level:"Security", def: "Auth for apps.", expl: ["User Pools (Sign-in).", "Identity Pools (AWS credentials)."]},
+  {id:58, title:"AWS AppSync (Managed GraphQL)", cat:"advanced", level:"Serverless", def: "Managed GraphQL.", expl: ["Real-time subscriptions.", "Multiple datasources."]},
+  {id:59, title:"AWS Amplify: Frontend/Mobile Backend", cat:"intermediate", level:"Frontend", def: "Fast backend setup.", expl: ["Amplify CLI.", "Hosting/CI/CD."]},
+  {id:60, title:"Amazon MQ (Managed RabbitMQ/ActiveMQ)", cat:"advanced", level:"Integration", def: "Managed brokers.", expl: ["RabbitMQ support.", "Standardized protocols."]},
+  {id:61, title:"CloudWatch: Metrics, Alarms, Logs & Insights", cat:"intermediate", level:"Monitoring", def: "Unified monitoring.", expl: ["Custom metrics.", "Log Insights."]},
+  {id:62, title:"AWS CloudTrail: API Auditing", cat:"intermediate", level:"Security", def: "API event history.", expl: ["Log validation.", "Security audits."]},
+  {id:63, title:"AWS X-Ray: Distributed Tracing", cat:"advanced", level:"Monitoring", def: "Debugging microservices.", expl: ["Service Maps.", "Trace analysis."]},
+  {id:64, title:"CloudFormation: Infrastructure as Code (IaC)", cat:"intermediate", level:"DevOps", def: "Template-based infra.", expl: ["Stacks/Nested stacks.", "Drift detection."]},
+  {id:65, title:"AWS CDK (Cloud Development Kit)", cat:"advanced", level:"DevOps", def: "Infra via code.", expl: ["Constructs.", "TS/Python/Go support."]},
+  {id:66, title:"CI/CD Pipeline: CodeCommit, CodeBuild, CodeDeploy", cat:"intermediate", level:"DevOps", def: "Deployment automation.", expl: ["CodePipeline flow.", "Automated testing."]},
+  {id:67, title:"Systems Manager (SSM): Parameter Store & Run Command", cat:"advanced", level:"DevOps", def: "Operational control.", expl: ["Parameter Store.", "SSM Agent."]},
+  {id:68, title:"AWS Config & Resource Compliance", cat:"advanced", level:"Management", def: "Resource tracking.", expl: ["Compliance rules.", "Resource history."]},
+  {id:69, title:"AWS Service Catalog", cat:"advanced", level:"Management", def: "Approved service portal.", expl: ["Portfolio management.", "Product control."]},
+  {id:70, title:"Amazon MSK (Managed Streaming for Apache Kafka)", cat:"advanced", level:"Streaming", def: "Managed Kafka.", expl: ["Broker management.", "High availability."]},
+  {id:71, title:"KMS (Key Management Service) & Envelope Encryption", cat:"advanced", level:"Security", def: "Encryption keys.", expl: ["CMKs.", "Envelope encryption."]},
+  {id:72, title:"AWS Secrets Manager vs Parameter Store", cat:"intermediate", level:"Security", def: "Sensitive data.", expl: ["Secret rotation.", "KMS integration."]},
+  {id:73, title:"WAF (Web Application Firewall) & AWS Shield", cat:"advanced", level:"Security", def: "Network protection.", expl: ["Layer 7 WAF.", "DDoS Shield."]},
+  {id:74, title:"Amazon GuardDuty & Macie", cat:"advanced", level:"Security", def: "Threat detection.", expl: ["AI-based GuardDuty.", "S3 PII detection via Macie."]},
+  {id:75, title:"Amazon Inspector & Security Hub", cat:"advanced", level:"Security", def: "Vulnerability/Compliance.", expl: ["EC2 scanning.", "Security posture hub."]},
+  {id:76, title:"AI/ML: Amazon SageMaker Ecosystem", cat:"advanced", level:"AI/ML", def: "Build/Train/Deploy ML.", expl: ["Notebooks.", "Endpoints."]},
+  {id:77, title:"Generative AI: Amazon Bedrock", cat:"advanced", level:"AI/ML", def: "Foundation models via API.", expl: ["Claude/Llama models.", "RAG workflows."]},
+  {id:78, title:"Amazon Rekognition, Polly & Comprehend", cat:"intermediate", level:"AI/ML", def: "Pre-built AI services.", expl: ["Image vision.", "Text-to-speech."]},
+  {id:79, title:"AWS IoT Core & Greengrass", cat:"advanced", level:"IoT", def: "Connecting devices.", expl: ["MQTT broker.", "Edge logic."]},
+  {id:80, title:"Disaster Recovery Strategies (RTO/RPO)", cat:"advanced", level:"Architecture", def: "Business continuity.", expl: ["Backup/Restore.", "Multi-site active."]}
+];
+
+function renderRoadmap(filtered = topics) {
+    const roadmapList = document.getElementById('roadmap-list');
+    roadmapList.innerHTML = '<div class="nav-title">80-Module Roadmap</div>';
+    filtered.forEach(t => {
+        const item = document.createElement('div');
+        item.className = 'nav-item';
+        item.onclick = (e) => showModule(t.id, e);
+        item.innerHTML = `<span class="nav-num">${String(t.id).padStart(2,'0')}</span> ${t.title}`;
+        roadmapList.appendChild(item);
+    });
+}
+
+function filterTopics() {
+    const q = document.getElementById('topicSearch').value.toLowerCase();
+    const filtered = topics.filter(t => t.title.toLowerCase().includes(q));
+    renderRoadmap(filtered);
+}
+
+function showModule(id, e) {
+    const t = topics.find(x => x.id === id);
+    document.querySelectorAll('.service-card').forEach(s => s.classList.remove('active'));
+    const dynamic = document.getElementById('dynamic-module');
+    dynamic.classList.add('active');
+
+    dynamic.innerHTML = `
+        <h2>Module ${id}: ${t.title}</h2>
+        <div class="def-box"><strong>Overview:</strong> ${t.def}</div>
+        <div class="section">
+            <h3>Key Concepts</h3>
+            <ul>${t.expl.map(i => `<li>→ ${i}</li>`).join('')}</ul>
+        </div>
+        <div class="example-box">
+            <strong>Exam Strategy:</strong> Understand the primary use-case and scaling limitations for this service.
+        </div>
+    `;
+    updateNav(e);
+}
+
+function showSection(id, e) {
+    document.querySelectorAll('.service-card').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    updateNav(e);
+}
+
+function updateNav(e) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    if (e && e.currentTarget) e.currentTarget.classList.add('active');
+    document.querySelector('.main').scrollTop = 0;
+}
+
+renderRoadmap();
+</script>
+
+</body>
+</html>
