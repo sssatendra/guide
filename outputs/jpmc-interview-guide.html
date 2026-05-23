@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JPMorganChase SE II (Frontend) — Complete Preparation Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#030408;
+  --sb:#060a12;
+  --card:#0c1220;
+  --card2:#121b2f;
+  --border:#18243c;
+  --border-hover:#2a3e66;
+  --text:#f1f5f9;
+  --muted:#64748b;
+  --blue:#3b82f6;
+  --jpm-blue:#1d4ed8;
+  --jpm-gold:#c5a059;
+  --amber:#fbbf24;
+  --green:#10b981;
+  --red:#ef4444;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#18243c;border-radius:4px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:500;background:rgba(3,4,8,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.55rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-size:.9rem;font-weight:800;letter-spacing:-.02em}.logo .l1{color:var(--jpm-gold)}.logo .l2{color:#fff}.logo .l3{color:var(--muted);font-weight:400;font-size:.65rem;margin-left:.3rem}
+.countdown{background:linear-gradient(135deg,rgba(197,160,89,.15),rgba(59,130,246,.15));border:1px solid rgba(197,160,89,.3);border-radius:8px;padding:.3rem .75rem;font-size:.7rem;font-weight:700;color:var(--jpm-gold);display:flex;align-items:center;gap:.35rem}
+.tbr{display:flex;gap:.3rem;align-items:center}.tbtn{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:.28rem .55rem;color:var(--muted);font-size:.65rem;cursor:pointer;transition:all .13s;font-weight:600}.tbtn:hover{color:var(--jpm-gold);border-color:var(--jpm-gold)}
+.mob-toggle{display:none;background:var(--jpm-blue);border:none;border-radius:6px;padding:.3rem .6rem;color:#fff;font-size:.7rem;cursor:pointer;font-weight:700}
+.layout{display:flex;margin-top:46px;min-height:calc(100vh - 46px)}
+.sidebar{width:270px;min-width:270px;background:var(--sb);border-right:1px solid var(--border);height:calc(100vh - 46px);overflow-y:auto;position:sticky;top:46px;display:flex;flex-direction:column}
+.sb-progress{padding:.55rem .6rem;border-bottom:1px solid var(--border);flex-shrink:0}
+.prog-label{display:flex;justify-content:space-between;font-size:.62rem;color:var(--muted);margin-bottom:.3rem;font-weight:600}
+.prog-bar{background:rgba(255,255,255,.05);border-radius:3px;height:4px}.prog-fill{height:100%;background:linear-gradient(90deg,var(--jpm-gold),var(--blue));border-radius:3px;transition:width .4s}
+.sb-section{padding:.35rem 0;border-bottom:1px solid var(--border)}.sb-sect-title{font-size:.6rem;font-weight:800;color:var(--jpm-gold);text-transform:uppercase;letter-spacing:.1em;padding:.25rem .7rem .15rem}
+.nav-item{display:flex;align-items:center;gap:.4rem;padding:.42rem .65rem;cursor:pointer;border:1px solid transparent;border-radius:6px;margin:.05rem .3rem;transition:all .12s}
+.nav-item:hover{background:rgba(255,255,255,.03);border-color:var(--border)}.nav-item.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);border-left:2px solid var(--jpm-blue)}
+.nav-ic{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}.nav-txt{font-size:.71rem;font-weight:600;flex:1}.nav-item.active .nav-txt{color:#93c5fd}.nav-badge{font-size:.57rem;padding:1px 5px;border-radius:5px;font-weight:700;background:rgba(59,130,246,.2);color:var(--blue)}
+.main{flex:1;overflow-y:auto;min-width:0}.content{padding:1.2rem 1.8rem 3rem;max-width:960px}
+.sect-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.3rem;margin-bottom:1rem;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.4)}
+.sect-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--hero-grad,linear-gradient(90deg,var(--jpm-gold),var(--blue)))}
+.sh-title{font-size:1.2rem;font-weight:900;margin-bottom:.3rem;color:#f8fafc}.sh-sub{font-size:.8rem;color:var(--muted);line-height:1.7}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.8rem;overflow:hidden;transition:border-color 0.2s;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+.card:hover{border-color:var(--border-hover)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:.75rem .95rem;cursor:pointer;transition:background .13s;user-select:none}.card-h:hover{background:rgba(255,255,255,.02)}
+.card-hl{display:flex;align-items:center;gap:.5rem}.card-ic{font-size:.9rem;width:24px;text-align:center}.card-ti{font-size:.8rem;font-weight:700}
+.card-ar{color:var(--muted);transition:transform .22s;font-size:.7rem}.card.open .card-ar{transform:rotate(90deg)}
+.card-body{display:none;border-top:1px solid var(--border);padding:1rem}.card.open .card-body{display:block}
+.def-box{background:rgba(59,130,246,.07);border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:.65rem .9rem;font-size:.8rem;line-height:1.75;color:#b0c4de;margin-bottom:.8rem}.def-box strong{color:var(--blue)}
+.cb{background:#04060b;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:.6rem 0}
+.cbh{display:flex;align-items:center;justify-content:space-between;padding:.4rem .75rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.cblang{font-size:.62rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cbody{padding:.8rem 1rem;overflow-x:auto}
+pre{font-family:'Cascadia Code',monospace;font-size:.73rem;line-height:1.75;color:#c9d1d9;white-space:pre;tab-size:2}
+.output{background:#020408;border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:.65rem .85rem;margin:.4rem 0;font-family:monospace;font-size:.72rem;color:#6ee7b7;line-height:1.65}
+.tip{border-left:3px solid var(--jpm-gold);background:rgba(197,160,89,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fde68a;margin:.55rem 0}
+.danger{border-left:3px solid var(--red);background:rgba(239,68,68,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.77rem;line-height:1.65;color:#fca5a5;margin:.55rem 0}
+.welcome-screen{padding:1.5rem 1.8rem 2rem;max-width:960px}.wh{font-size:1.8rem;font-weight:900;line-height:1.2;margin-bottom:.5rem}
+.wh .em1{color:var(--jpm-gold)}.wh .em2{color:var(--blue)}.wh .em3{color:#fff}
+.wsub{font-size:.83rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;max-width:580px}
+.copy-btn{padding:.15rem .45rem;font-size:.58rem;text-transform:uppercase;border-radius:4px;margin-left:auto}
+.diagram-wrapper{background:rgba(6,10,18,0.7);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem 0;display:flex;justify-content:center;align-items:center;box-shadow:inset 0 1px 1px rgba(255,255,255,0.05),0 10px 30px rgba(0,0,0,0.5);overflow:hidden;position:relative;backdrop-filter:blur(10px)}
+.diagram-wrapper svg{width:100%;height:auto;max-height:450px;display:block}
+
+/* Live Search sandbox styling */
+.sb-app{background:#070b14;border:1px solid var(--border);border-radius:12px;padding:1.2rem;margin:1rem 0;box-shadow:0 10px 25px rgba(0,0,0,0.4)}
+.sb-header{display:flex;gap:.5rem;margin-bottom:.8rem;border-bottom:1px solid var(--border);padding-bottom:.6rem}
+.sb-tab-btn{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--muted);padding:.35rem .8rem;border-radius:6px;font-size:.7rem;cursor:pointer;font-weight:700;transition:all 0.15s}
+.sb-tab-btn:hover{color:var(--jpm-gold);border-color:var(--jpm-gold)}
+.sb-tab-btn.active{background:rgba(197,160,89,0.15);border-color:var(--jpm-gold);color:var(--jpm-gold)}
+.sb-input-row{display:flex;flex-direction:column;gap:.4rem;margin-bottom:.8rem}
+.sb-search-field{width:100%;background:#030408;border:1px solid var(--border);border-radius:6px;padding:.5rem .7rem;font-size:.75rem;color:var(--text);outline:none;transition:border-color 0.2s}
+.sb-search-field:focus{border-color:var(--blue)}
+.sb-slider-row{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:.5rem .7rem;margin-bottom:.8rem}
+.sb-slider{flex:1;margin:0 1rem;cursor:pointer;accent-color:var(--jpm-gold)}
+.sb-indicator{font-size:.65rem;font-weight:700;margin-top:.2rem}
+.sb-results-area{background:#030408;border:1px solid var(--border);border-radius:8px;padding:.6rem;max-height:180px;overflow-y:auto}
+
+@media(max-width:768px){
+  .sidebar{display:none;position:fixed;top:46px;left:0;width:100%;height:calc(100vh - 46px);z-index:400}
+  .sidebar.open{display:flex}
+  .mob-toggle{display:block}
+  .content,.welcome-screen{padding:.85rem .8rem 2rem}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.6rem">
+    <button class="mob-toggle" onclick="openMob()">☰ Topics</button>
+    <div class="logo"><span class="l1">JPMC</span> <span class="l2">Prep</span><span class="l3">Software Engineer II Loop</span></div>
+  </div>
+  <div class="countdown"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:.3rem;animation:pulse 1.5s infinite;"></span>Corporate Hub</div>
+  <div class="tbr">
+    <button class="tbtn" onclick="window.scrollTo(0,0)">↑ Top</button>
+  </div>
+</div>
+
+<div class="layout">
+<div class="sidebar" id="sb">
+  <div class="sb-progress">
+    <div class="prog-label"><span>📊 Prep Progress</span><span id="prog-pct">0%</span></div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="sb-content"></div>
+</div>
+
+<div class="main" id="main">
+  <div id="welcome-screen">
+    <div class="welcome-screen">
+      <div class="wh"><span class="em1">JPMorganChase</span> <span class="em3">&amp; Co.</span></div>
+      <div class="wh" style="font-size:1.1rem;color:var(--muted);font-weight:500;margin-top:.2rem">Software Engineer II (Frontend / React) Prep Track</div>
+      <p class="wsub">Welcome! 💼 This guide compiles actual technical questions, dynamic optimizations, object algorithms, custom hooks, and mock managerial responses required to clear the JPMC frontend loop. Select a topic on the left to begin.</p>
+    </div>
+  </div>
+  <div id="topic-view" style="display:none"></div>
+</div>
+</div>
+
+<script>
+// --- INTERACTIVE DIAGRAM BUILDERS ---
+
+function buildContainerDiagram() {
+  return `
+  <svg viewBox="0 0 800 360" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="waterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.6"/>
+        <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.8"/>
+      </linearGradient>
+    </defs>
+    <style>
+      .bg { fill: #0c1220; stroke: #18243c; stroke-width: 2; }
+      .axis { stroke: #64748b; stroke-width: 2; }
+      .bar { fill: #c5a059; stroke: #fbbf24; stroke-width: 1.5; opacity: 0.85; transition: all 0.3s; }
+      .bar:hover { fill: #fbbf24; opacity: 1; }
+      .water { fill: url(#waterGrad); filter: drop-shadow(0 0 4px rgba(59,130,246,0.5)); }
+      .ptr { fill: #ef4444; font-weight: bold; font-family: system-ui, sans-serif; font-size: 14px; text-anchor: middle; }
+      .label { fill: #f1f5f9; font-family: system-ui, sans-serif; font-size: 11px; text-anchor: middle; }
+      .val-lbl { fill: #fbbf24; font-family: 'Cascadia Code', monospace; font-size: 10px; text-anchor: middle; }
+      .math { font-family: 'Cascadia Code', monospace; font-size: 13px; fill: #f1f5f9; }
+      .g-title { font-family: system-ui, sans-serif; font-weight: 800; font-size: 15px; fill: #f1f5f9; }
+    </style>
+    
+    <text x="20" y="30" class="g-title">Container with Most Water — Two-Pointer Optimization</text>
+    <text x="20" y="50" font-family="system-ui, sans-serif" font-size="11px" fill="#64748b">Visualizing bounds optimization with pointers L and R: Max Area = Min(height[L], height[R]) * Width</text>
+    
+    <g transform="translate(60, 60)">
+      <line x1="0" y1="220" x2="680" y2="220" class="axis" />
+      
+      <!-- Water region between index 1 (height 8) and index 8 (height 7) -->
+      <rect x="70" y="80" width="490" height="140" class="water" />
+      <text x="315" y="150" font-family="system-ui, sans-serif" font-size="13px" font-weight="bold" fill="#ffffff" text-anchor="middle">MAX WATER AREA = 7 * 7 = 49</text>
+      <text x="315" y="170" font-family="system-ui, sans-serif" font-size="10px" fill="#bfdbfe" text-anchor="middle">Width = 7 indices, height = 7 units</text>
+      
+      <!-- Bar 0: height 1 -->
+      <rect x="0" y="200" width="30" height="20" class="bar" />
+      <text x="15" y="190" class="val-lbl">1</text>
+      
+      <!-- Bar 1: height 8 -->
+      <rect x="70" y="60" width="30" height="160" class="bar" style="stroke:#10b981;fill:#047857;" />
+      <text x="85" y="50" class="val-lbl">8</text>
+      <text x="85" y="240" class="ptr">L →</text>
+      <text x="85" y="255" class="label" fill="#10b981">height[L]=8</text>
+      
+      <!-- Bar 2: height 6 -->
+      <rect x="140" y="100" width="30" height="120" class="bar" />
+      <text x="155" y="90" class="val-lbl">6</text>
+      
+      <!-- Bar 3: height 2 -->
+      <rect x="210" y="180" width="30" height="40" class="bar" />
+      <text x="225" y="170" class="val-lbl">2</text>
+      
+      <!-- Bar 4: height 5 -->
+      <rect x="280" y="120" width="30" height="100" class="bar" />
+      <text x="295" y="110" class="val-lbl">5</text>
+      
+      <!-- Bar 5: height 4 -->
+      <rect x="350" y="140" width="30" height="80" class="bar" />
+      <text x="365" y="130" class="val-lbl">4</text>
+      
+      <!-- Bar 6: height 8 -->
+      <rect x="420" y="60" width="30" height="160" class="bar" />
+      <text x="435" y="50" class="val-lbl">8</text>
+      
+      <!-- Bar 7: height 3 -->
+      <rect x="490" y="160" width="30" height="60" class="bar" />
+      <text x="505" y="150" class="val-lbl">3</text>
+      
+      <!-- Bar 8: height 7 -->
+      <rect x="560" y="80" width="30" height="140" class="bar" style="stroke:#10b981;fill:#047857;" />
+      <text x="575" y="70" class="val-lbl">7</text>
+      <text x="575" y="240" class="ptr">← R</text>
+      <text x="575" y="255" class="label" fill="#10b981">height[R]=7</text>
+    </g>
+    
+    <text x="60" y="335" class="math">Formula: Area = Min(height[L], height[R]) * (R - L) = Min(8, 7) * 7 = <tspan fill="#10b981" font-weight="bold">49</tspan></text>
+  </svg>
+  `;
+}
+
+function buildScriptLoadDiagram() {
+  return `
+  <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+    <style>
+      .lbl { font-family: system-ui, sans-serif; font-size: 11px; fill: #b0c4de; font-weight: bold; }
+      .bar-html { fill: #3b82f6; opacity: 0.85; rx: 3; }
+      .bar-download { fill: #fbbf24; opacity: 0.85; rx: 3; }
+      .bar-exec { fill: #ef4444; opacity: 0.85; rx: 3; }
+      .sec-title { font-family: system-ui, sans-serif; font-size: 14px; fill: #e8edf8; font-weight: bold; }
+      .legend-lbl { font-family: system-ui, sans-serif; font-size: 10px; fill: #64748b; }
+    </style>
+    
+    <text x="20" y="25" class="sec-title">Script Execution Modes Timeline Comparison</text>
+    
+    <g transform="translate(480, 10)">
+      <rect x="0" y="5" width="12" height="12" class="bar-html" />
+      <text x="18" y="15" class="legend-lbl">HTML Parsing</text>
+      <rect x="100" y="5" width="12" height="12" class="bar-download" />
+      <text x="118" y="15" class="legend-lbl">JS Download</text>
+      <rect x="200" y="5" width="12" height="12" class="bar-exec" />
+      <text x="218" y="15" class="legend-lbl">JS Execution</text>
+    </g>
+    
+    <g transform="translate(20, 50)">
+      <text x="0" y="18" class="lbl">1. Normal Script</text>
+      <rect x="130" y="8" width="100" height="16" class="bar-html" />
+      <rect x="230" y="8" width="100" height="16" class="bar-download" />
+      <rect x="330" y="8" width="60" height="16" class="bar-exec" />
+      <rect x="390" y="8" width="200" height="16" class="bar-html" />
+      <text x="280" y="40" font-family="system-ui, sans-serif" font-size="9px" fill="#ef4444" text-anchor="middle">⚠️ Blocks HTML parsing during fetch & execution!</text>
+    </g>
+    
+    <g transform="translate(20, 110)">
+      <text x="0" y="18" class="lbl">2. Async Script</text>
+      <rect x="130" y="8" width="220" height="16" class="bar-html" />
+      <rect x="130" y="8" width="120" height="6" class="bar-download" transform="translate(0, 10)" />
+      <rect x="350" y="8" width="60" height="16" class="bar-exec" />
+      <rect x="410" y="8" width="200" height="16" class="bar-html" />
+      <text x="380" y="40" font-family="system-ui, sans-serif" font-size="9px" fill="#fbbf24" text-anchor="middle">⚠️ Blocks parser ONLY during execution (as soon as fetched)</text>
+    </g>
+    
+    <g transform="translate(20, 170)">
+      <text x="0" y="18" class="lbl">3. Defer Script</text>
+      <rect x="130" y="8" width="400" height="16" class="bar-html" />
+      <rect x="130" y="8" width="150" height="6" class="bar-download" transform="translate(0, 10)" />
+      <rect x="530" y="8" width="60" height="16" class="bar-exec" />
+      <text x="395" y="40" font-family="system-ui, sans-serif" font-size="9px" fill="#10b981" text-anchor="middle">✅ Downloads in parallel, defers execution until DOM parsing finishes!</text>
+    </g>
+  </svg>
+  `;
+}
+
+function buildSearchSandbox() {
+  return `
+  <div class="sb-app">
+    <div class="sb-header">
+      <button class="sb-tab-btn active" data-tab="equities">Equities</button>
+      <button class="sb-tab-btn" data-tab="fixed-income">Fixed Income</button>
+      <button class="sb-tab-btn" data-tab="commodities">Commodities</button>
+    </div>
+    <div class="sb-slider-row">
+      <span style="font-size:.65rem;font-weight:600;">Debounce Delay:</span>
+      <input type="range" class="sb-slider" id="sb-debounce-slider" min="0" max="1000" step="100" value="400">
+      <span id="sb-slider-value" style="font-size:.65rem;font-family:monospace;font-weight:bold;color:var(--jpm-gold);">400ms</span>
+    </div>
+    <div class="sb-input-row">
+      <input type="text" class="sb-search-field" id="sb-search-input" placeholder="Type to search JPMC securities (e.g., JPM, bond, gold)...">
+      <div id="sb-debounce-indicator" class="sb-indicator" style="color:var(--green)">Instant Search (0ms) ⚡</div>
+    </div>
+    <div class="sb-results-area" id="sb-results">
+      <!-- Search suggestions dynamically populated -->
+    </div>
+  </div>
+  `;
+}
+
+// Global hook to bind tabbed search sandboxes when Round 2 section loads
+function initSearchSandbox() {
+  const tabBtns = document.querySelectorAll('.sb-tab-btn');
+  const searchInput = document.getElementById('sb-search-input');
+  const resultsDiv = document.getElementById('sb-results');
+  const indicator = document.getElementById('sb-debounce-indicator');
+  const slider = document.getElementById('sb-debounce-slider');
+  const sliderVal = document.getElementById('sb-slider-value');
+  
+  if (!searchInput || !resultsDiv || !slider) return;
+  
+  let activeTab = 'equities';
+  let debounceTimeout = null;
+  
+  const datasets = {
+    equities: [
+      { name: "JPMorgan Chase & Co. Common", ticker: "JPM" },
+      { name: "JPM US Large Cap Equity Fund", ticker: "JPLCE" },
+      { name: "JPMorgan Equities Value Growth", ticker: "JPEVG" },
+      { name: "Chase Alpha Core Strategy Portfolio", ticker: "CACSP" }
+    ],
+    'fixed-income': [
+      { name: "JPMorgan Ultra-Short Income ETF", ticker: "JPST" },
+      { name: "JPMorgan Core Bond Fund Portfolio", ticker: "JCBF" },
+      { name: "US Treasury Securities Allocation", ticker: "USTSA" },
+      { name: "JPM Global High Yield Bond ETF", ticker: "JGHYB" }
+    ],
+    commodities: [
+      { name: "Physical Gold Trust Allocation", ticker: "JPMGD" },
+      { name: "JPMorgan Broad Commodities Index", ticker: "JPMBC" },
+      { name: "Global Carbon and Energy Portfolio", ticker: "GCEP" },
+      { name: "Chase Agricultural Values Fund", ticker: "CAVF" }
+    ]
+  };
+  
+  function render(query) {
+    const list = datasets[activeTab];
+    const filtered = list.filter(item => 
+      item.name.toLowerCase().includes(query.toLowerCase()) || 
+      item.ticker.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    if (filtered.length === 0) {
+      resultsDiv.innerHTML = '<div style="color:var(--muted);font-size:.7rem;padding:.4rem;">No matching securities found.</div>';
+      return;
+    }
+    
+    resultsDiv.innerHTML = filtered.map(item => `
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;padding:.45rem .6rem;margin-bottom:.3rem;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.72rem;font-weight:600;color:var(--text);">${item.name}</span>
+        <span style="font-size:.65rem;font-family:monospace;background:rgba(197,160,89,0.12);color:var(--jpm-gold);padding:1px 5px;border-radius:4px;font-weight:bold;">${item.ticker}</span>
+      </div>
+    `).join('');
+  }
+  
+  // Wire up tab button clicks
+  tabBtns.forEach(btn => {
+    btn.onclick = () => {
+      tabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeTab = btn.getAttribute('data-tab');
+      render(searchInput.value);
+    };
+  });
+  
+  // Wire up slider change
+  slider.oninput = () => {
+    sliderVal.textContent = slider.value + 'ms';
+  };
+  
+  // Debounced search logic
+  searchInput.oninput = () => {
+    const delay = parseInt(slider.value);
+    
+    indicator.textContent = 'Typing... Debouncing keystrokes ⏳';
+    indicator.style.color = 'var(--amber)';
+    
+    clearTimeout(debounceTimeout);
+    
+    if (delay === 0) {
+      indicator.textContent = 'Instant Search (0ms) ⚡';
+      indicator.style.color = 'var(--green)';
+      render(searchInput.value);
+    } else {
+      debounceTimeout = setTimeout(() => {
+        indicator.textContent = `Search Executed! ✅ (${delay}ms debounce delay applied)`;
+        indicator.style.color = 'var(--green)';
+        render(searchInput.value);
+      }, delay);
+    }
+  };
+  
+  // Initial render
+  render('');
+}
+
+
+// All JPMC interview topics data
+const TOPICS = [
+  {
+    id: 'dsa-js',
+    icon: '🌊',
+    title: 'Round 1: DSA & JavaScript Core',
+    cat: 'Technical Check',
+    color: '#c5a059',
+    sub: 'Leetcode Medium, scope registers, event loop, API abort utilities, prototype polyfills, web storage ecosystems, and event bubbling triggers',
+    sections: [
+      {
+        id: 'lc-water',
+        title: 'Leetcode: Container with Most Water',
+        icon: '🥛',
+        def: 'Maximizing the cross-product boundary area of an array height grid.',
+        content: 'Given an array of heights, find two lines that together with the x-axis forms a container, such that the container contains the most water. In the brute-force approach, checking every pair takes <strong>O(N²)</strong> time. By leveraging the <strong>Two-Pointer approach</strong>, we can optimize this to <strong>O(N)</strong> time complexity and <strong>O(1)</strong> space. Pointers <code>L</code> and <code>R</code> start at opposite ends. At each step, we calculate the area and shift the pointer pointing to the shorter vertical bar, since shifting the taller bar can never increase the area bounded by the shorter height limitation.',
+        diagram: buildContainerDiagram(),
+        code: `// Optimal O(N) Two-Pointer Container Maximizer
+function maxArea(height) {
+  let maxVal = 0;
+  let L = 0;
+  let R = height.length - 1;
+  
+  while (L < R) {
+    const currentHeight = Math.min(height[L], height[R]);
+    const currentWidth = R - L;
+    const area = currentHeight * currentWidth;
+    
+    maxVal = Math.max(maxVal, area);
+    
+    // Greedy move: move the pointer with the smaller height
+    if (height[L] < height[R]) {
+      L++;
+    } else {
+      R--;
+    }
+  }
+  return maxVal;
+}`,
+        explanation: `<li><strong>Line 397-399 (Two-Pointer Initialization):</strong> Pointers <code>L</code> and <code>R</code> are initialized at the absolute boundary indexes (index <code>0</code> and <code>height.length - 1</code>) to maximize the starting horizontal width, which forms the starting candidate boundary.</li>
+        <li><strong>Line 401-404 (Area Maximization):</strong> In each iteration of the loop, the vertical bounding height is strictly constrained by the shorter bar (<code>Math.min(height[L], height[R])</code>). The area is calculated as <code>Height * (R - L)</code> and <code>maxVal</code> is updated if this area exceeds the previous maximum.</li>
+        <li><strong>Line 408-413 (Greedy Shifting Strategy):</strong> Shifting the pointer with the taller height can never yield a larger area because the width is decreasing and the overall height remains constrained by the shorter boundary. Thus, we greedily shift the shorter pointer (<code>L++</code> or <code>R--</code>) in search of a taller boundary that could offset the lost width.</li>
+        <li><strong>Overall Complexity:</strong> Since we inspect each element exactly once as L and R move toward each other, the time complexity is strictly linear <strong>O(N)</strong>. No auxiliary array space is allocated, yielding <strong>O(1)</strong> space complexity.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Standard Mixed Heights):</strong><br>
+          📥 <strong>Input:</strong> <code>height = [1, 8, 6, 2, 5, 4, 8, 3, 7]</code><br>
+          📤 <strong>Expected Output:</strong> <code>49</code> <span style="color:var(--muted)">(Water is bounded between index 1 (height 8) and index 8 (height 7). The horizontal width is 8 - 1 = 7. Bounding height is min(8, 7) = 7. Area = 7 * 7 = 49.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Symmetric Outer Bounds):</strong><br>
+          📥 <strong>Input:</strong> <code>height = [4, 3, 2, 1, 4]</code><br>
+          📤 <strong>Expected Output:</strong> <code>16</code> <span style="color:var(--muted)">(Water is bounded between index 0 (height 4) and index 4 (height 4). Width = 4 - 0 = 4. Bounding height = min(4, 4) = 4. Area = 4 * 4 = 16.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Minimal Width / Single Peak):</strong><br>
+          📥 <strong>Input:</strong> <code>height = [1, 2, 1]</code><br>
+          📤 <strong>Expected Output:</strong> <code>2</code> <span style="color:var(--muted)">(Water bounded between index 0 (height 1) and index 2 (height 1). Width = 2 - 0 = 2. Bounding height = min(1, 1) = 1. Area = 1 * 2 = 2.)</span>
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Interview Follow-up: Why shifting the taller bar can never help? Bounded height is limited by the shorter line; reducing width without increasing height strictly decreases the maximum product boundary!'
+      },
+      {
+        id: 'stale-closures',
+        title: 'Stale Closures Trap in JS',
+        icon: '🔒',
+        def: 'A closure retaining references to old variables inside stale evaluation contexts.',
+        content: 'Stale closures occur when an inner function is defined and captures a variable from an outer scope at a specific point in time, but subsequent updates to the outer variable are not reflected because the inner function continues to reference the older frame snapshot. In React, this is a common issue with hook callbacks (like <code>useEffect</code>, <code>useCallback</code>, or event listeners) that lack proper dependency lists, causing state variables to print initial default values forever.',
+        code: `// --- 1. The Stale Closure Bug ---
+function useStaleCounter() {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      // Bug: closure captures 'count' value of 0 initially
+      console.log('Count is:', count); 
+      setCount(count + 1); 
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []); // Empty dependency array traps closure!
+}
+
+// --- 2. Solution A: Functional State Updates ---
+// Avoids referencing local variable scope completely
+setCount(prev => prev + 1);
+
+// --- 3. Solution B: Mutable Ref Bindings ---
+// Keeps a mutable object reference whose .current property always points to the newest value
+const countRef = useRef(count);
+useEffect(() => { countRef.current = count; }, [count]);
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    console.log('Count is:', countRef.current);
+    setCount(prev => prev + 1);
+  }, 1000);
+  return () => clearInterval(timer);
+}, []);`,
+        explanation: `<li><strong>Line 446-456 (Lexical Scope Capture):</strong> When <code>useEffect</code> runs with an empty dependency list <code>[]</code>, the <code>setInterval</code> closure is instantiated exactly once during the initial mount phase. It permanently captures the reference to the local <code>count</code> state variable at its initial value of <code>0</code>.</li>
+        <li><strong>Line 451-453 (The Stale Trap):</strong> On every timer tick, the closure evaluates <code>setCount(count + 1)</code>. Because <code>count</code> is resolved as <code>0</code> within its static lexical context scope, it continuously executes <code>setCount(0 + 1)</code>, updating the state to <code>1</code> repeatedly and locking the value forever.</li>
+        <li><strong>Line 459-461 (Functional State Update Solution):</strong> By invoking <code>setCount(prev => prev + 1)</code>, we bypass the component's parent scope variables entirely. React's state manager passes the actual current state as the <code>prev</code> argument to the callback, resolving stale references cleanly.</li>
+        <li><strong>Line 463-475 (Mutable Ref Solution):</strong> A <code>useRef</code> container remains pointing to the same mutable object reference in the heap across all render cycles. Setting <code>countRef.current = count</code> in a side effect synchronizes the newest value without forcing effect redeclarations, allowing the timer to access it safely.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Stale Closure Behavior):</strong><br>
+          📥 <strong>Input:</strong> Initial count state <code>count = 0</code>, trigger three interval ticks using the buggy code.<br>
+          📤 <strong>Result:</strong> Console output on ticks 1, 2, and 3 is locked at <code>"Count is: 0"</code>. Count state updates to <code>1</code> on the first tick and never increments past <code>1</code>.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Functional Update Solution):</strong><br>
+          📥 <strong>Input:</strong> Initial count state <code>count = 0</code>, trigger ticks with <code>setCount(prev => prev + 1)</code>.<br>
+          📤 <strong>Result:</strong> Console output increments dynamically on every tick: <code>"Count is: 0"</code> -> <code>"Count is: 1"</code> -> <code>"Count is: 2"</code> -> <code>"Count is: 3"</code>... and counter updates correctly.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Ref Mirroring Solution):</strong><br>
+          📥 <strong>Input:</strong> Initial count state <code>count = 0</code>, trigger ticks using the <code>countRef.current</code> reference.<br>
+          📤 <strong>Result:</strong> The timer accesses the updated state synchronously without re-triggering the effect. Console output: <code>"Count is: 0"</code> -> <code>"Count is: 1"</code> -> <code>"Count is: 2"</code>... accurately.
+        </div>`,
+        lang: 'JSX',
+        tip: '💡 React state setters can always accept a functional update callback, shielding you from local lexical scope bindings!'
+      },
+      {
+        id: 'iife-usecases',
+        title: 'IIFE: Scope Isolation & Module Design',
+        icon: '📦',
+        def: 'Immediately Invoked Function Expressions execute immediately to keep global scopes clean.',
+        content: 'An IIFE (Immediately Invoked Function Expression) is a JavaScript function that runs as soon as it is defined. It is syntactically wrapped in grouping parentheses <code>(function(){})()</code> to force execution. Its primary use case is to prevent variable hoisting namespace contamination by establishing local scopes. In the pre-ES6 era, this was the primary way to build private scopes and construct modules.',
+        code: `// --- Classic IIFE Syntax ---
+(function() {
+  const privateToken = 'jpmc-secure-auth';
+  console.log('IIFE Initialized automatically!');
+})();
+
+// --- Module Pattern Use Case ---
+const financialModule = (function() {
+  let privateBalance = 1000000; // Shielded from external overrides
+  
+  return {
+    getBalance() { return privateBalance; },
+    addFunds(amount) { privateBalance += amount; }
+  };
+})();
+
+console.log(financialModule.getBalance()); // 1000000
+financialModule.addFunds(5000);
+console.log(financialModule.getBalance()); // 1000500`,
+        explanation: `<li><strong>Line 499-502 (Expression Coercion):</strong> Wrapping the function declaration in grouping parentheses <code>(function(){ ... })</code> converts it into a function expression that can be evaluated immediately. The trailing parentheses <code>()</code> invoke the evaluated function expression instantly, pushing its context onto the execution stack.</li>
+        <li><strong>Line 505-506 (Namespace Isolation):</strong> Variables declared inside the IIFE (like <code>privateBalance</code>) are bound to the function's local execution context. They are completely inaccessible from the outer global context, preventing global scope namespace conflicts and unauthorized overwrites.</li>
+        <li><strong>Line 508-511 (Module Return &amp; Closures):</strong> The IIFE returns a public API object containing methods (like <code>getBalance</code> and <code>addFunds</code>) that retain a closure reference to <code>privateBalance</code>. This constructs a secure data encapsulation module pattern.</li>
+        <li><strong>Practical Execution:</strong> Execution resolves synchronously, leaving the global namespace clean of intermediate local variables.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Direct Scope Access):</strong><br>
+          📥 <strong>Execution call:</strong> <code>console.log(financialModule.privateBalance)</code><br>
+          📤 <strong>Expected Output:</strong> <code>undefined</code> <span style="color:var(--muted)">(The variable is securely shielded within the IIFE local lexical scope, preventing external leakage.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (API Call read):</strong><br>
+          📥 <strong>Execution call:</strong> <code>financialModule.getBalance()</code><br>
+          📤 <strong>Expected Output:</strong> <code>1000000</code> <span style="color:var(--muted)">(Public API successfully retrieves the private balance via a closure.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (API Mutation state):</strong><br>
+          📥 <strong>Execution calls:</strong> <code>financialModule.addFunds(5000); financialModule.getBalance();</code><br>
+          📤 <strong>Expected Output:</strong> <code>1000500</code> <span style="color:var(--muted)">(State inside IIFE modifies securely through public setters, preserving encapsulation.)</span>
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Modern Use Case: Module bundlers (like Webpack, Rollup) automatically wrap build segments in nested IIFEs to scope variables safely without global leaking.'
+      },
+      {
+        id: 'event-loop',
+        title: 'Event Loop & Queue Starvation',
+        icon: '🔄',
+        def: 'The browser tick loop coordinating Call Stack, Microtasks, and Macrotasks.',
+        content: 'The JS Event Loop is a continuous single-threaded loop that checks if the Call Stack is empty. If it is, it dequeues tasks from queues. However, the loop executes in a strict order: <strong>Microtasks (Promises, queueMicrotask)</strong> are executed exhaustively until empty before any <strong>Macrotask (setTimeout, I/O)</strong> is fetched. This means recursive Promise chains can entirely starve macrotask ticks and lock up DOM paint updates!',
+        code: `// --- 1. Starving the Thread (Microtask Flood) ---
+function starveMicrotasks() {
+  // Recursively schedules microtasks continuously
+  function tick() {
+    Promise.resolve().then(tick);
+  }
+  tick(); // Starves the browser! UI completely freezes.
+}
+
+// --- 2. Correct Yielding Pattern (Macrotask Yielding) ---
+function yieldToMain() {
+  function tick() {
+    setTimeout(tick, 0); // Yields to browser repaint cycle
+  }
+  tick();
+}`,
+        explanation: `<li><strong>Line 540-547 (Microtask Priority &amp; Loop Starvation):</strong> The V8 engine resolves microtasks exhaustively in a loop. When a microtask finishes, if it schedules another microtask (like the recursive <code>Promise.resolve().then(tick)</code> call), the loop immediately executes it. The Call Stack never becomes empty long enough to yield control back to the Event Loop.</li>
+        <li><strong>Line 546 (Starved Repaint Cycle):</strong> Because the microtask queue is never completely emptied, the event loop cannot proceed to the browser's repaint phase or fetch low-priority macrotasks (like <code>setTimeout</code> or scroll events), causing the entire browser UI to lock up and freeze.</li>
+        <li><strong>Line 549-555 (Macrotask Yielding Solution):</strong> Using <code>setTimeout(tick, 0)</code> pushes the next execution callback onto the macrotask queue. This allows the Call Stack to empty completely, enabling the event loop to run screen repaints and process user interactions before fetching the next timer tick.</li>
+        <li><strong>Performance impact:</strong> Yielding prevents thread blocking and keeps Web applications completely responsive.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Execution Timeline Sequence):</strong><br>
+          📥 <strong>Input script:</strong><br>
+          <code>console.log('A'); setTimeout(() => console.log('B'), 0); Promise.resolve().then(() => console.log('C')); console.log('D');</code><br>
+          📤 <strong>Expected Output:</strong> <code>"A" -> "D" -> "C" -> "B"</code> <span style="color:var(--muted)">(Synchronous logs "A" and "D" run first. Promise microtask "C" runs next. Timer macrotask "B" runs last.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Starvation Freeze Scenario):</strong><br>
+          📥 <strong>Action:</strong> Call <code>starveMicrotasks()</code> and attempt to hover or click on UI elements.<br>
+          📤 <strong>Expected Result:</strong> Browser tab freezes completely. Hover animations stop, scroll actions are ignored, and page crashes with an "Out of Memory" or "Page Unresponsive" warning.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Yielding UI Interactive Test):</strong><br>
+          📥 <strong>Action:</strong> Call <code>yieldToMain()</code> and scroll the page.<br>
+          📤 <strong>Expected Result:</strong> Scroll operates smoothly at 60fps. The loop runs infinitely in the background but yields on every tick to process rendering tasks.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Interview Follow-up: In what order do console logs print? Promises print before setTimeout callbacks because Microtask execution cycles always complete first!'
+      },
+      {
+        id: 'retry-abort',
+        title: 'Fetch Utilities: Resilient Retries & Abort',
+        icon: '🔌',
+        def: 'Designing reliable networks using Exponential Backoff and AbortController.',
+        content: 'In distributed enterprise financial ecosystems, client calls must support resilient retries and dynamic request cancellation to prevent thread pooling overhead. `AbortController` handles cancellation by signaling network fetch handles to drop, while retries utilize exponential backoff delay formulas to prevent overloading down-stream APIs.',
+        code: `// --- 1. Resilient Fetch with Exponential Backoff ---
+async function fetchWithRetry(url, retries = 3, delay = 1000) {
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('API server returned ' + res.status);
+    return await res.json();
+  } catch (err) {
+    if (retries <= 0) throw err;
+    console.warn(\`API Failed. Retrying in \${delay}ms. \${retries} remaining...\`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return fetchWithRetry(url, retries - 1, delay * 2); // Exponentially doubles delay
+  }
+}
+
+// --- 2. Dynamic Fetch Cancellation (AbortController) ---
+let activeController = null;
+
+function searchFinancialAssets(query) {
+  // Abort any pending active requests before launching a new one
+  if (activeController) {
+    activeController.abort();
+    console.log('Previous search fetch aborted.');
+  }
+  
+  activeController = new AbortController();
+  const signal = activeController.signal;
+  
+  fetch(\`/api/securities?q=\${query}\`, { signal })
+    .then(res => res.json())
+    .then(data => console.log('Search Results:', data))
+    .catch(err => {
+      if (err.name === 'AbortError') {
+        console.log('Fetch successfully ignored.');
+      } else {
+        console.error('Fetch error:', err);
+      }
+    });
+}`,
+        explanation: `<li><strong>Line 576-580 (Recursive Try-Catch Fetch):</strong> The <code>fetchWithRetry</code> function attempts a network fetch inside a try block. If the server returns a non-2xx status (<code>!res.ok</code>), it explicitly throws an error to enter the catch recovery block.</li>
+        <li><strong>Line 581-586 (Exponential Backoff Calculation):</strong> If a network failure occurs, the catch block intercepts it. If retries remain, it creates a delay promise, double-updates the delay argument (<code>delay * 2</code>), and recursively returns a call to <code>fetchWithRetry</code>. This limits database load spikes.</li>
+        <li><strong>Line 590-600 (AbortController Registration):</strong> <code>AbortController</code> creates an abort trigger signal. By passing the <code>signal</code> in the fetch options, we link the network request to the controller's lifecycle.</li>
+        <li><strong>Line 594-597 &amp; 605-611 (Cancellation Signal &amp; Error Filter):</strong> Invoking <code>activeController.abort()</code> sends an abort signal to the fetch stream. The browser terminates the network connection instantly, rejecting the fetch promise with an <code>AbortError</code> which can be safely filtered out in the catch block to prevent stale overwrites.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Exponential Backoff Timeline):</strong><br>
+          📥 <strong>Input call:</strong> server is down, trigger <code>fetchWithRetry('/api/ticks', 3, 1000)</code><br>
+          📤 <strong>Console Warnings Log:</strong><br>
+          - Attempt 1 fails at 0ms.<br>
+          - logs: <code>"API Failed. Retrying in 1000ms. 3 remaining..."</code><br>
+          - Attempt 2 fails at 1000ms. logs: <code>"API Failed. Retrying in 2000ms. 2 remaining..."</code><br>
+          - Attempt 3 fails at 3000ms. logs: <code>"API Failed. Retrying in 4000ms. 1 remaining..."</code> -> Throws Error at 7000ms.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Fast Keypress Request Abort):</strong><br>
+          📥 <strong>Action:</strong> Click typeahead keys fast: type <code>"A"</code> then type <code>"AB"</code> in 50ms interval.<br>
+          📤 <strong>Expected Result:</strong> Fetch request for <code>"A"</code> aborted immediately via <code>activeController.abort()</code>, console prints: <code>"Previous search fetch aborted."</code> and <code>"Fetch successfully ignored."</code>. Only the <code>"AB"</code> request completes successfully.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Successful Retry Recovery):</strong><br>
+          📥 <strong>Input Call:</strong> Server fails once due to rate limits, but succeeds on the second attempt.<br>
+          📤 <strong>Expected Result:</strong> First attempt throws, logs: <code>"API Failed. Retrying in 1000ms. 3 remaining..."</code>. Resolves successfully at 1000ms with stock price JSON payload.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Use AbortControllers when implementing typeahead inputs to ensure slow out-of-order responses do not overwrite newer outputs!'
+      },
+      {
+        id: 'filter-polyfill',
+        title: 'Array.prototype.filter Polyfill',
+        icon: '🔨',
+        def: 'ECMAScript specification matching array filtration wrapper.',
+        content: 'Writing custom polyfills requires complying with the native spec: validating that the callback is callable, handling sparse index checks using the <code>in</code> operator to skip unallocated gaps, and binding to a custom <code>thisArg</code> context.',
+        code: `Array.prototype.myFilter = function(callback, thisArg) {
+  // 1. Validate callback callable
+  if (typeof callback !== 'function') {
+    throw new TypeError(callback + ' is not a function');
+  }
+  
+  // 2. Coerce caller array context
+  const O = Object(this);
+  const len = O.length >>> 0; // Unsigned right shift to force positive 32-bit integer length
+  const result = [];
+  
+  // 3. Iterate indexes safely checking sparse allocations
+  for (let k = 0; k < len; k++) {
+    if (k in O) {
+      const val = O[k];
+      // 4. Invoke callback with dynamic context binding
+      if (callback.call(thisArg, val, k, O)) {
+        result.push(val);
+      }
+    }
+  }
+  return result;
+};`,
+        explanation: `<li><strong>Line 294-297 (Callback Validation Check):</strong> Enforces standard JS runtime compliance by checking if the callback argument is a callable function, throwing a <code>TypeError</code> otherwise to prevent execution crashes.</li>
+        <li><strong>Line 300-301 (Unsigned 32-bit Shift >>> 0):</strong> Coerces the length property to a positive 32-bit unsigned integer, handling edge cases like negative, undefined, or non-integer lengths according to ECMAScript specifications.</li>
+        <li><strong>Line 304-307 (In-operator Sparse Check):</strong> Verifies indices using <code>k in O</code>. This ensures that unallocated array elements (e.g. <code>[1, , 3]</code> empty indices) are skipped entirely, conforming precisely to standard browser filter behaviors.</li>
+        <li><strong>Line 308-311 (Context Binding):</strong> Invokes the callback with <code>callback.call(thisArg, val, k, O)</code>, forwarding the correct <code>thisArg</code> context binding, index pointer, and original array reference to the caller.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Filter Odds):</strong><br>
+          📥 <strong>Input Call:</strong> <code>[1, 2, 3, 4, 5].myFilter(x => x % 2 === 0)</code><br>
+          📤 <strong>Expected Output:</strong> <code>[2, 4]</code> <span style="color:var(--muted)">(Keeps only elements that return true for even check.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Sparse Array Gaps Safety):</strong><br>
+          📥 <strong>Input Call:</strong> <code>const sparse = [1, , 3]; sparse.myFilter(x => x !== undefined);</code><br>
+          📤 <strong>Expected Output:</strong> <code>[1, 3]</code> <span style="color:var(--muted)">(Gaps are skipped entirely by the <code>in</code> check, index 1 is not evaluated at all, preventing processing empty slots.)</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Context Scope Binding):</strong><br>
+          📥 <strong>Input Call:</strong> <code>const bounds = { min: 3 }; [1, 2, 3, 4, 5].myFilter(function(x) { return x > this.min; }, bounds);</code><br>
+          📤 <strong>Expected Output:</strong> <code>[4, 5]</code> <span style="color:var(--muted)">(Evaluates with bounds as 'thisArg' context correctly.)</span>
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Spec Detail: Avoid iterating sparse empty indices directly (e.g. using forEach or simple index pointer checks) to prevent processing undefined gap keys.'
+      },
+      {
+        id: 'web-storage',
+        title: 'Web Storage vs IndexedDB',
+        icon: '🗄️',
+        def: 'Decoupling client storage strategies based on data complexity.',
+        content: 'Selecting client storage schemas requires balancing speed and size limits. Web Storage APIs block the main rendering thread, while IndexedDB runs asynchronously via transactional models, making it ideal for caching large financial assets offline.',
+        code: `// --- 1. IndexedDB Transactional Storage Utility ---
+function saveToDB(storeName, key, data) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open('FinancialCache', 1);
+    
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName);
+      }
+    };
+    
+    request.onsuccess = (e) => {
+      const db = e.target.result;
+      const transaction = db.transaction(storeName, 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const putReq = store.put(data, key);
+      
+      putReq.onsuccess = () => resolve('Data saved successfully!');
+      putReq.onerror = () => reject(putReq.error);
+    };
+    
+    request.onerror = () => reject(request.error);
+  });
+}`,
+        explanation: `<li><strong>Line 341-343 (Async Open Request):</strong> Calls <code>indexedDB.open('FinancialCache', 1)</code> to open an asynchronous event connection, preventing rendering thread blockages.</li>
+        <li><strong>Line 344-349 (Schema Migration upgrade):</strong> The <code>onupgradeneeded</code> hook initializes object schemas asynchronously during version modifications, dynamically creating the store.</li>
+        <li><strong>Line 351-356 (Transactional Boundary):</strong> Creates a transaction boundary using <code>db.transaction(storeName, 'readwrite')</code>, preventing database corruption by ensuring atomic database updates.</li>
+        <li><strong>Line 354-358 (Object Store write request):</strong> Resolves the store object and issues a write operation using <code>store.put(data, key)</code>, resolving the Promise wrapper on success.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Successful DB Write):</strong><br>
+          📥 <strong>Input Call:</strong> <code>saveToDB('ticks', 'AAPL', { price: 185.5 })</code><br>
+          📤 <strong>Expected Output:</strong> Promise resolves, saving object: <code>"Data saved successfully!"</code>.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Retrieving Offline Values):</strong><br>
+          📥 <strong>Action:</strong> User loses internet, grid requests AAPL ticks from local store.<br>
+          📤 <strong>Expected Output:</strong> Reads synchronously from local IndexedDB cache: <code>{ price: 185.5 }</code>.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Transaction Failure Rollback):</strong><br>
+          📥 <strong>Input Call:</strong> Open fails due to blocked database, or write fails with quota exceeded.<br>
+          📤 <strong>Expected Output:</strong> Promise rejects with: <code>DOMException: QuotaExceededError</code> (UI remains secure and doesn't freeze).
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Storage Grid: LocalStorage (5MB limit, synchronous, string-only), SessionStorage (5MB, synchronous, session-lifetime), IndexedDB (Unlimited/System, asynchronous, raw object store).'
+      },
+      {
+        id: 'async-defer',
+        title: 'Async vs Defer Loading',
+        icon: '⚡',
+        def: 'Governing browser script loading mechanics to prevent DOM blockages.',
+        content: 'Browser speed depends on DOM parsing structures. Normal scripts stop parsing completely to fetch and run JS. Async scripts fetch in parallel but halt parsing immediately for execution. Defer scripts fetch in parallel and hold execution until DOM parsing completes entirely.',
+        diagram: buildScriptLoadDiagram(),
+        code: `<!-- 1. Normal Blocking Script -->
+<script src="critical-grid.js"><\/script>
+
+<!-- 2. Parallel fetch, blocks parser during instant execution -->
+<script async src="analytics.js"><\/script>
+
+<!-- 3. Parallel fetch, deferred execution until DOM is fully built -->
+<script defer src="main-dashboard.js"><\/script>`,
+        explanation: `<li><strong>Line 383-384 (DOM Blocking parser):</strong> Standard scripts stop the DOM builder immediately to download and execute code synchronously, creating visual blockages.</li>
+        <li><strong>Line 386-387 (Async Parallel fetch):</strong> <code>async</code> downloads scripts fully in parallel. Once loaded, DOM parsing is paused immediately to run execution, which can cause race conditions if DOM nodes aren't ready yet.</li>
+        <li><strong>Line 389-390 (Defer Safe timeline paths):</strong> <code>defer</code> downloads scripts in parallel but holds off execution entirely until DOM parsing is complete.</li>
+        <li><strong>Ordering:</strong> Deferred scripts execute in the exact order they are declared in the HTML, whereas async scripts execute in whatever order they finish downloading, introducing execution race conditions.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Script Execution Order):</strong><br>
+          📥 <strong>Inputs:</strong> Three deferred scripts in order: <code>core.js</code>, <code>dashboard.js</code>, <code>helper.js</code><br>
+          📤 <strong>Execution sequence:</strong> Downloads them in parallel, but executes strictly as: <code>core.js</code> -> <code>dashboard.js</code> -> <code>helper.js</code>, after the DOM completes.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (DOM Element Access):</strong><br>
+          📥 <strong>Action:</strong> Script tries to read <code>document.getElementById('grid')</code> before parser finishes.<br>
+          📤 <strong>Result:</strong> Async script throws <code>TypeError: Cannot read properties of null</code>. Defer script executes successfully.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Page Load Benchmarks):</strong><br>
+          📥 <strong>Configuration:</strong> 1MB Javascript bundle linked via Normal vs Defer.<br>
+          📤 <strong>Result:</strong> Normal script block halts DOM, increasing First Contentful Paint (FCP) from 100ms to 900ms. Defer loads FCP at 100ms.
+        </div>`,
+        lang: 'HTML',
+        tip: '💡 Use defer for core UI bundles that rely on DOM elements existing; use async for independent side packages (like analytics or telemetry).'
+      },
+      {
+        id: 'propagation',
+        title: 'Event Bubbling & Delegation',
+        icon: '🎯',
+        def: 'Optimizing DOM interactions via event propagation models.',
+        content: 'Events travel in three phases: Capturing (parent down to target), Target, and Bubbling (target back up to parent). Event Delegation attaches a single event handler to a parent container to manage child clicks dynamically, saving memory and processing time.',
+        code: `// --- 1. Event Delegation with Parent Toggles ---
+const transactionGrid = document.getElementById('transaction-grid');
+
+transactionGrid.addEventListener('click', (event) => {
+  // Delegate clicks on action buttons inside dynamic grid rows
+  const btn = event.target.closest('.action-btn');
+  if (btn) {
+    const transactionId = btn.getAttribute('data-id');
+    console.log('Processing Transaction:', transactionId);
+    event.stopPropagation(); // Shield outer containers from event bubble
+  }
+});`,
+        explanation: `<li><strong>Line 409-410 (Global Listener Attachment):</strong> Attaches a single event handler to the parent container <code>#transaction-grid</code> instead of binding individual event listeners to thousands of rows, saving significant CPU memory.</li>
+        <li><strong>Line 413-415 (Dynamic Target Scoping):</strong> Uses <code>event.target.closest('.action-btn')</code> to determine if the clicked element (or any of its parents) matches the action button class, tracking dynamic row clicks cleanly.</li>
+        <li><strong>Line 418 (Propagation Stop):</strong> Invokes <code>event.stopPropagation()</code> to prevent the click event bubble from traveling up the DOM tree and triggering parent list click highlights.</li>
+        <li><strong>Complexity Mitigation:</strong> Decoupling lists from active click handles allows rows to be dynamically added, updated, or removed from the DOM without having to re-bind or clean up event listeners.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Click Action Button):</strong><br>
+          📥 <strong>Action:</strong> Click action button <code>&lt;button class="action-btn" data-id="tx-99"&gt;Process&lt;/button&gt;</code> nested inside row.<br>
+          📤 <strong>Result:</strong> Intercepted on parent container grid: prints <code>"Processing Transaction: tx-99"</code>. Grid-wide global clicks are skipped due to stopPropagation.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Click Outer Row Whitespace):</strong><br>
+          📥 <strong>Action:</strong> Click blank spacing inside the grid row, outside the process button.<br>
+          📤 <strong>Result:</strong> Event handler ignores it (closest returns null), preventing accidental actions.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Bubbling interception check):</strong><br>
+          📥 <strong>Action:</strong> Click action button with click event listener attached to the outer page body container.<br>
+          📤 <strong>Result:</strong> Row action fires, but body click is never triggered due to <code>event.stopPropagation()</code>.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Difference: stopPropagation() halts event traversal upward/downward; preventDefault() blocks browser default actions (like anchor links navigating) without stopping traversal!'
+      },
+      {
+        id: 'perf-hints',
+        title: 'Performance Optimization & Hints',
+        icon: '🚀',
+        def: 'Pre-caching assets and throttling execution rates to improve responsiveness.',
+        content: 'Optimizing responsiveness requires controlling event rates and pre-fetching critical assets. Debouncing groups rapid calls together after an idle delay, Throttling enforces a maximum call frequency, and Resource Hints tell the browser to prepare connections.',
+        code: `// --- 1. Debounce Implementation (Leading/Trailing Edge) ---
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// --- 2. Throttle Implementation ---
+function throttle(fn, limit) {
+  let inThrottle = false;
+  return function(...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  };
+}
+
+// --- 3. HTML Pre-fetching resource tags ---
+/*
+<link rel="preload" href="hero-trading-banner.png" as="image">
+<link rel="preconnect" href="https://api.jpmorgan.com">
+<link rel="prefetch" href="deeper-analytics-charts.js">
+*/`,
+        explanation: `<li><strong>Line 440-446 (Debounce Timer tracking):</strong> Keeps a private <code>timer</code> variable in a closure. When a debounced function is invoked, the previous timeout is immediately cleared (<code>clearTimeout(timer)</code>) and a new one is set, keeping execution locked until typing halts.</li>
+        <li><strong>Line 449-456 (Throttle Limit lock):</strong> Maintains an <code>inThrottle</code> lock boolean. When the function fires, the lock turns active, blocking any new calls until the <code>limit</code> interval expires, preventing scrolls or resize events from overloading the stack.</li>
+        <li><strong>Line 443 &amp; 453 (Dynamic Context Preservation):</strong> Both patterns use <code>fn.apply(this, args)</code> to ensure that executing callbacks preserve the correct execution context scope and argument lists.</li>
+        <li><strong>Line 460-464 (Resource Hints compilation):</strong> Directs the browser connection queues synchronously, allowing it to dns-prefetch or preload high-priority static assets ahead of runtime execution loops.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Debounced search keystrokes):</strong><br>
+          📥 <strong>Action:</strong> User types <code>"h"</code>, <code>"he"</code>, <code>"hel"</code> within 100ms interval (delay: 300ms).<br>
+          📤 <strong>Result:</strong> Timer is reset 3 times. Exactly one search request for <code>"hel"</code> is sent, 300ms after typing finishes.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Throttled page scrolling):</strong><br>
+          📥 <strong>Action:</strong> Scroll event fires 12 times in 100ms (throttle limit: 500ms).<br>
+          📤 <strong>Result:</strong> Scroll handler fires instantly on the first tick, locks execution, and ignores the other 11 ticks.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Scope arguments preservation):</strong><br>
+          📥 <strong>Action:</strong> Invoke debounced function twice with changing parameters: <code>debouncedFunc('UserA')</code> then <code>debouncedFunc('UserB')</code> within 50ms.<br>
+          📤 <strong>Result:</strong> Clears timer, and resolves exactly once using <code>'UserB'</code> parameter after 300ms.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Preload downloads high-priority assets needed for the current page; Prefetch downloads low-priority assets for future pages!'
+      }
+    ]
+  },
+  {
+    id: 'react',
+    icon: '⚛️',
+    title: 'Round 2: React Core & Live Sandbox',
+    cat: 'Technical Check',
+    color: '#3b82f6',
+    sub: 'Critical rendering paths, Promise architectures, recursive object unflattening, error boundary fallbacks, side-effect schedules, and dynamic debounced search playgrounds',
+    sections: [
+      {
+        id: 'crp',
+        title: 'Critical Rendering Path (CRP)',
+        icon: '🌍',
+        def: 'The sequence of steps a browser takes to turn code into pixels on the screen.',
+        content: 'To render a page, the browser goes through 5 main steps: 1) **DOM Build**: HTML is parsed into DOM nodes, 2) **CSSOM Build**: CSS styles are parsed into style nodes, 3) **Render Tree**: DOM and CSSOM are merged, omitting hidden nodes, 4) **Layout (Reflow)**: Coordinates and box dimensions are calculated, and 5) **Paint & Composite**: Pixels are drawn and layered onto the GPU.',
+        code: `// CRP Reflow / Repaint Triggering Examples
+const element = document.getElementById('ticker-panel');
+
+// ⚠️ Reflow Trigger: Querying box geometry forces immediate layout recalculations!
+const height = element.offsetHeight; 
+
+// ✅ Repaint Trigger: Updating background changes visuals without altering geometry
+element.style.backgroundColor = '#1d4ed8';`,
+        explanation: `<li><strong>Line 500-503 (Forced Synchronous Layout):</strong> Querying layout dimension properties like <code>offsetHeight</code>, <code>offsetWidth</code>, or <code>getBoundingClientRect()</code> right after modifying style properties forces the browser engine to halt JavaScript execution and instantly compute Reflow layout calculations. This creates significant rendering thread latency.</li>
+        <li><strong>Line 505-506 (Repaint Optimization):</strong> Updating properties like color or background-image skips geometry-defining Reflow boundaries and triggers only minor Repaint steps, reducing latency.</li>
+        <li><strong>Batching mutations:</strong> Grouping DOM reads and DOM writes separately isolates thread workloads and prevents layout thrashing.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Layout Thrashing Cost):</strong><br>
+          📥 <strong>Action:</strong> Query and change box width inside 100 elements in a loop.<br>
+          📤 <strong>Result:</strong> Browser frame drops, page freezes for 300ms due to forced synchronous layouts.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Batched rendering optimization):</strong><br>
+          📥 <strong>Action:</strong> Batch all read operations first, then batch all write operations.<br>
+          📤 <strong>Result:</strong> CPU rendering finishes in 4ms, frame rate remains locked at 60fps.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Skipping reflow via repaints):</strong><br>
+          📥 <strong>Action:</strong> Set <code>element.style.opacity = '0.5'</code>.<br>
+          📤 <strong>Result:</strong> Skips geometry recalculations, triggers Paint and GPU Composite directly.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Performance Tip: Avoid querying layout geometry right after modifying inline styles to prevent forced synchronous layouts (layout thrashing)!'
+      },
+      {
+        id: 'async-evolution',
+        title: 'Asynchronous JS: Callbacks, Promises, & Async',
+        icon: '⏳',
+        def: 'Evolution of managing non-blocking asynchronous logic.',
+        content: 'Asynchronous JavaScript evolved from nested callback triggers (callback hell) to standardized Promises with chaining, and ultimately to clean `async/await` syntax. Under the hood, Babel compiles `async/await` functions into generators and yield states powered by promise wrapper loops.',
+        code: `// --- 1. Babel Generator Compilation of Async/Await ---
+// Original: async function getData() { return await fetch(); }
+function getDataCompiled() {
+  return spawn(function* () {
+    const res = yield fetch();
+    return res;
+  });
+}
+
+function spawn(genF) {
+  return new Promise((resolve, reject) => {
+    const gen = genF();
+    function step(nextF) {
+      let next;
+      try {
+        next = nextF();
+      } catch (e) {
+        return reject(e);
+      }
+      if (next.done) return resolve(next.value);
+      Promise.resolve(next.value).then(
+        v => step(() => gen.next(v)),
+        e => step(() => gen.throw(e))
+      );
+    }
+    step(() => gen.next());
+  });
+}`,
+        explanation: `<li><strong>Line 531-537 (Syntactic Sugar Translation):</strong> Babel compiles <code>async/await</code> into ECMAScript generators (<code>function*</code>) which pause and resume execution flow natively.</li>
+        <li><strong>Line 539-556 (Spawn Wrapper Loop):</strong> The compiler wraps generators in a <code>spawn</code> loop utility that returns a standard ES6 Promise, converting yielding states to modern async-await APIs.</li>
+        <li><strong>Line 549-553 (Recursive Yield Resolution):</strong> The inner <code>step</code> callback resolves each yielded value (represented by <code>gen.next()</code>) via a <code>Promise.resolve()</code> wrapper.</li>
+        <li><strong>Line 551 (Continuations Callback Mapping):</strong> Once a yielded promise resolves, the resolution is recursively fed back into the generator engine (<code>gen.next(v)</code>), resuming execution until <code>next.done</code> evaluates to true.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Execution Trace):</strong><br>
+          📥 <strong>Input Call:</strong> <code>getDataCompiled()</code> runs, yielding fetch query promise.<br>
+          📤 <strong>Result:</strong> Resolves fetch result and prints value recursively, matching standard async/await execution exactly.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Handling thrown errors):</strong><br>
+          📥 <strong>Input Call:</strong> Fetch returns 500 error in generator code.<br>
+          📤 <strong>Result:</strong> Intercepted by try-catch, calling <code>gen.throw(err)</code> and throwing error to standard reject block.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Multiple Awaits compilation):</strong><br>
+          📥 <strong>Input Call:</strong> Generator with 3 consecutive fetch yields.<br>
+          📤 <strong>Result:</strong> Spawn engine resolves all 3 promises sequentially, matching standard sequential awaits.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Core rule: async/await is syntactic sugar over standard Promises; it makes async control flow look synchronous without blocking the single thread.'
+      },
+      {
+        id: 'json-unflatten',
+        title: 'Object Key Path Unflattening',
+        icon: '🧩',
+        def: 'Unflattening flat object keys containing delimiter paths into deeply nested JSON.',
+        content: 'In JS interviews, you are often asked to reshape flat server payloads. This algorithm converts an object with dot-separated or underscore-separated flat keys (e.g. `{"a_b_c": 1}`) into a deeply nested object hierarchy.',
+        code: `// --- Recursive Object Unflattener ---
+function unflatten(obj) {
+  const result = {};
+  
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      const value = obj[key];
+      const parts = key.split('_'); // Split on underscore path delimiter
+      
+      let current = result;
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        
+        // If it is the last key part, assign the value
+        if (i === parts.length - 1) {
+          current[part] = value;
+        } else {
+          // Keep nesting or create an empty object if index doesn't exist
+          if (!current[part]) {
+            current[part] = {};
+          }
+          current = current[part];
+        }
+      }
+    }
+  }
+  return result;
+}
+
+// --- Dry Run ---
+const inputObj = {
+  "a_b_c": 1,
+  "a_b_d": 2
+};
+console.log(unflatten(inputObj));
+// Output: { a: { b: { c: 1, d: 2 } } }`,
+        explanation: `<li><strong>Line 577-581 (Iterating Flat Keys):</strong> Traverses all flat keys in the input object, filtering inherited prototype properties using <code>hasOwnProperty(key)</code>.</li>
+        <li><strong>Line 582-583 (Path Delimiting):</strong> Splits each flat key path on the separator delimiter (<code>key.split('_')</code>) to obtain an ordered array of key parts (e.g. <code>['a', 'b', 'c']</code>).</li>
+        <li><strong>Line 585-598 (Climbing the tree &amp; Value Assignment):</strong> Uses a local pointer <code>current</code> initialized to point to the root of the output object. It climbs through each key part, instantiating empty child objects (<code>current[part] = {}</code>) if the key is not already defined. Once it reaches the final part of the path, it maps the primitive value directly to the nested property.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1:</strong><br>
+          📥 <strong>Input:</strong> <code>{ "a_b_c": 1, "a_b_d": 2 }</code><br>
+          📤 <strong>Expected Output:</strong> <code>{ a: { b: { c: 1, d: 2 } } }</code>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Multi-depth details):</strong><br>
+          📥 <strong>Input:</strong> <code>{ "user_name_first": "John", "user_name_last": "Doe" }</code><br>
+          📤 <strong>Expected Output:</strong> <code>{ user: { name: { first: "John", last: "Doe" } } }</code>
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Simple nesting):</strong><br>
+          📥 <strong>Input:</strong> <code>{ "JPMC_Core": "Success" }</code><br>
+          📤 <strong>Expected Output:</strong> <code>{ JPMC: { Core: "Success" } }</code>
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Extension: Ensure check validation for edge cases like overlapping collision keys (e.g. `{"a": 1, "a_b": 2}` would overwrite primitives)!'
+      },
+      {
+        id: 'error-boundaries',
+        title: 'React Error Boundaries',
+        icon: '🛡️',
+        def: 'Class wrappers that catch runtime errors during renders to prevent full page crashes.',
+        content: 'An Error Boundary is a React class component that catches JavaScript errors anywhere in its child component tree, logs the errors, and displays a graceful fallback UI instead of crashing the entire application.',
+        code: `import React from 'react';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  // 1. Catches error and sets local fallback state flag
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  // 2. Used to log telemetry error files
+  componentDidCatch(error, errorInfo) {
+    console.error('Logging Error boundary stack:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '1rem', border: '1px solid #ef4444', background: '#fef2f2', borderRadius: '8px' }}>
+          <h3>⚠️ JPMC Portal Failure</h3>
+          <p>We are unable to load this dashboard. Our systems have been notified.</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}`,
+        explanation: `<li><strong>Line 989-993 (State Setup):</strong> Standard class constructor initializes local error states to track component failure bubbles.</li>
+        <li><strong>Line 996-998 (Static State Mutation):</strong> <code>getDerivedStateFromError</code> intercepts runtime children exceptions and synchronously returns a mutated state object (<code>{ hasError: true }</code>) to trigger a fallback UI render.</li>
+        <li><strong>Line 1001-1003 (Side-Effect Logging):</strong> <code>componentDidCatch</code> runs asynchronously, capturing the stack trace and error info to send telemetry logs to JPMC monitoring databases.</li>
+        <li><strong>Line 1005-1015 (Graceful Degradation):</strong> If an error is caught, it renders a fallback UI block, preventing the javascript crash from unmounting the entire application view.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Isolating child error):</strong><br>
+          📥 <strong>Action:</strong> Nested subcomponent crashes, executing <code>throw new Error("Broken Grid API")</code>.<br>
+          📤 <strong>Result UI:</strong> Crashing sub-component is isolated, rendering: <code>"⚠️ JPMC Portal Failure..."</code>. The rest of the portal view remains fully active.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Async error limitation):</strong><br>
+          📥 <strong>Action:</strong> Nested component throws error inside click event listener.<br>
+          📤 <strong>Result:</strong> Not caught by Error Boundary; prints to standard browser console since async errors escape boundary scopes.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Dynamic error boundary recovery):</strong><br>
+          📥 <strong>Action:</strong> Click retry button which resets boundary state <code>hasError: false</code> to attempt component re-mount.<br>
+          📤 <strong>Result:</strong> Component re-renders normally after transient failure clears.
+        </div>`,
+        lang: 'JSX',
+        tip: '💡 Limit: React Error Boundaries do NOT catch errors in asynchronous code (e.g., fetch callbacks), event handlers, or during server-side rendering!'
+      },
+      {
+        id: 'effect-timing',
+        title: 'useEffect vs useLayoutEffect',
+        icon: '⏱️',
+        def: 'Decoupling synchronization timing based on layout painting timelines.',
+        content: '`useEffect` runs asynchronously after the render paint cycle is fully complete, ensuring non-blocking operations. `useLayoutEffect` fires synchronously after DOM modifications but before browser repaints, blocking visual flashes when measuring element sizes.',
+        code: `// --- 1. useLayoutEffect: Prevents visual flickering ---
+useLayoutEffect(() => {
+  const element = ref.current;
+  const rect = element.getBoundingClientRect();
+  
+  // Synchronously adjust positions before browser repaints!
+  if (rect.bottom > window.innerHeight) {
+    element.style.transform = 'translateY(-100%)';
+  }
+}, []); // Fires BEFORE paint
+
+// --- 2. useEffect: Ideal for data fetches ---
+useEffect(() => {
+  fetch('/api/ticks').then(res => res.json());
+}, []); // Fires AFTER paint`,
+        explanation: `<li><strong>Line 1036-1044 (Synchronous measure execution):</strong> React completes DOM updates. <code>useLayoutEffect</code> immediately executes its callback synchronously, blocking the browser from drawing pixels until code resolves.</li>
+        <li><strong>Line 1037-1042 (DOM Adjustment before paint):</strong> Inside <code>useLayoutEffect</code>, querying <code>getBoundingClientRect()</code> yields layout properties. We can dynamically adjust CSS positions before the browser paints.</li>
+        <li><strong>Line 1047-1049 (Non-blocking async side effects):</strong> <code>useEffect</code> schedules its callback to execute asynchronously after the browser paint is drawn, ensuring network fetches do not block layout frames.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (useLayoutEffect Tooltip Position):</strong><br>
+          📥 <strong>Action:</strong> Open tooltip. useLayoutEffect reads box size, shifts top-left bounds.<br>
+          📤 <strong>Result:</strong> Tooltip paints at top instantly. Zero screen jumps.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (useEffect Tooltip Position):</strong><br>
+          📥 <strong>Action:</strong> Open tooltip. useEffect reads size, shifts bounds.<br>
+          📤 <strong>Result:</strong> Tooltip paints at bottom for 1 frame, then jumps to top, causing a distinct visual jump.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Heavy loops impact):</strong><br>
+          📥 <strong>Action:</strong> Running large compute loop in useLayoutEffect.<br>
+          📤 <strong>Result:</strong> Page rendering is blocked for 300ms, causing noticeable UI freeze before elements render.
+        </div>`,
+        lang: 'JSX',
+        tip: '💡 Rule: Standardize on useEffect by default. Only use useLayoutEffect if you need to measure DOM nodes and make instant layout adjustments to prevent visual jumping.'
+      },
+      {
+        id: 'react-opt',
+        title: 'React Rendering Optimization',
+        icon: '⚙️',
+        def: 'Preventing unnecessary component updates in large React applications.',
+        content: 'Optimizing React requires preventing unnecessary re-renders. `useMemo` caches computed values, `useCallback` caches function references to prevent child re-renders, and list virtualization (windowing) limits rendering to visible rows.',
+        code: `import React, { useMemo, useCallback } from 'react';
+
+// 1. React.memo prevents re-rendering unless props change
+const LargeListRow = React.memo(({ row, onSelect }) => {
+  return (
+    <div onClick={() => onSelect(row.id)}>
+      {row.ticker}: \${row.price}
+    </div>
+  );
+});
+
+function TradingDashboard({ data }) {
+  // 2. useMemo caches heavy sorting logic
+  const sortedData = useMemo(() => {
+    return [...data].sort((a, b) => b.volume - a.volume);
+  }, [data]);
+
+  // 3. useCallback preserves reference of handler callbacks
+  const handleSelect = useCallback((id) => {
+    console.log('Row selected:', id);
+  }, []);
+
+  return (
+    <div>
+      {sortedData.map(row => (
+        <LargeListRow key={row.id} row={row} onSelect={handleSelect} />
+      ))}
+    </div>
+  );
+}`,
+        explanation: `<li><strong>Line 1076-1082 (Memoized child row components):</strong> <code>React.memo</code> wraps <code>LargeListRow</code>, making React skip rendering this child node unless its input props (<code>row</code> or <code>onSelect</code>) change.</li>
+        <li><strong>Line 1086-1088 (Caching intensive logic):</strong> <code>useMemo</code> caches the sorted array calculation. The sorting logic only re-runs if the source <code>data</code> array changes, preventing recalculations on unrelated state updates.</li>
+        <li><strong>Line 1091-1093 (Preserving callback reference identity):</strong> <code>useCallback</code> caches the <code>handleSelect</code> handler. Its reference identity remains identical across renders, preventing dependent child components from re-evaluating.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Counter update in parent):</strong><br>
+          📥 <strong>Action:</strong> Click counter button in <code>TradingDashboard</code>. List data props remain identical.<br>
+          📤 <strong>Result:</strong> Rendering cycles for all <code>LargeListRow</code> child nodes are skipped, DOM updating workload = 0ms.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Callback identity validation):</strong><br>
+          📥 <strong>Action:</strong> Callback without useCallback.<br>
+          📤 <strong>Result:</strong> Reference changes every render, making React.memo child row re-render anyway.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Sorting array updates):</strong><br>
+          📥 <strong>Action:</strong> Array sorted values calculated once on mount.<br>
+          📤 <strong>Result:</strong> Sort logic evaluates once on change, returns cached reference on subsequent renders.
+        </div>`,
+        lang: 'JSX',
+        tip: '💡 Note: Overusing hooks can add complexity. Do not wrap simple calculations in useMemo; only use them for expensive operations or reference stability in dependency lists!'
+      },
+      {
+        id: 'coding-sandbox',
+        title: 'React Search Sandbox (JPMC Tabbed Typeahead)',
+        icon: '💻',
+        def: 'Embedded live simulation of the tabbed search debouncing exercise.',
+        content: `This interactive sandbox matches JPMC's live coding requirements. It features 3 dynamic asset tabs, shapes custom static data arrays, auto-suggests matching assets as you type, and lets you slide debounce timeouts to see immediate visual performance changes.`,
+        diagram: buildSearchSandbox()
+      }
+    ]
+  },
+  {
+    id: 'architecture',
+    icon: '👔',
+    title: 'Round 3: Techno Managerial & Architecture',
+    cat: 'Design & Culture',
+    color: '#10b981',
+    sub: 'Large-scale React hierarchies, rendering 10,000+ real-time rows, resilient partial failure grids, accessible keyboard traps, and structured behavioral JPMC response maps',
+    sections: [
+      {
+        id: 'folder-layouts',
+        title: 'Scalable Folder Architectures',
+        icon: '📂',
+        def: 'Structuring directory boundaries based on domain-driven modules.',
+        content: 'Large-scale frontend repositories need structured directory layouts. Modern structures avoid generic folders (like `components/`, `hooks/`) and group by feature boundaries, which keeps dependencies clear and scales codebase growth.',
+        code: `src/
+├── assets/                  # Images, fonts, SVG icons
+├── common/                  # Shared core system UI components
+│   ├── buttons/
+│   └── modals/
+├── core/                    # Shared hooks, state store, auth
+│   ├── store/               # Global Zustand stores
+│   └── hooks/               # useEventListener, etc.
+└── features/                # Domain-driven features
+    ├── trade-equities/      # Isolated Equity trading module
+    │   ├── components/      # Feature-specific components
+    │   ├── hooks/           # Feature hooks (useEquityTicker)
+    │   ├── api/             # API request functions
+    │   └── index.js         # Public feature entry point
+    └── asset-overview/
+        ├── components/
+        └── index.js`,
+        explanation: `<li><strong>Line 1147-1153 (Scoping Directory Boundaries):</strong> Structural boundaries isolates generic modules into global folders while feature code boundaries map domains inside specialized packages (like <code>trade-equities</code>).</li>
+        <li><strong>Line 1141-1143 (Shared Core Primitives):</strong> Common layout components (e.g. modals, buttons) are isolated to prevent duplication and ensure design system alignment.</li>
+        <li><strong>Strict Feature Isolation:</strong> Feature scopes contain their own private endpoints, hook callbacks, and API handlers. Other components cannot access feature internals directly, preventing spaghetti dependencies.</li>
+        <li><strong>Line 1152 (Clean Public Exports Gateway):</strong> Exposure is controlled via a single <code>index.js</code> file which acts as the module's public gateway, simplifying code maintenance and dependency audits.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Modularity rule):</strong><br>
+          📥 <strong>Action:</strong> Dashboard needs to open Equities trade widget.<br>
+          📤 <strong>Result:</strong> Import is clean, direct: <code>import TradeWidget from '@/features/trade-equities'</code>. Feature internals are hidden.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Accessing private feature hook outside feature):</strong><br>
+          📥 <strong>Action:</strong> Try to import private hook <code>useEquityTicker</code> inside dashboard.<br>
+          📤 <strong>Result:</strong> Blocked by architecture rule: feature internals are not exported in feature gateway index.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Adding new feature path):</strong><br>
+          📥 <strong>Action:</strong> Adding <code>feature/crypto-trade</code> feature pack.<br>
+          📤 <strong>Result:</strong> Structure remains extremely clean, zero impact on existing features.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Best Practice: Feature modules should expose their components through an index.js entry point, preventing feature internals from leaking into other code.'
+      },
+      {
+        id: 'financial-grid',
+        title: '10,000+ Row Real-Time Data Grid',
+        icon: '📊',
+        def: 'Optimizing high-frequency visual grids without blocking the rendering thread.',
+        content: 'Rendering thousands of active cells in real-time requires bypassing the browser DOM. Strategies include virtualizing layouts (rendering only visible rows in the viewport), using CSS <code>content-visibility: auto</code>, and offloading parsing calculations to Web Workers.',
+        code: `// --- 1. Throttled Grid Painter using RequestAnimationFrame ---
+let pendingRows = null;
+
+function throttleGridPaint(newRowData) {
+  pendingRows = newRowData;
+  
+  // Enforce paint updates during the next refresh tick (60fps limit)
+  requestAnimationFrame(() => {
+    if (pendingRows) {
+      paintVisibleRows(pendingRows);
+      pendingRows = null;
+    }
+  });
+}
+
+// --- 2. CSS Virtualization Layer Hint ---
+/*
+.grid-row-container {
+  content-visibility: auto; /* Skip layout & painting for offscreen items */
+  contain-intrinsic-size: 0 45px; /* Reserve layout space estimations */
+}
+*/`,
+        explanation: `<li><strong>Line 1175-1178 (Variable buffering):</strong> Keeps the latest data load cached in the closed <code>pendingRows</code> buffer, decoupling high-frequency WebSocket updates from DOM painters.</li>
+        <li><strong>Line 1181-1186 (Frame Paint Synchronization):</strong> <code>requestAnimationFrame</code> instructs the browser to execute our paint update callback right before the next monitor refresh tick (60fps limit), eliminating screen tearing.</li>
+        <li><strong>Line 1182-1185 (Throttled Grid Painting):</strong> In the paint pass, we render the visible data. The <code>pendingRows</code> cache is cleared. Even if data updates arrive 200 times a second, the grid updates exactly 60 times a second, saving CPU resources.</li>
+        <li><strong>Line 1191-1194 (CSS Virtualization):</strong> <code>content-visibility: auto</code> instructs the browser to skip layout and painting for offscreen row components, reducing DOM rendering complexity.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Direct WebSocket Render):</strong><br>
+          📥 <strong>Action:</strong> Render rows directly on every socket update (200 updates/sec).<br>
+          📤 <strong>Result:</strong> Rendering thread is saturated, CPU usage hits 100%, screen lags.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (requestAnimationFrame Throttled Render):</strong><br>
+          📥 <strong>Action:</strong> Socket updates 200/sec, paint throttled to screen refresh rates.<br>
+          📤 <strong>Result:</strong> Grid redraws exactly 60 times a second, CPU usage stays under 15%, zero screen tearing.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (content-visibility optimization):</strong><br>
+          📥 <strong>Action:</strong> Virtual grid with 10,000 rows.<br>
+          📤 <strong>Result:</strong> First paint finishes under 8ms, browser renders only the visible rows on screen.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Performance Tip: Run JSON formatting, number sorting, and array mapping inside a Web Worker, offloading calculations from the main execution thread!'
+      },
+      {
+        id: 'resilient-ui',
+        title: 'Resilient UI Error Strategies',
+        icon: '🛡️',
+        def: 'Structuring interfaces to degrade gracefully during partial database/API dropouts.',
+        content: 'Modern trading portals must support partial degradation. If one feature API drops out, the rest of the application should remain functional. Resilience strategies include scoped Error Boundaries, skeleton loaders, and optimistic UI updates.',
+        code: `// --- Optimistic State Mutation Pattern ---
+function executeEquityOrder(orderId) {
+  // 1. Optimistically update local store state assuming success
+  updateLocalStoreState(orderId, 'PENDING');
+  
+  // 2. Fire fetch post request
+  fetch('/api/orders/execute', {
+    method: 'POST',
+    body: JSON.stringify({ orderId })
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Transaction rejected');
+    // 3. Confirm success
+    updateLocalStoreState(orderId, 'EXECUTED');
+  })
+  .catch(err => {
+    // 4. Gracefully roll back local state in case of server failure!
+    updateLocalStoreState(orderId, 'FAILED');
+    triggerNotificationToast('Order execution failed. Rolled back.');
+  });
+}`,
+        explanation: `<li><strong>Line 1217 (Instant local updates):</strong> Updates the local store state (<code>updateLocalStoreState(orderId, 'PENDING')</code>) immediately assuming network success, keeping UI latency at 0ms.</li>
+        <li><strong>Line 1220-1223 (Background network dispatch):</strong> Launches the asynchronous network fetch request in the background.</li>
+        <li><strong>Line 1227 (State execution confirmation):</strong> Confirms state transition once fetch returns OK.</li>
+        <li><strong>Line 1231-1232 (Failure rollback recovery):</strong> Catches error, rolls back store values to original state and pops error alert toast.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Order API Success):</strong><br>
+          📥 <strong>Action:</strong> Click buy button. Local status immediately updates to <code>PENDING</code>.<br>
+          📤 <strong>UI transition:</strong> 0ms: PENDING -> 400ms (fetch returns OK): status updates to <code>EXECUTED</code>.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Order API Drop):</strong><br>
+          📥 <strong>Action:</strong> Click buy button. Local status immediately updates to <code>PENDING</code>.<br>
+          📤 <strong>UI transition:</strong> 0ms: PENDING -> 400ms (fetch fails 500): catch block immediately rolls back state to <code>FAILED</code> and triggers rollback alert toast.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (API Timeout fallback):</strong><br>
+          📥 <strong>Action:</strong> API doesn't respond in 5s.<br>
+          📤 <strong>Result:</strong> Optimistic update is aborted, state is rolled back to failed state.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 UX Tip: Use skeleton loaders with structural size placeholders to prevent layout shifts when lazy-loaded components resolve!'
+      },
+      {
+        id: 'a11y-wcag',
+        title: 'Web Accessibility & WCAG Standards',
+        icon: '♿',
+        def: 'Designing products that can be used by everyone, including people with visual, motor, or cognitive challenges.',
+        content: 'JPMC applications must comply with WCAG 2.1 AA accessibility guidelines. Crucial steps include semantic HTML structures, supporting screen readers with proper ARIA attributes, and keeping tab focus loops trapped inside interactive modals.',
+        code: `// --- Keyboard Focus Trap inside Accessible Modal ---
+const modal = document.getElementById('secure-trade-modal');
+const focusables = modal.querySelectorAll('button, input, select, textarea');
+const firstElement = focusables[0];
+const lastElement = focusables[focusables.length - 1];
+
+modal.addEventListener('keydown', (event) => {
+  if (event.key !== 'Tab') return;
+  
+  if (event.shiftKey) { // Shift + Tab: navigate backwards
+    if (document.activeElement === firstElement) {
+      lastElement.focus();
+      event.preventDefault();
+    }
+  } else { // Tab: navigate forwards
+    if (document.activeElement === lastElement) {
+      firstElement.focus();
+      event.preventDefault();
+    }
+  }
+});`,
+        explanation: `<li><strong>Line 1259-1262 (Focusable query):</strong> Query selectors extract all keyboard-focusable elements (buttons, inputs, select) in order inside the modal boundary.</li>
+        <li><strong>Line 1264-1265 (Keyboard event capture):</strong> Keydown listeners trap and inspect keyboard focus traversal keys (specifically the <code>'Tab'</code> key).</li>
+        <li><strong>Line 1267-1271 (Backward Tab wrap):</strong> If user presses <code>Shift + Tab</code>, if focus is at the first element, we intercept browser defaults and programmatically focus the last element.</li>
+        <li><strong>Line 1272-1276 (Forward Tab wrap):</strong> If user presses standard <code>Tab</code>, if focus is at the last element, we loop focus back to the first element, keeping focus securely locked in the modal overlay.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Forward Tab wrapping):</strong><br>
+          📥 <strong>Action:</strong> Active element is close button (last focusable item). User presses <code>Tab</code>.<br>
+          📤 <strong>Result:</strong> Intercepts browser focus; programmatically focuses the first input field inside the modal container.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Backward Tab wrapping):</strong><br>
+          📥 <strong>Action:</strong> Active element is first input. User presses <code>Shift + Tab</code>.<br>
+          📤 <strong>Result:</strong> Intercepts browser focus; programmatically wraps focus backwards to the last item.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Clicking outside modal boundaries):</strong><br>
+          📥 <strong>Action:</strong> Interactive modal is active, click outside or press Tab on external elements.<br>
+          📤 <strong>Result:</strong> Screen reader focus is trapped within modal container, blocking keyboard users from selecting background content.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 A11y Rules: Every image must have an alt tag, interactive components must be focusable via Tab, and color contrast ratios must meet at least 4.5:1 for standard text!'
+      },
+      {
+        id: 'managerial-prep',
+        title: 'Managerial & Cultural Fit',
+        icon: '💬',
+        def: 'Structuring behavioral responses based on JPMC core values.',
+        content: 'Use JPMC-specific answers to demonstrate analytical maturity and team alignment during behavioral checks:',
+        code: `// --- 1. Why JPMorganChase? ---
+// Answer: "JPMC merges scale, technology, and absolute reliability. I want to build frontend systems
+// for platforms that process trillions of dollars in transactions daily. Additionally, your focus
+// on accessibility standards and modern reactive design matches my professional engineering goals."
+
+// --- 2. How do you handle team conflicts? ---
+// Answer: "I prioritize open collaboration and objectivity. I schedule a private call to identify the 
+// root cause. If there is a dispute over technical patterns, I set up a sandboxed proof-of-concept (POC) 
+// to measure time and performance metrics, allowing data and JPMC standards to guide our decision."
+
+// --- 3. How do you deliver under tight deadlines? ---
+// Answer: "I use a structured triaging process. I work with the Product Manager to establish must-have 
+// features for launch, identify high-risk components, and focus on coding core tasks first while keeping 
+// code maintainable and well-tested."`,
+        explanation: `<li><strong>Line 1302-1305 (STAR framework context alignment):</strong> Formulates concrete context setups (Situation, Task, Action, Result) in response templates to highlight engineering ownership and delivery structures.</li>
+        <li><strong>Line 1307-1310 (Objective Decision Frameworks):</strong> Advocates for metrics-driven sandboxed POCs to resolve technical debates rather than arguments, proving collaborative maturity.</li>
+        <li><strong>Line 1312-1315 (Strategic Triaging Priorities):</strong> Details priority-focused task breakdowns (must-haves vs side-features) in tight deadlines to guarantee delivery without compromising stability or test footprints.</li>
+        <li><strong>Corporate Values Mapping:</strong> Synthesizes core corporate values (high transaction volumes, reliability, accessibility standards, performance scaling) with personal coding practices.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (STAR framework response):</strong><br>
+          📥 <strong>Question:</strong> "Tell me about a time you solved a tough conflict."<br>
+          📤 <strong>Result:</strong> Detailed response structure describing setting up a sandbox performance POC to compare load times, keeping choices analytical.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Responding to tight launch deadlines):</strong><br>
+          📥 <strong>Question:</strong> "How do you deliver under pressure?"<br>
+          📤 <strong>Result:</strong> Response structure describing prioritizing core MVP elements with PMs first to guarantee robust launch quality.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Corporate mission fit):</strong><br>
+          📥 <strong>Question:</strong> "Why join JPMC?"<br>
+          📤 <strong>Result:</strong> Response structure aligning career growth with scaling transaction performance and WCAG AA accessibility patterns.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '💡 Behavioral Tip: Structure your responses using the STAR method (Situation, Task, Action, Result) to highlight concrete ownership!'
+      }
+    ]
+  }
+];
+
+let currentTopic = null;
+let topicProgress = {};
+
+function copyCode(btn, event) {
+  if (event) event.stopPropagation();
+  const pre = btn.closest('.cb').querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+
+function openMob() {
+  const sb = document.getElementById('sb');
+  if (sb) sb.classList.toggle('open');
+}
+
+function initSidebar() {
+  const sbContent = document.getElementById('sb-content');
+  const byCategory = {};
+  
+  TOPICS.forEach(t => {
+    if (!byCategory[t.cat]) byCategory[t.cat] = [];
+    byCategory[t.cat].push(t);
+  });
+  
+  let html = '';
+  Object.entries(byCategory).forEach(([cat, topics]) => {
+    html += `<div class="sb-section">
+      <div class="sb-sect-title">${cat}</div>`;
+    topics.forEach(topic => {
+      html += `<div class="nav-item" id="nav-${topic.id}" onclick="showTopic('${topic.id}')">
+        <div class="nav-ic">${topic.icon}</div>
+        <div class="nav-txt">${topic.title}</div>
+        <div class="nav-badge" id="badge-${topic.id}" style="display:none">✓</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  sbContent.innerHTML = html;
+}
+
+function showTopic(topicId) {
+  currentTopic = topicId;
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic) return;
+  
+  // Close mobile sidebar if open
+  const sb = document.getElementById('sb');
+  if (sb) sb.classList.remove('open');
+  
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('topic-view').style.display = 'block';
+  
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.getElementById(`nav-${topicId}`);
+  if (activeNav) activeNav.classList.add('active');
+  
+  let html = `<div class="sect-hero" style="--hero-grad:linear-gradient(90deg,${topic.color},#3b82f6)">
+    <div class="sh-title">${topic.icon} ${topic.title}</div>
+    <div class="sh-sub">${topic.sub}</div>
+  </div>`;
+  
+  topic.sections.forEach((section) => {
+    let bodyContent = '';
+    if (section.def) bodyContent += `<div class="def-box"><strong>Concept:</strong> ${section.def}</div>`;
+    if (section.content) bodyContent += `<div style="font-size:.8rem;line-height:1.7;color:#b0c4de;margin-bottom:.8rem">${section.content}</div>`;
+    if (section.diagram) bodyContent += `<div class="diagram-wrapper">${section.diagram}</div>`;
+    if (section.code) bodyContent += `<div class="cb"><div class="cbh"><div class="cblang">${section.lang || 'JS'}</div><button class="tbtn copy-btn" onclick="copyCode(this, event)">Copy</button></div><div class="cbody"><pre>${section.code}</pre></div></div>`;
+    if (section.explanation) bodyContent += `<div style="background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:8px;padding:.8rem;margin:.6rem 0;font-size:.73rem;line-height:1.7;color:#b0c4de;"><strong>💡 Under-the-Hood Code Explanation:</strong><ul style="margin-left:1.1rem;margin-top:.4rem;list-style-type:disc;display:flex;flex-direction:column;gap:.35rem;">${section.explanation}</ul></div>`;
+    if (section.ioExamples) bodyContent += `<div style="background:rgba(16,185,129,0.025);border:1px solid rgba(16,185,129,0.15);border-radius:8px;padding:.8rem;margin:.6rem 0;font-size:.73rem;line-height:1.6;color:#a7f3d0;"><strong>📋 Input / Expected Output Examples:</strong><div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">${section.ioExamples}</div></div>`;
+    if (section.tip) bodyContent += `<div class="tip">${section.tip}</div>`;
+    if (section.danger) bodyContent += `<div class="danger">${section.danger}</div>`;
+    
+    html += `<div class="card">
+      <div class="card-h" onclick="this.parentElement.classList.toggle('open')">
+        <div class="card-hl">
+          <div class="card-ic">${section.icon}</div>
+          <div class="card-ti">${section.title}</div>
+        </div>
+        <div class="card-ar">›</div>
+      </div>
+      <div class="card-body">
+        ${bodyContent}
+      </div>
+    </div>`;
+  });
+  
+  document.getElementById('topic-view').innerHTML = html;
+  
+  // Dynamic initialization for JPMC search suggestions sandbox
+  if (topicId === 'react') {
+    setTimeout(initSearchSandbox, 50);
+  }
+  
+  updateProgress();
+}
+
+function updateProgress() {
+  if (currentTopic) {
+    topicProgress[currentTopic] = true;
+  }
+  const completed = Object.keys(topicProgress).length;
+  const total = TOPICS.length;
+  const pct = Math.round((completed / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  initSidebar();
+  if (TOPICS.length > 0) {
+    showTopic(TOPICS[0].id);
+  }
+});
+</script>
+
+<style>
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+</style>
+</body>
+</html>

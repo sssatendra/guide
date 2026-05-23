@@ -1,0 +1,2337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TypeScript — Complete Study Guide</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--sb:#0c0f1d;--card:#0f1424;--card2:#131828;--border:#1c2544;
+  --text:#e4ecff;--muted:#526080;--ts:#3178c6;--tslight:#4a9de0;
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+  --cyan:#06b6d4;--pink:#ec4899;--orange:#f97316;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#1c2544;border-radius:4px}
+/* TOPBAR */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:500;background:rgba(7,9,15,.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.55rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.logo{font-family:monospace;font-size:1rem;font-weight:800;color:var(--ts);letter-spacing:-.02em;display:flex;align-items:center;gap:.4rem}
+.logo-sub{font-size:.65rem;color:var(--muted);font-family:'Segoe UI',sans-serif;font-weight:400}
+.progress-wrap{display:flex;align-items:center;gap:.5rem}
+.p-label{font-size:.62rem;color:var(--muted);font-weight:600}
+.p-bar{width:120px;background:rgba(255,255,255,.05);border-radius:3px;height:4px}
+.p-fill{height:100%;background:linear-gradient(90deg,var(--ts),var(--cyan));border-radius:3px;transition:width .4s;width:0%}
+.mob-btn{display:none;background:var(--ts);border:none;border-radius:6px;padding:.3rem .6rem;color:#fff;font-size:.7rem;cursor:pointer;font-weight:700}
+/* LAYOUT */
+.layout{display:flex;margin-top:46px;min-height:calc(100vh - 46px)}
+/* SIDEBAR */
+.sidebar{width:255px;min-width:255px;background:var(--sb);border-right:1px solid var(--border);height:calc(100vh - 46px);overflow-y:auto;position:sticky;top:46px}
+.sb-title{padding:.6rem .7rem .3rem;font-size:.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-count{background:rgba(49,120,198,.15);color:var(--ts);border:1px solid rgba(49,120,198,.25);border-radius:5px;padding:1px 6px;font-size:.6rem;font-weight:700}
+.sb-group{padding:.2rem 0;border-bottom:1px solid var(--border)}
+.sg-title{font-size:.59rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;padding:.3rem .7rem .15rem}
+.nav-item{display:flex;align-items:center;gap:.4rem;padding:.4rem .65rem;cursor:pointer;border:1px solid transparent;border-radius:6px;margin:.03rem .28rem;transition:all .11s}
+.nav-item:hover{background:rgba(255,255,255,.03);border-color:var(--border)}
+.nav-item.active{background:rgba(49,120,198,.08);border-color:rgba(49,120,198,.22);border-left:2px solid var(--ts)}
+.ni-ic{font-size:.85rem;width:18px;text-align:center;flex-shrink:0}
+.ni-txt{font-size:.7rem;font-weight:600;flex:1}
+.nav-item.active .ni-txt{color:#7fb3e8}
+.ni-badge{font-size:.56rem;padding:1px 5px;border-radius:4px;font-weight:700;flex-shrink:0}
+/* MAIN */
+.main{flex:1;overflow-y:auto;min-width:0}
+/* STICKY NAV */
+.snav{position:sticky;top:46px;z-index:200;background:rgba(7,9,15,.93);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:.35rem 1.4rem;display:flex;gap:.3rem;overflow-x:auto;white-space:nowrap}
+.sn-btn{background:transparent;border:1px solid transparent;border-radius:5px;padding:.24rem .55rem;color:var(--muted);font-size:.66rem;cursor:pointer;font-weight:600;transition:all .11s}
+.sn-btn:hover,.sn-btn.a{color:var(--ts);border-color:rgba(49,120,198,.28);background:rgba(49,120,198,.07)}
+/* TOPIC PAGE */
+.topic-page{padding:1.2rem 1.8rem 3rem;max-width:940px;display:none}
+.topic-page.active{display:block}
+/* HERO */
+.t-hero{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.2rem;margin-bottom:1rem;position:relative;overflow:hidden}
+.t-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--ts),var(--cyan))}
+.t-hero-top{display:flex;align-items:flex-start;gap:.8rem}
+.t-icon{font-size:2rem;line-height:1;flex-shrink:0}
+.t-info h1{font-size:1.25rem;font-weight:900;margin-bottom:.25rem;color:var(--text)}
+.t-info p{font-size:.79rem;color:var(--muted);line-height:1.7;max-width:680px}
+.t-tags{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.45rem}
+.t-tag{font-size:.6rem;padding:2px 7px;border-radius:7px;font-weight:700;border:1px solid;background:rgba(49,120,198,.08);color:var(--ts);border-color:rgba(49,120,198,.3)}
+.t-tag.green{background:rgba(34,197,94,.08);color:var(--green);border-color:rgba(34,197,94,.3)}
+.t-tag.amber{background:rgba(245,158,11,.08);color:var(--amber);border-color:rgba(245,158,11,.3)}
+/* SECTIONS */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:.75rem;overflow:hidden}
+.sec-h{display:flex;align-items:center;justify-content:space-between;padding:.72rem .9rem;cursor:pointer;user-select:none;transition:background .12s}
+.sec-h:hover{background:rgba(255,255,255,.018)}
+.sec-hl{display:flex;align-items:center;gap:.45rem}
+.sec-ic{font-size:.88rem;width:22px;text-align:center}
+.sec-ti{font-size:.78rem;font-weight:700}
+.sec-ar{color:var(--muted);font-size:.68rem;transition:transform .2s}
+.sec.open .sec-ar{transform:rotate(90deg)}
+.sec-body{display:none;border-top:1px solid var(--border);padding:.85rem .95rem}
+.sec.open .sec-body{display:block}
+/* DEFINITION */
+.def{background:rgba(49,120,198,.07);border-left:3px solid var(--ts);border-radius:0 8px 8px 0;padding:.65rem .9rem;font-size:.79rem;line-height:1.8;color:#b8d4f8;margin-bottom:.75rem}
+.def strong{color:var(--tslight)}
+/* CODE */
+.cb{background:#060912;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:.6rem 0}
+.cbh{display:flex;align-items:center;justify-content:space-between;padding:.38rem .72rem;background:rgba(255,255,255,.02);border-bottom:1px solid var(--border)}
+.cbl{display:flex;align-items:center;gap:.3rem;font-size:.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.cbl-dot{width:6px;height:6px;border-radius:50%;background:var(--ts)}
+.cp{font-size:.58rem;color:var(--muted);cursor:pointer;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:4px;padding:2px 7px;transition:all .12s}
+.cp:hover{color:var(--amber);border-color:var(--amber)}
+pre{font-family:'Cascadia Code','Fira Code','Courier New',monospace;font-size:.72rem;line-height:1.75;color:#c9d1d9;white-space:pre;padding:.78rem .9rem;overflow-x:auto;tab-size:2}
+.kw{color:#ff79c6;font-weight:500}.tp{color:#66d9ef}.fn{color:#50fa7b}.str{color:#f1fa8c}.num{color:#bd93f9}.cmt{color:#6272a4;font-style:italic}.bl{color:#8be9fd}.cls{color:#ffb86c}.op{color:#ff79c6}.prop{color:#a9dc76}
+/* OUTPUT */
+.out{background:#03070f;border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:.6rem .8rem;margin:.4rem 0;font-family:'Cascadia Code',monospace;font-size:.7rem;color:#6ee7b7;line-height:1.65}
+.out::before{content:'▶  Result / Type';display:block;color:#3d7a5e;font-size:.58rem;font-weight:700;margin-bottom:.28rem;letter-spacing:.05em}
+/* TIPS */
+.tip{border-left:3px solid var(--amber);background:rgba(245,158,11,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.76rem;line-height:1.65;color:#fde68a;margin:.5rem 0}
+.tip strong{color:var(--amber)}
+.danger{border-left:3px solid var(--red);background:rgba(239,68,68,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.76rem;line-height:1.65;color:#fca5a5;margin:.5rem 0}
+.danger strong{color:var(--red)}
+.success{border-left:3px solid var(--green);background:rgba(34,197,94,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.76rem;line-height:1.65;color:#86efac;margin:.5rem 0}
+.success strong{color:var(--green)}
+.memory{border-left:3px solid var(--purple);background:rgba(168,85,247,.07);border-radius:0 7px 7px 0;padding:.6rem .85rem;font-size:.76rem;line-height:1.65;color:#d8b4fe;margin:.5rem 0}
+.memory strong{color:var(--purple)}
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:.73rem;margin:.65rem 0}
+.tbl th{background:rgba(255,255,255,.04);color:var(--muted);font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;padding:.45rem .65rem;text-align:left;border-bottom:1px solid var(--border)}
+.tbl td{padding:.45rem .65rem;border-bottom:1px solid rgba(28,37,68,.5);color:#b0bdc8;line-height:1.5;vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.01)}
+.tbl td:first-child{color:var(--tslight);font-weight:700;font-family:monospace;font-size:.71rem;white-space:nowrap}
+/* GRID */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin:.55rem 0}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:.55rem;margin:.55rem 0}
+/* CHEATBOX */
+.cheat-box{background:rgba(49,120,198,.06);border:1px solid rgba(49,120,198,.18);border-radius:9px;padding:.75rem .9rem;margin:.55rem 0}
+.cheat-box h4{font-size:.7rem;font-weight:800;color:var(--ts);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.07em}
+.cheat-item{display:flex;align-items:flex-start;gap:.5rem;margin-bottom:.3rem;font-size:.76rem;line-height:1.55}
+.cheat-item code{background:rgba(255,255,255,.07);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:.71rem;color:#93c5fd;flex-shrink:0}
+.cheat-item span{color:#b0bdc8}
+/* CARD GRID */
+.card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem;margin:.55rem 0}
+.mini-card{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:.65rem .8rem}
+.mini-card h5{font-size:.68rem;font-weight:700;color:var(--ts);margin-bottom:.3rem}
+.mini-card p{font-size:.72rem;color:var(--muted);line-height:1.55}
+.mini-card code{display:block;font-family:monospace;font-size:.69rem;color:#93c5fd;margin-top:.25rem;background:rgba(0,0,0,.2);padding:.25rem .4rem;border-radius:4px}
+/* COMPARISON */
+.vs-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:.55rem 0}
+.vs-col{background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:8px;padding:.65rem .8rem}
+.vs-col h4{font-size:.68rem;font-weight:700;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.05em}
+.vs-col.good h4{color:var(--green)}
+.vs-col.bad h4{color:var(--red)}
+.vs-col.a h4{color:var(--ts)}
+.vs-col.b h4{color:var(--purple)}
+.vs-item{font-size:.73rem;color:#b0bdc8;margin-bottom:.2rem;display:flex;gap:.35rem;align-items:flex-start;line-height:1.5}
+.vs-col.good .vs-item::before{content:'✓';color:var(--green);flex-shrink:0}
+.vs-col.bad .vs-item::before{content:'✗';color:var(--red);flex-shrink:0}
+.vs-col.a .vs-item::before,.vs-col.b .vs-item::before{content:'→';color:var(--muted);flex-shrink:0}
+/* WELCOME */
+.welcome{padding:1.5rem 1.8rem 2rem;max-width:940px;display:block}
+.wh{font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,var(--ts),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.35rem}
+.wsub{font-size:.82rem;color:var(--muted);line-height:1.8;margin-bottom:1.4rem;max-width:600px}
+.topic-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:1.4rem}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.85rem;cursor:pointer;transition:all .17s;position:relative;overflow:hidden}
+.tc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ts),var(--cyan))}
+.tc:hover{border-color:rgba(49,120,198,.35);transform:translateY(-2px)}
+.tc-icon{font-size:1.3rem;margin-bottom:.3rem}
+.tc-title{font-size:.74rem;font-weight:700;margin-bottom:.18rem}
+.tc-sub{font-size:.65rem;color:var(--muted);line-height:1.5}
+/* HIGHLIGHT ROW */
+.hl-row{display:flex;align-items:center;gap:.4rem;padding:.4rem .55rem;background:rgba(49,120,198,.05);border-radius:6px;margin:.18rem 0;font-size:.76rem}
+.hl-row code{font-family:monospace;color:var(--tslight);background:rgba(49,120,198,.12);padding:1px 5px;border-radius:3px;font-size:.71rem}
+/* MOBILE */
+.mob-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:600;flex-direction:column}
+.mob-overlay.open{display:flex}
+.mob-h{background:var(--sb);border-bottom:1px solid var(--border);padding:.55rem .9rem;display:flex;align-items:center;justify-content:space-between}
+.mob-close{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;padding:.28rem .6rem;color:var(--text);font-size:.7rem;cursor:pointer}
+.mob-body{flex:1;overflow-y:auto;padding:.3rem .4rem}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeUp .22s ease both}
+@media(max-width:768px){
+  .sidebar{display:none}.mob-btn{display:block}
+  .topic-page{padding:.85rem .8rem 2rem}
+  .topic-cards{grid-template-columns:1fr 1fr}
+  .card-grid,.vs-grid,.grid2,.grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:.55rem">
+    <button class="mob-btn" onclick="openMob()">☰ Topics</button>
+    <div class="logo"><span>TS</span><span class="logo-sub">TypeScript Complete Guide</span></div>
+  </div>
+  <div class="progress-wrap">
+    <span class="p-label">Progress</span>
+    <div class="p-bar"><div class="p-fill" id="pfill"></div></div>
+    <span id="ppct" class="p-label">0%</span>
+  </div>
+</div>
+
+<div class="mob-overlay" id="mob">
+  <div class="mob-h"><b style="font-size:.85rem">📘 TypeScript Topics</b><button class="mob-close" onclick="closeMob()">✕</button></div>
+  <div class="mob-body" id="mob-body"></div>
+</div>
+
+<div class="layout">
+<div class="sidebar" id="sb"></div>
+<div class="main" id="main">
+  <div id="welcome-screen" class="welcome">
+    <div class="wh">TypeScript Mastery Guide</div>
+    <p class="wsub">Everything you need to know for your interview — from basic types to advanced patterns. Built for quick learning and easy memorization. 💪</p>
+    <div class="topic-cards" id="topic-cards"></div>
+    <div class="tip"><strong>How to use this guide:</strong> Work through topics in order — they build on each other. Each section has a "Memory Aid" box with tricks to remember key concepts. Focus on Basics → Types → Interfaces → Generics → Utility Types first.</div>
+  </div>
+  <div id="content-area"></div>
+</div>
+</div>
+
+<script>
+const TOPICS = [
+
+{id:'basics',icon:'🔤',title:'Primitive Types',group:'Basics',
+desc:'The 8 built-in types in TypeScript. These are the foundation of everything.',
+tags:['Beginner','Most Used','Memorize'],
+sections:[
+{id:'primitives',title:'8 Primitive Types',icon:'📦',content:`
+<div class="def">TypeScript extends JavaScript by adding <strong>static type checking</strong>. You annotate variables with types using <code>: TypeName</code>. The compiler catches errors <em>before</em> running your code.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── THE 8 PRIMITIVE TYPES ───────────────────</span>
+<span class="kw">let</span> name:    <span class="tp">string</span>  = <span class="str">"Satendra"</span>;
+<span class="kw">let</span> age:     <span class="tp">number</span>  = <span class="num">28</span>;          <span class="cmt">// int, float, hex — all 'number'</span>
+<span class="kw">let</span> active:  <span class="tp">boolean</span> = <span class="kw">true</span>;
+<span class="kw">let</span> nothing: <span class="tp">null</span>    = <span class="kw">null</span>;         <span class="cmt">// intentional absence</span>
+<span class="kw">let</span> undef:   <span class="tp">undefined</span> = <span class="kw">undefined</span>; <span class="cmt">// uninitialized</span>
+<span class="kw">let</span> id:      <span class="tp">symbol</span>  = Symbol(<span class="str">'id'</span>);
+<span class="kw">let</span> bignum:  <span class="tp">bigint</span>  = <span class="num">100n</span>;         <span class="cmt">// large integers</span>
+<span class="kw">let</span> data:    <span class="tp">any</span>     = <span class="str">"anything"</span>;  <span class="cmt">// escape hatch — avoid!</span>
+
+<span class="cmt">// ─── SPECIAL TYPES ───────────────────────────</span>
+<span class="kw">let</span> flexible: <span class="tp">unknown</span> = getUserInput(); <span class="cmt">// safer than any — must check type before use</span>
+<span class="kw">function</span> <span class="fn">throwError</span>(): <span class="tp">never</span> {         <span class="cmt">// function that NEVER returns</span>
+  <span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span>(<span class="str">"Fatal error"</span>);
+}
+<span class="kw">function</span> <span class="fn">logMessage</span>(): <span class="tp">void</span> {           <span class="cmt">// returns nothing</span>
+  console.<span class="fn">log</span>(<span class="str">"logged"</span>);
+}
+
+<span class="cmt">// ─── TYPE INFERENCE (TypeScript is smart!) ───</span>
+<span class="kw">let</span> city = <span class="str">"Bengaluru"</span>;   <span class="cmt">// TypeScript INFERS type: string</span>
+<span class="kw">let</span> num  = <span class="num">42</span>;            <span class="cmt">// Inferred: number</span>
+<span class="kw">let</span> flag = <span class="kw">true</span>;          <span class="cmt">// Inferred: boolean</span>
+city = <span class="num">123</span>;              <span class="cmt">// ❌ Error: Type 'number' not assignable to 'string'</span></pre></div>
+<div class="memory"><strong>🧠 Memory Trick:</strong> "S-N-B are the big 3" — <strong>S</strong>tring, <strong>N</strong>umber, <strong>B</strong>oolean. Then add null, undefined for JS compatibility. any = "I give up", unknown = "I'll check later", never = "impossible", void = "no return".</div>
+<table class="tbl"><thead><tr><th>Type</th><th>Use When</th><th>Example</th></tr></thead>
+<tbody>
+<tr><td>string</td><td>Text data</td><td>"hello", \`Hi \${name}\`</td></tr>
+<tr><td>number</td><td>Any numeric value</td><td>42, 3.14, 0xff</td></tr>
+<tr><td>boolean</td><td>true/false flags</td><td>isActive, hasPermission</td></tr>
+<tr><td>null</td><td>Intentional empty value</td><td>let user = null</td></tr>
+<tr><td>undefined</td><td>Variable not yet assigned</td><td>let x: undefined</td></tr>
+<tr><td>any</td><td>Escape hatch (avoid!)</td><td>Legacy JS code</td></tr>
+<tr><td>unknown</td><td>Unknown input — check before use</td><td>API responses, user input</td></tr>
+<tr><td>never</td><td>Code that never returns</td><td>throw functions, infinite loops</td></tr>
+<tr><td>void</td><td>Functions returning nothing</td><td>Event handlers</td></tr>
+</tbody></table>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Primitive Type Assignment & Enforcement):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>let age: number = 28; age = "28";</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Type 'string' not assignable to type 'number'.</code> <span style="color:var(--muted)">(TS prevents changing primitive variable type pointers at compile time.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Safer unknown Narrowing):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>let flexible: unknown = "input"; flexible.toUpperCase();</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>'flexible' is of type 'unknown'.</code> <span style="color:var(--muted)">(Must perform a type guard check like <code>typeof flexible === 'string'</code> to enable string methods.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (never Return Type):</strong><br>
+      📥 <strong>Function Trigger:</strong> <code>throwError();</code><br>
+      📤 <strong>Expected Output / Behavior:</strong> Code execution halts immediately, throwing a runtime <code>Error: Fatal error</code>. The function never completes.
+    </div>
+  </div>
+</div>
+`
+},
+{id:'annotations',title:'Type Annotations — Functions & Objects',icon:'✏️',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── VARIABLE ANNOTATIONS ────────────────────</span>
+<span class="kw">const</span> greeting: <span class="tp">string</span> = <span class="str">"Hello"</span>;
+<span class="kw">let</span> count: <span class="tp">number</span> = <span class="num">0</span>;
+
+<span class="cmt">// ─── FUNCTION ANNOTATIONS ────────────────────</span>
+<span class="kw">function</span> <span class="fn">add</span>(a: <span class="tp">number</span>, b: <span class="tp">number</span>): <span class="tp">number</span> {
+  <span class="kw">return</span> a + b;
+}
+
+<span class="cmt">// Arrow function</span>
+<span class="kw">const</span> multiply = (x: <span class="tp">number</span>, y: <span class="tp">number</span>): <span class="tp">number</span> => x * y;
+
+<span class="cmt">// Optional parameter (add ?)</span>
+<span class="kw">function</span> <span class="fn">greet</span>(name: <span class="tp">string</span>, title?: <span class="tp">string</span>): <span class="tp">string</span> {
+  <span class="kw">return</span> title ? <span class="str">\`\${title} \${name}\`</span> : name;
+}
+<span class="fn">greet</span>(<span class="str">"Alice"</span>);             <span class="cmt">// ✅ "Alice"</span>
+<span class="fn">greet</span>(<span class="str">"Alice"</span>, <span class="str">"Dr"</span>);      <span class="cmt">// ✅ "Dr Alice"</span>
+
+<span class="cmt">// Default parameter</span>
+<span class="kw">function</span> <span class="fn">createUser</span>(name: <span class="tp">string</span>, role: <span class="tp">string</span> = <span class="str">"user"</span>) {
+  <span class="kw">return</span> { name, role };
+}
+
+<span class="cmt">// ─── OBJECT TYPE ANNOTATIONS ─────────────────</span>
+<span class="kw">function</span> <span class="fn">formatName</span>(person: { firstName: <span class="tp">string</span>; lastName: <span class="tp">string</span> }): <span class="tp">string</span> {
+  <span class="kw">return</span> <span class="str">\`\${person.firstName} \${person.lastName}\`</span>;
+}
+
+<span class="cmt">// ─── ARRAY TYPES ─────────────────────────────</span>
+<span class="kw">const</span> numbers: <span class="tp">number</span>[] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];         <span class="cmt">// Preferred syntax</span>
+<span class="kw">const</span> strings: Array&lt;<span class="tp">string</span>&gt; = [<span class="str">"a"</span>, <span class="str">"b"</span>]; <span class="cmt">// Generic syntax</span>
+<span class="kw">const</span> mixed: (<span class="tp">string</span> | <span class="tp">number</span>)[] = [<span class="str">"a"</span>, <span class="num">1</span>, <span class="str">"b"</span>, <span class="num">2</span>]; <span class="cmt">// Union array</span>
+
+<span class="cmt">// ─── TUPLE (fixed-length, fixed-type array) ───</span>
+<span class="kw">const</span> coordinate: [<span class="tp">number</span>, <span class="tp">number</span>] = [<span class="num">12.97</span>, <span class="num">77.59</span>];
+<span class="kw">const</span> entry: [<span class="tp">string</span>, <span class="tp">number</span>] = [<span class="str">"age"</span>, <span class="num">28</span>];</pre></div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Function Call Argument Validation):</strong><br>
+      📥 <strong>Call:</strong> <code>add(5, "10")</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Argument of type 'string' not assignable to parameter of type 'number'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Optional Parameter Resolution):</strong><br>
+      📥 <strong>Calls:</strong> <code>greet("Alice")</code> and <code>greet("Alice", "Dr")</code><br>
+      📤 <strong>Expected Output:</strong> <code>"Alice"</code> and <code>"Dr Alice"</code> <span style="color:var(--muted)">(Optional title parameter resolves to undefined when omitted.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Tuple Structure Length Enforcement):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>const coordinate: [number, number] = [12.97, 77.59, 0];</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Source has 3 element(s) but target allows only 2.</code> <span style="color:var(--muted)">(Tuples strictly enforce exact element lengths and types at declared index slots.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'union-intersection',icon:'🔀',title:'Union & Intersection Types',group:'Types',
+desc:'Combine types flexibly — unions are "OR", intersections are "AND".',
+tags:['Essential','Union |','Intersection &'],
+sections:[
+{id:'union',title:'Union Types ( | )',icon:'🔀',content:`
+<div class="def"><strong>Union Type</strong> = A value that can be <strong>one of several types</strong>. Written as <code>TypeA | TypeB</code>. Think of it as "OR".</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// Basic union</span>
+<span class="kw">let</span> id: <span class="tp">string</span> | <span class="tp">number</span>;
+id = <span class="str">"ABC123"</span>;  <span class="cmt">// ✅</span>
+id = <span class="num">42</span>;       <span class="cmt">// ✅</span>
+id = <span class="kw">true</span>;     <span class="cmt">// ❌ Error!</span>
+
+<span class="cmt">// Union in function parameters</span>
+<span class="kw">function</span> <span class="fn">printId</span>(id: <span class="tp">string</span> | <span class="tp">number</span>) {
+  <span class="cmt">// Must narrow type before using type-specific methods</span>
+  <span class="kw">if</span> (<span class="kw">typeof</span> id === <span class="str">"string"</span>) {
+    console.<span class="fn">log</span>(id.<span class="fn">toUpperCase</span>()); <span class="cmt">// TS knows: id is string here</span>
+  } <span class="kw">else</span> {
+    console.<span class="fn">log</span>(id.<span class="fn">toFixed</span>(<span class="num">2</span>));   <span class="cmt">// TS knows: id is number here</span>
+  }
+}
+
+<span class="cmt">// Literal Union — most common pattern!</span>
+<span class="kw">type</span> <span class="cls">Direction</span> = <span class="str">"north"</span> | <span class="str">"south"</span> | <span class="str">"east"</span> | <span class="str">"west"</span>;
+<span class="kw">type</span> <span class="cls">Status</span>    = <span class="str">"idle"</span> | <span class="str">"loading"</span> | <span class="str">"success"</span> | <span class="str">"error"</span>;
+<span class="kw">type</span> <span class="cls">Size</span>      = <span class="str">"sm"</span> | <span class="str">"md"</span> | <span class="str">"lg"</span> | <span class="str">"xl"</span>;
+
+<span class="kw">function</span> <span class="fn">move</span>(dir: <span class="cls">Direction</span>) { ... }
+<span class="fn">move</span>(<span class="str">"north"</span>);    <span class="cmt">// ✅</span>
+<span class="fn">move</span>(<span class="str">"diagonal"</span>); <span class="cmt">// ❌ Error: not in union</span>
+
+<span class="cmt">// Union with null (very common for optional values)</span>
+<span class="kw">let</span> username: <span class="tp">string</span> | <span class="tp">null</span> = <span class="kw">null</span>;  <span class="cmt">// user not logged in</span>
+username = <span class="str">"alice"</span>;                   <span class="cmt">// user logged in</span>
+
+<span class="cmt">// Discriminated Union (best pattern for complex state)</span>
+<span class="kw">type</span> <span class="cls">RequestState</span> =
+  | { status: <span class="str">"idle"</span> }
+  | { status: <span class="str">"loading"</span> }
+  | { status: <span class="str">"success"</span>; data: <span class="tp">string</span>[] }
+  | { status: <span class="str">"error"</span>;   error: <span class="tp">string</span> };
+
+<span class="kw">function</span> <span class="fn">render</span>(state: <span class="cls">RequestState</span>) {
+  <span class="kw">switch</span> (state.status) {
+    <span class="kw">case</span> <span class="str">"loading"</span>: <span class="kw">return</span> <span class="str">"Spinner"</span>;
+    <span class="kw">case</span> <span class="str">"success"</span>: <span class="kw">return</span> state.data; <span class="cmt">// TS knows: data exists</span>
+    <span class="kw">case</span> <span class="str">"error"</span>:   <span class="kw">return</span> state.error; <span class="cmt">// TS knows: error exists</span>
+  }
+}</pre></div>
+<div class="memory"><strong>🧠 Memory:</strong> Union = OR. Intersection = AND. <code>|</code> pipe looks like "OR" in logic. <code>&</code> ampersand means "AND, combine everything".</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Union Assignment Check):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>let id: string | number; id = true;</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Type 'boolean' not assignable to type 'string | number'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Type Narrowing Method Dispatch):</strong><br>
+      📥 <strong>Calls:</strong> <code>printId("abc")</code> and <code>printId(42.567)</code><br>
+      📤 <strong>Expected Output:</strong> <code>"ABC"</code> (uppercase) and <code>"42.57"</code> (fixed decimal) <span style="color:var(--muted)">(typeof gates allow custom method executions safely.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Literal Union Bounds):</strong><br>
+      📥 <strong>Call:</strong> <code>move("diagonal")</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Argument of type '"diagonal"' not assignable to parameter of type 'Direction'.</code>
+    </div>
+  </div>
+</div>
+`
+},
+{id:'intersection',title:'Intersection Types ( & )',icon:'🔗',content:`
+<div class="def"><strong>Intersection Type</strong> = Combines multiple types into one. A value must satisfy <strong>ALL</strong> the types. Written as <code>TypeA & TypeB</code>. Think "AND".</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="kw">type</span> <span class="cls">Serializable</span> = { <span class="prop">serialize</span>(): <span class="tp">string</span> };
+<span class="kw">type</span> <span class="cls">Loggable</span>     = { <span class="prop">log</span>(): <span class="tp">void</span> };
+
+<span class="cmt">// Intersection: object must have BOTH serialize() AND log()</span>
+<span class="kw">type</span> <span class="cls">LoggableAndSerializable</span> = <span class="cls">Serializable</span> & <span class="cls">Loggable</span>;
+
+<span class="cmt">// Common use: extending types</span>
+<span class="kw">type</span> <span class="cls">User</span> = {
+  id: <span class="tp">number</span>;
+  name: <span class="tp">string</span>;
+};
+
+<span class="kw">type</span> <span class="cls">WithTimestamps</span> = {
+  createdAt: <span class="cls">Date</span>;
+  updatedAt: <span class="cls">Date</span>;
+};
+
+<span class="kw">type</span> <span class="cls">UserRecord</span> = <span class="cls">User</span> & <span class="cls">WithTimestamps</span>;
+<span class="cmt">// UserRecord has: id, name, createdAt, updatedAt</span>
+
+<span class="kw">const</span> user: <span class="cls">UserRecord</span> = {
+  id: <span class="num">1</span>,
+  name: <span class="str">"Alice"</span>,
+  createdAt: <span class="kw">new</span> <span class="cls">Date</span>(),
+  updatedAt: <span class="kw">new</span> <span class="cls">Date</span>(),
+};</pre></div>
+<div class="vs-grid">
+<div class="vs-col a"><h4>Union ( | ) — OR</h4>
+<div class="vs-item">Value can be TypeA OR TypeB</div>
+<div class="vs-item">Use for: flexible parameters</div>
+<div class="vs-item">Example: string | number | null</div>
+<div class="vs-item">Status: "loading" | "success" | "error"</div>
+</div>
+<div class="vs-col b"><h4>Intersection ( & ) — AND</h4>
+<div class="vs-item">Value must be TypeA AND TypeB</div>
+<div class="vs-item">Use for: combining/extending types</div>
+<div class="vs-item">Example: User & WithTimestamps</div>
+<div class="vs-item">Adds all properties together</div>
+</div>
+</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Successful Property Merging):</strong><br>
+      📥 <strong>Input:</strong> <code>const user: UserRecord = { id: 1, name: "Alice", createdAt: new Date(), updatedAt: new Date() };</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. The intersected type merges properties from both types.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Missing Intersection Properties):</strong><br>
+      📥 <strong>Input:</strong> <code>const user: UserRecord = { id: 1, name: "Alice" };</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Property 'createdAt' is missing in type '{ id: number; name: string; }' but required in type 'WithTimestamps'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Type Conflict in Intersection):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>type Conflicts = { id: string } & { id: number }; let x: Conflicts;</code><br>
+      📤 <strong>Expected Behavior:</strong> <code>x.id</code> resolves to type <code>never</code>, as no value can be both a string and a number simultaneously.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'interface',icon:'📋',title:'Interfaces',group:'Types',
+desc:'The primary way to describe object shapes in TypeScript.',
+tags:['Essential','Object Shape','Extends','Implements'],
+sections:[
+{id:'interface-basic',title:'Interface Basics',icon:'📖',content:`
+<div class="def"><strong>Interface</strong> = A contract that describes the shape of an object. It defines <em>what properties and methods</em> an object must have. Interfaces are erased at runtime — they only exist in TypeScript.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── BASIC INTERFACE ─────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">User</span> {
+  id:        <span class="tp">number</span>;
+  name:      <span class="tp">string</span>;
+  email?:    <span class="tp">string</span>;           <span class="cmt">// Optional (?) — may or may not exist</span>
+  <span class="kw">readonly</span> createdAt: <span class="cls">Date</span>;  <span class="cmt">// Readonly — cannot be changed after creation</span>
+}
+
+<span class="cmt">// Using the interface</span>
+<span class="kw">const</span> alice: <span class="cls">User</span> = {
+  id: <span class="num">1</span>,
+  name: <span class="str">"Alice"</span>,
+  createdAt: <span class="kw">new</span> <span class="cls">Date</span>()
+  <span class="cmt">// email is optional — OK to omit</span>
+};
+
+alice.createdAt = <span class="kw">new</span> <span class="cls">Date</span>(); <span class="cmt">// ❌ Error: Cannot assign to 'createdAt' — readonly!</span>
+
+<span class="cmt">// ─── METHOD SIGNATURES ───────────────────────</span>
+<span class="kw">interface</span> <span class="cls">Calculator</span> {
+  <span class="fn">add</span>(a: <span class="tp">number</span>, b: <span class="tp">number</span>): <span class="tp">number</span>;
+  <span class="fn">subtract</span>(a: <span class="tp">number</span>, b: <span class="tp">number</span>): <span class="tp">number</span>;
+  pi: <span class="tp">number</span>;  <span class="cmt">// Can also have properties</span>
+}
+
+<span class="cmt">// ─── INDEX SIGNATURE (for dynamic keys) ──────</span>
+<span class="kw">interface</span> <span class="cls">StringMap</span> {
+  [key: <span class="tp">string</span>]: <span class="tp">string</span>;  <span class="cmt">// Any string key → string value</span>
+}
+
+<span class="kw">const</span> translations: <span class="cls">StringMap</span> = {
+  hello: <span class="str">"namaste"</span>,
+  bye:   <span class="str">"alvida"</span>,
+  <span class="cmt">// Can add any string key</span>
+};</pre></div>
+<div class="tip"><strong>? vs readonly:</strong> <code>?</code> means "optional — might not exist". <code>readonly</code> means "exists but cannot be changed after creation".</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Readonly Property Block):</strong><br>
+      📥 <strong>Action:</strong> <code>const alice: User = { id: 1, name: "Alice", createdAt: new Date() }; alice.createdAt = new Date();</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Cannot assign to 'createdAt' because it is a read-only property.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Index Signature Keys):</strong><br>
+      📥 <strong>Action:</strong> <code>const maps: StringMap = { hello: "world" }; maps.bye = "alvida";</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. Dynamic string keys are allowed. Setting <code>maps.count = 100</code> throws: <code>Type 'number' not assignable to type 'string'</code>.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Optional Property Omission):</strong><br>
+      📥 <strong>Action:</strong> <code>const user: User = { id: 1, name: "Bob", createdAt: new Date() };</code><br>
+      📤 <strong>Expected Behavior:</strong> Valid. Optional <code>email</code> property is completely omitted without warnings.
+    </div>
+  </div>
+</div>
+`
+},
+{id:'interface-extends',title:'Interface Extension & Declaration Merging',icon:'🔗',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── EXTENDING INTERFACES (inheritance) ──────</span>
+<span class="kw">interface</span> <span class="cls">Animal</span> {
+  name: <span class="tp">string</span>;
+  <span class="fn">eat</span>(): <span class="tp">void</span>;
+}
+
+<span class="kw">interface</span> <span class="cls">Dog</span> <span class="kw">extends</span> <span class="cls">Animal</span> {    <span class="cmt">// Gets all of Animal's properties</span>
+  breed: <span class="tp">string</span>;
+  <span class="fn">bark</span>(): <span class="tp">void</span>;
+}
+<span class="cmt">// Dog now has: name, eat(), breed, bark()</span>
+
+<span class="cmt">// Extend multiple interfaces</span>
+<span class="kw">interface</span> <span class="cls">ServiceDog</span> <span class="kw">extends</span> <span class="cls">Dog</span>, <span class="cls">Animal</span> {
+  <span class="prop">serviceType</span>: <span class="tp">string</span>;
+}
+
+<span class="cmt">// ─── IMPLEMENTING IN CLASS ────────────────────</span>
+<span class="kw">class</span> <span class="cls">Labrador</span> <span class="kw">implements</span> <span class="cls">Dog</span> {
+  name: <span class="tp">string</span>;
+  breed: <span class="tp">string</span> = <span class="str">"Labrador"</span>;
+
+  <span class="fn">constructor</span>(name: <span class="tp">string</span>) {
+    <span class="kw">this</span>.name = name;
+  }
+  <span class="fn">eat</span>(): <span class="tp">void</span>  { console.<span class="fn">log</span>(<span class="str">"Nom nom"</span>); }
+  <span class="fn">bark</span>(): <span class="tp">void</span> { console.<span class="fn">log</span>(<span class="str">"Woof!"</span>); }
+}
+
+<span class="cmt">// ─── DECLARATION MERGING (unique to interfaces!) ──</span>
+<span class="kw">interface</span> <span class="cls">Window</span> {
+  myCustomProperty: <span class="tp">string</span>;  <span class="cmt">// Adds to the existing Window interface!</span>
+}
+<span class="cmt">// Now window.myCustomProperty is valid TS</span>
+<span class="cmt">// Type ALIASES cannot merge — only interfaces can!</span></pre></div>
+<div class="memory"><strong>🧠 Key Rule:</strong> Use <code>interface</code> for object shapes, especially when you'll extend them. Use <code>type</code> for unions, intersections, and primitives.</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Class Implementation of Extended Interface):</strong><br>
+      📥 <strong>Action:</strong> <code>const puppy = new Labrador("Max"); puppy.bark();</code><br>
+      📤 <strong>Expected Output:</strong> <code>"Woof!"</code> <span style="color:var(--muted)">(puppy inherits Dog's properties breed and name, eat() and bark().)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Missing Class Implementation Methods):</strong><br>
+      📥 <strong>Input class:</strong> <code>class Labrador implements Dog { name: string; breed: string; bark() {} }</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Class 'Labrador' incorrectly implements interface 'Dog'. Property 'eat' is missing in type 'Labrador' but required in type 'Dog'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Declaration Merging):</strong><br>
+      📥 <strong>Action:</strong> <code>interface Window { customProps: string; } window.customProps = "JPMC";</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. TypeScript merges both declarations into a single unified <code>Window</code> interface.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'type-alias',icon:'🏷️',title:'Type Aliases',group:'Types',
+desc:'Give a name to any type — primitives, unions, objects, functions.',
+tags:['Essential','Type Keyword','Union','Mapped'],
+sections:[
+{id:'type-basic',title:'Type Alias Basics',icon:'📖',content:`
+<div class="def"><strong>Type Alias</strong> = Gives a name to any type expression using the <code>type</code> keyword. Unlike interfaces, type aliases can represent unions, intersections, primitives, and more.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── NAMING PRIMITIVES ────────────────────────</span>
+<span class="kw">type</span> <span class="cls">UserID</span>  = <span class="tp">string</span>;
+<span class="kw">type</span> <span class="cls">Age</span>    = <span class="tp">number</span>;
+<span class="kw">type</span> <span class="cls">Email</span>  = <span class="tp">string</span>;
+
+<span class="cmt">// ─── OBJECT SHAPES ───────────────────────────</span>
+<span class="kw">type</span> <span class="cls">Point</span> = { x: <span class="tp">number</span>; y: <span class="tp">number</span> };
+<span class="kw">type</span> <span class="cls">Rect</span>  = { width: <span class="tp">number</span>; height: <span class="tp">number</span> };
+
+<span class="cmt">// ─── UNION TYPES ─────────────────────────────</span>
+<span class="kw">type</span> <span class="cls">Theme</span>   = <span class="str">"light"</span> | <span class="str">"dark"</span> | <span class="str">"system"</span>;
+<span class="kw">type</span> <span class="cls">Status</span>  = <span class="str">"pending"</span> | <span class="str">"active"</span> | <span class="str">"inactive"</span>;
+<span class="kw">type</span> <span class="cls">Nullable</span>&lt;T&gt; = T | <span class="kw">null</span>;
+
+<span class="cmt">// ─── FUNCTION TYPES ──────────────────────────</span>
+<span class="kw">type</span> <span class="cls">Callback</span>  = () => <span class="tp">void</span>;
+<span class="kw">type</span> <span class="cls">Transform</span> = (input: <span class="tp">string</span>) => <span class="tp">string</span>;
+<span class="kw">type</span> <span class="cls">EventHandler</span>&lt;E = Event&gt; = (event: E) => <span class="tp">void</span>;
+
+<span class="cmt">// ─── TUPLE TYPES ─────────────────────────────</span>
+<span class="kw">type</span> <span class="cls">Pair</span>&lt;T&gt;     = [T, T];
+<span class="kw">type</span> <span class="cls">Coordinate</span>  = [<span class="tp">number</span>, <span class="tp">number</span>];
+<span class="kw">type</span> <span class="cls">StateReturn</span>&lt;T&gt; = [T, (value: T) => <span class="tp">void</span>]; <span class="cmt">// Like useState!</span>
+
+<span class="cmt">// ─── COMBINATION ─────────────────────────────</span>
+<span class="kw">type</span> <span class="cls">APIResponse</span>&lt;T&gt; = {
+  data: T;
+  status: <span class="tp">number</span>;
+  message: <span class="tp">string</span>;
+  error?: <span class="tp">string</span>;
+};
+
+<span class="kw">type</span> <span class="cls">UserResponse</span> = <span class="cls">APIResponse</span>&lt;{ id: <span class="tp">number</span>; name: <span class="tp">string</span> }&gt;;</pre></div>
+<div class="vs-grid">
+<div class="vs-col a"><h4>Use Interface When</h4>
+<div class="vs-item">Defining object/class shape</div>
+<div class="vs-item">Need extends (inheritance)</div>
+<div class="vs-item">Need declaration merging</div>
+<div class="vs-item">Public API / library code</div>
+</div>
+<div class="vs-col b"><h4>Use Type When</h4>
+<div class="vs-item">Union types (A | B)</div>
+<div class="vs-item">Intersection types (A & B)</div>
+<div class="vs-item">Tuple types [A, B]</div>
+<div class="vs-item">Function types</div>
+</div>
+</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Generic Response Type Mapping):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>const res: UserResponse = { data: { id: 1, name: "Alice" }, status: 200, message: "OK" };</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, typing the data payload property strictly to the passed User schema.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Theme literal union checks):</strong><br>
+      📥 <strong>Action:</strong> <code>const t: Theme = "blue";</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Type '"blue"' not assignable to type 'Theme'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (useState typed return matching):</strong><br>
+      📥 <strong>Action:</strong> <code>const state: StateReturn<number> = [10, (v) => {}];</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. Typings correspond directly to React hooks value-setter tuples.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'generics',icon:'🔧',title:'Generics',group:'Advanced',
+desc:'Write reusable code that works with multiple types while maintaining type safety.',
+tags:['Important','<T>','Reusable','Constraints'],
+sections:[
+{id:'generics-basic',title:'Generic Basics',icon:'📖',content:`
+<div class="def"><strong>Generics</strong> = Write functions/classes/interfaces that work with <em>any type</em>, while still being type-safe. The type is passed as a <strong>type parameter</strong> using <code>&lt;T&gt;</code>.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── PROBLEM without generics ─────────────────</span>
+<span class="kw">function</span> <span class="fn">identity_bad</span>(value: <span class="tp">any</span>): <span class="tp">any</span> { <span class="cmt">// loses type info!</span>
+  <span class="kw">return</span> value;
+}
+<span class="kw">const</span> result = <span class="fn">identity_bad</span>(<span class="str">"hello"</span>); <span class="cmt">// result is 'any' 😱</span>
+
+<span class="cmt">// ─── SOLUTION with generics ───────────────────</span>
+<span class="kw">function</span> <span class="fn">identity</span>&lt;<span class="cls">T</span>&gt;(value: <span class="cls">T</span>): <span class="cls">T</span> { <span class="cmt">// T is a placeholder for any type</span>
+  <span class="kw">return</span> value;
+}
+<span class="kw">const</span> s = <span class="fn">identity</span>&lt;<span class="tp">string</span>&gt;(<span class="str">"hello"</span>); <span class="cmt">// s is 'string' ✅</span>
+<span class="kw">const</span> n = <span class="fn">identity</span>&lt;<span class="tp">number</span>&gt;(<span class="num">42</span>);      <span class="cmt">// n is 'number' ✅</span>
+<span class="kw">const</span> b = <span class="fn">identity</span>(<span class="kw">true</span>);           <span class="cmt">// TypeScript INFERS: identity&lt;boolean&gt;</span>
+
+<span class="cmt">// ─── MULTIPLE TYPE PARAMS ─────────────────────</span>
+<span class="kw">function</span> <span class="fn">pair</span>&lt;<span class="cls">A</span>, <span class="cls">B</span>&gt;(first: <span class="cls">A</span>, second: <span class="cls">B</span>): [<span class="cls">A</span>, <span class="cls">B</span>] {
+  <span class="kw">return</span> [first, second];
+}
+<span class="kw">const</span> p = <span class="fn">pair</span>(<span class="str">"age"</span>, <span class="num">28</span>); <span class="cmt">// [string, number]</span>
+
+<span class="cmt">// ─── GENERIC INTERFACES & TYPES ───────────────</span>
+<span class="kw">interface</span> <span class="cls">Box</span>&lt;<span class="cls">T</span>&gt; {
+  value: <span class="cls">T</span>;
+  <span class="fn">getValue</span>(): <span class="cls">T</span>;
+}
+
+<span class="kw">type</span> <span class="cls">ApiResponse</span>&lt;<span class="cls">T</span>&gt; = {
+  data:    <span class="cls">T</span>;
+  status:  <span class="tp">number</span>;
+  loading: <span class="tp">boolean</span>;
+  error?:  <span class="tp">string</span>;
+};
+
+<span class="kw">type</span> <span class="cls">UserResponse</span>    = <span class="cls">ApiResponse</span>&lt;<span class="cls">User</span>&gt;;
+<span class="kw">type</span> <span class="cls">ProductResponse</span> = <span class="cls">ApiResponse</span>&lt;<span class="cls">Product</span>&gt;;
+
+<span class="cmt">// ─── GENERIC ARRAYS ────────────────────────────</span>
+<span class="kw">function</span> <span class="fn">firstItem</span>&lt;<span class="cls">T</span>&gt;(arr: <span class="cls">T</span>[]): <span class="cls">T</span> | <span class="tp">undefined</span> {
+  <span class="kw">return</span> arr[<span class="num">0</span>];
+}
+<span class="kw">const</span> first = <span class="fn">firstItem</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]); <span class="cmt">// TypeScript infers: number | undefined</span></pre></div>
+<div class="memory"><strong>🧠 Memory:</strong> Think of generics like a function parameter — but for types! <code>T</code> is just a placeholder. You're saying "I don't know the type yet, the caller will tell me". Common names: T=Type, K=Key, V=Value, E=Element.</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Retaining types dynamically):</strong><br>
+      📥 <strong>Calls:</strong> <code>identity&lt;string&gt;("hello")</code> and <code>identity&lt;number&gt;(42)</code><br>
+      📤 <strong>Expected Type:</strong> Returned variables resolve strictly to types <code>string</code> and <code>number</code> respectively.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Type Inference inside Generics):</strong><br>
+      📥 <strong>Call:</strong> <code>identity(true)</code><br>
+      📤 <strong>Expected Behavior:</strong> TypeScript infers <code>T</code> as <code>boolean</code> automatically, resolving return variable as a boolean.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Dynamic Array generic indexes):</strong><br>
+      📥 <strong>Call:</strong> <code>firstItem([1, 2, 3])</code><br>
+      📤 <strong>Expected Type:</strong> Resolves to type <code>number | undefined</code>, protecting access to empty array index slots.
+    </div>
+  </div>
+</div>
+`
+},
+{id:'generics-constraints',title:'Generic Constraints',icon:'🔒',content:`
+<div class="def"><strong>Constraints</strong> = Restrict what types <code>T</code> can be using <code>extends</code>. This lets you use properties of T without TypeScript complaining.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// WITHOUT constraint — TypeScript complains</span>
+<span class="kw">function</span> <span class="fn">getLength_bad</span>&lt;<span class="cls">T</span>&gt;(item: <span class="cls">T</span>): <span class="tp">number</span> {
+  <span class="kw">return</span> item.length; <span class="cmt">// ❌ Error: T might not have .length</span>
+}
+
+<span class="cmt">// WITH constraint — TypeScript is happy</span>
+<span class="kw">function</span> <span class="fn">getLength</span>&lt;<span class="cls">T</span> <span class="kw">extends</span> { length: <span class="tp">number</span> }&gt;(item: <span class="cls">T</span>): <span class="tp">number</span> {
+  <span class="kw">return</span> item.length; <span class="cmt">// ✅ We guaranteed T has .length</span>
+}
+<span class="fn">getLength</span>(<span class="str">"hello"</span>);    <span class="cmt">// ✅ string has .length</span>
+<span class="fn">getLength</span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]);  <span class="cmt">// ✅ array has .length</span>
+<span class="fn">getLength</span>(<span class="num">42</span>);         <span class="cmt">// ❌ Error: number has no .length</span>
+
+<span class="cmt">// ─── keyof constraint (very common!) ──────────</span>
+<span class="kw">function</span> <span class="fn">getProperty</span>&lt;<span class="cls">T</span>, <span class="cls">K</span> <span class="kw">extends</span> <span class="kw">keyof</span> <span class="cls">T</span>&gt;(obj: <span class="cls">T</span>, key: <span class="cls">K</span>): <span class="cls">T</span>[<span class="cls">K</span>] {
+  <span class="kw">return</span> obj[key]; <span class="cmt">// Safely access a property of obj</span>
+}
+
+<span class="kw">const</span> user = { name: <span class="str">"Alice"</span>, age: <span class="num">28</span> };
+<span class="fn">getProperty</span>(user, <span class="str">"name"</span>);  <span class="cmt">// ✅ returns "Alice" (type: string)</span>
+<span class="fn">getProperty</span>(user, <span class="str">"age"</span>);   <span class="cmt">// ✅ returns 28 (type: number)</span>
+<span class="fn">getProperty</span>(user, <span class="str">"email"</span>); <span class="cmt">// ❌ Error: "email" not in User!</span>
+
+<span class="cmt">// ─── Default generic type ─────────────────────</span>
+<span class="kw">interface</span> <span class="cls">Container</span>&lt;<span class="cls">T</span> = <span class="tp">string</span>&gt; { <span class="cmt">// Default to string if not specified</span>
+  value: <span class="cls">T</span>;
+}
+
+<span class="kw">const</span> a: <span class="cls">Container</span>          = { value: <span class="str">"hello"</span> };  <span class="cmt">// T = string (default)</span>
+<span class="kw">const</span> b: <span class="cls">Container</span>&lt;<span class="tp">number</span>&gt;  = { value: <span class="num">42</span> };       <span class="cmt">// T = number</span></pre></div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Enforcing properties inside generic parameters):</strong><br>
+      📥 <strong>Call:</strong> <code>getLength(42)</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Argument of type 'number' not assignable to parameter of type '{ length: number; }'.</code> <span style="color:var(--muted)">(number doesn't have a length property.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (keyof constraint keys validations):</strong><br>
+      📥 <strong>Action:</strong> <code>getProperty(user, "email")</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Argument of type '"email"' not assignable to parameter of type '"name" | "age"'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Generic defaults fallback):</strong><br>
+      📥 <strong>Action:</strong> <code>const a: Container = { value: "hello" };</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, falling back to default type parameter <code>string</code>.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'utility-types',icon:'🛠️',title:'Utility Types',group:'Advanced',
+desc:'Built-in type transformers — the most used TypeScript feature in real projects.',
+tags:['Very Important','Built-in','Memorize All'],
+sections:[
+{id:'utility-core',title:'Core Utility Types (Must Know!)',icon:'⭐',content:`
+<div class="def"><strong>Utility Types</strong> = Pre-built generic types that transform existing types. TypeScript ships with these built-in. They are <em>extremely common</em> in real codebases and interviews!</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="kw">interface</span> <span class="cls">User</span> {
+  id:        <span class="tp">number</span>;
+  name:      <span class="tp">string</span>;
+  email:     <span class="tp">string</span>;
+  password:  <span class="tp">string</span>;
+  role:      <span class="str">"admin"</span> | <span class="str">"user"</span>;
+  createdAt: <span class="cls">Date</span>;
+}
+
+<span class="cmt">// ─── Partial&lt;T&gt; — all properties become optional ──</span>
+<span class="kw">type</span> <span class="cls">UpdateUser</span> = Partial&lt;<span class="cls">User</span>&gt;;
+<span class="cmt">// { id?: number; name?: string; email?: string; ... }</span>
+<span class="cmt">// Use case: PATCH requests (update only some fields)</span>
+<span class="kw">function</span> <span class="fn">updateUser</span>(id: <span class="tp">number</span>, changes: Partial&lt;<span class="cls">User</span>&gt;) { }
+
+<span class="cmt">// ─── Required&lt;T&gt; — all optional become required ───</span>
+<span class="kw">type</span> <span class="cls">StrictUser</span> = Required&lt;<span class="cls">User</span>&gt;;
+<span class="cmt">// Every field MUST be present</span>
+
+<span class="cmt">// ─── Readonly&lt;T&gt; — all properties become readonly ─</span>
+<span class="kw">type</span> <span class="cls">FrozenUser</span> = Readonly&lt;<span class="cls">User</span>&gt;;
+<span class="cmt">// Cannot modify any property after creation</span>
+<span class="kw">const</span> frozen: <span class="cls">FrozenUser</span> = { id: <span class="num">1</span>, name: <span class="str">"Alice"</span>, ... };
+frozen.name = <span class="str">"Bob"</span>; <span class="cmt">// ❌ Error: readonly!</span>
+
+<span class="cmt">// ─── Pick&lt;T, Keys&gt; — keep only specific properties ─</span>
+<span class="kw">type</span> <span class="cls">UserPreview</span> = Pick&lt;<span class="cls">User</span>, <span class="str">"id"</span> | <span class="str">"name"</span>&gt;;
+<span class="cmt">// { id: number; name: string }  — only these two!</span>
+<span class="cmt">// Use case: API response with limited fields</span>
+
+<span class="cmt">// ─── Omit&lt;T, Keys&gt; — remove specific properties ────</span>
+<span class="kw">type</span> <span class="cls">UserWithoutPassword</span> = Omit&lt;<span class="cls">User</span>, <span class="str">"password"</span>&gt;;
+<span class="cmt">// All User fields EXCEPT password</span>
+<span class="cmt">// Use case: Public user data (never send password!)</span>
+
+<span class="kw">type</span> <span class="cls">CreateUserInput</span> = Omit&lt;<span class="cls">User</span>, <span class="str">"id"</span> | <span class="str">"createdAt"</span>&gt;;
+<span class="cmt">// Remove auto-generated fields from input form</span>
+
+<span class="cmt">// ─── Record&lt;Keys, Type&gt; — map keys to type ──────────</span>
+<span class="kw">type</span> <span class="cls">RolePermissions</span> = Record&lt;<span class="str">"admin"</span> | <span class="str">"user"</span> | <span class="str">"guest"</span>, <span class="tp">string</span>[]&gt;;
+<span class="cmt">// { admin: string[]; user: string[]; guest: string[] }</span>
+
+<span class="kw">const</span> perms: <span class="cls">RolePermissions</span> = {
+  admin: [<span class="str">"read"</span>, <span class="str">"write"</span>, <span class="str">"delete"</span>],
+  user:  [<span class="str">"read"</span>, <span class="str">"write"</span>],
+  guest: [<span class="str">"read"</span>],
+};</pre></div>
+<div class="memory"><strong>🧠 Memory Trick — "PRR-POR":</strong><br>
+<strong>P</strong>artial = all optional | <strong>R</strong>equired = all required | <strong>R</strong>eadonly = no change allowed<br>
+<strong>P</strong>ick = keep selected | <strong>O</strong>mit = remove selected | <strong>R</strong>ecord = key-value map</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Partial&lt;T&gt; in mutations):</strong><br>
+      📥 <strong>Action:</strong> <code>updateUser(1, { name: "Bob" })</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. Partial marks all User properties optional, perfect for PATCH updates.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Omit&lt;T, K&gt; for secure responses):</strong><br>
+      📥 <strong>Action:</strong> <code>const clientData: Omit&lt;User, "password"&gt; = { id: 1, name: "Alice", email: "a@a.com", role: "user", createdAt: new Date() };</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, stripping sensitive database columns.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Record&lt;K, V&gt; mapping check):</strong><br>
+      📥 <strong>Action:</strong> <code>const config: Record&lt;"USD" | "EUR", number&gt; = { USD: 1.0, EUR: 0.92 };</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. Rejects arbitrary strings like <code>INR: 83.5</code>.
+    </div>
+  </div>
+</div>
+`
+},
+{id:'utility-advanced',title:'Advanced Utility Types',icon:'🔬',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── Exclude&lt;T, U&gt; — remove types from a union ──────</span>
+<span class="kw">type</span> <span class="cls">Colors</span>  = <span class="str">"red"</span> | <span class="str">"green"</span> | <span class="str">"blue"</span> | <span class="str">"black"</span>;
+<span class="kw">type</span> <span class="cls">Primary</span> = Exclude&lt;<span class="cls">Colors</span>, <span class="str">"black"</span>&gt;;
+<span class="cmt">// "red" | "green" | "blue"  — black removed</span>
+
+<span class="cmt">// ─── Extract&lt;T, U&gt; — keep only matching types ────────</span>
+<span class="kw">type</span> <span class="cls">Mixed</span>   = <span class="tp">string</span> | <span class="tp">number</span> | <span class="tp">boolean</span>;
+<span class="kw">type</span> <span class="cls">Strings</span> = Extract&lt;<span class="cls">Mixed</span>, <span class="tp">string</span>&gt;;  <span class="cmt">// string</span>
+<span class="kw">type</span> <span class="cls">Nums</span>    = Extract&lt;<span class="cls">Mixed</span>, <span class="tp">string</span> | <span class="tp">number</span>&gt;; <span class="cmt">// string | number</span>
+
+<span class="cmt">// ─── NonNullable&lt;T&gt; — remove null and undefined ──────</span>
+<span class="kw">type</span> <span class="cls">MaybeString</span>    = <span class="tp">string</span> | <span class="tp">null</span> | <span class="tp">undefined</span>;
+<span class="kw">type</span> <span class="cls">DefiniteString</span> = NonNullable&lt;<span class="cls">MaybeString</span>&gt;; <span class="cmt">// string</span>
+
+<span class="cmt">// ─── ReturnType&lt;T&gt; — get return type of a function ───</span>
+<span class="kw">function</span> <span class="fn">getUser</span>() {
+  <span class="kw">return</span> { id: <span class="num">1</span>, name: <span class="str">"Alice"</span>, role: <span class="str">"admin"</span> };
+}
+<span class="kw">type</span> <span class="cls">UserShape</span> = ReturnType&lt;<span class="kw">typeof</span> getUser&gt;;
+<span class="cmt">// { id: number; name: string; role: string }</span>
+<span class="cmt">// Useful: no need to define a separate type!</span>
+
+<span class="cmt">// ─── Parameters&lt;T&gt; — get parameter types as tuple ───</span>
+<span class="kw">function</span> <span class="fn">createPost</span>(title: <span class="tp">string</span>, body: <span class="tp">string</span>, userId: <span class="tp">number</span>) {}
+<span class="kw">type</span> <span class="cls">PostParams</span> = Parameters&lt;<span class="kw">typeof</span> createPost&gt;;
+<span class="cmt">// [title: string, body: string, userId: number]</span>
+
+<span class="cmt">// ─── Awaited&lt;T&gt; — unwrap Promise type ───────────────</span>
+<span class="kw">type</span> <span class="cls">UserPromise</span>  = Promise&lt;<span class="cls">User</span>&gt;;
+<span class="kw">type</span> <span class="cls">ResolvedUser</span> = Awaited&lt;<span class="cls">UserPromise</span>&gt;; <span class="cmt">// User</span>
+<span class="cmt">// TypeScript 4.5+ — great for async functions</span></pre></div>
+<table class="tbl"><thead><tr><th>Utility Type</th><th>What it does</th><th>Common Use</th></tr></thead>
+<tbody>
+<tr><td>Partial&lt;T&gt;</td><td>All props optional</td><td>PATCH/update requests</td></tr>
+<tr><td>Required&lt;T&gt;</td><td>All props required</td><td>Strict validation</td></tr>
+<tr><td>Readonly&lt;T&gt;</td><td>All props readonly</td><td>Immutable state/config</td></tr>
+<tr><td>Pick&lt;T, K&gt;</td><td>Keep named props</td><td>Subset of type for display</td></tr>
+<tr><td>Omit&lt;T, K&gt;</td><td>Remove named props</td><td>Remove sensitive fields</td></tr>
+<tr><td>Record&lt;K, V&gt;</td><td>Key-value map type</td><td>Dictionaries, lookup tables</td></tr>
+<tr><td>Exclude&lt;T, U&gt;</td><td>Remove from union</td><td>Filter union types</td></tr>
+<tr><td>Extract&lt;T, U&gt;</td><td>Keep from union</td><td>Filter union types</td></tr>
+<tr><td>NonNullable&lt;T&gt;</td><td>Remove null/undefined</td><td>Guaranteed value</td></tr>
+<tr><td>ReturnType&lt;F&gt;</td><td>Function return type</td><td>Infer from function</td></tr>
+<tr><td>Parameters&lt;F&gt;</td><td>Function param types</td><td>Reuse function params</td></tr>
+<tr><td>Awaited&lt;T&gt;</td><td>Unwrap Promise</td><td>Async return types</td></tr>
+</tbody></table>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Exclude&lt;T, U&gt; union filter):</strong><br>
+      📥 <strong>Input Variable:</strong> <code>type T = Exclude&lt;"A" | "B" | "C", "C"&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>"A" | "B"</code> <span style="color:var(--muted)">("C" is excluded from the union.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (ReturnType&lt;T&gt; extraction):</strong><br>
+      📥 <strong>Input function:</strong> <code>function getPrice() { return 100; } type P = ReturnType&lt;typeof getPrice&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>number</code> <span style="color:var(--muted)">(Extracts the return type of the function pointer.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Awaited Promise Unwrapping):</strong><br>
+      📥 <strong>Input Type:</strong> <code>Awaited&lt;Promise&lt;string&gt;&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>string</code> <span style="color:var(--muted)">(Unwraps Promise values to their resolved type.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'type-guards',icon:'🛡️',title:'Type Guards & Narrowing',group:'Advanced',
+desc:'Tell TypeScript what type a variable is at runtime to use type-specific methods safely.',
+tags:['Important','Runtime Check','typeof','instanceof'],
+sections:[
+{id:'guards-basic',title:'Type Narrowing Techniques',icon:'🔍',content:`
+<div class="def"><strong>Type Narrowing</strong> = Using runtime checks to tell TypeScript "within this block, the variable is definitely this type". TypeScript analyzes these checks and narrows the type.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── 1. typeof guard ─────────────────────────</span>
+<span class="kw">function</span> <span class="fn">process</span>(value: <span class="tp">string</span> | <span class="tp">number</span> | <span class="tp">boolean</span>) {
+  <span class="kw">if</span> (<span class="kw">typeof</span> value === <span class="str">"string"</span>) {
+    value.<span class="fn">toUpperCase</span>(); <span class="cmt">// ✅ TS knows: value is string</span>
+  } <span class="kw">else if</span> (<span class="kw">typeof</span> value === <span class="str">"number"</span>) {
+    value.<span class="fn">toFixed</span>(<span class="num">2</span>);   <span class="cmt">// ✅ TS knows: value is number</span>
+  } <span class="kw">else</span> {
+    value;              <span class="cmt">// TS knows: value is boolean</span>
+  }
+}
+
+<span class="cmt">// ─── 2. instanceof guard ──────────────────────</span>
+<span class="kw">function</span> <span class="fn">handleError</span>(err: <span class="tp">unknown</span>) {
+  <span class="kw">if</span> (err <span class="kw">instanceof</span> <span class="cls">Error</span>) {
+    console.<span class="fn">log</span>(err.message);  <span class="cmt">// ✅ err is Error</span>
+  } <span class="kw">else</span> {
+    console.<span class="fn">log</span>(String(err));
+  }
+}
+
+<span class="cmt">// ─── 3. in operator guard ─────────────────────</span>
+<span class="kw">type</span> <span class="cls">Cat</span> = { kind: <span class="str">"cat"</span>; meow(): <span class="tp">void</span> };
+<span class="kw">type</span> <span class="cls">Dog</span> = { kind: <span class="str">"dog"</span>; bark(): <span class="tp">void</span> };
+
+<span class="kw">function</span> <span class="fn">makeSound</span>(pet: <span class="cls">Cat</span> | <span class="cls">Dog</span>) {
+  <span class="kw">if</span> (<span class="str">"meow"</span> <span class="kw">in</span> pet) {
+    pet.<span class="fn">meow</span>(); <span class="cmt">// ✅ TS knows: pet is Cat</span>
+  } <span class="kw">else</span> {
+    pet.<span class="fn">bark</span>(); <span class="cmt">// ✅ TS knows: pet is Dog</span>
+  }
+}
+
+<span class="cmt">// ─── 4. Discriminated union (best pattern) ────</span>
+<span class="kw">function</span> <span class="fn">render</span>(state: <span class="cls">RequestState</span>) {
+  <span class="kw">switch</span> (state.status) {
+    <span class="kw">case</span> <span class="str">"loading"</span>: <span class="kw">return</span> &lt;<span class="cls">Spinner</span> /&gt;;
+    <span class="kw">case</span> <span class="str">"success"</span>: <span class="kw">return</span> &lt;<span class="cls">List</span> data={state.data} /&gt;; <span class="cmt">// ✅ data exists!</span>
+    <span class="kw">case</span> <span class="str">"error"</span>:   <span class="kw">return</span> &lt;<span class="cls">Error</span> msg={state.error} /&gt;; <span class="cmt">// ✅ error exists!</span>
+  }
+}
+
+<span class="cmt">// ─── 5. Custom type predicate (is) ────────────</span>
+<span class="kw">function</span> <span class="fn">isString</span>(value: <span class="tp">unknown</span>): value <span class="kw">is</span> <span class="tp">string</span> {
+  <span class="kw">return</span> <span class="kw">typeof</span> value === <span class="str">"string"</span>;
+}
+
+<span class="kw">function</span> <span class="fn">processInput</span>(input: <span class="tp">unknown</span>) {
+  <span class="kw">if</span> (<span class="fn">isString</span>(input)) {
+    input.<span class="fn">toUpperCase</span>(); <span class="cmt">// ✅ TS knows: input is string</span>
+  }
+}</pre></div>
+<div class="memory"><strong>🧠 Memory — 5 Ways to Narrow:</strong><br>
+1. <code>typeof x === "string"</code> — for primitives<br>
+2. <code>x instanceof Error</code> — for class instances<br>
+3. <code>"prop" in obj</code> — for checking property existence<br>
+4. <code>x.kind === "cat"</code> — discriminated union<br>
+5. <code>function isX(v): v is X</code> — custom predicate</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (typeof primitive guards):</strong><br>
+      📥 <strong>Action:</strong> <code>if (typeof value === "string") value.toUpperCase();</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, narrowing <code>value</code> strictly to string in that scope.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (instanceof Class instance checks):</strong><br>
+      📥 <strong>Action:</strong> <code>if (err instanceof Error) console.log(err.message);</code><br>
+      📤 <strong>Expected Behavior:</strong> Narrows <code>err</code> to <code>Error</code>, validating <code>message</code> property presence safely.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (in Operator Object keys checks):</strong><br>
+      📥 <strong>Action:</strong> <code>if ("meow" in pet) pet.meow();</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, checking key property existence in the object runtime payload.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'enums',icon:'📊',title:'Enums',group:'Types',
+desc:'Named constants — define a set of named values. Numeric and string enums.',
+tags:['Common','const enum','String Enum'],
+sections:[
+{id:'enums-basic',title:'Enum Types',icon:'📖',content:`
+<div class="def"><strong>Enum</strong> = A way to define a set of named constants. Unlike type unions, enums exist at runtime as objects.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── NUMERIC ENUM (default) ───────────────────</span>
+<span class="kw">enum</span> <span class="cls">Direction</span> {
+  Up    = <span class="num">0</span>,  <span class="cmt">// or just: Up (auto = 0)</span>
+  Down  = <span class="num">1</span>,  <span class="cmt">// auto-increments</span>
+  Left  = <span class="num">2</span>,
+  Right = <span class="num">3</span>,
+}
+<span class="kw">let</span> dir: <span class="cls">Direction</span> = <span class="cls">Direction</span>.Up;  <span class="cmt">// dir = 0</span>
+
+<span class="cmt">// ─── STRING ENUM (preferred!) ─────────────────</span>
+<span class="kw">enum</span> <span class="cls">Status</span> {
+  Active   = <span class="str">"ACTIVE"</span>,
+  Inactive = <span class="str">"INACTIVE"</span>,
+  Pending  = <span class="str">"PENDING"</span>,
+}
+<span class="kw">let</span> status: <span class="cls">Status</span> = <span class="cls">Status</span>.Active; <span class="cmt">// "ACTIVE"</span>
+
+<span class="cmt">// ─── CONST ENUM (compiled away — no runtime obj) ──</span>
+<span class="kw">const</span> <span class="kw">enum</span> <span class="cls">HttpMethod</span> {
+  GET    = <span class="str">"GET"</span>,
+  POST   = <span class="str">"POST"</span>,
+  PUT    = <span class="str">"PUT"</span>,
+  DELETE = <span class="str">"DELETE"</span>,
+}
+<span class="cmt">// Inlines the values at compile time — more efficient!</span>
+
+<span class="cmt">// ─── Using enums ─────────────────────────────</span>
+<span class="kw">function</span> <span class="fn">fetchData</span>(method: <span class="cls">HttpMethod</span>, url: <span class="tp">string</span>) {
+  console.<span class="fn">log</span>(<span class="str">\`\${method} \${url}\`</span>);
+}
+<span class="fn">fetchData</span>(<span class="cls">HttpMethod</span>.GET, <span class="str">"/api/users"</span>);</pre></div>
+<div class="tip"><strong>Interview Answer:</strong> Prefer <strong>string enums</strong> over numeric — more readable in logs/JSON. Use <strong>const enum</strong> for performance (no runtime object created). For new code, consider using <strong>union of literals</strong> instead: <code>type Status = "ACTIVE" | "INACTIVE"</code> — simpler and equally type-safe.</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Numeric Auto-Increment):</strong><br>
+      📥 <strong>Action:</strong> <code>console.log(Direction.Up, Direction.Down);</code><br>
+      📤 <strong>Expected Output:</strong> <code>0, 1</code> <span style="color:var(--muted)">(Numeric enums auto-assign incrementing numbers.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (String Enum log values):</strong><br>
+      📥 <strong>Action:</strong> <code>console.log(Status.Active);</code><br>
+      📤 <strong>Expected Output:</strong> <code>"ACTIVE"</code> <span style="color:var(--muted)">(Provides highly readable string log mappings in production.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Const Enum compile optimizations):</strong><br>
+      📥 <strong>Compiled JS output of HttpMethod.GET:</strong><br>
+      📤 <strong>Expected Output:</strong> <code>fetchData("GET", "/api/users")</code> <span style="color:var(--muted)">(HttpMethod is completely erased at compilation, leaving no runtime object.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'classes',icon:'🏛️',title:'Classes in TypeScript',group:'Advanced',
+desc:'OOP with TypeScript — access modifiers, abstract classes, implements.',
+tags:['OOP','Access Modifiers','Abstract','Implements'],
+sections:[
+{id:'classes-basic',title:'Classes & Access Modifiers',icon:'📖',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="kw">class</span> <span class="cls">BankAccount</span> {
+  <span class="cmt">// ─── Access Modifiers ─────────────────────────</span>
+  <span class="kw">public</span>    accountNumber: <span class="tp">string</span>;  <span class="cmt">// Accessible everywhere (default)</span>
+  <span class="kw">private</span>   balance: <span class="tp">number</span>;        <span class="cmt">// Only this class</span>
+  <span class="kw">protected</span> owner: <span class="tp">string</span>;          <span class="cmt">// This class + subclasses</span>
+  <span class="kw">readonly</span>  createdAt: <span class="cls">Date</span>;       <span class="cmt">// Cannot reassign</span>
+
+  <span class="cmt">// ─── Shorthand constructor (auto-creates properties) ──</span>
+  <span class="fn">constructor</span>(
+    <span class="kw">public</span>  accountNumber: <span class="tp">string</span>,  <span class="cmt">// Creates this.accountNumber</span>
+    <span class="kw">private</span> balance: <span class="tp">number</span> = <span class="num">0</span>    <span class="cmt">// Creates this.balance = 0</span>
+  ) {
+    <span class="kw">this</span>.owner = <span class="str">"Unknown"</span>;
+    <span class="kw">this</span>.createdAt = <span class="kw">new</span> <span class="cls">Date</span>();
+  }
+
+  <span class="cmt">// ─── Getter / Setter ──────────────────────────</span>
+  <span class="kw">get</span> <span class="fn">currentBalance</span>(): <span class="tp">number</span> {
+    <span class="kw">return</span> <span class="kw">this</span>.balance;
+  }
+  <span class="kw">set</span> <span class="fn">deposit</span>(amount: <span class="tp">number</span>) {
+    <span class="kw">if</span> (amount <= <span class="num">0</span>) <span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span>(<span class="str">"Invalid amount"</span>);
+    <span class="kw">this</span>.balance += amount;
+  }
+
+  <span class="cmt">// ─── Static methods / properties ─────────────</span>
+  <span class="kw">static</span> <span class="fn">create</span>(number: <span class="tp">string</span>): <span class="cls">BankAccount</span> {
+    <span class="kw">return</span> <span class="kw">new</span> <span class="cls">BankAccount</span>(number);
+  }
+}
+
+<span class="cmt">// ─── Abstract Classes ─────────────────────────</span>
+<span class="kw">abstract</span> <span class="kw">class</span> <span class="cls">Shape</span> {
+  <span class="kw">abstract</span> <span class="fn">getArea</span>(): <span class="tp">number</span>; <span class="cmt">// Must be implemented by subclass</span>
+
+  <span class="fn">describe</span>(): <span class="tp">string</span> { <span class="cmt">// Shared implementation</span>
+    <span class="kw">return</span> <span class="str">\`Area: \${<span class="kw">this</span>.<span class="fn">getArea</span>()}\`</span>;
+  }
+}
+
+<span class="kw">class</span> <span class="cls">Circle</span> <span class="kw">extends</span> <span class="cls">Shape</span> {
+  <span class="fn">constructor</span>(<span class="kw">private</span> radius: <span class="tp">number</span>) { <span class="kw">super</span>(); }
+  <span class="fn">getArea</span>(): <span class="tp">number</span> { <span class="kw">return</span> Math.PI * <span class="kw">this</span>.radius ** <span class="num">2</span>; }
+}
+
+<span class="kw">const</span> shape: <span class="cls">Shape</span> = <span class="kw">new</span> <span class="cls">Circle</span>(<span class="num">5</span>);
+<span class="cmt">// new Shape() — ❌ Error: Cannot instantiate abstract class</span></pre></div>
+<table class="tbl"><thead><tr><th>Modifier</th><th>Accessible In</th><th>Use For</th></tr></thead>
+<tbody>
+<tr><td>public</td><td>Everywhere (default)</td><td>Public API</td></tr>
+<tr><td>private</td><td>Only this class</td><td>Internal implementation</td></tr>
+<tr><td>protected</td><td>This class + subclasses</td><td>Shared with children</td></tr>
+<tr><td>readonly</td><td>Everywhere (read-only)</td><td>Immutable properties</td></tr>
+<tr><td>static</td><td>On class itself, not instance</td><td>Factory methods, utils</td></tr>
+</tbody></table>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Accessing private class properties):</strong><br>
+      📥 <strong>Action:</strong> <code>const acc = new BankAccount("123", 100); acc.balance;</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Property 'balance' is private and only accessible within class 'BankAccount'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Abstract method enforcement in subclass):</strong><br>
+      📥 <strong>Action:</strong> Subclass Circle extends Shape without defining getArea()<br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Non-abstract class 'Circle' does not implement inherited abstract member 'getArea' from class 'Shape'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Abstract Class Instantiation):</strong><br>
+      📥 <strong>Action:</strong> <code>const shape = new Shape();</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Cannot create an instance of an abstract class.</code>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'type-assertions',icon:'⚡',title:'Type Assertions & Non-null',group:'Basics',
+desc:'Tell TypeScript "trust me, I know the type" — use sparingly!',
+tags:['as keyword','! operator','Assertion'],
+sections:[
+{id:'assertions-basic',title:'Type Assertions',icon:'📖',content:`
+<div class="def"><strong>Type Assertion</strong> = You tell TypeScript to treat a value as a specific type. You're essentially saying "I know more than you do here". Use sparingly — it bypasses type checking!</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── as keyword (modern syntax) ───────────────</span>
+<span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">"name"</span>); <span class="cmt">// HTMLElement | null</span>
+<span class="kw">const</span> nameInput = document.<span class="fn">getElementById</span>(<span class="str">"name"</span>) <span class="kw">as</span> HTMLInputElement;
+nameInput.value; <span class="cmt">// ✅ Now TS knows it's an input element</span>
+
+<span class="cmt">// ─── Double assertion (when types are incompatible) ──</span>
+<span class="kw">const</span> x = <span class="str">"hello"</span> <span class="kw">as</span> <span class="tp">unknown</span> <span class="kw">as</span> <span class="tp">number</span>; <span class="cmt">// Escape hatch — use with care!</span>
+
+<span class="cmt">// ─── Non-null assertion (!) ───────────────────</span>
+<span class="kw">const</span> element = document.<span class="fn">getElementById</span>(<span class="str">"app"</span>)!;
+<span class="cmt">// ! tells TS: "I'm certain this won't be null"</span>
+<span class="cmt">// If you're wrong → runtime error!</span>
+
+<span class="cmt">// ─── Optional chaining (?.) vs non-null (!) ───</span>
+<span class="kw">const</span> user = getUser();
+
+<span class="cmt">// ?. — safe: returns undefined if null/undefined</span>
+<span class="kw">const</span> city = user?.address?.city;     <span class="cmt">// string | undefined</span>
+
+<span class="cmt">// ! — unsafe: assumes NOT null (may throw!)</span>
+<span class="kw">const</span> city2 = user!.address!.city;   <span class="cmt">// string (might crash!)</span>
+
+<span class="cmt">// ─── Nullish Coalescing (??) ──────────────────</span>
+<span class="kw">const</span> name = user?.name ?? <span class="str">"Anonymous"</span>; <span class="cmt">// Default if null/undefined</span>
+<span class="kw">const</span> count = items?.length ?? <span class="num">0</span>;        <span class="cmt">// 0 if items is null</span>
+
+<span class="cmt">// ?? vs || difference:</span>
+<span class="kw">const</span> a = <span class="str">""</span> || <span class="str">"default"</span>;   <span class="cmt">// "default" (|| treats "" as falsy)</span>
+<span class="kw">const</span> b = <span class="str">""</span> ?? <span class="str">"default"</span>;  <span class="cmt">// "" (?? only checks null/undefined)</span></pre></div>
+<div class="danger"><strong>Warning:</strong> Don't use type assertions to "fix" TypeScript errors. If you're asserting types frequently, your code design might need fixing. Type assertions hide bugs!</div>
+<div class="memory"><strong>🧠 Memory:</strong><br>
+<code>?.</code> optional chain = "give me this IF it exists, else undefined"<br>
+<code>!</code> non-null = "I guarantee this is not null" (risky!)<br>
+<code>??</code> nullish coalescing = "use this as fallback if null/undefined"</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Type Assertion as HTML element):</strong><br>
+      📥 <strong>Action:</strong> <code>const el = document.getElementById("name") as HTMLInputElement; el.value = "John";</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, bypassing HTMLElement checks to enable input value writes.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Non-null Assertion crash risk):</strong><br>
+      📥 <strong>Action:</strong> <code>const el = document.getElementById("missing-app")!; console.log(el.className);</code><br>
+      📤 <strong>Result:</strong> Compiles successfully, but crashes at runtime: <code>TypeError: Cannot read properties of null (reading 'className')</code>.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Nullish Coalescing ??):</strong><br>
+      📥 <strong>Action:</strong> <code>const a = "" ?? "default"; const b = "" || "default";</code><br>
+      📤 <strong>Expected Output:</strong> <code>a = ""</code> and <code>b = "default"</code> <span style="color:var(--muted)">(Nullish check ignores falsy empty strings.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'keyof-typeof',icon:'🔑',title:'keyof & typeof Operators',group:'Advanced',
+desc:'Extract types from objects and types — powerful runtime-to-type conversion.',
+tags:['keyof','typeof','Advanced','Common'],
+sections:[
+{id:'keyof',title:'keyof & typeof',icon:'🔑',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── keyof — get all keys of a type as union ──</span>
+<span class="kw">interface</span> <span class="cls">User</span> {
+  id:    <span class="tp">number</span>;
+  name:  <span class="tp">string</span>;
+  email: <span class="tp">string</span>;
+}
+
+<span class="kw">type</span> <span class="cls">UserKeys</span> = <span class="kw">keyof</span> <span class="cls">User</span>; <span class="cmt">// "id" | "name" | "email"</span>
+
+<span class="kw">function</span> <span class="fn">getUserField</span>&lt;<span class="cls">K</span> <span class="kw">extends</span> <span class="kw">keyof</span> <span class="cls">User</span>&gt;(user: <span class="cls">User</span>, key: <span class="cls">K</span>): <span class="cls">User</span>[<span class="cls">K</span>] {
+  <span class="kw">return</span> user[key];
+}
+<span class="fn">getUserField</span>(user, <span class="str">"name"</span>);  <span class="cmt">// Returns string</span>
+<span class="fn">getUserField</span>(user, <span class="str">"id"</span>);    <span class="cmt">// Returns number</span>
+<span class="fn">getUserField</span>(user, <span class="str">"age"</span>);   <span class="cmt">// ❌ Error: "age" not in User</span>
+
+<span class="cmt">// ─── typeof — get type of a value ─────────────</span>
+<span class="kw">const</span> config = {
+  endpoint: <span class="str">"https://api.example.com"</span>,
+  timeout:  <span class="num">5000</span>,
+  debug:    <span class="kw">false</span>,
+};
+
+<span class="kw">type</span> <span class="cls">Config</span> = <span class="kw">typeof</span> config;
+<span class="cmt">// { endpoint: string; timeout: number; debug: boolean }</span>
+<span class="cmt">// Don't manually define type — extract it from value!</span>
+
+<span class="kw">type</span> <span class="cls">ConfigKeys</span> = <span class="kw">keyof</span> <span class="kw">typeof</span> config; <span class="cmt">// "endpoint" | "timeout" | "debug"</span>
+
+<span class="cmt">// ─── Indexed Access Types (T[K]) ───────────────</span>
+<span class="kw">type</span> <span class="cls">UserName</span>  = <span class="cls">User</span>[<span class="str">"name"</span>];   <span class="cmt">// string</span>
+<span class="kw">type</span> <span class="cls">UserID</span>    = <span class="cls">User</span>[<span class="str">"id"</span>];     <span class="cmt">// number</span>
+<span class="kw">type</span> <span class="cls">AnyValue</span>  = <span class="cls">User</span>[<span class="kw">keyof</span> <span class="cls">User</span>]; <span class="cmt">// string | number — all value types</span>
+
+<span class="cmt">// ─── Enum with typeof + keyof ─────────────────</span>
+<span class="kw">const</span> <span class="cls">Roles</span> = { Admin: <span class="str">"admin"</span>, User: <span class="str">"user"</span>, Guest: <span class="str">"guest"</span> } <span class="kw">as</span> <span class="kw">const</span>;
+<span class="kw">type</span> <span class="cls">Role</span> = <span class="kw">typeof</span> <span class="cls">Roles</span>[<span class="kw">keyof</span> <span class="kw">typeof</span> <span class="cls">Roles</span>]; <span class="cmt">// "admin" | "user" | "guest"</span></pre></div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (keyof union extraction):</strong><br>
+      📥 <strong>Action:</strong> <code>type Keys = keyof User;</code><br>
+      📤 <strong>Expected Type:</strong> <code>"id" | "name" | "email"</code> <span style="color:var(--muted)">(Extracts interface key properties as literal union.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (typeof values type mapping):</strong><br>
+      📥 <strong>Action:</strong> <code>type ConfigShape = typeof config;</code><br>
+      📤 <strong>Expected Type:</strong> <code>{ endpoint: string; timeout: number; debug: boolean; }</code> <span style="color:var(--muted)">(Extracts the type directly from the object value.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Indexed Access Types T[K]):</strong><br>
+      📥 <strong>Action:</strong> <code>type Values = User[keyof User];</code><br>
+      📤 <strong>Expected Type:</strong> <code>string | number</code> <span style="color:var(--muted)">(Yields union of all values types inside the interface.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'mapped-types',icon:'🗺️',title:'Mapped Types',group:'Advanced',
+desc:'Transform every property in a type systematically.',
+tags:['Advanced','Transforms','Custom Utilities'],
+sections:[
+{id:'mapped-basic',title:'Creating Mapped Types',icon:'📖',content:`
+<div class="def"><strong>Mapped Types</strong> = Create new types by transforming each property in an existing type. They use the syntax <code>[K in keyof T]</code> to iterate over all keys.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// How Partial&lt;T&gt; is implemented internally:</span>
+<span class="kw">type</span> MyPartial&lt;T&gt; = {
+  [K <span class="kw">in</span> <span class="kw">keyof</span> T]?: T[K];  <span class="cmt">// ? makes each property optional</span>
+};
+
+<span class="cmt">// How Readonly&lt;T&gt; is implemented:</span>
+<span class="kw">type</span> MyReadonly&lt;T&gt; = {
+  <span class="kw">readonly</span> [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K];
+};
+
+<span class="cmt">// Custom: make all properties nullable</span>
+<span class="kw">type</span> Nullable&lt;T&gt; = {
+  [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K] | <span class="kw">null</span>;
+};
+
+<span class="cmt">// Custom: add a "changed" flag to each field</span>
+<span class="kw">type</span> WithChangedFlag&lt;T&gt; = {
+  [K <span class="kw">in</span> <span class="kw">keyof</span> T]: {
+    value: T[K];
+    changed: <span class="tp">boolean</span>;
+  };
+};
+
+<span class="kw">interface</span> <span class="cls">Form</span> { name: <span class="tp">string</span>; age: <span class="tp">number</span>; }
+<span class="kw">type</span> <span class="cls">FormWithFlags</span> = WithChangedFlag&lt;<span class="cls">Form</span>&gt;;
+<span class="cmt">// {</span>
+<span class="cmt">//   name: { value: string;  changed: boolean };</span>
+<span class="cmt">//   age:  { value: number;  changed: boolean };</span>
+<span class="cmt">// }</span>
+
+<span class="cmt">// ─── Removing modifiers with - ────────────────</span>
+<span class="kw">type</span> Mutable&lt;T&gt; = {
+  -<span class="kw">readonly</span> [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K]; <span class="cmt">// Remove readonly</span>
+};
+<span class="kw">type</span> AllRequired&lt;T&gt; = {
+  [K <span class="kw">in</span> <span class="kw">keyof</span> T]-?: T[K]; <span class="cmt">// Remove optional</span>
+};</pre></div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Creating Partial Mapped Types):</strong><br>
+      📥 <strong>Input Type:</strong> <code>MyPartial&lt;{ id: number, name: string }&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>{ id?: number; name?: string; }</code> <span style="color:var(--muted)">(Iterates keys and adds optional modifiers.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Declaration of Nullable values):</strong><br>
+      📥 <strong>Input Type:</strong> <code>Nullable&lt;{ name: string }&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>{ name: string | null; }</code> <span style="color:var(--muted)">(Iterates keys and appends | null to value types.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Removing Modifiers):</strong><br>
+      📥 <strong>Input Type:</strong> <code>Mutable&lt;{ readonly id: number }&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>{ id: number; }</code> <span style="color:var(--muted)">(Uses -readonly syntax to strip read-only status from properties.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'conditional-types',icon:'❓',title:'Conditional Types',group:'Advanced',
+desc:'Types that choose between two options based on a condition.',
+tags:['Advanced','Ternary','infer'],
+sections:[
+{id:'conditional-basic',title:'Conditional Types',icon:'📖',content:`
+<div class="def"><strong>Conditional Types</strong> = Type-level ternary operator: <code>T extends U ? TrueType : FalseType</code>. Returns one type or another based on whether T is assignable to U.</div>
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// Basic conditional type</span>
+<span class="kw">type</span> IsString&lt;T&gt; = T <span class="kw">extends</span> <span class="tp">string</span> ? <span class="str">"yes"</span> : <span class="str">"no"</span>;
+
+<span class="kw">type</span> A = IsString&lt;<span class="tp">string</span>&gt;; <span class="cmt">// "yes"</span>
+<span class="kw">type</span> B = IsString&lt;<span class="tp">number</span>&gt;; <span class="cmt">// "no"</span>
+
+<span class="cmt">// ─── Practical: NonNullable is implemented as: ────</span>
+<span class="kw">type</span> MyNonNullable&lt;T&gt; = T <span class="kw">extends</span> <span class="kw">null</span> | <span class="tp">undefined</span> ? <span class="tp">never</span> : T;
+
+<span class="cmt">// ─── infer — extract a type from conditional ──</span>
+<span class="kw">type</span> GetReturnType&lt;T&gt; = T <span class="kw">extends</span> (...args: <span class="tp">any</span>[]) <span class="op">=></span> <span class="kw">infer</span> R ? R : <span class="tp">never</span>;
+<span class="cmt">// infer R: "extract whatever the return type is into R"</span>
+
+<span class="kw">function</span> <span class="fn">getUser</span>() { <span class="kw">return</span> { id: <span class="num">1</span>, name: <span class="str">"Alice"</span> }; }
+
+<span class="kw">type</span> <span class="cls">UserType</span> = GetReturnType&lt;<span class="kw">typeof</span> getUser&gt;;
+<span class="cmt">// { id: number; name: string }</span>
+
+<span class="cmt">// ─── Flatten array type ────────────────────────</span>
+<span class="kw">type</span> Flatten&lt;T&gt; = T <span class="kw">extends</span> Array&lt;<span class="kw">infer</span> Item&gt; ? Item : T;
+
+<span class="kw">type</span> Nums     = Flatten&lt;<span class="tp">number</span>[]&gt;;  <span class="cmt">// number</span>
+<span class="kw">type</span> Strs     = Flatten&lt;<span class="tp">string</span>[]&gt;;  <span class="cmt">// string</span>
+<span class="kw">type</span> NotArray = Flatten&lt;<span class="tp">boolean</span>&gt;;  <span class="cmt">// boolean (not array, unchanged)</span></pre></div>
+<div class="memory"><strong>🧠 Memory:</strong> Conditional types are just if-else for types. <code>T extends U ? A : B</code> = "if T is a subtype of U, use A, else B". The <code>infer</code> keyword is like a type variable that captures whatever TypeScript figures out.</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Type-Level Ternary check):</strong><br>
+      📥 <strong>Input Types:</strong> <code>IsString&lt;string&gt;</code> and <code>IsString&lt;number&gt;</code><br>
+      📤 <strong>Expected Types:</strong> <code>"yes"</code> and <code>"no"</code> respectively.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (infer return type extraction):</strong><br>
+      📥 <strong>Action:</strong> <code>type R = GetReturnType&lt;() => string&gt;</code><br>
+      📤 <strong>Expected Type:</strong> <code>string</code> <span style="color:var(--muted)">(Captures returning values from functional bounds.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Flatten Arrays types):</strong><br>
+      📥 <strong>Action:</strong> <code>type N = Flatten&lt;number[]&gt;; type B = Flatten&lt;boolean&gt;;</code><br>
+      📤 <strong>Expected Types:</strong> <code>number</code> and <code>boolean</code> <span style="color:var(--muted)">(Unwraps arrays or defaults to input types.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'react-ts',icon:'⚛️',title:'TypeScript with React',group:'React',
+desc:'Type React components, props, events, hooks, and refs correctly.',
+tags:['React','Props','Events','Hooks','Refs'],
+sections:[
+{id:'react-props',title:'Typing React Components & Props',icon:'📖',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript + React</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="kw">import</span> React, { useState, useEffect, useRef, FC } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="cmt">// ─── Props Interface ───────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">ButtonProps</span> {
+  label:     <span class="tp">string</span>;
+  onClick:   () => <span class="tp">void</span>;
+  variant?:  <span class="str">"primary"</span> | <span class="str">"secondary"</span> | <span class="str">"danger"</span>;
+  disabled?: <span class="tp">boolean</span>;
+  children?: React.<span class="cls">ReactNode</span>;   <span class="cmt">// Anything renderable</span>
+  className?: <span class="tp">string</span>;
+}
+
+<span class="cmt">// ─── Functional Component ─────────────────────</span>
+<span class="kw">const</span> <span class="cls">Button</span>: FC&lt;<span class="cls">ButtonProps</span>&gt; = ({
+  label, onClick, variant = <span class="str">"primary"</span>, disabled = <span class="kw">false</span>, children
+}) => {
+  <span class="kw">return</span> (
+    &lt;button
+      onClick={onClick}
+      disabled={disabled}
+      className={<span class="str">\`btn btn-\${variant}\`</span>}
+    &gt;
+      {label} {children}
+    &lt;/button&gt;
+  );
+};
+
+<span class="cmt">// ─── useState with TypeScript ──────────────────</span>
+<span class="kw">const</span> [count,  setCount]  = useState&lt;<span class="tp">number</span>&gt;(<span class="num">0</span>);
+<span class="kw">const</span> [user,   setUser]   = useState&lt;<span class="cls">User</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> [items,  setItems]  = useState&lt;<span class="tp">string</span>[]&gt;([]);
+<span class="kw">const</span> [status, setStatus] = useState&lt;<span class="str">"idle"</span>|<span class="str">"loading"</span>|<span class="str">"done"</span>&gt;(<span class="str">"idle"</span>);
+
+<span class="cmt">// ─── Event Handling ────────────────────────────</span>
+<span class="kw">const</span> <span class="fn">handleChange</span> = (e: React.<span class="cls">ChangeEvent</span>&lt;HTMLInputElement&gt;) => {
+  console.<span class="fn">log</span>(e.target.value);
+};
+<span class="kw">const</span> <span class="fn">handleSubmit</span> = (e: React.<span class="cls">FormEvent</span>&lt;HTMLFormElement&gt;) => {
+  e.<span class="fn">preventDefault</span>();
+};
+<span class="kw">const</span> <span class="fn">handleClick</span>  = (e: React.<span class="cls">MouseEvent</span>&lt;HTMLButtonElement&gt;) => {
+  console.<span class="fn">log</span>(e.currentTarget);
+};
+<span class="kw">const</span> <span class="fn">handleKey</span>    = (e: React.<span class="cls">KeyboardEvent</span>&lt;HTMLInputElement&gt;) => {
+  <span class="kw">if</span> (e.key === <span class="str">"Enter"</span>) { }
+};
+
+<span class="cmt">// ─── useRef ───────────────────────────────────</span>
+<span class="kw">const</span> inputRef = useRef&lt;HTMLInputElement&gt;(<span class="kw">null</span>);
+<span class="kw">const</span> timerRef = useRef&lt;<span class="cls">ReturnType</span>&lt;<span class="kw">typeof</span> setTimeout&gt;&gt;(<span class="kw">null</span>!);
+
+<span class="cmt">// ─── useCallback / useMemo ────────────────────</span>
+<span class="kw">const</span> handleSearch = useCallback((query: <span class="tp">string</span>): <span class="tp">void</span> => {
+  <span class="cmt">// TypeScript knows query is string</span>
+}, []);
+
+<span class="kw">const</span> processedData = useMemo((): <span class="tp">string</span>[] => {
+  <span class="kw">return</span> data.<span class="fn">map</span>(item => item.name);
+}, [data]);</pre></div>
+<div class="cheat-box"><h4>Common React TypeScript Types</h4>
+<div class="cheat-item"><code>React.ReactNode</code><span>Anything React can render (JSX, string, null)</span></div>
+<div class="cheat-item"><code>React.ReactElement</code><span>JSX element specifically</span></div>
+<div class="cheat-item"><code>React.FC&lt;Props&gt;</code><span>Functional component with typed props</span></div>
+<div class="cheat-item"><code>React.ChangeEvent&lt;T&gt;</code><span>Input/select/textarea change events</span></div>
+<div class="cheat-item"><code>React.MouseEvent&lt;T&gt;</code><span>Mouse click events</span></div>
+<div class="cheat-item"><code>React.KeyboardEvent&lt;T&gt;</code><span>Keyboard events</span></div>
+<div class="cheat-item"><code>React.FormEvent&lt;T&gt;</code><span>Form submit events</span></div>
+<div class="cheat-item"><code>React.CSSProperties</code><span>Inline style object</span></div>
+<div class="cheat-item"><code>React.Dispatch&lt;A&gt;</code><span>useState setter function type</span></div>
+</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Component props missing validation):</strong><br>
+      📥 <strong>Action:</strong> Call <code>&lt;Button variant="primary" /&gt;</code> (missing label)<br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Property 'label' is missing in type '{ variant: "primary"; }' but required in type 'ButtonProps'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (useState union mapping):</strong><br>
+      📥 <strong>Action:</strong> <code>const [user, setUser] = useState&lt;User | null&gt;(null); setUser("Alice");</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Argument of type 'string' not assignable to parameter of type 'User | null'.</code>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Strongly Typed change Events):</strong><br>
+      📥 <strong>Action:</strong> e.target.value inside <code>React.ChangeEvent&lt;HTMLInputElement&gt;</code> handler.<br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully. TypeScript validates e.target is an input and has value string property.
+    </div>
+  </div>
+</div>
+
+<!-- Dynamic Sandbox -->
+<style>
+.ts-react-sandbox {
+  margin-top: 1rem;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ts-react-sandbox-h {
+  background: rgba(255,255,255,0.02);
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ts-react-sandbox-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--tslight);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.ts-react-sandbox-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  min-height: 250px;
+}
+@media (max-width: 768px) {
+  .ts-react-sandbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.ts-sandbox-controls {
+  padding: 0.8rem;
+  background: rgba(0,0,0,0.2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.ts-ctrl-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.ts-ctrl-label {
+  font-size: 0.58rem;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.ts-ctrl-input {
+  background: #060912;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 0.25rem 0.45rem;
+  color: #fff;
+  font-size: 0.68rem;
+  outline: none;
+  font-family: inherit;
+}
+.ts-ctrl-input:focus {
+  border-color: var(--ts);
+}
+.ts-ctrl-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.68rem;
+}
+.ts-sandbox-preview {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  justify-content: space-between;
+  background: rgba(7,9,15,0.4);
+}
+.ts-preview-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  padding: 1.5rem;
+  background: rgba(0,0,0,0.3);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  position: relative;
+  min-height: 100px;
+}
+.ts-simulated-button {
+  padding: 0.45rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s;
+}
+.ts-simulated-button.primary {
+  background: var(--ts);
+  color: #fff;
+}
+.ts-simulated-button.primary:hover:not(:disabled) {
+  background: var(--tslight);
+}
+.ts-simulated-button.secondary {
+  background: rgba(255,255,255,0.05);
+  border-color: var(--border);
+  color: var(--text);
+}
+.ts-simulated-button.secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+}
+.ts-simulated-button.danger {
+  background: var(--red);
+  color: #fff;
+}
+.ts-simulated-button.danger:hover:not(:disabled) {
+  background: #f87171;
+}
+.ts-simulated-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ts-event-log {
+  background: #03070f;
+  border: 1px solid rgba(255,255,255,0.03);
+  border-radius: 6px;
+  padding: 0.45rem 0.65rem;
+  font-family: monospace;
+  font-size: 0.58rem;
+  color: var(--cyan);
+  min-height: 46px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-height: 80px;
+  overflow-y: auto;
+}
+.ts-code-inspector {
+  background: #060912;
+  border-top: 1px solid var(--border);
+  padding: 0.6rem 0.8rem;
+}
+</style>
+
+<div class="ts-react-sandbox">
+  <div class="ts-react-sandbox-h">
+    <span class="ts-react-sandbox-title">⚛️ TypeScript React Sandbox — Dynamic Props Previewer</span>
+    <span id="ts-type-status" style="font-size:0.58rem;padding:2px 7px;border-radius:4px;font-weight:700;background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2)">✓ Compiler Valid</span>
+  </div>
+  
+  <div class="ts-react-sandbox-grid">
+    <div class="ts-sandbox-controls">
+      <div class="ts-ctrl-group">
+        <span class="ts-ctrl-label">prop: label (string)</span>
+        <input type="text" id="ts-prop-label" class="ts-ctrl-input" value="Click Me">
+      </div>
+      
+      <div class="ts-ctrl-group">
+        <span class="ts-ctrl-label">prop: variant</span>
+        <select id="ts-prop-variant" class="ts-ctrl-input">
+          <option value="primary">"primary"</option>
+          <option value="secondary">"secondary"</option>
+          <option value="danger">"danger"</option>
+          <option value="invalid">"success" (invalid TS literal!)</option>
+        </select>
+      </div>
+      
+      <div class="ts-ctrl-row">
+        <input type="checkbox" id="ts-prop-disabled">
+        <span class="ts-ctrl-label" style="margin:0">prop: disabled (boolean)</span>
+      </div>
+      
+      <div class="ts-ctrl-row">
+        <input type="checkbox" id="ts-prop-children" checked>
+        <span class="ts-ctrl-label" style="margin:0">prop: children (ReactNode)</span>
+      </div>
+    </div>
+    
+    <div class="ts-sandbox-preview">
+      <div class="ts-preview-stage">
+        <span style="position:absolute;top:0.3rem;left:0.4rem;font-size:0.55rem;color:var(--muted);font-weight:700;text-transform:uppercase">Interactive Canvas</span>
+        <button id="ts-sim-btn" class="ts-simulated-button primary">
+          Click Me <span id="ts-sim-child">🚀</span>
+        </button>
+      </div>
+      
+      <div class="ts-ctrl-group">
+        <span class="ts-ctrl-label">React.MouseEvent&lt;HTMLButtonElement&gt; Logger</span>
+        <div id="ts-event-logs" class="ts-event-log">
+          <div>Waiting for user interaction...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="ts-code-inspector">
+    <span class="ts-ctrl-label" style="display:block;margin-bottom:0.25rem">Live Generated TSX Code</span>
+    <pre style="padding:0;font-size:0.64rem;line-height:1.45" id="ts-tsx-code"></pre>
+  </div>
+</div>
+
+<script>
+(function() {
+  // We use deferred initialization to ensure DOM nodes are ready
+  function initTsSandbox() {
+    const labelInput = document.getElementById('ts-prop-label');
+    const variantInput = document.getElementById('ts-prop-variant');
+    const disabledInput = document.getElementById('ts-prop-disabled');
+    const childrenInput = document.getElementById('ts-prop-children');
+    
+    const simBtn = document.getElementById('ts-sim-btn');
+    const eventLogs = document.getElementById('ts-event-logs');
+    const statusBadge = document.getElementById('ts-type-status');
+    const codePre = document.getElementById('ts-tsx-code');
+    
+    if (!labelInput || !simBtn) {
+      // Retry in 100ms if topic is still rendering
+      setTimeout(initTsSandbox, 100);
+      return;
+    }
+    
+    function updateSandbox() {
+      const label = labelInput.value.trim();
+      const variant = variantInput.value;
+      const disabled = disabledInput.checked;
+      const showChildren = childrenInput.checked;
+      
+      // 1. Update Preview Button
+      simBtn.className = "ts-simulated-button " + (variant === 'invalid' ? 'primary' : variant);
+      simBtn.disabled = disabled;
+      
+      // Update Button inner text & icon child
+      simBtn.innerHTML = label + " " + (showChildren ? '<span id="ts-sim-child">🚀</span>' : '');
+      
+      // 2. Type checking simulation logic
+      let isValid = true;
+      let errorMsg = '';
+      
+      if (variant === 'invalid') {
+        isValid = false;
+        errorMsg = 'Type \'"success"\' is not assignable to type \'"primary" | "secondary" | "danger" | undefined\'.';
+      } else if (label === '') {
+        isValid = false;
+        errorMsg = 'Property \'label\' is missing but required in type \'ButtonProps\'.';
+      }
+      
+      if (isValid) {
+        statusBadge.textContent = '✓ Compiler Valid';
+        statusBadge.style.background = 'rgba(34,197,94,0.1)';
+        statusBadge.style.color = 'var(--green)';
+        statusBadge.style.borderColor = 'rgba(34,197,94,0.2)';
+      } else {
+        statusBadge.textContent = '❌ TS Compiler Error';
+        statusBadge.style.background = 'rgba(239,68,68,0.1)';
+        statusBadge.style.color = 'var(--red)';
+        statusBadge.style.borderColor = 'rgba(239,68,68,0.2)';
+      }
+      
+      // 3. Update live TSX usage code
+      let childrenCode = showChildren ? '
+  &lt;span role="img"&gt;🚀&lt;/span&gt;
+' : '';
+      let disabledCode = disabled ? '
+  disabled={true}' : '';
+      let variantCode = variant === 'invalid' ? '
+  variant="success"' : (variant !== 'primary' ? '
+  variant="' + variant + '"' : '');
+      
+      let tsxCode = '';
+      if (isValid) {
+        tsxCode = '<span class="kw">const</span> App = () => {
+' +
+                  '  <span class="kw">return</span> (
+' +
+                  '    <span class="tp">&lt;Button</span>
+' +
+                  '      label=<span class="str">"' + label + '"</span>' + variantCode + disabledCode + '
+' +
+                  '    ' + (childrenCode ? '&gt;' + childrenCode + '    <span class="tp">&lt;/Button&gt;</span>' : '/&gt;') + '
+' +
+                  '  );
+' +
+                  '};';
+      } else {
+        tsxCode = '// ❌ <span class="danger">TypeScript Compilation Failure:</span>
+' +
+                  '// <span class="danger">' + errorMsg + '</span>
+
+' +
+                  '<span class="kw">const</span> App = () => {
+' +
+                  '  <span class="kw">return</span> (
+' +
+                  '    <span class="tp">&lt;Button</span>
+' +
+                  '      label=<span class="str">"' + label + '"</span>' + variantCode + disabledCode + '
+' +
+                  '    <span class="tp">/&gt;</span>
+' +
+                  '  );
+' +
+                  '};';
+      }
+      codePre.innerHTML = tsxCode;
+    }
+    
+    // Event handler for button clicks
+    simBtn.addEventListener('click', (e) => {
+      const time = new Date().toLocaleTimeString();
+      const logDiv = document.createElement('div');
+      logDiv.style.borderBottom = '1px solid rgba(255,255,255,0.02)';
+      logDiv.style.padding = '1px 0';
+      logDiv.innerHTML = '<span style="color:var(--muted)">[' + time + ']</span> <span style="color:var(--amber)">onClick</span> called: clientX: <span style="color:#fff">' + e.clientX + '</span>, clientY: <span style="color:#fff">' + e.clientY + '</span>';
+      
+      if (eventLogs.innerText.includes('Waiting for user interaction...')) {
+        eventLogs.innerHTML = '';
+      }
+      
+      eventLogs.insertBefore(logDiv, eventLogs.firstChild);
+      
+      // Auto-prune logs to keep it neat
+      if (eventLogs.children.length > 5) {
+        eventLogs.removeChild(eventLogs.lastChild);
+      }
+    });
+    
+    // Attach change listeners to control inputs
+    labelInput.addEventListener('input', updateSandbox);
+    variantInput.addEventListener('change', updateSandbox);
+    disabledInput.addEventListener('change', updateSandbox);
+    childrenInput.addEventListener('change', updateSandbox);
+    
+    // Initial draw
+    updateSandbox();
+  }
+  
+  // Initialize on script load (deferred to allow rendering)
+  setTimeout(initTsSandbox, 150);
+})();
+<\/script>
+`
+},
+{id:'react-generic',title:'Generic Components & Advanced Patterns',icon:'🔧',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>TypeScript + React</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ─── Generic Component ────────────────────────</span>
+<span class="kw">interface</span> <span class="cls">ListProps</span>&lt;<span class="cls">T</span>&gt; {
+  items:     <span class="cls">T</span>[];
+  renderItem: (item: <span class="cls">T</span>, index: <span class="tp">number</span>) => React.<span class="cls">ReactNode</span>;
+  keyExtractor: (item: <span class="cls">T</span>) => <span class="tp">string</span>;
+  emptyText?: <span class="tp">string</span>;
+}
+
+<span class="kw">function</span> <span class="cls">List</span>&lt;<span class="cls">T</span>&gt;({ items, renderItem, keyExtractor, emptyText }: <span class="cls">ListProps</span>&lt;<span class="cls">T</span>&gt;) {
+  <span class="kw">if</span> (items.length === <span class="num">0</span>) <span class="kw">return</span> &lt;p&gt;{emptyText ?? <span class="str">"No items"</span>}&lt;/p&gt;;
+  <span class="kw">return</span> (
+    &lt;ul&gt;
+      {items.<span class="fn">map</span>((item, i) => (
+        &lt;li key={<span class="fn">keyExtractor</span>(item)}&gt;{<span class="fn">renderItem</span>(item, i)}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+
+<span class="cmt">// Usage (TS infers T as User):</span>
+&lt;<span class="cls">List</span>
+  items={users}
+  keyExtractor={u <span class="op">=></span> String(u.id)}
+  renderItem={u <span class="op">=></span> &lt;span&gt;{u.name}&lt;/span&gt;}
+/&gt;
+
+<span class="cmt">// ─── Context with TypeScript ───────────────────</span>
+<span class="kw">interface</span> <span class="cls">AuthContextType</span> {
+  user:     <span class="cls">User</span> | <span class="kw">null</span>;
+  login:    (email: <span class="tp">string</span>, password: <span class="tp">string</span>) => Promise&lt;<span class="tp">void</span>&gt;;
+  logout:   () => <span class="tp">void</span>;
+  isLoading: <span class="tp">boolean</span>;
+}
+
+<span class="kw">const</span> <span class="cls">AuthContext</span> = createContext&lt;<span class="cls">AuthContextType</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+<span class="kw">function</span> <span class="fn">useAuth</span>(): <span class="cls">AuthContextType</span> {
+  <span class="kw">const</span> ctx = useContext(<span class="cls">AuthContext</span>);
+  <span class="kw">if</span> (!ctx) <span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span>(<span class="str">"useAuth must be inside AuthProvider"</span>);
+  <span class="kw">return</span> ctx;
+}
+
+<span class="cmt">// ─── Custom Hook return type ───────────────────</span>
+<span class="kw">interface</span> <span class="cls">UseFetchResult</span>&lt;<span class="cls">T</span>&gt; {
+  data:    <span class="cls">T</span> | <span class="kw">null</span>;
+  loading: <span class="tp">boolean</span>;
+  error:   <span class="tp">string</span> | <span class="kw">null</span>;
+  refetch: () => <span class="tp">void</span>;
+}
+
+<span class="kw">function</span> <span class="fn">useFetch</span>&lt;<span class="cls">T</span>&gt;(url: <span class="tp">string</span>): <span class="cls">UseFetchResult</span>&lt;<span class="cls">T</span>&gt; {
+  <span class="kw">const</span> [data, setData] = useState&lt;<span class="cls">T</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+  <span class="kw">const</span> [loading, setLoading] = useState(<span class="kw">true</span>);
+  <span class="kw">const</span> [error, setError] = useState&lt;<span class="tp">string</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>);
+
+  <span class="kw">const</span> fetchData = useCallback(<span class="kw">async</span> () => {
+    <span class="kw">try</span> {
+      <span class="fn">setLoading</span>(<span class="kw">true</span>);
+      <span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(url);
+      <span class="kw">if</span> (!res.ok) <span class="kw">throw</span> <span class="kw">new</span> <span class="cls">Error</span>(res.statusText);
+      <span class="fn">setData</span>(<span class="kw">await</span> res.<span class="fn">json</span>());
+    } <span class="kw">catch</span> (e) {
+      <span class="fn">setError</span>((e <span class="kw">as</span> <span class="cls">Error</span>).message);
+    } <span class="kw">finally</span> { <span class="fn">setLoading</span>(<span class="kw">false</span>); }
+  }, [url]);
+
+  useEffect(() => { <span class="fn">fetchData</span>(); }, [fetchData]);
+  <span class="kw">return</span> { data, loading, error, refetch: fetchData };
+}</pre></div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Generic Component Type Inference):</strong><br>
+      📥 <strong>Action:</strong> <code>&lt;List items={users} renderItem={u =&gt; &lt;span&gt;{u.name}&lt;/span&gt;} keyExtractor={u =&gt; String(u.id)} /&gt;</code><br>
+      📤 <strong>Expected Behavior:</strong> TypeScript infers generic type <code>T</code> as <code>User</code>, validating <code>u.name</code> safely.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Typed Context Provider safety):</strong><br>
+      📥 <strong>Action:</strong> Call custom hook <code>useAuth()</code> outside context Provider.<br>
+      📤 <strong>Expected Output / Behavior:</strong> Throws runtime: <code>Error: useAuth must be inside AuthProvider</code>. Prevents accessing uninitialized contexts.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Custom generic hooks typing):</strong><br>
+      📥 <strong>Action:</strong> <code>const { data, loading } = useFetch&lt;User&gt;("/api/user/1");</code><br>
+      📤 <strong>Expected Behavior:</strong> Compiles successfully, typing returned value <code>data</code> strictly as <code>User | null</code>.
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'strict-mode',icon:'🔐',title:'tsconfig & Strict Mode',group:'Basics',
+desc:'TypeScript configuration — strict mode is the most important setting.',
+tags:['Config','Strict','tsconfig.json'],
+sections:[
+{id:'tsconfig',title:'Key tsconfig.json Settings',icon:'⚙️',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>tsconfig.json</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre>{
+  <span class="str">"compilerOptions"</span>: {
+    <span class="cmt">// ─── MOST IMPORTANT ──────────────────────────</span>
+    <span class="str">"strict"</span>: <span class="kw">true</span>,          <span class="cmt">// Enables ALL strict checks — ALWAYS use this!</span>
+
+    <span class="cmt">// strict: true enables all of these:</span>
+    <span class="str">"strictNullChecks"</span>: <span class="kw">true</span>,  <span class="cmt">// null ≠ undefined ≠ string</span>
+    <span class="str">"noImplicitAny"</span>: <span class="kw">true</span>,     <span class="cmt">// Must annotate types, no sneaky 'any'</span>
+    <span class="str">"strictFunctionTypes"</span>: <span class="kw">true</span>,
+
+    <span class="cmt">// ─── TARGET & MODULE ──────────────────────────</span>
+    <span class="str">"target"</span>: <span class="str">"ES2020"</span>,    <span class="cmt">// JS version to output</span>
+    <span class="str">"module"</span>: <span class="str">"ESNext"</span>,    <span class="cmt">// Module system</span>
+    <span class="str">"lib"</span>: [<span class="str">"ES2020"</span>, <span class="str">"DOM"</span>], <span class="cmt">// APIs available</span>
+
+    <span class="cmt">// ─── FOR REACT ────────────────────────────────</span>
+    <span class="str">"jsx"</span>: <span class="str">"react-jsx"</span>,    <span class="cmt">// React 17+ JSX transform</span>
+    <span class="str">"baseUrl"</span>: <span class="str">"src"</span>,      <span class="cmt">// Base for imports</span>
+    <span class="str">"paths"</span>: {              <span class="cmt">// Import aliases</span>
+      <span class="str">"@/*"</span>: [<span class="str">"./*"</span>]
+    },
+
+    <span class="cmt">// ─── OUTPUT ───────────────────────────────────</span>
+    <span class="str">"outDir"</span>: <span class="str">"dist"</span>,       <span class="cmt">// Where compiled JS goes</span>
+    <span class="str">"rootDir"</span>: <span class="str">"src"</span>,       <span class="cmt">// Where source TS is</span>
+    <span class="str">"declaration"</span>: <span class="kw">true</span>,    <span class="cmt">// Generate .d.ts files</span>
+    <span class="str">"sourceMap"</span>: <span class="kw">true</span>,      <span class="cmt">// For debugging</span>
+
+    <span class="cmt">// ─── ADDITIONAL CHECKS ────────────────────────</span>
+    <span class="str">"noUnusedLocals"</span>: <span class="kw">true</span>,    <span class="cmt">// Error on unused variables</span>
+    <span class="str">"noUnusedParameters"</span>: <span class="kw">true</span>, <span class="cmt">// Error on unused params</span>
+    <span class="str">"noImplicitReturns"</span>: <span class="kw">true</span>,  <span class="cmt">// All code paths must return</span>
+    <span class="str">"esModuleInterop"</span>: <span class="kw">true</span>,    <span class="cmt">// Better CommonJS interop</span>
+    <span class="str">"skipLibCheck"</span>: <span class="kw">true</span>       <span class="cmt">// Skip type-checking .d.ts files</span>
+  },
+  <span class="str">"include"</span>: [<span class="str">"src/**/*"</span>],
+  <span class="str">"exclude"</span>: [<span class="str">"node_modules"</span>, <span class="str">"dist"</span>]
+}</pre></div>
+<div class="tip"><strong>Interview Answer:</strong> "I always enable <code>strict: true</code> in TypeScript projects. The most important setting is <code>strictNullChecks</code> which forces you to handle null/undefined explicitly — this eliminates an entire class of runtime errors."</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (strictNullChecks enforcement):</strong><br>
+      📥 <strong>Action:</strong> <code>let name: string = null;</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Type 'null' not assignable to type 'string'.</code> <span style="color:var(--muted)">(Eliminates accidental null pointer exceptions.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (noImplicitAny checking):</strong><br>
+      📥 <strong>Action:</strong> <code>function greet(name) { console.log(name); }</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>Parameter 'name' implicitly has an 'any' type.</code> <span style="color:var(--muted)">(Forces developer to specify parameters types.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (noUnusedLocals cleanups):</strong><br>
+      📥 <strong>Action:</strong> <code>const x = 100; // never accessed</code><br>
+      📤 <strong>Expected Compiler Output:</strong> <code>'x' is declared but its value is never read.</code> <span style="color:var(--muted)">(Helps keep codebase clean from obsolete variables.)</span>
+    </div>
+  </div>
+</div>
+`
+}
+]
+},
+{id:'cheatsheet',icon:'📄',title:'Quick Reference Cheatsheet',group:'Reference',
+desc:'Everything on one page — types, utilities, syntax, and patterns.',
+tags:['Cheatsheet','Reference','All Topics'],
+sections:[
+{id:'all-syntax',title:'TypeScript Syntax at a Glance',icon:'📋',content:`
+<div class="cb"><div class="cbh"><div class="cbl"><div class="cbl-dot"></div>Complete TypeScript Reference</div><button class="cp" onclick="cp(this)">Copy</button></div>
+<pre><span class="cmt">// ═══════ TYPES ════════════════════════════════</span>
+<span class="kw">let</span> a: <span class="tp">string</span>;       <span class="kw">let</span> b: <span class="tp">number</span>;     <span class="kw">let</span> c: <span class="tp">boolean</span>;
+<span class="kw">let</span> d: <span class="tp">null</span>;         <span class="kw">let</span> e: <span class="tp">undefined</span>; <span class="kw">let</span> f: <span class="tp">any</span>;
+<span class="kw">let</span> g: <span class="tp">unknown</span>;     <span class="kw">let</span> h: <span class="tp">never</span>;     <span class="kw">let</span> i: <span class="tp">void</span>;
+
+<span class="cmt">// ═══════ SPECIAL SYNTAX ═══════════════════════</span>
+T | U           <span class="cmt">// Union — T or U</span>
+T & U           <span class="cmt">// Intersection — T and U</span>
+T?              <span class="cmt">// Optional (on interface props)</span>
+T!              <span class="cmt">// Non-null assertion</span>
+T as X          <span class="cmt">// Type assertion</span>
+<span class="kw">keyof</span> T         <span class="cmt">// Keys of T as union</span>
+<span class="kw">typeof</span> x        <span class="cmt">// Type of variable x</span>
+T[K]            <span class="cmt">// Indexed access type</span>
+T <span class="kw">extends</span> U     <span class="cmt">// Type constraint / conditional</span>
+<span class="kw">infer</span> R         <span class="cmt">// Extract type (in conditional)</span>
+
+<span class="cmt">// ═══════ DECLARATIONS ══════════════════════════</span>
+<span class="kw">interface</span> <span class="cls">I</span> { prop: <span class="tp">string</span>; method(): <span class="tp">void</span> }
+<span class="kw">type</span> <span class="cls">T</span> = <span class="tp">string</span> | <span class="tp">number</span>;
+<span class="kw">type</span> <span class="cls">G</span>&lt;T&gt; = T[];
+<span class="kw">enum</span> <span class="cls">E</span> { A = <span class="str">"a"</span>, B = <span class="str">"b"</span> }
+<span class="kw">const</span> <span class="kw">enum</span> <span class="cls">CE</span> { X = <span class="num">1</span> } <span class="cmt">// Compiled away</span>
+
+<span class="cmt">// ═══════ UTILITY TYPES (Built-in) ══════════════</span>
+Partial&lt;T&gt;          <span class="cmt">// All optional</span>
+Required&lt;T&gt;         <span class="cmt">// All required</span>
+Readonly&lt;T&gt;         <span class="cmt">// All readonly</span>
+Pick&lt;T, <span class="str">"a"</span>|<span class="str">"b"</span>&gt;    <span class="cmt">// Keep only named props</span>
+Omit&lt;T, <span class="str">"a"</span>|<span class="str">"b"</span>&gt;    <span class="cmt">// Remove named props</span>
+Record&lt;K, V&gt;        <span class="cmt">// Map K to V</span>
+Exclude&lt;T, U&gt;       <span class="cmt">// Remove U from union T</span>
+Extract&lt;T, U&gt;       <span class="cmt">// Keep U from union T</span>
+NonNullable&lt;T&gt;      <span class="cmt">// Remove null | undefined</span>
+ReturnType&lt;F&gt;       <span class="cmt">// Return type of function</span>
+Parameters&lt;F&gt;       <span class="cmt">// Parameter types of function</span>
+Awaited&lt;T&gt;          <span class="cmt">// Unwrap Promise&lt;T&gt; → T</span>
+InstanceType&lt;C&gt;     <span class="cmt">// Instance type of class</span>
+
+<span class="cmt">// ═══════ MAPPED TYPE SYNTAX ════════════════════</span>
+{ [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K] }      <span class="cmt">// Copy all props</span>
+{ [K <span class="kw">in</span> <span class="kw">keyof</span> T]?: T[K] }     <span class="cmt">// All optional</span>
+{ <span class="kw">readonly</span> [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K] } <span class="cmt">// All readonly</span>
+{ -<span class="kw">readonly</span> [K <span class="kw">in</span> <span class="kw">keyof</span> T]: T[K] } <span class="cmt">// Remove readonly</span>
+{ [K <span class="kw">in</span> <span class="kw">keyof</span> T]-?: T[K] }    <span class="cmt">// Remove optional</span>
+
+<span class="cmt">// ═══════ TYPE GUARDS ════════════════════════════</span>
+<span class="kw">typeof</span> x === <span class="str">"string"</span>           <span class="cmt">// Primitive check</span>
+x <span class="kw">instanceof</span> <span class="cls">Error</span>              <span class="cmt">// Class instance check</span>
+<span class="str">"prop"</span> <span class="kw">in</span> obj                   <span class="cmt">// Property existence</span>
+function isX(v): v <span class="kw">is</span> X { ... } <span class="cmt">// Custom predicate</span>
+
+<span class="cmt">// ═══════ REACT TYPES ════════════════════════════</span>
+React.ReactNode      <span class="cmt">// Renderable content</span>
+React.FC&lt;P&gt;          <span class="cmt">// Functional component</span>
+React.ChangeEvent&lt;T&gt; <span class="cmt">// Input change</span>
+React.MouseEvent&lt;T&gt;  <span class="cmt">// Mouse click</span>
+React.FormEvent&lt;T&gt;   <span class="cmt">// Form submit</span>
+React.CSSProperties  <span class="cmt">// Inline styles</span>
+React.RefObject&lt;T&gt;   <span class="cmt">// useRef return type</span></pre></div>
+<div class="memory"><strong>🧠 Final Memory Aid — TIGER:</strong><br>
+<strong>T</strong>ypes (string, number, boolean, etc.)<br>
+<strong>I</strong>nterfaces (object shapes, extends)<br>
+<strong>G</strong>enerics (&lt;T&gt; for reusable types)<br>
+<strong>E</strong>xpansion (utility types: Partial, Pick, Omit...)<br>
+<strong>R</strong>efinement (type guards: typeof, instanceof, in)</div>
+<div class="success">
+  <strong>📋 Input / Expected Output Examples & Deep Explanations:</strong>
+  <div style="margin-top:.45rem;display:flex;flex-direction:column;gap:.55rem;">
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 1 (Non-null assertions):</strong><br>
+      📥 <strong>Action:</strong> <code>const active = user!;</code><br>
+      📤 <strong>Expected Type:</strong> Bypasses null compiler checks, forcing return type directly to User.
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 2 (Indexed Access type resolution):</strong><br>
+      📥 <strong>Action:</strong> <code>type T = User["email"];</code><br>
+      📤 <strong>Expected Type:</strong> <code>string</code> <span style="color:var(--muted)">(Resolves key parameter types from source schemas.)</span>
+    </div>
+    <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+      <strong>Example 3 (Mapped modifiers copiability):</strong><br>
+      📥 <strong>Input Mapped Type:</strong> <code>{ [K in keyof T]-?: T[K] }</code><br>
+      📤 <strong>Expected Type:</strong> Generates identical type, but systematically strips optionality from all properties.
+    </div>
+  </div>
+</div>
+`
+}
+]
+}
+];
+
+let currentTopic = null;
+let completedSections = {};
+
+function cp(btn) {
+  const pre = btn.closest('.cb').querySelector('pre');
+  if (!pre) return;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    const originalText = btn.textContent;
+    btn.textContent = 'Copied!';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 1500);
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+}
+
+function openMob() {
+  document.getElementById('mob').classList.add('open');
+}
+
+function closeMob() {
+  document.getElementById('mob').classList.remove('open');
+}
+
+function initSidebar() {
+  const sbContent = document.getElementById('sb');
+  const mobBody = document.getElementById('mob-body');
+  if (!sbContent) return;
+
+  // Group by category/group
+  const groups = {};
+  TOPICS.forEach(topic => {
+    if (!groups[topic.group]) groups[topic.group] = [];
+    groups[topic.group].push(topic);
+  });
+
+  let html = `<div class="sb-title"><span>Topics</span><span class="sb-count">${TOPICS.length}</span></div>`;
+  Object.entries(groups).forEach(([groupName, topics]) => {
+    html += `<div class="sb-group">
+      <div class="sg-title">${groupName}</div>`;
+    topics.forEach(t => {
+      html += `<div class="nav-item" id="nav-${t.id}" onclick="showTopic('${t.id}')">
+        <div class="ni-ic">${t.icon}</div>
+        <div class="ni-txt">${t.title}</div>
+        <span class="ni-badge" id="badge-${t.id}" style="display:none;color:var(--green)">✓</span>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  sbContent.innerHTML = html;
+  if (mobBody) mobBody.innerHTML = html;
+}
+
+function initWelcomeScreen() {
+  const grid = document.getElementById('topic-cards');
+  if (!grid) return;
+
+  let html = '';
+  TOPICS.forEach(topic => {
+    html += `<div class="tc" onclick="showTopic('${topic.id}')">
+      <div class="tc-icon">${topic.icon}</div>
+      <div class="tc-title">${topic.title}</div>
+      <div class="tc-sub">${topic.desc || ''}</div>
+    </div>`;
+  });
+  grid.innerHTML = html;
+}
+
+function showTopic(topicId) {
+  currentTopic = topicId;
+  const topic = TOPICS.find(t => t.id === topicId);
+  if (!topic) return;
+
+  closeMob();
+
+  const welcome = document.getElementById('welcome-screen');
+  if (welcome) welcome.style.display = 'none';
+
+  const contentArea = document.getElementById('content-area');
+  if (!contentArea) return;
+  contentArea.style.display = 'block';
+
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const activeNav = document.getElementById(`nav-${topicId}`);
+  if (activeNav) activeNav.classList.add('active');
+  const mobNav = document.getElementById('mob-body')?.querySelector(`#nav-${topicId}`);
+  if (mobNav) mobNav.classList.add('active');
+
+  let tagsHtml = '';
+  if (topic.tags) {
+    topic.tags.forEach(tag => {
+      tagsHtml += `<span class="t-tag">${tag}</span>`;
+    });
+  }
+
+  let sectionsHtml = '';
+  topic.sections.forEach(sec => {
+    sectionsHtml += `
+      <div class="sec" id="sec-${sec.id}">
+        <div class="sec-h" onclick="toggleSec('${topicId}', '${sec.id}', this)">
+          <div class="sec-hl">
+            <div class="sec-ic">${sec.icon}</div>
+            <div class="sec-ti">${sec.title}</div>
+          </div>
+          <div class="sec-ar">›</div>
+        </div>
+        <div class="sec-body">
+          ${sec.content}
+        </div>
+      </div>
+    `;
+  });
+
+  contentArea.innerHTML = `
+    <div class="topic-page active">
+      <div class="t-hero">
+        <div class="t-hero-top">
+          <div class="t-icon">${topic.icon}</div>
+          <div class="t-info">
+            <h1>${topic.title}</h1>
+            <p>${topic.desc || ''}</p>
+            <div class="t-tags">${tagsHtml}</div>
+          </div>
+        </div>
+      </div>
+      <div class="fi">${sectionsHtml}</div>
+    </div>
+  `;
+
+  // Auto-open first section
+  const firstSec = contentArea.querySelector('.sec');
+  if (firstSec) {
+    firstSec.classList.add('open');
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleSec(topicId, secId, header) {
+  const sec = header.closest('.sec');
+  if (sec) {
+    sec.classList.toggle('open');
+  }
+  markCompleted(topicId, secId);
+}
+
+function markCompleted(topicId, secId) {
+  const key = `${topicId}-${secId}`;
+  completedSections[key] = true;
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalSections = TOPICS.reduce((sum, t) => sum + t.sections.length, 0);
+  const completed = Object.keys(completedSections).length;
+  const pct = totalSections > 0 ? Math.round((completed / totalSections) * 100) : 0;
+
+  const fill = document.getElementById('pfill');
+  const pctText = document.getElementById('ppct');
+  if (fill) fill.style.width = pct + '%';
+  if (pctText) pctText.textContent = pct + '%';
+
+  TOPICS.forEach(topic => {
+    const allDone = topic.sections.every(sec => completedSections[`${topic.id}-${sec.id}`]);
+    const badge = document.getElementById(`badge-${topic.id}`);
+    if (badge) {
+      badge.style.display = allDone ? 'inline' : 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initWelcomeScreen();
+  updateProgress();
+});
+</script>
+</body>
+</html>
