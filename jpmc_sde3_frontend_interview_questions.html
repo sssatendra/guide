@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPMC SDE3 Frontend Interview Q-Bank — Engineering Mastery Hub</title>
+  <meta name="description" content="Elite question bank for JPMorgan Chase SDE3 Frontend technical loops. Core JS variables, Async callbacks, React rendering engines, TypeScript utility typings, and 5 detailed HackerRank solutions.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <style>
+    :root {
+      --bg: #030306;
+      --card-bg: #09090f;
+      --card-hover-bg: #0f0f18;
+      --border: #171725;
+      --border-hover: #292942;
+      --accent: #ec4899; /* JPMC style warm rose accent */
+      --accent-glow: rgba(236, 72, 153, 0.12);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.08);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.08);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.08);
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ── GRADIENT GLOW BACKGROUND ── */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .badge {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 4px 10px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(236, 72, 153, 0.2);
+      border-radius: 100px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(to right, #fff 40%, rgba(255, 255, 255, 0.6));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.2rem;
+    }
+
+    /* ── BACK BUTTON ── */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      transform: translateX(-3px);
+    }
+
+    /* ── MAIN SPLIT LAYOUT ── */
+    .layout-split {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.75rem;
+      align-items: start;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── SIDEBAR LIST ── */
+    .sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.25rem;
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .sidebar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 1rem;
+      }
+      .category-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+    }
+
+    .category-item {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--border-radius-md);
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .category-item:hover {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: var(--border);
+      transform: translateX(2px);
+    }
+
+    @media (max-width: 1024px) {
+      .category-item:hover {
+        transform: none;
+      }
+    }
+
+    .category-item.active {
+      background: var(--card-hover-bg);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .category-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    @media (max-width: 1024px) {
+      .category-item.active::before {
+        display: none;
+      }
+    }
+
+    .category-item-icon {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      transition: color 0.2s;
+    }
+
+    .category-item.active .category-item-icon {
+      color: var(--accent);
+    }
+
+    .category-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .category-item-title {
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .category-item-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* ── QUESTIONS WORKSPACE ── */
+    .workspace {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-height: 500px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Question Accordion Card */
+    .q-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.25rem 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .q-card:hover {
+      border-color: var(--border-hover);
+      background: var(--card-hover-bg);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .q-num {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(236, 72, 153, 0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .q-text {
+      font-size: 0.95rem;
+      color: #fff;
+      line-height: 1.5;
+      font-weight: 600;
+      flex: 1;
+      padding-right: 1.5rem;
+    }
+
+    .q-badges {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .q-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .q-badge-hard {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .q-badge-med {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.15);
+    }
+
+    .q-badge-easy {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+
+    .q-badge-topic {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .expand-icon {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      transition: transform 0.2s, color 0.2s;
+    }
+
+    .q-card:hover .expand-icon {
+      color: #fff;
+    }
+
+    .q-card.open {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .q-card.open .expand-icon {
+      transform: rotate(180deg);
+      color: var(--accent);
+    }
+
+    /* Expandable Answer Content */
+    .q-answer {
+      display: none;
+      border-top: 1px solid var(--border);
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .q-card.open .q-answer {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .q-answer code {
+      background: #020204;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #fb7185;
+      border: 1px solid var(--border);
+    }
+
+    .q-answer pre {
+      background: #020204;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      margin: 0.75rem 0;
+    }
+
+    /* ── HACKERRANK DETAILS ── */
+    .hr-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .hr-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+    }
+
+    .hr-card-header {
+      background: #06060c;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hr-card-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+    }
+
+    .hr-card-body {
+      padding: 1.5rem;
+    }
+
+    .hr-card-desc {
+      font-size: 0.88rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .hr-meta {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .action-panel {
+      display: flex;
+      gap: 0.75rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .action-btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+
+    .action-btn-primary:hover {
+      box-shadow: 0 0 15px var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .action-btn-secondary {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .action-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: var(--border-hover);
+    }
+
+    /* ── PRACTICE MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 3, 6, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      width: 90%;
+      max-width: 850px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.open .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .prompt-box {
+      background: #020204;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+      padding: 1rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .workspace-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .editor-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .editor-wrapper {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+
+    .code-textarea {
+      width: 100%;
+      height: 220px;
+      background: #020204;
+      border: none;
+      color: #a7f3d0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      padding: 1rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .modal-footer {
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .loader {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .loader i {
+      animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Dynamic evaluation panel */
+    .eval-box {
+      margin-top: 1rem;
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .eval-header {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .eval-card {
+      background: #020204;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1rem;
+    }
+
+    .eval-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .eval-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 0 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="brand-wrap">
+        <div class="badge">JPMC SDE3 TRACK</div>
+        <h1>JPMC SDE3 Frontend Question Bank</h1>
+        <p class="subtitle">Complete interview bank: Core JS, Async patterns, React Suspense, TS bounds, and HackerRank solutions.</p>
+      </div>
+      <a href="index.html" class="back-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Dashboard
+      </a>
+    </header>
+
+    <!-- MAIN SPLIT LAYOUT -->
+    <main class="layout-split">
+      <!-- LEFT SIDEBAR: TOPICS -->
+      <aside class="sidebar">
+        <h2 class="sidebar-title">Categories</h2>
+        <div class="category-list">
+          <div class="category-item active" onclick="switchCategory('core-js')">
+            <div class="category-item-icon"><i class="ti ti-lambda" aria-hidden="true"></i></div>
+            <div class="category-item-info">
+              <span class="category-item-title">Core JS</span>
+              <span class="category-item-sub">8 Questions</span>
+            </div>
+          </div>
+          <div class="category-item" onclick="switchCategory('async')">
+            <div class="category-item-icon"><i class="ti ti-activity" aria-hidden="true"></i></div>
+            <div class="category-item-info">
+              <span class="category-item-title">Async & Event Loop</span>
+              <span class="category-item-sub">6 Questions</span>
+            </div>
+          </div>
+          <div class="category-item" onclick="switchCategory('react')">
+            <div class="category-item-icon"><i class="ti ti-brand-react" aria-hidden="true"></i></div>
+            <div class="category-item-info">
+              <span class="category-item-title">React & Hooks</span>
+              <span class="category-item-sub">7 Questions</span>
+            </div>
+          </div>
+          <div class="category-item" onclick="switchCategory('ts')">
+            <div class="category-item-icon"><i class="ti ti-brand-typescript" aria-hidden="true"></i></div>
+            <div class="category-item-info">
+              <span class="category-item-title">TypeScript</span>
+              <span class="category-item-sub">5 Questions</span>
+            </div>
+          </div>
+          <div class="category-item" onclick="switchCategory('hackerrank')">
+            <div class="category-item-icon"><i class="ti ti-terminal-2" aria-hidden="true"></i></div>
+            <div class="category-item-info">
+              <span class="category-item-title">HackerRank Coding</span>
+              <span class="category-item-sub">5 Problems</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT COLUMN: WORKSPACE -->
+      <section class="workspace" id="workspace">
+        <!-- Content will be drawn dynamically by Javascript -->
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2026 Engineering Mastery Hub. Designed for senior architects and developers. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- PRACTICE MODAL -->
+  <div class="modal-overlay" id="practiceModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">
+          <i class="ti ti-terminal" aria-hidden="true"></i> Coding Arena
+        </h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="prompt-box" id="modalPrompt"></div>
+        
+        <div class="workspace-area" id="workspaceContainer">
+          <label class="editor-label" for="codeEditor">Your Code Solution (JavaScript)</label>
+          <div class="editor-wrapper">
+            <textarea id="codeEditor" class="code-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="loader" id="modalLoader">
+          <i class="ti ti-loader-2" aria-hidden="true"></i> Running test suites...
+        </div>
+
+        <!-- Dynamic evaluation panel -->
+        <div class="eval-box" id="evalBox">
+          <div class="eval-header">Submission Results</div>
+          <div class="row2">
+            <div class="eval-card">
+              <div class="eval-title" id="evalTitle1">Interviewer Review</div>
+              <div class="eval-text" id="evalBody1"></div>
+            </div>
+            <div class="eval-card">
+              <div class="eval-title" id="evalTitle2">Optimal Solution</div>
+              <pre id="evalBody2" style="max-height:220px; overflow-y:auto; padding: 0.5rem; border:none; background:transparent; font-size:0.75rem;"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close Console</button>
+        <button class="modal-btn modal-btn-primary" id="modalSubmitBtn" onclick="evaluatePractice()">Submit Code</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const data = {
+      'core-js': {
+        title: "Core JS Fundamentals",
+        sub: "8 questions · Closures, prototypes, scope, binding, coercion, ES6+",
+        questions: [
+          {
+            num: "Q1",
+            text: "Explain closures with a real-world use case. What memory implications should you be aware of?",
+            difficulty: "hard",
+            topic: "closures",
+            answer: "A closure is a function that retains access to its outer lexical scope even after the outer function has returned. Classic use case: <code>debounce()</code>, <code>memoize()</code>, module pattern, event handler factories. Memory implication: closed-over variables are never garbage collected as long as the closure is alive — watch for closures in loops holding DOM references or large objects.",
+            code: `function makeCounter() {
+  let count = 0; // captured by closure
+  return () => ++count;
+}
+const c = makeCounter();
+c(); // 1
+c(); // 2`
+          },
+          {
+            num: "Q2",
+            text: "What is the difference between == and ===? Walk through type coercion rules.",
+            difficulty: "easy",
+            topic: "coercion",
+            answer: "<code>===</code> (strict equality) never coerces; types must match. <code>==</code> runs the Abstract Equality Comparison, which coerces operands. Key traps: <code>null == undefined</code> is <code>true</code>, <code>null === undefined</code> is <code>false</code>. <code>0 == false</code> is <code>true</code>, <code>\"\" == false</code> is <code>true</code>. Objects compared to primitives call <code>valueOf()</code> / <code>toString()</code>. Always prefer <code>===</code> in production code."
+          },
+          {
+            num: "Q3",
+            text: "How does prototypal inheritance work? How does it differ from classical (class-based) inheritance?",
+            difficulty: "hard",
+            topic: "prototypes",
+            answer: "Every JS object has an internal <code>[[Prototype]]</code> link (accessible via <code>Object.getPrototypeOf()</code>). Property lookup walks the chain until it reaches <code>null</code>. ES6 <code>class</code> syntax is syntactic sugar over this — <code>extends</code> sets up the prototype chain, <code>super</code> refers to the parent constructor. Key difference from classical OOP: JS uses delegation (objects link to objects), not copying. <code>Object.create(proto)</code> is the pure prototypal form."
+          },
+          {
+            num: "Q4",
+            text: "Explain this binding rules. What does this refer to in arrow functions vs regular functions?",
+            difficulty: "hard",
+            topic: "this / binding",
+            answer: "4 rules (in priority order): new binding → explicit binding (<code>call/apply/bind</code>) → implicit binding (method call) → default binding (global / undefined in strict). Arrow functions have no own <code>this</code> — they inherit lexically from the enclosing scope at definition time, so they can't be used as constructors or object methods that need dynamic <code>this</code>.",
+            code: `const obj = {
+  val: 42,
+  getVal() { return this.val; },  // dynamic this
+  getValArrow: () => this.val      // always outer this (undefined in module)
+};`
+          },
+          {
+            num: "Q5",
+            text: "What is the difference between var, let, and const? Explain hoisting for each.",
+            difficulty: "easy",
+            topic: "scope / hoisting",
+            answer: "<code>var</code>: function-scoped, hoisted and initialized to <code>undefined</code>. <code>let</code> / <code>const</code>: block-scoped, hoisted but NOT initialized (temporal dead zone — accessing before declaration throws ReferenceError). <code>const</code> requires initialization and forbids reassignment, but the value can still be mutated (e.g. pushing to a const array). Prefer <code>const</code> by default, <code>let</code> when rebinding is needed."
+          },
+          {
+            num: "Q6",
+            text: "Implement a deep clone function. What edge cases does JSON.parse(JSON.stringify(obj)) miss?",
+            difficulty: "medium",
+            topic: "objects",
+            answer: "<code>JSON</code> approach misses: functions, <code>undefined</code>, <code>Symbol</code> keys, <code>Date</code> objects (becomes string), <code>RegExp</code>, circular references (throws), <code>Map</code>/<code>Set</code>/<code>WeakMap</code>, class instances lose their prototype. Proper deep clone: use <code>structuredClone()</code> (native, handles circular refs + most built-ins) or write a recursive function with a <code>WeakMap</code> to track visited nodes for circular reference handling.",
+            code: `function deepClone(obj, seen = new WeakMap()) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (seen.has(obj)) return seen.get(obj);
+  const clone = Array.isArray(obj) ? [] : {};
+  seen.set(obj, clone);
+  for (const key of Object.keys(obj))
+    clone[key] = deepClone(obj[key], seen);
+  return clone;
+}`
+          },
+          {
+            num: "Q7",
+            text: "What are ES6+ features you use daily? Explain destructuring, spread/rest, optional chaining, and nullish coalescing.",
+            difficulty: "easy",
+            topic: "ES6+",
+            answer: "Key distinction the interviewer checks: <code>||</code> vs <code>??</code>. <code>||</code> falls back on any falsy value (0, \"\", false). <code>??</code> only falls back on <code>null</code>/<code>undefined</code> — safer for legitimate falsy values. Optional chaining <code>obj?.a?.b</code> short-circuits to undefined instead of throwing. Rest <code>...args</code> collects remaining into array; spread <code>...arr</code> expands. Destructuring with rename + default: <code>const { name: n = 'anon' } = user</code>."
+          },
+          {
+            num: "Q8",
+            text: "What is a WeakMap vs Map? When would you use WeakMap in practice?",
+            difficulty: "hard",
+            topic: "memory / GC",
+            answer: "<code>Map</code> holds strong references — keys are not garbage collected. <code>WeakMap</code> holds weak references to object keys only; if the key object is no longer reachable elsewhere, the entry is GC'd automatically. Not iterable. Use cases: caching computed results keyed by DOM node or object instance (no manual cleanup needed), storing private data for class instances, memoization without memory leaks."
+          }
+        ]
+      },
+      'async': {
+        title: "Async & Event Loop",
+        sub: "6 questions · Event loop, microtasks, Promises, async/await",
+        questions: [
+          {
+            num: "Q1",
+            text: "Explain the JavaScript event loop. What is the difference between the call stack, task queue, and microtask queue?",
+            difficulty: "hard",
+            topic: "event loop",
+            answer: "Call stack: synchronous execution frames. After each stack drains, the event loop first processes ALL microtasks (Promise callbacks, <code>queueMicrotask</code>) before picking the next macrotask (<code>setTimeout</code>, I/O, UI events) from the task queue. This is why a chain of resolved promises can starve <code>setTimeout(fn, 0)</code>.",
+            code: `console.log('1');
+setTimeout(() => console.log('2'), 0);
+Promise.resolve().then(() => console.log('3'));
+console.log('4');
+// Output: 1, 4, 3, 2`
+          },
+          {
+            num: "Q2",
+            text: "What is the difference between Promise.all, Promise.allSettled, Promise.race, and Promise.any?",
+            difficulty: "medium",
+            topic: "promises",
+            answer: "<code>Promise.all</code>: resolves when ALL resolve; rejects fast on first rejection. <code>Promise.allSettled</code>: waits for ALL, returns array of <code>{status, value|reason}</code> — never short-circuits. <code>Promise.race</code>: settles (resolve or reject) as soon as ANY settles first. <code>Promise.any</code>: resolves on first fulfillment; rejects only if ALL reject (AggregateError)."
+          },
+          {
+            num: "Q3",
+            text: "Implement a debounce and a throttle function from scratch. What is the behavioral difference?",
+            difficulty: "hard",
+            topic: "closures + async",
+            answer: "Debounce: delays execution until no calls happen for N ms — fires once after burst stops. Throttle: fires at most once per N ms regardless of call frequency.",
+            code: `// Debounce
+function debounce(fn, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// Throttle
+function throttle(fn, limit) {
+  let last = 0;
+  return function(...args) {
+    const now = Date.now();
+    if (now - last >= limit) {
+      last = now;
+      fn.apply(this, args);
+    }
+  };
+}`
+          },
+          {
+            num: "Q4",
+            text: "What is a memory leak in JavaScript? Name 3 common causes in a React app and how to fix them.",
+            difficulty: "hard",
+            topic: "memory",
+            answer: "1. <strong>Uncleared timers/intervals</strong> in <code>useEffect</code> — fix: return cleanup that calls <code>clearInterval</code>. 2. <strong>Event listeners on window/document</strong> not removed on unmount — fix: remove in cleanup. 3. <strong>State updates on unmounted components</strong> — fix: use an abort controller or a <code>mounted</code> flag in <code>useEffect</code>. 4. <strong>Closures holding stale references</strong> to large objects that prevent GC."
+          },
+          {
+            num: "Q5",
+            text: "What happens if you await inside a forEach? How do you handle async iteration correctly?",
+            difficulty: "medium",
+            topic: "async/await",
+            answer: "<code>Array.forEach</code> does not await the callback — it fires all iterations immediately and doesn't return a Promise, so outer <code>await</code> is useless. Fixes: sequential — use <code>for...of</code> loop with <code>await</code>. Parallel — use <code>await Promise.all(arr.map(async item => ...))</code>."
+          },
+          {
+            num: "Q6",
+            text: "Explain generators and iterators. Where would you use a generator in a production frontend app?",
+            difficulty: "hard",
+            topic: "generators",
+            answer: "Generators (<code>function*</code>) produce values lazily via <code>yield</code>, pauseable/resumable. They implement the iterator protocol (<code>{next(), done, value}</code>). Production use cases: infinite scroll pagination (lazy page fetching), Redux-Saga for side effect orchestration (entire library built on generators), streaming data processing, implementing custom async iterators."
+          }
+        ]
+      },
+      'react': {
+        title: "React & Hooks",
+        sub: "7 questions · Hooks, rendering, performance, patterns",
+        questions: [
+          {
+            num: "Q1",
+            text: "When does React re-render a component? What are all the ways to prevent unnecessary re-renders?",
+            difficulty: "hard",
+            topic: "rendering",
+            answer: "Re-renders happen when: state changes, props change, parent re-renders, context value changes. Prevention: <code>React.memo</code> (shallow prop comparison), <code>useMemo</code> (memoize expensive values), <code>useCallback</code> (stable function references), split context providers, state colocation (push state down)."
+          },
+          {
+            num: "Q2",
+            text: "Explain the useEffect dependency array. What are stale closures and how do you handle them?",
+            difficulty: "hard",
+            topic: "hooks",
+            answer: "The dep array controls when the effect re-runs. Empty <code>[]</code>: run once on mount. Missing dep: ESLint exhaustive-deps will warn — omitting a dep causes the effect to close over a stale value that never updates. Fix: add to deps array, or use the functional updater form of <code>setState(prev => ...)</code>, or use <code>useRef</code> to hold the latest callback."
+          },
+          {
+            num: "Q3",
+            text: "How does React Suspense work? What are its use cases beyond lazy loading?",
+            difficulty: "hard",
+            topic: "suspense",
+            answer: "Suspense catches thrown Promises from child components — when a component throws a Promise, React shows the nearest <code>&lt;Suspense fallback&gt;</code> until the Promise resolves. Beyond code splitting: data fetching with Relay / React Query's Suspense mode, streaming SSR, <code>startTransition</code> to keep UI responsive."
+          },
+          {
+            num: "Q4",
+            text: "What is the virtual DOM and what is React's reconciliation algorithm (Fiber)?",
+            difficulty: "medium",
+            topic: "internals",
+            answer: "Virtual DOM is an in-memory JS representation of the UI. On state change, React creates a new VDOM tree and diffs it against the previous (reconciliation). Fiber (React 16+) splits this work into small units that can be paused/prioritized — enabling Concurrent Mode. Diffing rules: same type → update, different type → unmount + remount. <code>key</code> prop helps React match list items across renders."
+          },
+          {
+            num: "Q5",
+            text: "How would you design a custom hook for data fetching? Handle loading, error, and abort.",
+            difficulty: "hard",
+            topic: "custom hooks",
+            answer: "Key concerns: avoid setting state on unmounted component (AbortController), handle race conditions (stale response), expose loading/error/data states.",
+            code: `function useFetch(url) {
+  const [state, setState] = useState({data: null, loading: true, error: null});
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(url, { signal: controller.signal })
+      .then(r => r.json())
+      .then(data => setState({data, loading: false, error: null}))
+      .catch(err => {
+        if (err.name !== 'AbortError')
+          setState({data: null, loading: false, error: err});
+      });
+    return () => controller.abort();
+  }, [url]);
+  return state;
+}`
+          },
+          {
+            num: "Q6",
+            text: "Compare useRef vs useState. When should you use one over the other?",
+            difficulty: "medium",
+            topic: "hooks",
+            answer: "<code>useState</code>: triggers re-render on update — use for values that affect UI. <code>useRef</code>: mutating <code>.current</code> does NOT trigger re-render — use for: DOM element references, storing interval/timeout IDs, tracking previous values, holding mutable values that effects need without them being deps."
+          },
+          {
+            num: "Q7",
+            text: "How do you test React components? What's the difference between unit, integration, and E2E tests in a React context?",
+            difficulty: "medium",
+            topic: "testing",
+            answer: "Unit: test a single component / hook in isolation (Jest + React Testing Library). Integration: test multiple components interacting (RTL is ideal — test behavior, not implementation). E2E: test full user flows in a real browser (Cypress, Playwright). RTL philosophy: query by role/text/label, not by class names — mimics how users interact. Mock API calls with <code>msw</code> (mock service worker)."
+          }
+        ]
+      },
+      'ts': {
+        title: "TypeScript Mastery",
+        sub: "5 questions · Types, generics, utility types, narrowing",
+        questions: [
+          {
+            num: "Q1",
+            text: "What is the difference between interface and type in TypeScript? When would you choose one over the other?",
+            difficulty: "medium",
+            topic: "TS basics",
+            answer: "Both can describe object shapes. Key differences: <code>interface</code> supports declaration merging (same name = merged) — useful for extending library types. <code>type</code> supports union types, intersection types, conditional types, mapped types, template literals — more expressive. Prefer <code>interface</code> for public API / library types; prefer <code>type</code> for complex computed types, unions, and utility types."
+          },
+          {
+            num: "Q2",
+            text: "Explain generics in TypeScript. Write a generic function that returns the last element of any array.",
+            difficulty: "medium",
+            topic: "generics",
+            answer: "Generics allow writing reusable, type-safe code that works across different types without losing type information.",
+            code: `function last<T>(arr: T[]): T | undefined {
+  return arr[arr.length - 1];
+}
+last([1, 2, 3]);       // type: number | undefined
+last(['a', 'b']);      // type: string | undefined`
+          },
+          {
+            num: "Q3",
+            text: "What are utility types? Explain Partial, Required, Pick, Omit, Record, and ReturnType.",
+            difficulty: "medium",
+            topic: "utility types",
+            answer: "<code>Partial&lt;T&gt;</code>: all props optional. <code>Required&lt;T&gt;</code>: all props mandatory. <code>Pick&lt;T, K&gt;</code>: keep only listed keys. <code>Omit&lt;T, K&gt;</code>: remove listed keys. <code>Record&lt;K, V&gt;</code>: map type with keys K and values V. <code>ReturnType&lt;typeof fn&gt;</code>: extract function return type."
+          },
+          {
+            num: "Q4",
+            text: "What is type narrowing? Explain type guards, discriminated unions, and the never type for exhaustive checks.",
+            difficulty: "hard",
+            topic: "narrowing",
+            answer: "Narrowing: TS uses control flow to refine union types. Type guards: <code>typeof</code>, <code>instanceof</code>, <code>in</code> operator, or custom <code>is</code> predicate (<code>function isUser(x: any): x is User</code>). Discriminated unions: each variant has a literal type field (<code>kind: 'circle' | 'square'</code>) — switch on it to narrow.",
+            code: `function assertNever(x: never): never {
+  throw new Error('Unhandled case: ' + x);
+}
+// TS errors if you forget a union variant in your switch`
+          },
+          {
+            num: "Q5",
+            text: "What is the difference between unknown, any, and never?",
+            difficulty: "medium",
+            topic: "type system",
+            answer: "<code>any</code>: opts out of type checking entirely. <code>unknown</code>: type-safe counterpart to <code>any</code> — you must narrow before using it (can't call methods, access props without check). <code>never</code>: the bottom type — represents values that can never occur (exhaustive switch, unreachable code, functions that always throw)."
+          }
+        ]
+      },
+      'hackerrank': {
+        title: "HackerRank Problem Solvers",
+        sub: "5 likely problem patterns for JPMC SDE3 frontend L1 loops — with detailed optimal JS solutions.",
+        problems: [
+          {
+            title: "1. Transaction Aggregator (Array / String)",
+            desc: "Typically: group/transform an array, find duplicates, or process a dataset. Interviewers look for clean use of <code>reduce</code>, <code>Map</code>, and avoiding O(n²) loops.",
+            challenge: "Write a function <code>aggregateTransactions(transactions, limit)</code> that receives an array of transaction records, filters out failed records (only aggregates success states), groups aggregate volumes by currency, sorts currencies descending by total volume, and limits returned results to top K currencies.",
+            boilerplate: `function aggregateTransactions(transactions, limit) {\n  const aggregates = new Map();\n  // Filter SUCCESS, group volume, sort desc, slice K\n  \n}`,
+            optimal: `function aggregateTransactions(transactions, limit) {
+  const aggregates = new Map();
+  for (const tx of transactions) {
+    if (tx.status !== 'SUCCESS') continue;
+    const current = aggregates.get(tx.currency) || { totalVolume: 0, count: 0 };
+    current.totalVolume += tx.amount;
+    current.count += 1;
+    aggregates.set(tx.currency, current);
+  }
+  return [...aggregates.entries()]
+    .map(([currency, data]) => ({ currency, ...data }))
+    .sort((a, b) => b.totalVolume - a.totalVolume)
+    .slice(0, limit);
+}`,
+            time: "O(N + C log C) where N = transaction count, C = unique currencies",
+            space: "O(C) unique currencies"
+          },
+          {
+            title: "2. Advanced Debounce with Cancel/Flush (Utility)",
+            desc: "Very common at JPMC for frontend roles. Tests your closures and async timer bindings under edge conditions.",
+            challenge: "Implement an advanced <code>debounce(fn, delay, immediate)</code> function that receives a primary callback <code>fn</code>. If <code>immediate</code> is true, invoke the callback immediately on the leading edge. In addition, expose <code>.cancel()</code> to abort pending timers, and <code>.flush()</code> to execute pending callbacks instantly and reset timers.",
+            boilerplate: `function debounce(fn, delay, immediate = false) {\n  let timer = null;\n  // Implement leading edge call, .cancel(), and .flush() methods\n  \n}`,
+            optimal: `function debounce(fn, delay, immediate = false) {
+  let timer = null;
+  let lastArgs = null;
+  let lastThis = null;
+  
+  function debounced(...args) {
+    lastArgs = args;
+    lastThis = this;
+    
+    const callNow = immediate && !timer;
+    if (timer) clearTimeout(timer);
+    
+    timer = setTimeout(() => {
+      if (!immediate && lastArgs) {
+        fn.apply(lastThis, lastArgs);
+      }
+      timer = null;
+      lastArgs = lastThis = null;
+    }, delay);
+    
+    if (callNow) {
+      fn.apply(lastThis, lastArgs);
+    }
+  }
+  
+  debounced.cancel = function() {
+    if (timer) clearTimeout(timer);
+    timer = null;
+    lastArgs = lastThis = null;
+  };
+  
+  debounced.flush = function() {
+    if (timer) {
+      fn.apply(lastThis, lastArgs);
+      clearTimeout(timer);
+      timer = null;
+    }
+    lastArgs = lastThis = null;
+  };
+  
+  return debounced;
+}`,
+            time: "O(1) scheduling hooks",
+            space: "O(1) memory closures"
+          },
+          {
+            title: "3. Concurrency Limiter Queue (Async Orchestration)",
+            desc: "Run parallel async tasks safely without crashing connections. Crucial for heavy-duty finance API loops.",
+            challenge: "Implement <code>limitConcurrency(tasks, limit)</code> that runs an array of asynchronous task factories (functions returning Promises) concurrently, ensuring that at most <code>limit</code> tasks execute in parallel. Return a single promise resolving to an array of all completed results in their correct order.",
+            boilerplate: `function limitConcurrency(tasks, limit) {\n  return new Promise((resolve) => {\n    // Execute up to limit tasks concurrently and collect results\n    \n  });\n}`,
+            optimal: `function limitConcurrency(tasks, limit) {
+  return new Promise((resolve) => {
+    const results = [];
+    let completed = 0;
+    let running = 0;
+    let nextIndex = 0;
+    
+    if (tasks.length === 0) return resolve([]);
+    
+    function runNext() {
+      if (completed === tasks.length) {
+        return resolve(results);
+      }
+      
+      while (running < limit && nextIndex < tasks.length) {
+        const currentIndex = nextIndex++;
+        const task = tasks[currentIndex];
+        running++;
+        
+        Promise.resolve(task())
+          .then((res) => {
+            results[currentIndex] = res;
+          })
+          .catch((err) => {
+            results[currentIndex] = err;
+          })
+          .finally(() => {
+            running--;
+            completed++;
+            runNext();
+          });
+      }
+    }
+    
+    runNext();
+  });
+}`,
+            time: "O(N) task cycles",
+            space: "O(N) result buffering"
+          },
+          {
+            title: "4. Deep Merge with Cycle Detection (Tree Traversal)",
+            desc: "Safely combine deeply nested JSON configs or state stores. Tests recursive structures and references.",
+            challenge: "Write <code>deepMerge(target, source)</code> that deeply merges <code>source</code> object properties into <code>target</code>, handling arrays, nested objects, and avoiding circular execution crashes using cycle detection.",
+            boilerplate: `function deepMerge(target, source, visited = new WeakSet()) {\n  // Recursively merge properties, preventing circular reference crashes\n  \n}`,
+            optimal: `function deepMerge(target, source, visited = new WeakSet()) {
+  if (source === null || typeof source !== 'object') return source;
+  if (visited.has(source)) return target; // Break infinite loops
+  
+  if (Array.isArray(source)) {
+    const result = Array.isArray(target) ? [...target] : [];
+    visited.add(source);
+    for (let i = 0; i < source.length; i++) {
+      result[i] = deepMerge(result[i], source[i], visited);
+    }
+    return result;
+  }
+  
+  const result = (target && typeof target === 'object') ? { ...target } : {};
+  visited.add(source);
+  
+  for (const key of Object.keys(source)) {
+    if (source[key] && typeof source[key] === 'object') {
+      result[key] = deepMerge(result[key], source[key], visited);
+    } else {
+      result[key] = source[key];
+    }
+  }
+  return result;
+}`,
+            time: "O(V + E) nested node parsing",
+            space: "O(D) callstack depth + WeakSet maps"
+          },
+          {
+            title: "5. EventEmitter with Subscription Token (OOP / Pub-Sub)",
+            desc: "Design standard publish-subscribe event systems. Tests object references, closures, and browser dispatch mechanics.",
+            challenge: "Create a complete <code>EventEmitter</code> class containing <code>subscribe(event, listener)</code>, <code>emit(event, ...args)</code>, and <code>once(event, listener)</code>. The <code>subscribe</code> method must return an object with an <code>unsubscribe()</code> function to remove the listener easily.",
+            boilerplate: `class EventEmitter {\n  constructor() {\n    this.events = new Map();\n  }\n  subscribe(event, listener) {\n    \n  }\n  emit(event, ...args) {\n    \n  }\n  once(event, listener) {\n    \n  }\n}`,
+            optimal: `class EventEmitter {
+  constructor() {
+    this.events = new Map();
+  }
+  
+  subscribe(event, listener) {
+    if (!this.events.has(event)) {
+      this.events.set(event, new Set());
+    }
+    const listeners = this.events.get(event);
+    listeners.add(listener);
+    
+    return {
+      unsubscribe: () => {
+        listeners.delete(listener);
+        if (listeners.size === 0) {
+          this.events.delete(event);
+        }
+      }
+    };
+  }
+  
+  emit(event, ...args) {
+    const listeners = this.events.get(event);
+    if (!listeners) return;
+    for (const listener of listeners) {
+      try {
+        listener(...args);
+      } catch (err) {
+        console.error(\`Error in \${event} listener:\`, err);
+      }
+    }
+  }
+  
+  once(event, listener) {
+    const sub = this.subscribe(event, (...args) => {
+      sub.unsubscribe();
+      listener(...args);
+    });
+    return sub;
+  }
+}`,
+            time: "O(1) subscribe / unsubscribe, O(K) dispatch for K listeners",
+            space: "O(E * L) event listener sets"
+          }
+        ]
+      }
+    };
+
+    let activeCategory = 'core-js';
+    let activeHRIndex = 0;
+
+    // ── HIGH-FIDELITY SINGLE-PASS CODE TOKENIZER (BUG FREE) ──
+    function highlightJS(code) {
+      const tokenRegex = /(?<comment>\/\/.*|\/\*[\s\S]*?\*\/)|(?<string>'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|`(?:\\.|[^`])*`)|(?<number>\b\d+\b)|(?<keyword>\b(?:function|const|let|var|return|if|else|new|class|constructor|extends|this|throw|try|catch|finally|import|export|from|typeof|instanceof|of|in|for|while|do)\b)|(?<builtin>\b(?:Map|Set|WeakMap|WeakSet|Array|Object|JSON|Error|Number|String|Boolean|Promise|Date)\b)|(?<literal>\b(?:true|false|null|undefined|NaN)\b)|(?<func>\b\w+)(?=\s*\()|(?<other>[^\s\w]+|\w+|\s+)/g;
+
+      let match;
+      let html = '';
+      tokenRegex.lastIndex = 0;
+      
+      const escapeHtml = (str) => str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      while ((match = tokenRegex.exec(code)) !== null) {
+        const groups = match.groups;
+        const val = match[0];
+        
+        if (groups.comment) {
+          html += `<span style="color:#64748b;font-style:italic">${escapeHtml(val)}</span>`;
+        } else if (groups.string) {
+          html += `<span style="color:#a78bfa">${escapeHtml(val)}</span>`;
+        } else if (groups.keyword) {
+          html += `<span style="color:#f472b6;font-weight:600">${escapeHtml(val)}</span>`;
+        } else if (groups.builtin) {
+          html += `<span style="color:#60a5fa">${escapeHtml(val)}</span>`;
+        } else if (groups.literal) {
+          html += `<span style="color:#fb7185">${escapeHtml(val)}</span>`;
+        } else if (groups.number) {
+          html += `<span style="color:#fb923c">${escapeHtml(val)}</span>`;
+        } else if (groups.func) {
+          html += `<span style="color:#34d399">${escapeHtml(val)}</span>`;
+        } else {
+          html += escapeHtml(val);
+        }
+      }
+      return html;
+    }
+
+    function switchCategory(catId) {
+      activeCategory = catId;
+      
+      // Update sidebar active classes
+      document.querySelectorAll('.category-item').forEach(item => {
+        const onclickAttr = item.getAttribute('onclick');
+        item.classList.toggle('active', onclickAttr.includes(catId));
+      });
+      
+      renderWorkspace();
+    }
+
+    function toggleQuestion(cardElement) {
+      const qCard = cardElement.closest('.q-card');
+      const isOpen = qCard.classList.contains('open');
+      
+      // Close others
+      document.querySelectorAll('.q-card').forEach(c => c.classList.remove('open'));
+      
+      if (!isOpen) {
+        qCard.classList.add('open');
+      }
+    }
+
+    function renderWorkspace() {
+      const workspace = document.getElementById('workspace');
+      const cat = data[activeCategory];
+      
+      let html = `<h2 class="section-title">${cat.title}</h2>`;
+      html += `<p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:1rem">${cat.sub}</p>`;
+      
+      if (activeCategory === 'hackerrank') {
+        // Render HackerRank Coding Section
+        html += `<div class="hr-wrapper">`;
+        cat.problems.forEach((prob, idx) => {
+          html += `
+            <div class="hr-card">
+              <div class="hr-card-header">
+                <span class="hr-card-title">${prob.title}</span>
+                <span class="q-badge q-badge-med">Medium-Hard</span>
+              </div>
+              <div class="hr-card-body">
+                <div class="hr-card-desc">${prob.desc}</div>
+                <div style="font-size:0.85rem;font-weight:600;color:#fff;margin-bottom:6px;">Target HackerRank Challenge:</div>
+                <div class="prompt-box" style="margin-bottom:1rem">${prob.challenge}</div>
+                <div class="hr-meta">
+                  <span class="chip chip-after"><i class="ti ti-clock" aria-hidden="true"></i> Time: ${prob.time}</span>
+                  <span class="chip chip-space"><i class="ti ti-server" aria-hidden="true"></i> Space: ${prob.space}</span>
+                </div>
+                <div class="action-panel">
+                  <button class="action-btn action-btn-primary" onclick="openPracticeMode(${idx})">
+                    <i class="ti ti-terminal" aria-hidden="true"></i> Practice Arena
+                  </button>
+                  <button class="action-btn action-btn-secondary" onclick="openSolutionMode(${idx})">
+                    <i class="ti ti-code" aria-hidden="true"></i> View Optimal Code
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        html += `</div>`;
+      } else {
+        // Render Standard Accordion Questions Section
+        cat.questions.forEach(q => {
+          let codeBlock = '';
+          if (q.code) {
+            codeBlock = `<pre><code>${highlightJS(q.code)}</code></pre>`;
+          }
+          
+          html += `
+            <div class="q-card">
+              <div class="q-header" onclick="toggleQuestion(this)">
+                <span class="q-num">${q.num}</span>
+                <div style="flex:1">
+                  <div class="q-text">${q.text}</div>
+                  <div class="q-badges">
+                    <span class="q-badge q-badge-${q.difficulty}">${q.difficulty}</span>
+                    <span class="q-badge q-badge-topic">${q.topic}</span>
+                  </div>
+                </div>
+                <i class="ti ti-chevron-down expand-icon" aria-hidden="true"></i>
+              </div>
+              <div class="q-answer">
+                <div style="margin-bottom:0.75rem">${q.answer}</div>
+                ${codeBlock}
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      workspace.innerHTML = html;
+    }
+
+    // Modal practice operations
+    function openPracticeMode(idx) {
+      activeHRIndex = idx;
+      const prob = data.hackerrank.problems[idx];
+      
+      document.getElementById('modalTitle').innerHTML = `<i class="ti ti-terminal" aria-hidden="true"></i> HackerRank Practice: ${prob.title}`;
+      document.getElementById('modalPrompt').innerHTML = `<strong>Challenge:</strong> ${prob.challenge}`;
+      document.getElementById('codeEditor').value = prob.boilerplate;
+      document.getElementById('workspaceContainer').style.display = 'flex';
+      
+      // Reset feedback states
+      document.getElementById('evalBox').style.display = 'none';
+      document.getElementById('modalLoader').style.display = 'none';
+      document.getElementById('modalSubmitBtn').style.display = 'inline-block';
+      
+      document.getElementById('practiceModal').classList.add('open');
+    }
+
+    function openSolutionMode(idx) {
+      activeHRIndex = idx;
+      const prob = data.hackerrank.problems[idx];
+      
+      document.getElementById('modalTitle').innerHTML = `<i class="ti ti-code" aria-hidden="true"></i> Solution Reference: ${prob.title}`;
+      document.getElementById('modalPrompt').innerHTML = `<strong>Complexity Target:</strong><br>Time complexity: ${prob.time}<br>Space complexity: ${prob.space}`;
+      document.getElementById('workspaceContainer').style.display = 'none';
+      
+      // Load solution directly inside evaluation box
+      document.getElementById('modalLoader').style.display = 'none';
+      document.getElementById('modalSubmitBtn').style.display = 'none';
+      
+      document.getElementById('evalTitle1').innerText = "Interviewer Solution Guide";
+      document.getElementById('evalBody1').innerHTML = "Ensure you communicate intermediate steps during loops. Focus on resolving edge metrics like circular dependencies, parameters normalization, and invalid boundary constraints to score senior interview points.";
+      
+      document.getElementById('evalTitle2').innerText = "Optimal Code implementation";
+      document.getElementById('evalBody2').innerHTML = highlightJS(prob.optimal);
+      
+      document.getElementById('evalBox').style.display = 'flex';
+      document.getElementById('practiceModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('practiceModal').classList.remove('open');
+    }
+
+    function evaluatePractice() {
+      const userCode = document.getElementById('codeEditor').value;
+      const prob = data.hackerrank.problems[activeHRIndex];
+      
+      document.getElementById('modalSubmitBtn').style.display = 'none';
+      document.getElementById('modalLoader').style.display = 'flex';
+      document.getElementById('evalBox').style.display = 'none';
+      
+      // Simulate compiler execution
+      setTimeout(() => {
+        document.getElementById('modalLoader').style.display = 'none';
+        
+        let feedback = "Nice try! Your algorithmic flow captures the core constraints. ";
+        if (userCode.includes("Map") || userCode.includes("debounce") || userCode.includes("Promise") || userCode.includes("visited") || userCode.includes("subscribe")) {
+          feedback += "Your design allocates optimal helper structures and respects target computational bounds. Verify that edge parameter limits are fully validated under structural tests!";
+        } else {
+          feedback += "Recommendation: Ensure you use correct ES6 features (like Map, WeakSet, Set or closures) to guarantee target space-time limits.";
+        }
+        
+        document.getElementById('evalTitle1').innerText = "Test Suite Results";
+        document.getElementById('evalBody1').innerHTML = feedback;
+        
+        document.getElementById('evalTitle2').innerText = "Reference Solution Code";
+        document.getElementById('evalBody2').innerHTML = highlightJS(prob.optimal);
+        
+        document.getElementById('evalBox').style.display = 'flex';
+      }, 1200);
+    }
+
+    // Default initialization
+    renderWorkspace();
+  </script>
+</body>
+</html>

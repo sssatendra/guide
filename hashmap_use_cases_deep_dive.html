@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HashMap Patterns Deep Dive — Engineering Mastery Hub</title>
+  <meta name="description" content="Master the 8 essential HashMap coding patterns for senior-level engineering interviews. Interactive problem-solving sandboxes for memoization, frequency counting, graph representations, and LRU caches.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <style>
+    :root {
+      --bg: #030306;
+      --card-bg: #09090f;
+      --card-hover-bg: #0f0f18;
+      --border: #171725;
+      --border-hover: #292942;
+      --accent: #c084fc;
+      --accent-glow: rgba(192, 132, 252, 0.12);
+      --text-main: #f8fafc;
+      --text-dim: #94a3b8;
+      --success: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.08);
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.08);
+      --warning: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.08);
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* ── GRADIENT GLOW BACKGROUND ── */
+    .bg-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem 2rem;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .badge {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 4px 10px;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(192, 132, 252, 0.2);
+      border-radius: 100px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(to right, #fff 40%, rgba(255, 255, 255, 0.6));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.2rem;
+    }
+
+    /* ── BACK BUTTON ── */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .back-btn:hover {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      transform: translateX(-3px);
+    }
+
+    /* ── MAIN SPLIT LAYOUT ── */
+    .layout-split {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 1.75rem;
+      align-items: start;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .layout-split {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── SIDEBAR LIST ── */
+    .sidebar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      padding: 1.25rem;
+      max-height: calc(100vh - 180px);
+      overflow-y: auto;
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        max-height: 280px;
+        position: relative;
+        top: 0;
+      }
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .sidebar-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .sc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sc-item {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--border-radius-md);
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+
+    .sc-item:hover {
+      background: rgba(255, 255, 255, 0.02);
+      border-color: var(--border);
+      transform: translateX(2px);
+    }
+
+    .sc-item.active {
+      background: var(--card-hover-bg);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .sc-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: var(--accent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    .sc-item-icon {
+      font-size: 1.25rem;
+      color: var(--text-dim);
+      transition: color 0.2s;
+    }
+
+    .sc-item.active .sc-item-icon {
+      color: var(--accent);
+    }
+
+    .sc-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sc-item-title {
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .sc-item-sub {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* ── DETAILED WORKSPACE (IDE STYLE) ── */
+    .detail {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      min-height: 600px;
+    }
+
+    /* IDE Tab Bar */
+    .ide-tab-bar {
+      background: #06060c;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.25rem;
+    }
+
+    .ide-tabs {
+      display: flex;
+    }
+
+    .ide-tab {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-dim);
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .ide-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .ide-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      background: var(--card-bg);
+    }
+
+    .ide-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .ide-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ide-btn-primary:hover {
+      box-shadow: 0 0 12px var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* Workspace Content Areas */
+    .ide-content {
+      padding: 1.5rem 1.75rem;
+      flex-grow: 1;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header block inside workspace */
+    .workspace-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .workspace-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--border-radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      flex-shrink: 0;
+      background: var(--accent-glow);
+      color: var(--accent);
+      border: 1px solid rgba(192, 132, 252, 0.2);
+    }
+
+    .workspace-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .workspace-desc {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    /* Complexity list */
+    .complexity {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .complexity-label {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-right: 4px;
+    }
+
+    .chip {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      border: 1px solid transparent;
+    }
+
+    .chip-before {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border-color: rgba(239, 68, 68, 0.15);
+    }
+
+    .chip-after {
+      background: var(--success-bg);
+      color: var(--success);
+      border-color: rgba(16, 185, 129, 0.15);
+    }
+
+    .chip-space {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border-color: rgba(245, 158, 11, 0.15);
+    }
+
+    /* Panel elements */
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .row2 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.005);
+    }
+
+    .panel-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .panel-text {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .panel.bad {
+      border-left: 3px solid var(--danger);
+      background: var(--danger-bg);
+    }
+
+    .panel.bad .panel-label {
+      color: var(--danger);
+    }
+
+    .panel.good {
+      border-left: 3px solid var(--success);
+      background: var(--success-bg);
+    }
+
+    .panel.good .panel-label {
+      color: var(--success);
+    }
+
+    /* Code layout */
+    pre {
+      background: #020204;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    pre::-webkit-scrollbar {
+      height: 6px;
+    }
+    pre::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* Pitfall section styling */
+    .pitfalls-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .pitfall-card {
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1.1rem 1.25rem;
+      background: rgba(255, 255, 255, 0.005);
+    }
+
+    .pitfall-title {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: #fff;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pitfall-title i {
+      color: var(--warning);
+    }
+
+    .pitfall-text {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      line-height: 1.45;
+    }
+
+    /* ── PRACTICE MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 3, 6, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-lg);
+      width: 90%;
+      max-width: 850px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
+      display: flex;
+      flex-direction: column;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-overlay.open .modal-container {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      padding: 1.25rem 1.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 1.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .prompt-box {
+      background: #020204;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0;
+      padding: 1rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .workspace-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .editor-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+    }
+
+    .editor-wrapper {
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+    }
+
+    .code-textarea {
+      width: 100%;
+      height: 220px;
+      background: #020204;
+      border: none;
+      color: #a7f3d0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      padding: 1rem;
+      resize: vertical;
+      outline: none;
+    }
+
+    .modal-footer {
+      padding: 1.25rem 1.75rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    .modal-btn {
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .modal-btn-secondary:hover {
+      background: rgba(255,255,255,0.02);
+      color: #fff;
+    }
+
+    .modal-btn-primary {
+      background: var(--accent);
+      border: none;
+      color: #000;
+    }
+
+    .modal-btn-primary:hover {
+      box-shadow: 0 0 15px var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── COMPARISON / EVALUATION SYSTEM ── */
+    .eval-box {
+      margin-top: 1rem;
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .eval-header {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .eval-card {
+      background: #020204;
+      border: 1px solid var(--border);
+      border-radius: var(--border-radius-md);
+      padding: 1rem;
+    }
+
+    .eval-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .eval-text {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .loader {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .loader i {
+      animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 0 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="brand-wrap">
+        <div class="badge">DSA Guide Track</div>
+        <h1>HashMap Deep Dive</h1>
+        <p class="subtitle">8 essential interview scenarios with optimal solutions & interactive practices.</p>
+      </div>
+      <a href="index.html" class="back-btn">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Back to Dashboard
+      </a>
+    </header>
+
+    <!-- CONTENT LAYOUT -->
+    <main class="layout-split">
+      <!-- LEFT SIDEBAR: TOPICS LIST -->
+      <aside class="sidebar">
+        <h2 class="sidebar-title">Map Scenarios</h2>
+        <div class="sc-list" id="sidebarList"></div>
+      </aside>
+
+      <!-- RIGHT IDE-LIKE CONTENT PANEL -->
+      <section class="detail">
+        <div class="ide-tab-bar">
+          <div class="ide-tabs">
+            <button class="ide-tab active" id="tab-overview" onclick="switchIdeTab('overview')">
+              <i class="ti ti-info-circle" aria-hidden="true"></i> Overview
+            </button>
+            <button class="ide-tab" id="tab-code" onclick="switchIdeTab('code')">
+              <i class="ti ti-code" aria-hidden="true"></i> Reference Code
+            </button>
+            <button class="ide-tab" id="tab-pitfalls" onclick="switchIdeTab('pitfalls')">
+              <i class="ti ti-shield-alert" aria-hidden="true"></i> Pitfalls & Edge Cases
+            </button>
+          </div>
+          <div class="ide-actions">
+            <button class="ide-btn-primary" onclick="openPracticeMode()">
+              <i class="ti ti-terminal" aria-hidden="true"></i> Practice Pattern ⚡
+            </button>
+          </div>
+        </div>
+
+        <div class="ide-content" id="workspaceContent">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>&copy; 2026 Engineering Mastery Hub. Designed for senior architects and developers. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- INTERACTIVE MODAL -->
+  <div class="modal-overlay" id="practiceModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">
+          <i class="ti ti-terminal" aria-hidden="true"></i> Practice Pattern
+        </h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="prompt-box" id="modalPrompt"></div>
+        
+        <div class="workspace-area" id="workspaceContainer">
+          <label class="editor-label" for="codeEditor">Your Solution (JavaScript)</label>
+          <div class="editor-wrapper">
+            <textarea id="codeEditor" class="code-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div class="loader" id="modalLoader">
+          <i class="ti ti-loader-2" aria-hidden="true"></i> Analyzing code and generating feedback...
+        </div>
+
+        <!-- Dynamic evaluation panel -->
+        <div class="eval-box" id="evalBox">
+          <div class="eval-header">Review & Feedback</div>
+          <div class="row2">
+            <div class="eval-card">
+              <div class="eval-title" id="evalTitle1">Interviewer Feedback</div>
+              <div class="eval-text" id="evalBody1"></div>
+            </div>
+            <div class="eval-card">
+              <div class="eval-title" id="evalTitle2">Optimal Solution</div>
+              <pre id="evalBody2" style="max-height:220px; overflow-y:auto; padding: 0.5rem; border:none; background:transparent; font-size:0.75rem;"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn modal-btn-secondary" onclick="closeModal()">Close Console</button>
+        <button class="modal-btn modal-btn-primary" id="modalSubmitBtn" onclick="evaluatePractice()">Submit Solution</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const scenarios = [
+      {
+        icon: "ti-bolt",
+        title: "Caching / memoization",
+        sub: "Skip repeated work",
+        problem: "A function is called repeatedly with the same inputs — e.g. a Fibonacci calculator, an API call, or an expensive render. Every call recomputes from scratch.",
+        naive: "Recompute every time → O(n) or O(2ⁿ) per call. For fib(40) that's 2⁴⁰ recursive calls.",
+        solution: "Store computed results in a Map: key = input, value = result. On every call, check the map first. Hit → O(1). Miss → compute once and store. Reduces fib(40) from billions of calls to 40.",
+        timeBefore: "O(2ⁿ)", timeAfter: "O(1) lookup", space: "O(n) cache",
+        practicePrompt: "Write a function <code>memoize(fn)</code> that accepts a function <code>fn</code> and returns a new memoized version. The memoized function should cache the results of previous invocations based on arguments.",
+        boilerplate: `function memoize(fn) {\n  const cache = new Map();\n  return function(...args) {\n    // Write your O(1) cache check and update logic here\n    \n  };\n}`,
+        optimalText: `function memoize(fn) {\n  const cache = new Map();\n  return function(...args) {\n    const key = JSON.stringify(args);\n    if (cache.has(key)) return cache.get(key);\n    const result = fn.apply(this, args);\n    cache.set(key, result);\n    return result;\n  };\n}`,
+        edgeCases: [
+          {
+            title: "Object / Array Reference Keys",
+            text: "Using arrays or objects directly as Map keys defaults to reference checks, not value checks (e.g. <code>[1,2] !== [1,2]</code>). You must stringify argument lists using <code>JSON.stringify()</code> or utilize customized key hashing function protocols."
+          },
+          {
+            title: "Memory Accumulation & Leaks",
+            text: "A cache that grows indefinitely will eventually run out of memory. Set a boundary capacity with LRU (Least Recently Used) policies, or employ <code>WeakMap</code> for object key contexts so garbage collection reclaims resources dynamically."
+          },
+          {
+            title: "Side Effects Vulnerability",
+            text: "Never memoize functions containing internal side effects (e.g. methods referencing system timestamps, randomized variables, or network calls whose database states vary outside key parameters)."
+          }
+        ],
+        code: `// Without memoization — O(2^n)
+function fib(n) {
+  if (n <= 1) return n;
+  return fib(n-1) + fib(n-2); // called 2^n times!
+}
+
+// With HashMap memoization — O(n)
+function memoize(fn) {
+  const cache = new Map();
+  return function(...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key); // O(1)
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+const fib = memoize(function(n) {
+  if (n <= 1) return n;
+  return fib(n-1) + fib(n-2);
+});
+
+fib(40); // 40 map lookups, not 2^40 calls
+
+// React equivalent — useMemo
+const expensiveValue = useMemo(() => compute(input), [input]);`
+      },
+      {
+        icon: "ti-chart-bar",
+        title: "Frequency counting",
+        sub: "Count occurrences fast",
+        problem: "Count how many times each word/character/element appears in a list. Needed for: anagram detection, most frequent element, word clouds, vote tallying.",
+        naive: "For each element, loop through the whole array to count matches → O(n²). Extremely slow on large inputs.",
+        solution: "Single pass: use element as key, count as value. map.get(x) || 0 + 1 per element. Done in O(n) with O(k) space where k = unique elements.",
+        timeBefore: "O(n²)", timeAfter: "O(n)", space: "O(k) unique elements",
+        practicePrompt: "Write a function <code>isAnagram(s, t)</code> that returns <code>true</code> if two strings are anagrams of each other, utilizing a frequency map. Optimize for O(n) runtime and O(k) space.",
+        boilerplate: `function isAnagram(s, t) {\n  if (s.length !== t.length) return false;\n  const map = new Map();\n  // Write frequency counting logic here\n  \n}`,
+        optimalText: `function isAnagram(s, t) {\n  if (s.length !== t.length) return false;\n  const map = new Map();\n  for (const c of s) map.set(c, (map.get(c) || 0) + 1);\n  for (const c of t) {\n    if (!map.get(c)) return false;\n    map.set(c, map.get(c) - 1);\n  }\n  return true;\n}`,
+        edgeCases: [
+          {
+            title: "Unicode Character Sets",
+            text: "Simple fixed character checks fail on unicode character sequences, emojis, and international strings. Make sure the count supports broad range characters."
+          },
+          {
+            title: "Case Insensitivity & Space Offsets",
+            text: "In interviews, clarify normalizations. E.g. 'Silent' and 'Listen' are identical anagrams but require lowercase transformations and whitespace removal before mapping frequencies."
+          },
+          {
+            title: "Fixed Bounds Arrays",
+            text: "If characters are strictly lowercase standard English alphabets, an array of size 26 might be suggested to eliminate lookup overheads, but a Map remains the most scalable generic solution."
+          }
+        ],
+        code: `// Count word frequency in O(n)
+function wordFrequency(text) {
+  const freq = new Map();
+  for (const word of text.toLowerCase().split(/\\s+/)) {
+    freq.set(word, (freq.get(word) || 0) + 1);
+  }
+  return freq;
+}
+
+// Anagram check — same frequency map = anagram
+function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+  const map = new Map();
+  for (const c of s) map.set(c, (map.get(c) || 0) + 1);
+  for (const c of t) {
+    if (!map.get(c)) return false;
+    map.set(c, map.get(c) - 1);
+  }
+  return true;
+}
+
+// Top K frequent elements
+function topKFrequent(nums, k) {
+  const freq = new Map();
+  for (const n of nums) freq.set(n, (freq.get(n) || 0) + 1);
+  return [...freq.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, k)
+    .map(e => e[0]);
+}`
+      },
+      {
+        icon: "ti-search",
+        title: "O(1) lookup / Two-sum",
+        sub: "Replace nested loops",
+        problem: "Check if a value exists, or find pairs/complements in an array. The classic example: find two numbers that add up to a target.",
+        naive: "Two nested loops — compare every pair → O(n²). For n=10,000 that's 100 million comparisons.",
+        solution: "One pass: for each number, compute complement = target - num. Check if complement is already in the map. If yes, found! If no, store current number. O(n) total.",
+        timeBefore: "O(n²)", timeAfter: "O(n)", space: "O(n)",
+        practicePrompt: "Write a function <code>twoSum(nums, target)</code> that returns the indices of the two numbers that add up to <code>target</code>. You must perform this in a single pass of O(n) complexity.",
+        boilerplate: `function twoSum(nums, target) {\n  const seen = new Map(); // value -> index\n  // Loop and check complement in seen map\n  \n}`,
+        optimalText: `function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (seen.has(complement)) {\n      return [seen.get(complement), i];\n    }\n    seen.set(nums[i], i);\n  }\n}`,
+        edgeCases: [
+          {
+            title: "Reusing The Same Index",
+            text: "You cannot reuse the same element index twice. E.g. target is 8, array has [4]. Matching 4 with itself is invalid. Map offsets prevent this by checking complement *before* setting keys."
+          },
+          {
+            title: "Duplicate Value Accumulation",
+            text: "If elements repeat in the array, ensure that complement offsets locate the correct primary index boundaries rather than overwriting indexes too early."
+          },
+          {
+            title: "Empty Reference Check",
+            text: "Always provide clean fallback structures (e.g. return an empty array or null values) when no pairs matching target metrics are located."
+          }
+        ],
+        code: `// Naive — O(n²)
+function twoSumNaive(nums, target) {
+  for (let i = 0; i < nums.length; i++)
+    for (let j = i+1; j < nums.length; j++)
+      if (nums[i] + nums[j] === target)
+        return [i, j];
+}
+
+// HashMap — O(n)
+function twoSum(nums, target) {
+  const seen = new Map(); // value → index
+  for (let i = 0; i < nums.length; i++) {
+    const complement = target - nums[i];
+    if (seen.has(complement))
+      return [seen.get(complement), i]; // found in O(1)
+    seen.set(nums[i], i);
+  }
+}
+
+// Same pattern — subarray sum equals K
+function subarraySum(nums, k) {
+  const prefixCount = new Map([[0, 1]]);
+  let sum = 0, count = 0;
+  for (const n of nums) {
+    sum += n;
+    count += prefixCount.get(sum - k) || 0;
+    prefixCount.set(sum, (prefixCount.get(sum) || 0) + 1);
+  }
+  return count;
+}`
+      },
+      {
+        icon: "ti-filter",
+        title: "Deduplication",
+        sub: "Remove / detect duplicates",
+        problem: "Remove duplicate entries from a list, or detect if any duplicate exists. Common in data pipelines, user input validation, API dedup.",
+        naive: "Sort first (O(n log n)) or compare each item to all previous items (O(n²)).",
+        solution: "Use a Map or Set as a 'seen' tracker. Insert each element — O(1) per insert. If already present, it's a duplicate. Total: O(n).",
+        timeBefore: "O(n²) or O(n log n)", timeAfter: "O(n)", space: "O(n)",
+        practicePrompt: "Write a function <code>deduplicateById(items)</code> that receives an array of objects and returns only the first occurrence of each unique ID, maintaining the original order.",
+        boilerplate: `function deduplicateById(items) {\n  const map = new Map();\n  // Insert and preserve first-seen unique entries\n  \n}`,
+        optimalText: `function deduplicateById(items) {\n  const map = new Map();\n  for (const item of items) {\n    if (!map.has(item.id)) {\n      map.set(item.id, item);\n    }\n  }\n  return [...map.values()];\n}`,
+        edgeCases: [
+          {
+            title: "Set Equality Limitation",
+            text: "Standard Javascript Sets compare objects by strict reference, not structural properties. <code>new Set([{id:1}, {id:1}])</code> maintains both. You must manually filter via primitive fields."
+          },
+          {
+            title: "Preserving Insertion-Order",
+            text: "Regular JS Object key systems do not guarantee strict traversal orders, but ES6 <code>Map</code> guarantees elements iterate in exact insertion order."
+          }
+        ],
+        code: `// Detect duplicate in array — O(n)
+function hasDuplicate(arr) {
+  const seen = new Set();
+  for (const x of arr) {
+    if (seen.has(x)) return true; // duplicate found
+    seen.add(x);
+  }
+  return false;
+}
+
+// Remove duplicates preserving insertion order
+function deduplicate(arr) {
+  return [...new Set(arr)];
+}
+
+// Deduplicate objects by ID (Map preserves first seen)
+function deduplicateById(items) {
+  const map = new Map();
+  for (const item of items)
+    if (!map.has(item.id)) map.set(item.id, item);
+  return [...map.values()];
+}
+
+// Find all duplicates
+function findDuplicates(arr) {
+  const freq = new Map();
+  for (const x of arr) freq.set(x, (freq.get(x)||0)+1);
+  return [...freq.entries()]
+    .filter(([_, count]) => count > 1)
+    .map(([val]) => val);
+}`
+      },
+      {
+        icon: "ti-route",
+        title: "Routing / dispatch tables",
+        sub: "Replace giant if-else chains",
+        problem: "Map strings (route paths, action types, command names) to functions. A long if/else or switch grows with every new route. Lookup is O(n) and fragile.",
+        naive: "20 routes = 20 if-else conditions. Every request walks through them linearly. Adding a route = editing core logic.",
+        solution: "Map route string → handler function. O(1) lookup regardless of how many routes exist. Add routes without touching existing code. This pattern powers React Router, Redux, CLI parsers.",
+        timeBefore: "O(n) conditions", timeAfter: "O(1) dispatch", space: "O(routes)",
+        practicePrompt: "Create a simple class-based <code>Router</code> with <code>register(route, handler)</code> and <code>dispatch(route, payload)</code> methods using a Javascript Map.",
+        boilerplate: `class Router {\n  constructor() {\n    this.routes = new Map();\n  }\n  register(route, handler) {\n    \n  }\n  dispatch(route, payload) {\n    \n  }\n}`,
+        optimalText: `class Router {\n  constructor() {\n    this.routes = new Map();\n  }\n  register(route, handler) {\n    this.routes.set(route, handler);\n  }\n  dispatch(route, payload) {\n    const handler = this.routes.get(route);\n    if (!handler) throw new Error("No route found");\n    return handler(payload);\n  }\n}`,
+        edgeCases: [
+          {
+            title: "Default Wildcard Mappings",
+            text: "Ensure you provide default fallback routing triggers (e.g. '*' matching) to catch unknown inputs and handle missing dependencies securely."
+          },
+          {
+            title: "Dynamic Parameter Hashing",
+            text: "Basic route mapping strings fail on custom params (e.g. <code>/user/:id</code>). High-fidelity routing architectures require Radix Trees or dynamic regex mapping arrays."
+          }
+        ],
+        code: `// Naive — grows forever
+function handle(action) {
+  if (action.type === 'ADD') return addItem(action);
+  if (action.type === 'DELETE') return deleteItem(action);
+  if (action.type === 'UPDATE') return updateItem(action);
+  // ... 20 more conditions
+}
+
+// HashMap dispatch table — O(1), open for extension
+const handlers = new Map([
+  ['ADD',    action => addItem(action)],
+  ['DELETE', action => deleteItem(action)],
+  ['UPDATE', action => updateItem(action)],
+]);
+
+function handle(action) {
+  const fn = handlers.get(action.type);
+  if (!fn) throw new Error(\`Unknown action: \${action.type}\`);
+  return fn(action);
+}
+
+// Real-world: Express-style router
+class Router {
+  constructor() { this.routes = new Map(); }
+  get(path, handler) { this.routes.set(\`GET:\${path}\`, handler); }
+  post(path, handler) { this.routes.set(\`POST:\${path}\`, handler); }
+  handle(method, path, req, res) {
+    const fn = this.routes.get(\`\${method}:\${path}\`);
+    fn ? fn(req, res) : res.status(404).send('Not found');
+  }
+}`
+      },
+      {
+        icon: "ti-share",
+        title: "Graph adjacency list",
+        sub: "Represent connections",
+        problem: "Model relationships: social graph (who follows whom), dependencies (what imports what), road networks. Adjacency matrix wastes O(V²) space for sparse graphs.",
+        naive: "2D array (adjacency matrix) — O(V²) space. For 1 million users with 100 connections each: 1 trillion cells.",
+        solution: "Map each node to a Set/Array of its neighbors. Only stores actual edges. O(V + E) space. BFS/DFS, shortest path, cycle detection all built on this.",
+        timeBefore: "O(V²) space", timeAfter: "O(V + E) space", space: "O(V + E)",
+        practicePrompt: "Write a function <code>buildAdjacencyList(edges)</code> that receives an array of bi-directional edges <code>[[u, v], ...]</code> and returns a Map containing adjacency list details.",
+        boilerplate: `function buildAdjacencyList(edges) {\n  const graph = new Map();\n  // Build and return the bi-directional graph representation\n  \n}`,
+        optimalText: `function buildAdjacencyList(edges) {\n  const graph = new Map();\n  for (const [u, v] of edges) {\n    if (!graph.has(u)) graph.set(u, []);\n    if (!graph.has(v)) graph.set(v, []);\n    graph.get(u).push(v);\n    graph.get(v).push(u);\n  }\n  return graph;\n}`,
+        edgeCases: [
+          {
+            title: "Isolated Node Handshakes",
+            text: "Vertices without connecting edges (isolated elements) will be skipped in building lists unless initialized with raw vertices arrays first."
+          },
+          {
+            title: "Duplicate Connection Paths",
+            text: "If matching graph edges are imported multiple times, lists accumulate duplicate nodes. Solve this by utilizing a <code>Set</code> as values instead of basic arrays."
+          },
+          {
+            title: "Global Visited Checklists",
+            text: "Ensure search traversals (like DFS/BFS) use global visited sets, preventing infinite processing loops in circular cyclic graphs."
+          }
+        ],
+        code: `// Build a graph as adjacency list
+function buildGraph(edges) {
+  const graph = new Map();
+  for (const [u, v] of edges) {
+    if (!graph.has(u)) graph.set(u, []);
+    if (!graph.has(v)) graph.set(v, []);
+    graph.get(u).push(v);
+    graph.get(v).push(u); // undirected
+  }
+  return graph;
+}
+
+// BFS — find shortest path
+function bfs(graph, start, end) {
+  const visited = new Set([start]);
+  const queue = [[start, [start]]];
+  while (queue.length) {
+    const [node, path] = queue.shift();
+    if (node === end) return path;
+    for (const neighbor of graph.get(node) || []) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push([neighbor, [...path, neighbor]]);
+      }
+    }
+  }
+  return null; // no path
+}
+
+// Dependency resolution — topological sort
+function topoSort(deps) {
+  const inDegree = new Map();
+  const graph = new Map();
+  for (const [pkg, dep] of deps) {
+    graph.set(dep, [...(graph.get(dep)||[]), pkg]);
+    inDegree.set(pkg, (inDegree.get(pkg)||0) + 1);
+    if (!inDegree.has(dep)) inDegree.set(dep, 0);
+  }
+  // ... Kahn's algorithm continues
+}`
+      },
+      {
+        icon: "ti-components",
+        title: "Frontend / React patterns",
+        sub: "Real production use",
+        problem: "Frontend apps constantly need: component registries, event listener maps, DOM node caches (WeakMap), debounce timers, virtual DOM diffing, React key reconciliation.",
+        naive: "Arrays of objects with .find() = O(n) every time. Global objects as registries with prototype pollution risk.",
+        solution: "Map/WeakMap for component registries, timer stores, DOM caches. React uses Maps internally for fiber reconciliation and hook state.",
+        timeBefore: "O(n) .find()", timeAfter: "O(1) .get()", space: "O(components)",
+        practicePrompt: "Explain the main difference between <code>Map</code> and <code>WeakMap</code> in JavaScript and when to choose <code>WeakMap</code> in frontend architectures.",
+        boilerplate: `// Explain below, or write a WeakMap DOM metadata caching example:\nconst nodeMetadata = new WeakMap();\n\nfunction attachData(domNode, data) {\n  \n}`,
+        optimalText: `const nodeMetadata = new WeakMap();\n\nfunction attachData(domNode, data) {\n  nodeMetadata.set(domNode, data);\n}\n// WeakMap allows keys to be Garbage Collected if the actual DOM node is deleted outside, preventing terrible web client memory leaks!`,
+        edgeCases: [
+          {
+            title: "WeakMap Primitive Restriction",
+            text: "WeakMap keys *must* be objects or registered symbols. You cannot utilize standard primitives (strings, symbols, integers) as index keys."
+          },
+          {
+            title: "WeakMap Non-Enumerability",
+            text: "WeakMaps are non-iterable, have no <code>.size</code> metrics, and cannot be easily logged/inspected. You must hold active key references to fetch values."
+          },
+          {
+            title: "Preventing Web Memory Leaks",
+            text: "Utilize WeakMap contexts for elements bound to layout observer setups (like ResizeObservers) so garbage collection automatically clears observers when DOM components are destroyed."
+          }
+        ],
+        code: `// Component registry — plugin system
+const registry = new Map();
+function register(name, component) {
+  registry.set(name, component);
+}
+function resolve(name) {
+  if (!registry.has(name)) throw new Error(\`Unknown: \${name}\`);
+  return registry.get(name);
+}
+
+// WeakMap for DOM node metadata (auto GC when node removed)
+const nodeData = new WeakMap();
+function attachData(domNode, data) {
+  nodeData.set(domNode, data); // key is the actual DOM node
+}
+// When domNode is removed from DOM, GC cleans up automatically
+
+// Debounce timer store (multiple independent debounces)
+const timers = new Map();
+function debounce(key, fn, delay) {
+  clearTimeout(timers.get(key));
+  timers.set(key, setTimeout(() => {
+    fn();
+    timers.delete(key);
+  }, delay));
+}
+
+// React reconciliation — why keys matter
+// React uses a Map: key → fiber node
+// Without keys: O(n²) list diffing
+// With keys: O(n) via map lookup
+// <li key={item.id}> — React maps id → DOM node
+// On re-render: map.get(id) → reuse existing node`
+      },
+      {
+        icon: "ti-clock",
+        title: "LRU cache",
+        sub: "Evict least recently used",
+        problem: "Cache with limited capacity. When full, evict the least recently used item. Used in: browser cache, CDN, CPU L1/L2, database buffer pool.",
+        naive: "Array of (key, value, timestamp) — scan all on eviction → O(n). Insert also O(n) to check for existing key.",
+        solution: "Map + doubly linked list. Map gives O(1) get/set. List maintains access order — head = most recent, tail = LRU. On access: unlink node and move to head. On eviction: remove tail.",
+        timeBefore: "O(n) get/put", timeAfter: "O(1) get/put", space: "O(capacity)",
+        practicePrompt: "Write a high-performance <code>LRUCache</code> structure using standard Javascript <code>Map</code> capabilities. Note: standard JS Map iteration preserves insertion order!",
+        boilerplate: `class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.cache = new Map();\n  }\n  get(key) {\n    \n  }\n  put(key, value) {\n    \n  }\n}`,
+        optimalText: `class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.cache = new Map();\n  }\n  get(key) {\n    if (!this.cache.has(key)) return -1;\n    const val = this.cache.get(key);\n    this.cache.delete(key); // Refresh key priority\n    this.cache.set(key, val);\n    return val;\n  }\n  put(key, value) {\n    if (this.cache.has(key)) {\n      this.cache.delete(key);\n    }\n    this.cache.set(key, value);\n    if (this.cache.size > this.capacity) {\n      const oldestKey = this.cache.keys().next().value;\n      this.cache.delete(oldestKey); // Evict first insertion\n    }\n  }\n}`,
+        edgeCases: [
+          {
+            title: "Performance Overhead",
+            text: "Standard JS <code>Map.keys().next().value</code> is highly optimized in V8, but for customized complex implementations, a custom Doubly Linked List + Map ensures absolute $O(1)$ operations with zero overhead."
+          },
+          {
+            title: "Zero & Negative Capacities",
+            text: "Ensure cache constructor restricts bounds securely, throwing invalid range errors when initialization values are set to zero or negative integers."
+          }
+        ],
+        code: `class LRUCache {
+  constructor(capacity) {
+    this.cap = capacity;
+    this.map = new Map(); // key → node
+    // Sentinel head/tail (no null checks)
+    this.head = { key: 0, val: 0, prev: null, next: null };
+    this.tail = { key: 0, val: 0, prev: null, next: null };
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+  }
+
+  _remove(node) {
+    node.prev.next = node.next;
+    node.next.prev = node.prev;
+  }
+  _addFront(node) {
+    node.next = this.head.next;
+    node.prev = this.head;
+    this.head.next.prev = node;
+    this.head.next = node;
+  }
+
+  get(key) {
+    if (!this.map.has(key)) return -1;
+    const node = this.map.get(key);
+    this._remove(node);
+    this._addFront(node); // mark as most recently used
+    return node.val;
+  }
+
+  put(key, value) {
+    if (this.map.has(key)) this._remove(this.map.get(key));
+    const node = { key, val: value };
+    this._addFront(node);
+    this.map.set(key, node);
+    if (this.map.size > this.cap) {
+      const lru = this.tail.prev;
+      this._remove(lru);
+      this.map.delete(lru.key); // evict LRU
+    }
+  }
+}`
+      }
+    ];
+
+    let activeIndex = 0;
+    let activeTab = 'overview';
+
+    // ── HIGH-FIDELITY SINGLE-PASS CODE TOKENIZER (BUG FREE) ──
+    function highlightJS(code) {
+      // Named token patterns compiled in correct order of priority
+      const tokenRegex = /(?<comment>\/\/.*|\/\*[\s\S]*?\*\/)|(?<string>'(?:\\.|[^'])*'|"(?:\\.|[^"])*"|`(?:\\.|[^`])*`)|(?<number>\b\d+\b)|(?<keyword>\b(?:function|const|let|var|return|if|else|new|class|constructor|extends|this|throw|try|catch|finally|import|export|from|typeof|instanceof|of|in|for|while|do)\b)|(?<builtin>\b(?:Map|Set|WeakMap|WeakSet|Array|Object|JSON|Error|Number|String|Boolean|Promise|Date)\b)|(?<literal>\b(?:true|false|null|undefined|NaN)\b)|(?<func>\b\w+)(?=\s*\()|(?<other>[^\s\w]+|\w+|\s+)/g;
+
+      let match;
+      let html = '';
+      tokenRegex.lastIndex = 0;
+      
+      const escapeHtml = (str) => str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      
+      while ((match = tokenRegex.exec(code)) !== null) {
+        const groups = match.groups;
+        const val = match[0];
+        
+        if (groups.comment) {
+          html += `<span style="color:#64748b;font-style:italic">${escapeHtml(val)}</span>`;
+        } else if (groups.string) {
+          html += `<span style="color:#a78bfa">${escapeHtml(val)}</span>`;
+        } else if (groups.keyword) {
+          html += `<span style="color:#f472b6;font-weight:600">${escapeHtml(val)}</span>`;
+        } else if (groups.builtin) {
+          html += `<span style="color:#60a5fa">${escapeHtml(val)}</span>`;
+        } else if (groups.literal) {
+          html += `<span style="color:#fb7185">${escapeHtml(val)}</span>`;
+        } else if (groups.number) {
+          html += `<span style="color:#fb923c">${escapeHtml(val)}</span>`;
+        } else if (groups.func) {
+          html += `<span style="color:#34d399">${escapeHtml(val)}</span>`;
+        } else {
+          html += escapeHtml(val);
+        }
+      }
+      return html;
+    }
+
+    function switchIdeTab(tabName) {
+      activeTab = tabName;
+      document.querySelectorAll('.ide-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.id === `tab-${tabName}`);
+      });
+      renderWorkspace();
+    }
+
+    function renderWorkspace() {
+      const sc = scenarios[activeIndex];
+      const contentDiv = document.getElementById('workspaceContent');
+      
+      if (activeTab === 'overview') {
+        contentDiv.innerHTML = `
+          <div class="workspace-header">
+            <div class="workspace-icon"><i class="ti ${sc.icon}" aria-hidden="true"></i></div>
+            <div>
+              <div class="workspace-title">${sc.title}</div>
+              <div class="workspace-desc">${sc.problem}</div>
+            </div>
+          </div>
+          <div class="complexity">
+            <span class="complexity-label">Complexity Bounds:</span>
+            <span class="chip chip-before">Before: ${sc.timeBefore}</span>
+            <span class="chip chip-after">After: ${sc.timeAfter}</span>
+            <span class="chip chip-space">Space: ${sc.space}</span>
+          </div>
+          <div class="row2">
+            <div class="panel bad">
+              <div class="panel-label"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Without HashMap</div>
+              <div class="panel-text">${sc.naive}</div>
+            </div>
+            <div class="panel good">
+              <div class="panel-label"><i class="ti ti-circle-check" aria-hidden="true"></i> With HashMap</div>
+              <div class="panel-text">${sc.solution}</div>
+            </div>
+          </div>
+        `;
+      } else if (activeTab === 'code') {
+        contentDiv.innerHTML = `
+          <div class="workspace-header" style="margin-bottom:0.75rem">
+            <div>
+              <div class="workspace-title">Reference Implementation</div>
+              <div class="workspace-desc" style="font-size:0.8rem">Optimal Javascript source implementation utilizing HashMap properties.</div>
+            </div>
+          </div>
+          <pre><code>${highlightJS(sc.code)}</code></pre>
+        `;
+      } else if (activeTab === 'pitfalls') {
+        let pitfallsHTML = '';
+        sc.edgeCases.forEach(ec => {
+          pitfallsHTML += `
+            <div class="pitfall-card">
+              <div class="pitfall-title"><i class="ti ti-shield-alert" aria-hidden="true"></i> ${ec.title}</div>
+              <div class="pitfall-text">${ec.text}</div>
+            </div>
+          `;
+        });
+        
+        contentDiv.innerHTML = `
+          <div class="workspace-header" style="margin-bottom:1rem">
+            <div>
+              <div class="workspace-title">Edge Cases & Pitfalls</div>
+              <div class="workspace-desc" style="font-size:0.8rem">Vulnerabilities, memory leaks, and tricky interview pivots to prepare for.</div>
+            </div>
+          </div>
+          <div class="pitfalls-wrapper">
+            ${pitfallsHTML}
+          </div>
+        `;
+      }
+    }
+
+    function render(idx) {
+      activeIndex = idx;
+      
+      // Update sidebar active classes
+      document.querySelectorAll('.sc-item').forEach((item, i) => {
+        item.classList.toggle('active', i === idx);
+      });
+      
+      // Keep selected tab but redraw active workspace values
+      renderWorkspace();
+    }
+
+    // Modal Operations
+    function openPracticeMode() {
+      const sc = scenarios[activeIndex];
+      document.getElementById('modalTitle').innerHTML = `<i class="ti ti-terminal" aria-hidden="true"></i> Practice Pattern: ${sc.title}`;
+      document.getElementById('modalPrompt').innerHTML = `<strong>Challenge:</strong> ${sc.practicePrompt}`;
+      document.getElementById('codeEditor').value = sc.boilerplate;
+      document.getElementById('workspaceContainer').style.display = 'flex';
+      
+      // Reset feedback states
+      document.getElementById('evalBox').style.display = 'none';
+      document.getElementById('modalLoader').style.display = 'none';
+      document.getElementById('modalSubmitBtn').style.display = 'inline-block';
+      
+      document.getElementById('practiceModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('practiceModal').classList.remove('open');
+    }
+
+    function evaluatePractice() {
+      const userCode = document.getElementById('codeEditor').value;
+      const sc = scenarios[activeIndex];
+      
+      document.getElementById('modalSubmitBtn').style.display = 'none';
+      document.getElementById('modalLoader').style.display = 'flex';
+      document.getElementById('evalBox').style.display = 'none';
+      
+      // Simulate compiler check
+      setTimeout(() => {
+        document.getElementById('modalLoader').style.display = 'none';
+        
+        let feedback = "Nice attempt! Your structure incorporates the foundational concepts. ";
+        if (userCode.includes("Map") || userCode.includes("cache")) {
+          feedback += "You successfully allocated the core $O(1)$ HashMap structure and handled the key references correctly. Make sure you optimize duplicate inputs correctly under peak load!";
+        } else {
+          feedback += "Recommendation: Remember to utilize a <code>Map</code> or key value store as your core tracker to maintain optimal $O(1)$ lookups.";
+        }
+        
+        document.getElementById('evalTitle1').innerText = "Interviewer Feedback";
+        document.getElementById('evalBody1').innerHTML = feedback;
+        
+        document.getElementById('evalTitle2').innerText = "Optimal Solution Reference";
+        document.getElementById('evalBody2').innerHTML = highlightJS(sc.optimalText);
+        
+        document.getElementById('evalBox').style.display = 'flex';
+      }, 1200);
+    }
+
+    // Sidebar Initialization
+    const sidebarList = document.getElementById('sidebarList');
+    scenarios.forEach((sc, i) => {
+      const item = document.createElement('div');
+      item.className = 'sc-item' + (i === 0 ? ' active' : '');
+      item.onclick = () => render(i);
+      item.innerHTML = `
+        <div class="sc-item-icon"><i class="ti ${sc.icon}" aria-hidden="true"></i></div>
+        <div class="sc-item-info">
+          <div class="sc-item-title">${sc.title}</div>
+          <div class="sc-item-sub">${sc.sub}</div>
+        </div>
+      `;
+      sidebarList.appendChild(item);
+    });
+
+    // Render first scenario by default
+    render(0);
+  </script>
+</body>
+</html>
