@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Amazon System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#ff9900',
+                            charcoal: '#141920',
+                            dark: '#0f1115',
+                            slate: '#1a1f29',
+                            card: 'rgba(25, 30, 40, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-orange: #ff9900;
+            --brand-charcoal: #141920;
+            --brand-dark: #0f1115;
+            --brand-slate: #1a1f29;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f1115;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #232f3e;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-orange);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(25, 30, 40, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 153, 0, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(255, 153, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(26, 31, 41, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-orange {
+            background: linear-gradient(135deg, #ffc77d 0%, #ff9900 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(255, 153, 0, 0.08);
+            border-left: 3px solid var(--brand-orange);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-orange);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #11141a;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(255, 153, 0, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-orange) !important;
+            fill: #1a222d !important;
+        }
+
+        .svg-link {
+            stroke: #232f3e;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-orange);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-orange);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-orange {
+            animation: pulse-orange-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-orange-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(255, 153, 0, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(255, 153, 0, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(255, 153, 0, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-orange to-amber-600 flex items-center justify-center text-white font-bold text-sm">A</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Amazon Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-orange to-amber-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-orange/20">A</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">AMAZON</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Inventory Settlement</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-orange hover:bg-brand-orange/5 hover:border-brand-orange/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Inventory Scale
+                    </a>
+                    <a href="#sharding" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> DynamoDB Shards
+                    </a>
+                    <a href="#replication" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Cart Replication
+                    </a>
+                    <a href="#allocation" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Warehouse Locks
+                    </a>
+                    <a href="#settlement" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Ledger Commits
+                    </a>
+                    <a href="#reconciliation" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Reconciliation Streams
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Checkout Map
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-orange pulse-orange"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Checkout TPS: 100k+</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v1.9.1 • DynamoDB Hardened</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-orange/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-amber-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Availability E-Commerce Checkout
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Amazon <span class="text-gradient-orange">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the systems powering the world's largest retail platform. Learn how Amazon ensures high-availability shopping carts, executes write sharded transactions on **DynamoDB key spaces**, locks multi-warehouse inventories atomically, and reconciles transactions asynchronously using Lambda streams.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The E-Commerce Settlement Challenge</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        At massive scale, e-commerce architectures must balance two conflicting requirements: **maximum availability** during client shopping (users must be able to add to their cart even under network partition events) and **strict ACID consistency** during ledger inventory commits (you cannot sell the same physical unit to two different buyers). Hot-spots on items, partition-level database choking, and latency during peak shopping events (like Prime Day) are highly common issues that require robust distributed ledger designs.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Continuous Cart availability:</strong> Carts must never fail to add items, even if a datastore datacenter collapses.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Hot-Spot Throttling:</strong> Distributing millions of concurrent writes on extremely popular items to prevent database partition lockups.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Warehouse Allocations:</strong> Locking stock allocations across multiple warehouses without introducing latency.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Double-Entry Ledger:</strong> Guaranteeing that checks, debits, and inventory writes settle atomically with audit trails.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Shoppers</div>
+                                    <div class="text-2xl font-black text-brand-orange font-outfit mt-1">310 Million</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Global subscribers</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Checkout TPS</div>
+                                    <div class="text-2xl font-black text-slate-300 font-outfit mt-1">100,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Prime Day peak writes/sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Fulfillment scale</div>
+                                    <div class="text-2xl font-black text-brand-orange font-outfit mt-1">175+ Centers</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Integrated warehouses</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Write SLA</div>
+                                    <div class="text-2xl font-black text-brand-orange font-outfit mt-1">&lt; 10ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">DynamoDB transaction speed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="sharding" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">DynamoDB Sharded Write Key Space</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When millions of users checkout simultaneously, writing all order items to a single database table shard will choke database storage partitions (the "hot key" issue). Amazon bypasses this by implementing **Consistent Hash Partitioning** and **Synthetic Write Keys** in DynamoDB.
+                    </p>
+
+                    <!-- SVG Diagram 1: DynamoDB Write Sharding -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ffc77d" />
+                                    <stop offset="100%" stop-color="#ff9900" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 140,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Sharding splits to database partitions -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Client Order -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT PAYCHECK</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Order: #89283</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Initiates transaction</text>
+                            </g>
+
+                            <!-- Hashing Aggregator (Router) -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">HASH ROUTER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Order_ID sharding</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Suffix addition</text>
+                            </g>
+
+                            <!-- Partition 1 (A-H) -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 1</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Keys: 89283_0</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">DynamoDB Node A</text>
+                            </g>
+
+                            <!-- Partition 2 (I-P) -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 2</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Keys: 89283_1</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">DynamoDB Node B</text>
+                            </g>
+
+                            <!-- Partition 3 (Q-Z) -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 3</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Keys: 89283_2</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">DynamoDB Node C</text>
+                            </g>
+
+                            <!-- Consistent Hash Ring Label -->
+                            <text x="350" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Write workload sharded across physical disk nodes</text>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-orange"></span> Avoiding Partition Throttling
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                DynamoDB splits data into physical partitions based on **Partition Key (PK)** hash values, capping each partition at 1,000 write operations per second. If a popular item is purchased 10,000 times per second, writing directly to that item's ID PK will immediately trigger partition throttling. Amazon resolves this by appending a random synthetic suffix (e.g. `_0` to `_9`) to the partition key, sharding the write load across 10 physical storage partitions.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Partition Key Distribution
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                At search lookup, the query engine performs parallel reads across all sharded suffixes and aggregates indices instantly in the application layer, resolving checkout transactions in under 10ms.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="replication" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Distributed Carts High-Availability Replication</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        To guarantee shopping cart availability even during complete datacenter network drops, Amazon prioritizes write capability over immediate database consistency. This is historically modeled on **Dynamo Key-Value Storage**, employing **eventual consistency, Vector Clocks, and client-side conflict resolutions**.
+                    </p>
+
+                    <!-- SVG Diagram 2: Shopping Cart Replication -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#141920" />
+                                    <stop offset="100%" stop-color="#0f1115" />
+                                </linearGradient>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ffc77d" />
+                                    <stop offset="100%" stop-color="#ff9900" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Sync links between datacenters -->
+                            <path class="svg-link" d="M 310,140 Q 400,100 490,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,310 Q 400,350 310,310" marker-end="url(#arrow)" />
+
+                            <!-- Dynamic splits to active zones -->
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,140 L 200,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,310 L 200,310" marker-end="url(#arrow)" />
+
+                            <!-- Client Cart Add request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CART ADD</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Item added to cart</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Write requested</text>
+                            </g>
+
+                            <!-- Datacenter Zone 1 (US-East) -->
+                            <g class="svg-node" transform="translate(200, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DATACENTER A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">US-East Active</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Vector Clock: [A:1]</text>
+                            </g>
+
+                            <!-- Datacenter Zone 2 (US-West) -->
+                            <g class="svg-node" transform="translate(200, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DATACENTER B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">US-West Active</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Vector Clock: [B:1]</text>
+                            </g>
+
+                            <!-- Master conflict resolution engine -->
+                            <g class="svg-node" transform="translate(500, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CONFLICT RESOLVE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Sibling convergence</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Vector comparisons</text>
+                            </g>
+
+                            <!-- Reconciled Cart Database -->
+                            <g class="svg-node" transform="translate(680, 190)">
+                                <rect x="0" y="0" width="100" height="70" rx="8" fill="#22c55e" stroke="none" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">FINAL CART</text>
+                                <text x="50" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Consistent state</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Eventual consistency shopping cart design:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <p>
+                                Carts prioritize **high availability** over immediate consistency using Dynamo parameters:
+                            </p>
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Dynamo Key-Value Write:</strong> Adding an item to the shopping cart performs a low-latency write to the closest geographical active zone (e.g. US-East).</li>
+                                <li><strong>Vector Clocks:</strong> Rather than overwriting existing records, changes are versioned using vector clocks (e.g. `[node_A: 1, node_B: 2]`).</li>
+                                <li><strong>Sibling Creation:</strong> If a network partition occurs between datacenters A and B, a user can write to both datacenters concurrently. The database preserves both entries as "siblings" instead of throwing error codes.</li>
+                                <li><strong>Client-Side Convergence:</strong> When the connection restores and the user opens their cart page, the client application reconciles siblings (e.g. combining items added to both partitions) and writes the unified cart back to the database, achieving eventual consistency.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="allocation" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Multi-Warehouse Inventory Allocation & Locks</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        While shopping carts operate on eventual consistency, inventory allocations at checkout require **strict consistency**. You cannot allow two users to purchase the last physical Kindle unit in a warehouse simultaneously. To manage this, Amazon utilizes an active **distributed locking allocation engine**.
+                    </p>
+
+                    <!-- SVG Diagram 3: Warehouse Inventory Allocation -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#141920" />
+                                    <stop offset="100%" stop-color="#0f1115" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Allocation engine sharding locks -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Checkout Ingress -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BUYER CHECKOUT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Acquires order</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Submits purchase</text>
+                            </g>
+
+                            <!-- Inventory Allocation Engine -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ALLOCATOR</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Finds close warehouse</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Evaluates inventory</text>
+                            </g>
+
+                            <!-- Warehouse A (Seattle) -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WAREHOUSE A</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Seattle: 23 units</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Lock acquired: 10s</text>
+                            </g>
+
+                            <!-- Warehouse B (Denver) -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WAREHOUSE B</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Denver: 4 units</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Standby reserve</text>
+                            </g>
+
+                            <!-- Warehouse C (Dallas) -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WAREHOUSE C</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Dallas: 0 units</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Out of Stock</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Strict Inventory Allocations
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            When checkout is initiated, the **Inventory Allocator** selects the closest warehouse containing active stock of the purchased item.
+                            <br><br>
+                            To lock the allocation, the engine attempts to acquire an **in-memory distributed lock** on that warehouse's item SKU using Redis (Redlock). This short-lived 10-second lock prevents race conditions. If the transaction completes successfully (i.e. payment settles), the inventory count is decremented on DynamoDB and the lock is committed; if payment fails or timeouts occur, the lock is released instantly to return stock to available pools.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="settlement" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dynamic Order Ledger Settlement (ACID Commits)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Settling e-commerce transactions requires absolute transactional integrity. Order creation, credit card capture, and inventory decrement writes must succeed as a single atomic unit. Amazon solves this using highly sharded **Two-Phase Commit (2PC) Transactions** combined with double-entry ledger bookkeeping.
+                    </p>
+
+                    <!-- SVG Diagram 4: Dual-Active Ledger Settlement -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#141920" />
+                                    <stop offset="100%" stop-color="#0f1115" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 320,225 Q 375,225 375,140 L 400,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 320,225 Q 375,225 375,310 L 400,310" marker-end="url(#arrow)" />
+                            
+                            <!-- Commit confirmations back to coordinator -->
+                            <path class="svg-link" d="M 510,140 Q 565,140 565,205 L 580,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 510,310 Q 565,310 565,245 L 580,245" marker-end="url(#arrow)" />
+
+                            <!-- Transaction Request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PAY SECURE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Payment authorization</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Atomic transaction</text>
+                            </g>
+
+                            <!-- Distributed Transaction Coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">2PC COORDINATOR</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Orchestrates phases</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Prepare & Commit</text>
+                            </g>
+
+                            <!-- Inward Ledger Ledger (Database A) -->
+                            <g class="svg-node" transform="translate(400, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER BOOK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">DynamoDB write</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Saves order ledger</text>
+                            </g>
+
+                            <!-- Outward Inventory Ledger (Database B) -->
+                            <g class="svg-node" transform="translate(400, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INVENTORY LOG</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">DynamoDB write</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Decrements stock</text>
+                            </g>
+
+                            <!-- Confirmed Transaction Lock -->
+                            <g class="svg-node" transform="translate(580, 205)">
+                                <rect x="0" y="0" width="110" height="50" rx="8" fill="#22c55e" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">COMMIT OK</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Atomic Settlement Commits
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            To commit ledger changes atomically, the **Transaction Coordinator** initiates a two-phase process:
+                            <br><br>
+                            - **Phase 1 (Prepare):** The coordinator asks both database partitions (Order Book and Inventory Log) to reserve resources and lock the records, returning an active "Prepared" acknowledgement.
+                            - **Phase 2 (Commit):** If both partitions acknowledge successfully, the coordinator pushes a "Commit" signal, writing both transactions to disk. If any database fails to acknowledge (or a network drop occurs), a "Rollback" signal is broadcast instantly, returning all resources to their original state and preserving ACID ledger consistency.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="reconciliation" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Asynchronous Reconciliation Pipeline</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        While checkout transactions are synchronous, downstream operations (warehouse dispatches, financial accounting updates, and seller payouts) are decoupled into an **Asynchronous Reconciliation Pipeline** powered by SQS queues and Lambda stream processors.
+                    </p>
+
+                    <!-- SVG Diagram 5: Asynchronous Reconciliation -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#141920" />
+                                    <stop offset="100%" stop-color="#0f1115" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Lambda splitting to Warehouse & Finance -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Order Settle Success -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER SETTLE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Saves checkout</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Triggers event</text>
+                            </g>
+
+                            <!-- AWS SQS Queue (Reconciliation Buffer) -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SQS BUFFER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Asynchronous SQS</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Reconciliation log</text>
+                            </g>
+
+                            <!-- AWS Lambda Stream Processor -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LAMBDA ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Processes events</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Decoupled dispatch</text>
+                            </g>
+
+                            <!-- Warehouse Dispatch System -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WAREHOUSE DISP</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Initiates shipping</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fulfillment centers</text>
+                            </g>
+
+                            <!-- Financial Accounting Ledger -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FINANCE ACCOUNT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Updates balance</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Double-entry logs</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Decoupled Downstream Pipelines
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            If checkout processes must wait synchronously for warehouse inventory updates, shipping labels creation, and financial bookkeeping modifications, checking out would take minutes and buckle the core systems.
+                            <br><br>
+                            To prevent this, Amazon decouples downstream updates into an **Asynchronous Reconciliation Stream**.
+                            Once checkout settles, a secure transaction event is published to highly available **AWS SQS queues**. **Lambda stream processor nodes** read SQS logs, dispatching independent async jobs to initiate warehouse packaging, verify dynamic tax parameters, compute seller payouts, and write entries to double-entry financial databases.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Expert Interview Q&A</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Prepare for elite system design loops. Study the exact technical database sharding and cart replication questions and production-ready answers.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q1. How does the system handle "hot-spot" partition throttling on extremely popular items?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By appending a random synthetic suffix (e.g. `_0` to `_9`) to the DynamoDB **Partition Key (PK)** hash values. This shards the write load across 10 physical storage partitions, avoiding partition write limits. The query engine reads partitions in parallel and aggregates indices in the application layer.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q2. Why is eventual consistency selected for shopping carts over strict consistency?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> To guarantee high availability. Prioritizing write capability over immediate consistency ensures users can add items to carts even under network partition drops. Versioned records are tracked using vector clocks, and conflicts are resolved on the client-side at page loads.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q3. How does the system prevent double-selling the last physical item in a warehouse?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By executing checkout allocations under in-memory distributed locks in **Redis (Redlock)**. When a warehouse is selected, the engine acquires a 10-second lock on the SKU. If payment completes, the inventory count decrements on DynamoDB; if it fails, the lock is released instantly.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q4. How are accounting and shipping updates managed without inflating checkout times?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Downstream operations are decoupled into an **Asynchronous Reconciliation Stream**. Checkout writes publish transaction events to **AWS SQS queues**, which decoupled **Lambda stream nodes** read to execute warehouse dispatch and balance calculations asynchronously.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified End-to-End Checkout & Settlement Map</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology powering Amazon's checkout and inventory settlement. It traces shopper checkout clicks to sharded DynamoDB nodes, Redlock inventory allocations, 2PC coordinators, and decoupled Lambda SQS queues.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 -80 900 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ffc77d" />
+                                    <stop offset="100%" stop-color="#ff9900" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#4ade80" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#141920" />
+                                    <stop offset="100%" stop-color="#0f1115" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff9900" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#387ed1" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,-50 L 900,-50 M 0,0 L 900,0 M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,-80 L 100,550 M 200,-80 L 200,550 M 300,-80 L 300,550 M 400,-80 L 400,550 M 500,-80 L 500,550 M 600,-80 L 600,550 M 700,-80 L 700,550 M 800,-80 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- User to Gateway -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- CONTROL PATH (UPPER ROUTE) -->
+                            <!-- Gateway to 2PC Coordinator -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- Coordinator to sharded Order DB -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Sharded Order DB to Inventory Lock -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- Inventory Lock to SQS Queue -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+
+                            <!-- ASYNC PIPELINE (LOWER ROUTE) -->
+                            <!-- Ingest to SQS async downstream -->
+                            <path class="svg-link" d="M 330,290 Q 380,320 380,380 L 400,380" marker-end="url(#arrow-orange)" />
+                            <!-- Async lambda directly back to Client -->
+                            <path class="svg-link" d="M 510,380 Q 280,380 280,320 Q 280,290 180,285" marker-end="url(#arrow-orange)" />
+
+                            <!-- DYNAMODB SHARDS CONNECTIONS -->
+                            <!-- S3 Master catalog to DB partition -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,15 L 585,65" marker-end="url(#arrow-gray)" />
+                            <!-- Database updates to SQS Queue -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 640,100 L 730,100 L 730,340 M 730,340 L 510,380" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Client Cart App -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER APP (AMAZON)</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Initiates Checkout</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Asynchronous updates</text>
+                            </g>
+
+                            <!-- 2. API Ingress Gateway -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS GATE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">VPC Ingress router</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">SSL termination</text>
+                            </g>
+
+                            <!-- 3. Two-Phase Commit Coordinator -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">2PC ENGINE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">ACID commits</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Synchronous gate</text>
+                            </g>
+
+                            <!-- 4. Sharded Order Database (DynamoDB) -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="2" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER SHARDS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Write sharding suffix</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Parallel index lookups</text>
+                            </g>
+
+                            <!-- 5. Distributed Inventory Lock (Redlock) -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INVENTORY LOCK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Redis Redlock</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">10s atomic reservation</text>
+                            </g>
+
+                            <!-- 6. Asynchronous SQS Queue -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SQS BUFFER</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Decoupled queue</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Reconcile logs</text>
+                            </g>
+
+                            <!-- 7. AWS Lambda Downstream Broker -->
+                            <g class="svg-node" transform="translate(400, 335)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LAMBDA SPY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Asynchronous Lambda</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Trigger warehouse/tax</text>
+                            </g>
+
+                            <!-- 8. Amazon S3 Master Catalog -->
+                            <g class="svg-node" transform="translate(530, -50)">
+                                <rect x="0" y="0" width="110" height="65" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">S3 CATALOG</text>
+                                <text x="55" y="47" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Master item indexes</text>
+                            </g>
+
+                            <!-- 9. Warehouse Dispatch System -->
+                            <g class="svg-node" transform="translate(530, 65)">
+                                <rect x="0" y="0" width="110" height="45" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#0f1115" text-anchor="middle">WAREHOUSE DISP</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-orange"></span> Checkout & Fulfillment Journey: Step-by-Step
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">High-Availability Shopping Cart Ingress</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Adding items to shopping carts performs a low-latency write to the closest geographical active zone (e.g. US-East). Versioned records are tracked using vector clocks, and conflicts are resolved on the client-side at page loads, guaranteeing high availability even under network partitions.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Checkout Ingress Gateway & Rate Limiter</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Tapping "Proceed to Checkout" opens a secure session via regional gateways. Ingress gateways decrypt SSL, authorize user sessions, and check rate-limiting tokens under 3ms.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">DynamoDB Sharded Write Execution</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Checkout requests publish to sharded DynamoDB partitions. Adding synthetic suffixes (e.g. `_0` to `_9`) to popular item Partition Keys shards writes across 10 physical storage partitions, avoiding write throttle limits.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Distributed Inventory SKU Allocation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The allocator identifies the closest warehouse containing the purchased stock. To prevent double-selling, a short-lived **Redis distributed lock (Redlock)** is acquired on the SKU key during the transaction.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Two-Phase Commit (2PC) Ledger Settle</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Order ledger and stock count updates commit in an atomic two-phase commit: Phase 1 prepares resource locks on database shards; Phase 2 executes the write commit upon secure credit card capture.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Asynchronous SQS Event Broadcast</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Once the commit is acknowledged, a checkout event publishes to secure **AWS SQS queues**, decoupling long-latency downstream processes from the synchronous client loop.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Lambda Downstream Fulfillment Settle</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        **AWS Lambda stream processors** consume SQS logs, dispatching independent async jobs to calculate taxes, update double-entry financial journals, compute seller commissions, and initiate physical packaging at fulfillment centers.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-orange to-amber-600 flex items-center justify-center text-white font-black text-sm">A</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Amazon</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-orange hover:bg-brand-orange/5 hover:border-brand-orange/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#sharding" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">DynamoDB Shards</a>
+                    <a href="#replication" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Cart Replication</a>
+                    <a href="#allocation" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Warehouse Locks</a>
+                    <a href="#settlement" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Ledger Commits</a>
+                    <a href="#reconciliation" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Reconciliation Streams</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Checkout Map</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-orange pulse-orange"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">DynamoDB Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

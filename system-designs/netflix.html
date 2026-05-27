@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Netflix System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            red: '#e50914',
+                            darkRed: '#b20710',
+                            dark: '#050508',
+                            slate: '#0b0b12',
+                            card: 'rgba(15, 15, 25, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-red: #e50914;
+            --brand-dark-red: #b20710;
+            --brand-dark: #050508;
+            --brand-slate: #0b0b12;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050508;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #171725;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-red);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(15, 15, 25, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(229, 9, 20, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(229, 9, 20, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(11, 11, 18, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-red {
+            background: linear-gradient(135deg, #ff7e86 0%, #e50914 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(229, 9, 20, 0.08);
+            border-left: 3px solid var(--brand-red);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-red);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #09090f;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(229, 9, 20, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-red) !important;
+            fill: #14141f !important;
+        }
+
+        .svg-link {
+            stroke: #27273a;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-red);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-red);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-red {
+            animation: pulse-red-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-red-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(229, 9, 20, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(229, 9, 20, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-red to-rose-600 flex items-center justify-center text-white font-bold text-sm">N</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Netflix Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-red to-rose-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-red/20">N</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">NETFLIX</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">System Design</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-red hover:bg-brand-red/5 hover:border-brand-red/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Overview & Scale
+                    </a>
+                    <a href="#architecture" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Control vs Data Plane
+                    </a>
+                    <a href="#openconnect" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Open Connect CDN
+                    </a>
+                    <a href="#transcoding" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Cosmos Video Pipeline
+                    </a>
+                    <a href="#cassandra" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Active-Active DB
+                    </a>
+                    <a href="#evcache" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> EVCache Infrastructure
+                    </a>
+                    <a href="#chaos" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Chaos Engineering
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">09</span> Unified Flow
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-red pulse-red"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">CDN Availability: 99.999%</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v4.2.1 • Chaos Kong Hardened</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-red/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-rose-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-red/10 border border-brand-red/20 text-brand-red text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Scale Video Delivery
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Netflix <span class="text-gradient-red">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Discover the engineering blueprints behind the world's leading video streaming service. Learn how Netflix orchestrates AWS computing resources and physical **Open Connect Edge Appliances** inside ISPs globally to deliver high-fidelity video streams to **260+ million active subscribers** concurrently under absolute zero network friction.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Operational Scale & Requirements</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Netflix is not a standard video catalog; it is a global data distribution engine that at peak hours accounts for **over 15% of the entire world's internet traffic**. Scaling to this requirement requires solving extremely hard challenges: seamless video startup speeds (sub-second playing latency), zero buffering under active network degradation, massive horizontal concurrency, and resilience against physical internet fiber cuts.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-red"></span> Engineering Objectives
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-red font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Sub-Second Playback:</strong> Buffer and decode the initial movie segment inside 800ms of clicking "Play".</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-red font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Adaptive Bitrate Control:</strong> Dynamically change video resolution (H.264/HEVC encoding profiles) millisecond-by-millisecond depending on internet speed.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-red font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Active Edge Delivery:</strong> Route bandwidth-heavy video assets directly from inside the client's Internet Service Provider (ISP), bypassing backbone web lines.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-red font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Infinite Fault Tolerance:</strong> Guarantee continuous playback even if an entire AWS geographical server datacenter collapses.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-rose-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Subscribers</div>
+                                    <div class="text-2xl font-black text-brand-red font-outfit mt-1">260 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Global members</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Peak Streaming load</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">100+ Tbps</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Sustained egress bandwidth</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Metadata TPS</div>
+                                    <div class="text-2xl font-black text-rose-500 font-outfit mt-1">20 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Requests/sec on AWS API</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Video Catalog size</div>
+                                    <div class="text-2xl font-black text-amber-500 font-outfit mt-1">100+ Petabytes</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Transcoded video binaries</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="architecture" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Split Plane Topology (Control vs. Data)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Netflix scales by strictly segregating their architectures into two completely isolated operational levels: the **Control Plane** (residing entirely in AWS to handle search, user accounts, recommendation engines, and transcoding pipelines) and the **Data Plane** (residing inside local ISPs on custom Open Connect Edge Appliances to deliver raw video binaries directly).
+                    </p>
+
+                    <!-- SVG Diagram 1: Control vs Data Plane -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flow Paths -->
+                            <!-- Client to Ingress LB -->
+                            <path class="svg-link" d="M 150,225 L 210,225" marker-end="url(#arrow)" />
+                            <!-- Ingress LB splitting to Control (UP) and Data (DOWN) -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,140 L 390,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,310 L 390,310" marker-end="url(#arrow)" />
+                            <!-- Control Plane back to DB storage -->
+                            <path class="svg-link" d="M 510,140 Q 560,140 560,180 L 580,180" marker-end="url(#arrow)" />
+                            <!-- Data Plane back to client -->
+                            <path class="svg-link" d="M 510,310 Q 560,310 560,270 L 580,270" marker-end="url(#arrow)" />
+
+                            <!-- Client Node -->
+                            <g class="svg-node" transform="translate(30, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">USER DEVICE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Netflix Client UI</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Browsing & Stream</text>
+                            </g>
+
+                            <!-- Load Balancer -->
+                            <g class="svg-node" transform="translate(210, 180)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">GATEWAY LB</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Zuul Proxy</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Splits traffic type</text>
+                            </g>
+
+                            <!-- Control Plane (AWS) -->
+                            <g class="svg-node" transform="translate(390, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CONTROL (AWS)</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Stateless microservices</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Auth, Recs, Search</text>
+                            </g>
+
+                            <!-- Data Plane (Open Connect) -->
+                            <g class="svg-node" transform="translate(390, 265)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DATA (CDN)</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Open Connect OCAs</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Direct video stream</text>
+                            </g>
+
+                            <!-- Database Storage Cluster -->
+                            <g class="svg-node" transform="translate(580, 180)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CASSANDRA DB</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">Active Session states</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#ffd0c5" text-anchor="middle">Multi-region replicated</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-red"></span> The AWS Control Plane
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The Control Plane resides in Amazon Web Services (AWS) using stateless microservices orchestrated over custom platform APIs. This handles low-bandwidth, transactional operations: processing search inputs, streaming recommended movie queues, processing monthly billing transactions, and orchestrating video media transcoding tasks.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> The Open Connect Data Plane
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                When a user clicks "Play", the high-bandwidth demand (streaming massive 4K video files) completely bypasses AWS servers. The client app requests video segments directly from localized **Open Connect Appliances (OCAs)** installed physically inside the user’s local Internet Service Provider (ISP) network, cutting latency and global traffic costs.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="openconnect" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Open Connect Global CDN</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Instead of building standard datacenters or leasing third-party cloud CDN bands (which would cost billions in egress traffic), Netflix created **Open Connect**—a custom hardware global network. Netflix builds specialized server machines (Open Connect Appliances - OCAs) and installs them directly inside ISP local routing centers for free, delivering movie data locally.
+                    </p>
+
+                    <!-- SVG Diagram 2: Open Connect CDN -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 500,225 Q 570,225 570,160 L 590,160" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 500,225 Q 570,225 570,290 L 590,290" marker-end="url(#arrow)" />
+
+                            <!-- 1. Netflix Master Store -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">AWS ORIGIN</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffd0c5" text-anchor="middle">Master S3 library</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#ffd0c5" text-anchor="middle">Uploads new titles</text>
+                            </g>
+
+                            <!-- 2. Local ISP Exchange -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LOCAL ISP GRID</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Comcast, Airtel, etc.</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Hosts OCA Hardware</text>
+                            </g>
+
+                            <!-- 3. Local OCA Server Box -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">OCA APPLIANCE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Solid-State SSDs</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Pre-caches movies overnight</text>
+                            </g>
+
+                            <!-- Clients (Subscribers in proximity) -->
+                            <g class="svg-node" transform="translate(590, 115)">
+                                <circle cx="30" cy="30" r="30" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="30" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">USER A</text>
+                            </g>
+
+                            <g class="svg-node" transform="translate(590, 245)">
+                                <circle cx="30" cy="30" r="30" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="30" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">USER B</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How caching on Open Connect operates:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <p>
+                                When Netflix releases a popular title like *Stranger Things*, they do not stream it from a single central database server to millions of active screens simultaneously.
+                            </p>
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li>During off-peak night hours (when internet usage is low), Netflix pushes the encoded video media files from **AWS S3** to all **Open Connect Appliances (OCAs)** around the world.</li>
+                                <li>The OCA (configured with high-capacity flash SSD storage arrays and optimized FreeBSD cores) saves the files locally.</li>
+                                <li>The next evening, when millions of users in London tap "Watch Stranger Things", their client requests are dynamically redirected by the Zuul proxy to the **closest local ISP OCA** physically in London.</li>
+                                <li>Video streams originate directly from their local ISP exchange—**consuming zero global bandwidth** and avoiding buffering lags.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="transcoding" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Cosmos Media Transcoding Pipeline</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        A movie filmed by Netflix is delivered in a high-fidelity master format that is several terabytes in size. This massive asset cannot be streamed directly. Netflix must convert it into hundreds of different profiles (codecs, resolutions, and bitrates) to suit diverse devices. This is managed by the **Cosmos Media Pipeline**—a massive parallel encoding framework in AWS.
+                    </p>
+
+                    <!-- SVG Diagram 3: Cosmos Transcoding Pipeline -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flow paths -->
+                            <path class="svg-link" d="M 120,225 L 180,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 290,225 L 350,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 460,225 Q 520,225 520,160 L 540,160" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 460,225 Q 520,225 520,290 L 540,290" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 640,160 Q 690,160 690,225" />
+                            <path class="svg-link" d="M 640,290 Q 690,290 690,225" />
+                            <path class="svg-link" d="M 690,225 L 720,225" marker-end="url(#arrow)" />
+
+                            <!-- Raw Upload Master -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RAW MASTER</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Multi-TB Video</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">High definition source</text>
+                            </g>
+
+                            <!-- Chunking Engine -->
+                            <g class="svg-node" transform="translate(180, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CHUNKER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Cosmos Service</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Splits into 5s segments</text>
+                            </g>
+
+                            <!-- Parallel Transcoding Cluster -->
+                            <g class="svg-node" transform="translate(350, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">COSMOS MESH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">1000s of Nodes</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Parallel encoding</text>
+                            </g>
+
+                            <!-- Codec A (HEVC 4K) -->
+                            <g class="svg-node" transform="translate(540, 115)">
+                                <rect x="0" y="0" width="100" height="80" rx="6" fill="url(#grad-dark)" stroke="#4ade80" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">HEVC PROFILE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4ade80" text-anchor="middle">Optimized for TV</text>
+                            </g>
+
+                            <!-- Codec B (AVC Mobile) -->
+                            <g class="svg-node" transform="translate(540, 250)">
+                                <rect x="0" y="0" width="100" height="80" rx="6" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">AVC PROFILE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#387ed1" text-anchor="middle">Optimized for Phone</text>
+                            </g>
+
+                            <!-- Final Assembled Catalogue -->
+                            <g class="svg-node" transform="translate(710, 180)">
+                                <rect x="0" y="0" width="75" height="90" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="37.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CDN INDEX</text>
+                                <text x="37.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ffe0d8" text-anchor="middle">Manifest File</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg">1. Dynamic Video Chunking</h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Transcoding a whole 2-hour 4K movie as a single file on one machine would take hours and fail easily. Instead, the Cosmos workflow engine splits the master file into thousands of small, **5-second video chunks**. These chunks are encoded in parallel across a massive cluster of AWS worker instances, reducing encoding times from hours to minutes.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg">2. Manifest Compilation</h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                After all chunks are successfully encoded into hundreds of codec and bitrate variations, the system merges them, compiling a master **Manifest File (.m3u8/.mpd)**. When the client taps watch, the device reads the manifest to dynamically request the best matching bitrate chunks (switching between SD, HD, and 4K) as network conditions fluctuate.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="cassandra" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Active-Active Cassandra Replication</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When you pause a video on Netflix on your phone and immediately open it on your TV, your playback position is updated instantly. This state must be persisted globally with high durability. Netflix relies on **Apache Cassandra** set up in a highly scalable, **Active-Active Multi-Region Replication** topology across several AWS datacenters.
+                    </p>
+
+                    <!-- SVG Diagram 4: Cassandra Replication -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Lines -->
+                            <path class="svg-link" d="M 180,185 L 260,185" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 180,265 L 260,265" marker-end="url(#arrow)" />
+                            <!-- Bidirectional replication link -->
+                            <path class="svg-link" stroke="#e50914" stroke-width="2" d="M 380,185 L 380,265" marker-end="url(#arrow)" />
+                            <path class="svg-link" stroke="#e50914" stroke-width="2" d="M 380,265 L 380,185" marker-end="url(#arrow)" />
+                            
+                            <!-- Master cluster US-East -->
+                            <g class="svg-node" transform="translate(260, 140)">
+                                <rect x="0" y="0" width="240" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="120" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">AWS REGION 1 (US-EAST)</text>
+                                <text x="120" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Cassandra Node Ring 1</text>
+                                <text x="120" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Handles East-Coast traffic</text>
+                            </g>
+
+                            <!-- Master cluster US-West -->
+                            <g class="svg-node" transform="translate(260, 280)">
+                                <rect x="0" y="0" width="240" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="120" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">AWS REGION 2 (US-WEST)</text>
+                                <text x="120" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Cassandra Node Ring 2</text>
+                                <text x="120" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Handles West-Coast traffic</text>
+                            </g>
+
+                            <!-- Client inputs -->
+                            <g class="svg-node" transform="translate(30, 140)">
+                                <rect x="0" y="0" width="150" height="70" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EAST COAST USER</text>
+                                <text x="75" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Writes state in Region 1</text>
+                            </g>
+
+                            <g class="svg-node" transform="translate(30, 290)">
+                                <rect x="0" y="0" width="150" height="70" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WEST COAST USER</text>
+                                <text x="75" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Writes state in Region 2</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-red"></span> Decentralized Design
+                            </h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                Cassandra uses a masterless peer-to-peer ring topology. There is no single master node to bottleneck write limits. User viewing histories can be written to *any* local replica node. The cluster handles consistency in the background, replicating updates to other geographical regions asynchronously.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-red"></span> Dynamic Conflict Resolution
+                            </h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                Bi-directional write paths create the risk of data conflict (e.g. updating play position from two devices simultaneously). Cassandra uses the **Last-Write-Wins (LWW)** conflict resolution algorithm: the write with the latest client physical timestamp overwrites older states, maintaining perfect coherence.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="evcache" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">EVCache Caching Layer</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Reading user catalogs, movie descriptors, and dynamic recommendation matrix algorithms from primary databases on every app load would crash Cassandra under high loads. Netflix shields databases with **EVCache** (Episodic Volatile Cache)—a highly customized, distributed in-memory cache system built on top of Memcached.
+                    </p>
+
+                    <!-- SVG Diagram 5: EVCache distributed Caching -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 230,225 L 340,225" marker-end="url(#arrow)" />
+                            <!-- Cache Miss path down to database -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 400,270 L 400,330 L 530,330" marker-end="url(#arrow)" />
+                            <!-- Cache Hit path -->
+                            <path class="svg-link" d="M 460,225 L 530,225" marker-end="url(#arrow)" />
+
+                            <!-- API Server -->
+                            <g class="svg-node" transform="translate(80, 180)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="75" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">API MICROSERVICE</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Requesting Catalog</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Needs quick data response</text>
+                            </g>
+
+                            <!-- EVCache Layer -->
+                            <g class="svg-node" transform="translate(340, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">EVCACHE GRID</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Memcached cluster</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">In-Memory search</text>
+                            </g>
+
+                            <!-- Target data return paths -->
+                            <g class="svg-node" transform="translate(530, 180)">
+                                <rect x="0" y="0" width="190" height="90" rx="8" fill="url(#grad-dark)" stroke="#4ade80" stroke-width="1.5" />
+                                <text x="95" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CACHE HIT (99%+)</text>
+                                <text x="95" y="50" font-family="'Inter', sans-serif" font-size="9" fill="#4ade80" text-anchor="middle">Sub-millisecond delivery</text>
+                                <text x="95" y="65" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Direct return, avoids DB</text>
+                            </g>
+
+                            <g class="svg-node" transform="translate(530, 290)">
+                                <rect x="0" y="0" width="190" height="90" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="95" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CACHE MISS (&lt; 1%)</text>
+                                <text x="95" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffd0c5" text-anchor="middle">Fetch from Cassandra DB</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">Linear Scalability</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light font-sans">
+                                EVCache scales horizontally by adding Memcached instances to the cluster. High-bandwidth cache keys are automatically distributed across the nodes using **consistent hashing rings**, maintaining perfect stability under massive request surges.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">Asynchronous Updates</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light font-sans">
+                                When a primary Cassandra database write occurs (e.g. updating viewing logs), the application service triggers asynchronous EVCache invalidation requests, keeping cached objects in sync without blocking transaction writes.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">Region Localized Caching</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light font-sans">
+                                Every AWS geographical datacenter hosts an independent physical EVCache ring. Cache hits execute locally under 1ms, completely eliminating regional backbone data traffic overhead.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="chaos" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Chaos Engineering & Chaos Kong Failovers</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Netflix is the pioneer of **Chaos Engineering**. Instead of waiting for hardware components to break in production unexpectedly, Netflix intentionally breaks its own production systems to verify self-healing resilience. Their ultimate defense drill is **Chaos Kong**—an automation that shuts down entire AWS geographic regions to test warm-failovers.
+                    </p>
+
+                    <!-- SVG Diagram 6: Chaos Kong Regional Failover -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Path links -->
+                            <!-- User traffic going up to DNS -->
+                            <path class="svg-link" d="M 170,225 L 240,225" marker-end="url(#arrow)" />
+                            <!-- Active route ( Virginia - CRASHED ) -->
+                            <path class="svg-link" stroke="#e50914" stroke-width="2" d="M 350,225 Q 430,160 490,160" marker-end="url(#arrow)" />
+                            <!-- Failover Warm reroute ( Oregon - ACTIVE ) -->
+                            <path class="svg-link" stroke="#22c55e" stroke-width="2" d="M 350,225 Q 430,290 490,290" marker-end="url(#arrow)" />
+
+                            <!-- Client Traffic -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="75" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER TRAFFIC</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">10M+ active viewers</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Streams live movies</text>
+                            </g>
+
+                            <!-- Traffic Director DNS -->
+                            <g class="svg-node" transform="translate(240, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ROUTE 53 DNS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#387ed1" text-anchor="middle">Active traffic failover</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Detects regional health</text>
+                            </g>
+
+                            <!-- Virginia Datacenter (Crashed by Chaos Kong) -->
+                            <g class="svg-node" transform="translate(490, 115)">
+                                <rect x="0" y="0" width="220" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="2" />
+                                <text x="110" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REGION 1 (US-EAST)</text>
+                                <text x="110" y="55" font-family="'Outfit', sans-serif" font-weight="black" font-size="13" fill="#e50914" text-anchor="middle">❌ CRASHED BY CHAOS KONG</text>
+                                <text x="110" y="75" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">No traffic allowed</text>
+                            </g>
+
+                            <!-- Oregon Datacenter (Warm standby handles load) -->
+                            <g class="svg-node" transform="translate(490, 245)">
+                                <rect x="0" y="0" width="220" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="2" />
+                                <text x="110" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REGION 2 (US-WEST)</text>
+                                <text x="110" y="55" font-family="'Outfit', sans-serif" font-weight="black" font-size="11" fill="#22c55e" text-anchor="middle">ACTIVE STANDBY</text>
+                                <text x="110" y="75" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Absorbs 100% of US-East traffic loads</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                        <h3 class="text-xl font-outfit font-bold text-white">How regional warm failover functions under 5 mins:</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                            When **Chaos Kong** triggers, it fully blocks an AWS geographical cloud zone (e.g. US-East). In most systems, this causes global downtime. On Netflix:
+                        </p>
+                        <ol class="list-decimal list-inside space-y-3 font-light text-slate-300 text-sm">
+                            <li>Route 53 DNS servers detect the outage and start shifting global network traffic immediately.</li>
+                            <li>DNS routes 100% of the active connection requests from US-East to **US-West (Oregon)**.</li>
+                            <li>The stateless API servers in Oregon launch new instances dynamically to handle the massive traffic surge.</li>
+                            <li>Because Cassandra database records are mirrored bi-directionally, the US-West Cassandra cluster already has the user viewing history.</li>
+                            <li>Users continue watching their streams with **zero interruption or session logouts**.</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">System Design Interview Cheat Sheet</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Use this cheat sheet to confidently tackle high-scale video streaming system design interview questions.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-red">Q1. How does Netflix scale to deliver high-bandwidth video files without crushing internal networks?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Netflix utilizes a **Split-Plane architecture**. While transactional controls (search, user recommendations, profiles) are handled by stateless microservices in AWS, all high-bandwidth video assets are served via a custom global CDN called **Open Connect**. Physical **Open Connect Appliances (OCAs)** are installed directly inside local ISPs for free. These OCAs store cached video segments locally and stream them directly to subscribers over local ISP networks, bypassing backbone internet channels.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-red">Q2. How is adaptive bitrate streaming orchestrated on the backend?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Master video files are ingested by the **Cosmos media framework** in AWS. Cosmos splits the file into thousands of **5-second chunks** and encodes them in parallel across a cluster of worker nodes into multiple formats (HEVC, AVC) and bitrates. The system compiles a **Manifest File (.m3u8/.mpd)**. During playback, the client device reads the manifest file and dynamically requests the best bitrate chunk to match real-time network speeds, ensuring zero buffering.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-red">Q3. Why is Apache Cassandra used instead of transactional relational databases for playback state tracking?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Tracking real-time user playback states requires massive write throughput. A centralized relational database would throttle under lock queues. Apache Cassandra uses a **decentralized, masterless peer-to-peer ring topology** with no single point of failure, enabling linear write-scaling. Viewing history is written to local nodes and replicated across regions asynchronously in the background.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-red">Q4. How is session persistence guaranteed if an entire cloud database region goes down?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By deploying a highly resilient **Active-Active Cassandra Multi-Region Replication** structure. When a user updates their state (e.g. pause playhead), the write goes to their closest active region and replicates asynchronously to a secondary region. If Region 1 crashes, Route 53 DNS redirects client traffic to Region 2 instantly. The stateless API servers in Region 2 read the user's data from the replicated Cassandra ring, resuming playback seamlessly.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 9 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-red/10 text-brand-red border border-brand-red/20 font-mono text-xs font-bold">09</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified End-to-End System Flow</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology representing the complete Netflix ecosystem. It traces how metadata requests route to AWS control panels while raw video playback streams directly from Open Connect Edge CDNs.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 -80 900 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#4ade80" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e50914" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#e50914" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#387ed1" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,-50 L 900,-50 M 0,0 L 900,0 M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,-80 L 100,550 M 200,-80 L 200,550 M 300,-80 L 300,550 M 400,-80 L 400,550 M 500,-80 L 500,550 M 600,-80 L 600,550 M 700,-80 L 700,550 M 800,-80 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- User App to Load Balancer -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- CONTROL PATH (UPPER ROUTE) -->
+                            <!-- Load Balancer to Gateway Proxy -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- Gateway Proxy to microservices -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Microservices to EVCache -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- EVCache to Cassandra DB -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+
+                            <!-- DATA PLAYOUT PATH (LOWER ROUTE) -->
+                            <!-- Load Balancer down to Open Connect CDN -->
+                            <path class="svg-link" d="M 330,290 Q 380,320 380,380 L 400,380" marker-end="url(#arrow-red)" />
+                            <!-- Open Connect OCA directly back to User App -->
+                            <path class="svg-link" d="M 510,380 Q 280,380 280,320 Q 280,290 180,285" marker-end="url(#arrow-red)" />
+
+                            <!-- TRANSCODING ASYNC ENGINE -->
+                            <!-- S3 Master Library to Cosmos Transcoder -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,15 L 585,65" marker-end="url(#arrow-gray)" />
+                            <!-- Cosmos Transcoder to Open Connect CDN Cache updates -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 640,100 L 730,100 L 730,340 M 730,340 L 510,380" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Client App Core -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER APP (NETFLIX)</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Control requests (AWS)</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Direct video streams</text>
+                            </g>
+
+                            <!-- 2. Zuul Ingress LB proxy -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ZUUL GATEWAY</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Edge Load Balancer</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">DNS Router</text>
+                            </g>
+
+                            <!-- 3. API gateway orchestrator -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API PLATFORM</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">AWS Control plane</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Routes catalog requests</text>
+                            </g>
+
+                            <!-- 4. Stateless Microservice -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SUBSCRIBER SERVICE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Stateless APIs</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Profile states</text>
+                            </g>
+
+                            <!-- 5. EVCache Ring -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EVCACHE GRID</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Consistent rings</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">In-Memory cache</text>
+                            </g>
+
+                            <!-- 6. Cassandra Database cluster -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-dark)" stroke="#e50914" stroke-width="1.5" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CASSANDRA</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e50914" text-anchor="middle">Active database</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Replicated master</text>
+                            </g>
+
+                            <!-- 7. Open Connect CDN Appliance -->
+                            <g class="svg-node" transform="translate(400, 335)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">OPEN CONNECT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Local ISP OCA</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Direct video streams</text>
+                            </g>
+
+                            <!-- 8. AWS S3 Origin library -->
+                            <g class="svg-node" transform="translate(530, -50)">
+                                <rect x="0" y="0" width="110" height="65" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">S3 LIBRARIES</text>
+                                <text x="55" y="47" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Master video binaries</text>
+                            </g>
+
+                            <!-- 9. Cosmos Parallel Transcoder -->
+                            <g class="svg-node" transform="translate(530, 65)">
+                                <rect x="0" y="0" width="110" height="45" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">COSMOS TRANSCODER</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-red"></span> Video Streaming Journey: Step-by-Step Lifecycle
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Off-Peak Asset Pre-Caching (Data Plane Hydration)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Before any title is streamed by subscribers, Netflix's AWS **Cosmos parallel encoding clusters** fetch multi-terabyte master files from **S3**. Cosmos chunks them into 5-second increments and compresses them into hundreds of adaptive codec/bitrate variations. During off-peak night hours, these assets are pre-cached over ISP leased connections directly onto the solid-state storage arrays inside the local **Open Connect Edge Appliances (OCAs)**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">User Discovery, Searching, & API Navigation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When you open the Netflix app, your device sends HTTP catalog browsing, search inputs, and authorization requests to our **Zuul Ingress Proxy**. Zuul authenticates your session tokens, validates permissions, and forwards routing demands straight to AWS stateless microservice clusters (Control Plane) under **&lt; 5ms**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Shielded Caching & Dynamic Recommendation Lookup (EVCache Layer)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        To prevent choking database endpoints under million-user peak spikes, microservice queries are intercepted by the high-throughput **EVCache** distributed cache layer. EVCache searches consistent hashing rings, returning compiled homepages, recommendations, and active movie lists under **&lt; 2ms** with a **99%+ cache hit rate**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Global State Playback Persistence (Cassandra Multi-Region Replication)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When you watch or pause a title, real-time playhead bookmarks are written continuously to local nodes in the closest geographical **Apache Cassandra Multi-Region Database**. Cassandra’s masterless ring design scales write workloads linearly and uses peer-to-peer pipelines to replicate your session states across regions asynchronously in the background.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Manifest Verification & Close-Proximity Redirects</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The moment you click the watch play button, the AWS control plane returns a specialized **Manifest File** mapping out the locations of nearby cached video chunks. Your device’s connection requests are intercepted by Zuul and dynamically routed straight to the **closest physical Open Connect Appliance (OCA)** situated directly inside your local ISP exchange.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Zero-Lag Video Playout (OCA Delivery Edge)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The localized **Open Connect Appliance (OCA)** receives the request and immediately streams the 5-second video chunks directly over your local ISP’s network using optimized high-performance FreeBSD socket engines. Because the traffic does not travel through global backend internet backbones, video playback loads in **&lt; 800ms** with zero buffering.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-red/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-red/10 border border-brand-red/20 flex items-center justify-center font-mono font-bold text-brand-red flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Real-time Adaptive Bitrate Adjustment</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        During active video playout, your client device continually monitors current download speeds and packet loss frequencies. As network capacity changes, the player seamlessly switches between different video profiles outlined in the manifest, requesting higher or lower quality 5-second chunks from the OCA on-the-fly to guarantee zero playout interruption.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer Section -->
+                <footer class="text-center py-12 text-slate-500 border-t border-slate-900 text-xs font-light">
+                    <p class="mb-2 font-mono">Netflix System Design Masterclass • High Availability • Open Connect CDN • Cassandra</p>
+                    <p>© 2026 Netflix Engineering Guide. Crafted with absolute dedication to premium visual layouts.</p>
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- IntersectionObserver and Mobile Toggle Drawer Scripts -->
+    <script>
+        // DOM Elements
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const sidebarNav = document.getElementById('sidebar-nav');
+        const menuIcon = document.getElementById('menu-icon');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        // Drawer Menu Toggle for Mobile Layout
+        menuToggleBtn.addEventListener('click', () => {
+            sidebarNav.classList.toggle('-translate-x-full');
+            
+            // Toggle hamburger icon state
+            if (sidebarNav.classList.contains('-translate-x-full')) {
+                menuIcon.setAttribute('d', 'M4 6h16M4 12h16m-7 6h7');
+            } else {
+                menuIcon.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // Close sidebar on navigate (Mobile)
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024) {
+                    sidebarNav.classList.add('-translate-x-full');
+                    menuIcon.setAttribute('d', 'M4 6h16M4 12h16m-7 6h7');
+                }
+            });
+        });
+
+        // Active Link Highlighting with IntersectionObserver
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -60% 0px', // Captures active sections near center-top of viewport
+            threshold: 0
+        };
+
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    
+                    // Reset active states
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                            
+                            // Scroll sidebar nav automatically to keep active item in view if needed
+                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        // Track all sections
+        sections.forEach(section => {
+            sectionObserver.observe(section);
+        });
+    </script>
+</body>
+
+</html>

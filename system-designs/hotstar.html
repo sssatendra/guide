@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hotstar Live Broadcast System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#1fdb6d',
+                            gold: '#ffc72c',
+                            dark: '#020710',
+                            slate: '#071122',
+                            card: 'rgba(10, 25, 47, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-green: #1fdb6d;
+            --brand-gold: #ffc72c;
+            --brand-dark: #020710;
+            --brand-slate: #071122;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020710;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f1f38;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-green);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(10, 25, 47, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(31, 219, 109, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(31, 219, 109, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(7, 17, 34, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-green {
+            background: linear-gradient(135deg, #a7f3d0 0%, #1fdb6d 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-gold {
+            background: linear-gradient(135deg, #fef08a 0%, #ffc72c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(31, 219, 109, 0.08);
+            border-left: 3px solid var(--brand-green);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-green);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #040d1a;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(31, 219, 109, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-green) !important;
+            fill: #081a33 !important;
+        }
+
+        .svg-link {
+            stroke: #182e4e;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-green);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-green);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-green {
+            animation: pulse-green-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-green-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(31, 219, 109, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(31, 219, 109, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(31, 219, 109, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-green to-emerald-600 flex items-center justify-center text-white font-bold text-sm">H</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Hotstar Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-green to-emerald-600 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-green/20">H</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">HOTSTAR</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Live Broadcast Scaling</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-green hover:bg-brand-green/5 hover:border-brand-green/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Concurrency Challenge
+                    </a>
+                    <a href="#architecture" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Ingestion Plane
+                    </a>
+                    <a href="#packaging" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Packaging & Encoding
+                    </a>
+                    <a href="#multicdn" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Multi-CDN Routing
+                    </a>
+                    <a href="#dai" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Dynamic Ad Injects
+                    </a>
+                    <a href="#paywall" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Entitlement Shields
+                    </a>
+                    <a href="#scores" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Scorecard Pub-Sub
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">09</span> Unified Broadcast Flow
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-green pulse-green"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Record Concurrency: 59M</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.4.0 • Dynamic Multi-CDN</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-green/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Concurrency Live Broadcasting
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Hotstar <span class="text-gradient-green">Live Broadcast</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the systems that broadcast live sports tournaments to **59+ million concurrent viewers** globally. Explore the multi-CDN dynamic failover pipelines, real-time ad manifest manipulators, Erlang scorecard publishers, and edge payshields designed to handle hyper-spikes under sub-second network latencies.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Massive Live Concurrency Scale</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Live cricket broadcasting is uniquely challenging because it combines two high-stress system characteristics: **absolute low latency** (users must see a six before their neighbor screams) and **massive thundering herd spikes** (tens of millions of active users log in at the exact same second when a crucial wicket falls). Managing this scale requires a radical departure from traditional REST architectures, replacing them with specialized dynamic edge packaging grids.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-green"></span> Engineering Objectives
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Sub-5 Second Glass-to-Glass Latency:</strong> Raw stadium capture encoded, packaged, and distributed globally to edge devices under 5 seconds.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Mitigate Thundering Herds:</strong> Handle spikes of 10M+ new requests per minute without buckling core database rings.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Real-Time Targeted Ad Insertion:</strong> Stitch personalized advertisements directly into HLS/DASH manifest chunks during over breaks.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Continuous Score updates:</strong> Broadcast scorecards to 50M+ users simultaneously with under 500ms lag.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live Playout Metrics
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Peak Concurrency</div>
+                                    <div class="text-2xl font-black text-brand-green font-outfit mt-1">59 Million</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Simultaneous users</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Egress Bandwidth</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">30+ Tbps</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Aggregated multi-CDN egress</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Entitlement TPS</div>
+                                    <div class="text-2xl font-black text-emerald-500 font-outfit mt-1">5 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Paywall validations/sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Glass-to-Glass Lag</div>
+                                    <div class="text-2xl font-black text-brand-gold font-outfit mt-1">&lt; 4.2 Seconds</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Encoding + CDN transit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="architecture" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Stadium-to-CDN Broadcast Plane</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        The broadcasting plane maps the journey of raw camera frames from the stadium ground up to the edge CDN servers. High-definition SDI baseband video signals are transmitted via fiber lines and satellite links to co-located **dual-active hardware encoding centers** in AWS, converting them into digital master streams.
+                    </p>
+
+                    <!-- SVG Diagram 1: High-Level Broadcast Architecture -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flow Paths -->
+                            <path class="svg-link" d="M 140,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 370,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 480,225 Q 540,225 540,140 L 560,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 480,225 Q 540,225 540,310 L 560,310" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 680,140 Q 720,180 730,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 680,310 Q 720,270 730,245" marker-end="url(#arrow)" />
+
+                            <!-- Stadium Capture -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">STADIUM FEED</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">1080i Uncompressed</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">SDI Fiber / Sat link</text>
+                            </g>
+
+                            <!-- Redundant Ingestion Gateway -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGEST HUB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Redundant Gates</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Active-Active capture</text>
+                            </g>
+
+                            <!-- AWS Transcoding Platform -->
+                            <g class="svg-node" transform="translate(370, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AWS MediaLive</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">HEVC H.264/H.265</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Multi-bitrate encoding</text>
+                            </g>
+
+                            <!-- Control & Manifest Plane (AWS) -->
+                            <g class="svg-node" transform="translate(560, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e2e8f0" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MANIFEST ENGINE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">Dynamic Ad Stitcher</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Custom manifests</text>
+                            </g>
+
+                            <!-- Data Delivery CDN Plane -->
+                            <g class="svg-node" transform="translate(560, 265)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MULTI-CDN GRID</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Akamai, Cloudflare</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Playout segments</text>
+                            </g>
+
+                            <!-- Subscriber App Screen -->
+                            <g class="svg-node" transform="translate(710, 190)">
+                                <rect x="0" y="0" width="80" height="70" rx="8" fill="url(#grad-green)" stroke="none" />
+                                <text x="40" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">CLIENT APP</text>
+                                <text x="40" y="48" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Hotstar Player</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Redundant Stadium Capture
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The capture phase features highly redundant stadium connectivity. Dual high-frequency satellite transponders transmit raw 1.5 Gbps uncompressed HD-SDI signals from the stadium trucks, while parallel high-speed underground fiber optic lines push backup raw packets to redundant cloud-based VPC ingest nodes.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-gold"></span> Split-Plane Routing
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Hotstar decouples the control manifest generation layer (which creates customized playlist files for each user with personal ad structures) from the heavy video packet storage CDN layer. This segregates intensive rendering from database dependencies, preserving massive playback bandwidth.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="packaging" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dual-Active Video Packaging Pipeline</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        To maintain absolute continuity, the raw ingestion feeds must be converted into Adaptive Bitrate (ABR) streams instantly. Redundant active-active encoders ingest the raw frames, compress them in parallel using HEVC/H.265, and chunk them into highly optimized **2-second segments** formatted in DASH and HLS.
+                    </p>
+
+                    <!-- SVG Diagram 2: Dual-Active Packaging -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Ingestion splitting to dual encoders -->
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,140 L 200,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,310 L 200,310" marker-end="url(#arrow)" />
+
+                            <!-- Encoders converging to Packager -->
+                            <path class="svg-link" d="M 310,140 Q 360,140 360,205 L 380,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,310 Q 360,310 360,245 L 380,245" marker-end="url(#arrow)" />
+
+                            <!-- Packager to Ad Injector -->
+                            <path class="svg-link" d="M 500,225 L 560,225" marker-end="url(#arrow)" />
+                            <!-- Ad Injector to Manifest server -->
+                            <path class="svg-link" d="M 670,225 L 700,225" marker-end="url(#arrow)" />
+
+                            <!-- Stadium Capturing -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">STADIUM LINK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Dual RTMP/SRT</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Stadium Truck</text>
+                            </g>
+
+                            <!-- Primary Encoder (Active) -->
+                            <g class="svg-node" transform="translate(200, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AWS ENCODER A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Dynamic ABR</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Live packaging</text>
+                            </g>
+
+                            <!-- Secondary Encoder (Active) -->
+                            <g class="svg-node" transform="translate(200, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AWS ENCODER B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Dynamic ABR</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Hot standby redundancy</text>
+                            </g>
+
+                            <!-- Unified ABR Packager -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">UNIFIED PACKAGER</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">HLS / DASH engine</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">2s media chunks</text>
+                            </g>
+
+                            <!-- Ad Injector (SCTE-35 insertion) -->
+                            <g class="svg-node" transform="translate(560, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AD INJECT ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">SCTE-35 Markers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ad splice pointers</text>
+                            </g>
+
+                            <!-- Edge Manifest Server -->
+                            <g class="svg-node" transform="translate(700, 190)">
+                                <rect x="0" y="0" width="80" height="70" rx="8" fill="url(#grad-green)" stroke="none" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">MANIFESTS</text>
+                                <text x="40" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Playout playlists</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Advanced Packaging Mechanics:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <p>
+                                Broadcast quality and robustness are maintained via three high-performance strategies:
+                            </p>
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Active-Active Dual Encoders:</strong> AWS Elemental MediaLive processes two separate stadium inputs (Primary & Backup) concurrently. If Encoder A loses a packet, the downstream Packager dynamically fetches the missing segment from Encoder B without dropping a single frame.</li>
+                                <li><strong>Sub-Second Chunking:</strong> Traditional HLS uses 6-second segments, introducing 18+ seconds of latency. Hotstar packages video into **2-second chunk segments** combined with CMAF (Common Media Application Format) chunking, reducing streaming lag down to 4.2 seconds.</li>
+                                <li><strong>SCTE-35 Splice Markers:</strong> The master packaging engine injects SCTE-35 digital cue markers into HLS/DASH manifest structures during live breaks, telling downstream servers exactly where a commercial starts and ends.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="multicdn" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dynamic Multi-CDN Dynamic Switching</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        No single CDN provider (Akamai, Fastly, or Cloudflare) can sustain 30+ Tbps of peak live video traffic. A single regional network bottleneck would buffer millions of concurrent screens instantly. To solve this, Hotstar operates a **Multi-CDN Topology** governed by real-time client-side performance feedback loops.
+                    </p>
+
+                    <!-- SVG Diagram 3: Dynamic Multi-CDN Switching -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#1fdb6d" />
+                                </marker>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 190,225" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- Telemetry routing splits -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow-gray)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow-green)" stroke="#1fdb6d" stroke-width="2.5" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow-gray)" />
+
+                            <!-- CDNs converging to ISP -->
+                            <path class="svg-link" d="M 500,115 Q 560,115 560,195 L 580,195" marker-end="url(#arrow-gray)" />
+                            <path class="svg-link" d="M 510,225 L 580,225" marker-end="url(#arrow-green)" stroke="#1fdb6d" stroke-width="2.5" />
+                            <path class="svg-link" d="M 500,335 Q 560,335 560,255 L 580,255" marker-end="url(#arrow-gray)" />
+
+                            <!-- Feedback loop from Client to Router -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 720,180 Q 720,60 450,60 Q 255,60 255,180" marker-end="url(#arrow-gray)" />
+
+                            <!-- Client Screen -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SUBSCRIBER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Hotstar Client</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Requests segment</text>
+                            </g>
+
+                            <!-- Cedexis / Conviva Dynamic DNS Switcher -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DYNAMIC ROUTER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Conviva Telemetry</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">CDN selection</text>
+                            </g>
+
+                            <!-- CDN 1 (Akamai) -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AKAMAI CDN</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Edge Cache</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Capacity: 12 Tbps</text>
+                            </g>
+
+                            <!-- CDN 2 (Fastly - Active Route) -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="2" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FASTLY CDN (BEST)</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Low RTT ISP peering</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Active Egress Route</text>
+                            </g>
+
+                            <!-- CDN 3 (Cloudflare) -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLOUDFLARE CDN</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Edge Cache</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Capacity: 10 Tbps</text>
+                            </g>
+
+                            <!-- Local ISP Exchange to Client -->
+                            <g class="svg-node" transform="translate(580, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LOCAL ISP GRID</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Comcast, Airtel</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Peered delivery</text>
+                            </g>
+
+                            <!-- Telemetry Feedback label -->
+                            <text x="350" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Real-time Buffer & Latency telemetry reports</text>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Live Client Telemetry Loop
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The Hotstar player client embedded inside subscriber devices sends continuous QoS telemetry logs (reporting frame drops, local ISP buffer depths, and segment request latencies) back to the **Conviva / Cedexis** cloud router. If an Akamai endpoint in Bangalore starts buffering, the router redirects the client's next 2-second segment request to Fastly instantly.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-gold"></span> Multi-CDN Peer Offloading
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Decoupled CDN routing maps dynamically balance workloads by checking capacity limits. If India's local exchanges hit capacity limits, the intelligent load balancer automatically shifts international and non-critical streams to alternative transit lines to protect critical domestic links.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="dai" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dynamic Ad Insertion (DAI)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Dynamic Ad Insertion (DAI) represents Hotstar's primary monetization source. When the overs end, Hotstar must serve different, personalized advertisements to millions of active streams concurrently. Stitching ads on the client-side creates latency and buffering. Hotstar solves this with server-side **Manifest Manipulation**.
+                    </p>
+
+                    <!-- SVG Diagram 4: Dynamic Ad Insertion -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <!-- Client to Manipulator -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Manipulator splitting to ADS & Master stream -->
+                            <path class="svg-link" d="M 320,225 Q 370,225 370,140 L 390,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 320,225 Q 370,225 370,310 L 390,310" marker-end="url(#arrow)" />
+
+                            <!-- ADS to Ad Cache -->
+                            <path class="svg-link" d="M 510,140 L 580,140" marker-end="url(#arrow)" />
+                            <!-- Master packager to Stitcher -->
+                            <path class="svg-link" d="M 510,310 Q 565,310 565,245 L 580,245" marker-end="url(#arrow)" />
+                            <!-- Ad Cache to Stitcher -->
+                            <path class="svg-link" d="M 690,140 Q 720,180 710,205" marker-end="url(#arrow)" />
+
+                            <!-- Stitched playlist out -->
+                            <path class="svg-link" d="M 700,225 L 720,225" marker-end="url(#arrow)" />
+
+                            <!-- Client Player Request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT PLAYER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Requests stream</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">HLS index playlist</text>
+                            </g>
+
+                            <!-- Server-side Manifest Manipulator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MANIPULATOR</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Server-Side Stitch</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">HLS/DASH rewriter</text>
+                            </g>
+
+                            <!-- Ad Decision Server (ADS) -->
+                            <g class="svg-node" transform="translate(390, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AD DECISION (ADS)</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">User Demographic</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Picks targeted ad</text>
+                            </g>
+
+                            <!-- Master Stream Segment Packager -->
+                            <g class="svg-node" transform="translate(390, 265)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LIVE PLAYS</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">2s cricket segments</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Continuous broadcast</text>
+                            </g>
+
+                            <!-- Target Ad Video Segments -->
+                            <g class="svg-node" transform="translate(580, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AD SEGMENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#cbd5e1" text-anchor="middle">1080p dynamic ad</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Cached on CDN</text>
+                            </g>
+
+                            <!-- Stitched Playlist Creator -->
+                            <g class="svg-node" transform="translate(580, 205)">
+                                <rect x="0" y="0" width="110" height="50" rx="8" fill="url(#grad-green)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">STITCHED FEED</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-green"></span> Server-Side Manifest Manipulation
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            Stitching commercials on client apps requires the device to download separate ad video links, tear down the main decoder screen, and buffer the commercial—creating severe lagging and visual drops.
+                            <br><br>
+                            To prevent this, Hotstar performs **Server-Side Manifest Manipulation**. When a subscriber requests their next playout HLS index file (`playlist.m3u8`), the **Manifest Manipulator** interceptor queries the **Ad Decision Server (ADS)**, fetches targeted commercials tailored to the user's age and location, and physically rewrites the manifest lines. The player client simply receives a single seamless index stream containing both the game segment and the targeted commercial chunks, resulting in **zero-buffering transitions**.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="paywall" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Thundering Herd Mitigation (Entitlement Caching)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When a crucial moment occurs (e.g. MS Dhoni walking out to bat), millions of new users click the push notification to join the stream concurrently. Standard authentication and payment verification architectures will buckle under this volume. Hotstar shields its relational databases by caching subscription entitlements directly at the Edge.
+                    </p>
+
+                    <!-- SVG Diagram 5: Entitlement Edge Cache -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Ingress LB splitting to Redis and API Gate -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,140 L 380,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,310 L 380,310" marker-end="url(#arrow)" />
+
+                            <!-- Redis HIT direct path back -->
+                            <path class="svg-link" d="M 500,140 Q 560,140 560,205 L 580,205" marker-end="url(#arrow)" />
+                            <!-- API Gate to DB write path -->
+                            <path class="svg-link" d="M 490,310 L 580,310" marker-end="url(#arrow)" />
+
+                            <!-- 10M concurrent logins -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">50M+ USERS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Join concurrently</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Thundering Herd</text>
+                            </g>
+
+                            <!-- Ingress Gateway Proxy (Kong/Go) -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS PROXY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Go API Proxy</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Rate Limiting Gate</text>
+                            </g>
+
+                            <!-- Edge Redis Cache (Entitlement Shield) -->
+                            <g class="svg-node" transform="translate(380, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="2" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS EDGE CACHE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Cache hit: 99.8%</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Low-latency session check</text>
+                            </g>
+
+                            <!-- API Gateway Controller -->
+                            <g class="svg-node" transform="translate(380, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API CONTROL</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Database Check</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Cache Miss route</text>
+                            </g>
+
+                            <!-- Persistent PostgreSQL DB Ring -->
+                            <g class="svg-node" transform="translate(580, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SUBSCRIBERS DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Cassandra Database</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Persistent State</text>
+                            </g>
+
+                            <!-- Playout Authorized Screen -->
+                            <g class="svg-node" transform="translate(580, 190)">
+                                <rect x="0" y="0" width="110" height="50" rx="8" fill="url(#grad-green)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">AUTH GRANTED</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-green"></span> Paywall Entitlement Verification
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            To view a live match, a user must pass paywall entitlements (verifying that their account is premium and authorized).
+                            <br><br>
+                            If millions of clients fetch this status from relational database disks simultaneously during peak seconds, the DB connections pool will starve. Hotstar mitigates this by converting the entitlement check into an **edge validation pattern**.
+                            <br><br>
+                            When you pay for a subscription, a secure **cryptographically signed entitlement JWT token** containing your session permissions and expirations is generated and cached inside highly sharded, memory-optimized **Redis clusters** physically co-located in the close Ingress proxy zones. When a subscriber joins the stream, the Go proxy intercepts the request and verifies the JWT cache locally under **&lt; 1.2ms** without making a single database call, shielding database structures.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="scores" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Low-Latency Scorecard Pub-Sub</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Alongside video, millions of users consume interactive overlays, live scorecards, and predictive games ("Watch & Play") concurrently. Building these score feeds over traditional polling (HTTP requests every 5 seconds) would generate hundreds of millions of requests per second on AWS web containers. Hotstar replaces polling with server-pushed **Server-Sent Events (SSE)**.
+                    </p>
+
+                    <!-- SVG Diagram 6: Scores Pub-Sub Ingest -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Go Proxy splitting to Redis & Gaming -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Pub-Sub out to clients -->
+                            <path class="svg-link" d="M 680,140 Q 720,180 730,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 680,310 Q 720,270 730,245" marker-end="url(#arrow)" />
+
+                            <!-- Stadium scorer data ingest -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">STADIUM SCORER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Enters run event</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">API update payload</text>
+                            </g>
+
+                            <!-- Kafka Partitioned Queue -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA STREAM</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Runs Broker Topic</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ordered log</text>
+                            </g>
+
+                            <!-- Go SSE Proxy Cluster -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">GO SSE ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Pub-sub listener</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Server-Sent-Events</text>
+                            </g>
+
+                            <!-- Redis Pub/Sub scorecard channel -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS PUB/SUB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">In-Memory channel</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Updates under 20ms</text>
+                            </g>
+
+                            <!-- Interactive Gaming Engine (Watch & Play) -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">GAMING ENGINE</text>
+                                x<text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Predictive states</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Real-time locks</text>
+                            </g>
+
+                            <!-- Clients receiving server pushed scores -->
+                            <g class="svg-node" transform="translate(710, 190)">
+                                <rect x="0" y="0" width="80" height="70" rx="8" fill="url(#grad-green)" stroke="none" />
+                                <text x="40" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">CLIENTS</text>
+                                <text x="40" y="48" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Shedded updates</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-green"></span> Server-Sent Events vs polling Scale
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            If 50 million active users poll score updates every 5 seconds, it generates **10 million HTTP requests per second** on AWS API gateways. This would lead to massive cloud costs and server failures.
+                            <br><br>
+                            Hotstar replaces this with **Server-Sent Events (SSE)**.
+                            When a subscriber launches the match screen, a single **persistent, unidirectional HTTP connection** (`text/event-stream`) is established and kept open. 
+                            When the scorer updates the scorecard in the stadium, the event is processed by a highly partitioned **Kafka Topic** and consumed by a Go pub-sub broker cluster. The Go brokers immediately push the tiny event update down the established HTTP pipe to all 50M concurrent devices under **&lt; 100ms** latency, consuming virtually **zero connection CPU overhead** and preventing millions of recurrent server queries.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Expert Interview Q&A</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Prepare for elite, senior-level system design loops. Study the exact technical questions and robust responses covering Hotstar’s broadcast scaling.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-green">Q1. How does the system handle an instantaneous regional fiber cut on a primary CDN transit line?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Dynamic multi-CDN telemetry intercepts. When the local client-side telemetry detects segment download failures or RTT spikes, the local Conviva player library redirects the next 2-second segment request to the secondary CDN within **&lt; 2 seconds** without the viewer experiencing any buffer drop. Dynamic DNS routers simultaneously update IP tables globally.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-green">Q2. Why is manifest manipulation used over standard client-side ad insertion for high scale?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Client-side ad insertion (CSAI) degrades player performance and increases buffering rates. Fetching ad URLs, executing client scripts, and rebuilding decoders is unstable on low-end devices. Manifest manipulation processes ad insertion **on the server-side** by physically rewriting the HLS playlist chunks. The client player receives a single continuous stream, preventing buffer crashes.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-green">Q3. How are subscription paywall checks (entitlements) scaled to handle a massive thundering herd spike?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Entitlements are shifted to an **edge token validation pattern**. Cryptographically signed subscription JWT keys are generated at checkout and stored directly in in-memory **Redis Edge clusters**. When users join, the Go ingress proxies decrypt and validate the JWT locally in under **1.2ms**, preventing millions of database queries.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-green">Q4. How does the system prevent score updates from choking web app capacity?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> The scorecard is sent via **Server-Sent Events (SSE)**. Unidirectional persistent HTTP streams are established at launch. Score events in the stadium publish to a highly partitioned **Kafka topic**, which dynamic Go brokers broadcast down active user pipes instantly. This consumes minimal server memory and prevents client polling spikes.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 9 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">09</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified End-to-End Broadcast Flow</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology representing the complete Hotstar broadcasting ecosystem. It traces stadium uncompressed feeds to redundant encoders, control plane authorization caches, manifest manipulation DAI stitchers, and multi-CDN dynamic delivery.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 -80 900 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#1fdb6d" />
+                                </linearGradient>
+                                <linearGradient id="grad-gold" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#fef08a" />
+                                    <stop offset="100%" stop-color="#ffc72c" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0b172a" />
+                                    <stop offset="100%" stop-color="#020914" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#1fdb6d" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#387ed1" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,-50 L 900,-50 M 0,0 L 900,0 M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,-80 L 100,550 M 200,-80 L 200,550 M 300,-80 L 300,550 M 400,-80 L 400,550 M 500,-80 L 500,550 M 600,-80 L 600,550 M 700,-80 L 700,550 M 800,-80 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- Stadium to Redundant Encoder -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- CONTROL PATH (UPPER ROUTE) -->
+                            <!-- Ingress LB to Gateway Proxy -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- Gateway to Edge Auth -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Edge Auth to dynamic manifest manipulator -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- Manifest manipulator to Cassandra DB -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+
+                            <!-- DATA PLAYOUT PATH (LOWER ROUTE) -->
+                            <!-- Ingest to Multi-CDN distribution -->
+                            <path class="svg-link" d="M 330,290 Q 380,320 380,380 L 400,380" marker-end="url(#arrow-green)" />
+                            <!-- Multi-CDN directly back to client app -->
+                            <path class="svg-link" d="M 510,380 Q 280,380 280,320 Q 280,290 180,285" marker-end="url(#arrow-green)" />
+
+                            <!-- TRANSCODING ASYNC ENGINE -->
+                            <!-- S3 Master Library to DAI manipulator -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,15 L 585,65" marker-end="url(#arrow-gray)" />
+                            <!-- DAI manipulator to Edge CDN updates -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 640,100 L 730,100 L 730,340 M 730,340 L 510,380" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Client App Core -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER APP (HOTSTAR)</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Playout segments</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Telemetry QoS logs</text>
+                            </g>
+
+                            <!-- 2. Go Ingress Proxy -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS GATE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Kong API Proxy</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dynamic route splitting</text>
+                            </g>
+
+                            <!-- 3. Dynamic Router -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CONVIVA ROUTER</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Multi-CDN dynamic</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Telemetry-based paths</text>
+                            </g>
+
+                            <!-- 4. Edge Entitlement Token Cache -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="2" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS ENTIRE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Edge Entitlements</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Paywall verification</text>
+                            </g>
+
+                            <!-- 5. Go Manifest Manipulator -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MANIFEST STITCH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Dynamic Ad Stitch</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Servermanifest manipulation</text>
+                            </g>
+
+                            <!-- 6. Subscribers DB ring -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CASSANDRA</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Account states</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Master storage</text>
+                            </g>
+
+                            <!-- 7. Multi-CDN Distribution -->
+                            <g class="svg-node" transform="translate(400, 335)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MULTI-CDN PLAYS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Akamai, Cloudflare</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Aggregated 30 Tbps</text>
+                            </g>
+
+                            <!-- 8. AWS S3 Master Origin library -->
+                            <g class="svg-node" transform="translate(530, -50)">
+                                <rect x="0" y="0" width="110" height="65" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">S3 LIBRARIES</text>
+                                <text x="55" y="47" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Master video binaries</text>
+                            </g>
+
+                            <!-- 9. Ad Decision Server (ADS) -->
+                            <g class="svg-node" transform="translate(530, 65)">
+                                <rect x="0" y="0" width="110" height="45" rx="8" fill="url(#grad-gold)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#020710" text-anchor="middle">AD DECISION (ADS)</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-green"></span> Live Stream Playout: Step-by-Step System Journey
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Stadium Frame Capture & Dual Ingestion</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Raw HD uncompressed camera frames are captured in the stadium at 1.5 Gbps baseband and transmitted via dual redundant sat links and dedicated fibers to co-located ingestion VPCs in AWS. Redundant active-active captured feeds prevent single point of failures from physical stadium line cuts.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Dynamic ABR Packaging (2s Chunks)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        AWS Elemental MediaLive transcodes the raw signals in parallel, converting them into HEVC (H.265) video profiles across 1080p, 720p, 480p, and 360p resolutions. Unified Streaming packagers group the digital chunks into **2-second segments** wrapped in HLS and DASH containers to support ultra-low live playout latency.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">User Request Ingress & Edge Token Validation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When a subscriber clicks "Watch Live Match", the player client queries the Go-based API Gateway. To protect the main Cassandra accounts database from buckling under a 10M+ thundering herd, Ingress proxies intercept requests and validate JWT entitlement caches stored in in-memory **Redis Edge clusters** in under **&lt; 1.2ms**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Dynamic Ad Manifest Manipulation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When SCTE-35 markers signal an over break, the server-side **Manifest Manipulator** intercepts playout playlist requests, queries the Ad Decision Server (ADS) to fetch user-targeted commercial segments, and rewrites index manifests on-the-fly. The client simply streams the written list, showing targeted ads with zero-buffering transitions.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Real-time Telemetry Multi-CDN Routing</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The client player requests the segment from a dynamic CDN router (Conviva/Cedexis). Based on constant buffer telemetry reported by client devices, Cedexis dynamically shifts subscriber routing across Akamai, Fastly, and Cloudflare to bypass localized ISP bottlenecks.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Edge CDN Segment Playout</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The resolved edge CDN server fetches the encoded ABR chunks and delivers them directly down local peered ISP exchanges (Airtel, Jio, Comcast) in the viewer's city. The video is decoded locally on user decoders, completing the stadium-to-screen loop inside **&lt; 4.2 seconds**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Server-Sent Events Scorecard Push</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Simultaneously, live scoreboard changes inside the stadium are published to highly partitioned **Kafka topics**. Specialized Go pub-sub gateways consume these run events and push the updates down established, persistent unidirectional HTTP connections (Server-Sent Events) to millions of screens in under **100ms** latency without client-side polling spikes.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-green to-emerald-600 flex items-center justify-center text-white font-black text-sm">H</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Hotstar</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-green hover:bg-brand-green/5 hover:border-brand-green/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#architecture" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Ingestion Plane</a>
+                    <a href="#packaging" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Packaging & Encoding</a>
+                    <a href="#multicdn" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Multi-CDN Routing</a>
+                    <a href="#dai" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Dynamic Ad Injects</a>
+                    <a href="#paywall" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Entitlement Shields</a>
+                    <a href="#scores" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Scorecard Pub-Sub</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Broadcast Flow</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-green pulse-green"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Dynamic Multi-CDN</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zerodha System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#f37254',
+                            blue: '#387ed1',
+                            dark: '#080f18',
+                            slate: '#0b1420',
+                            card: 'rgba(15, 23, 42, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-orange: #f37254;
+            --brand-blue: #387ed1;
+            --brand-dark: #080f18;
+            --brand-slate: #0b1420;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080f18;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-orange);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(243, 114, 84, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(243, 114, 84, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(11, 20, 32, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Text gradient */
+        .text-gradient-orange {
+            background: linear-gradient(135deg, #ff9e7d 0%, #f37254 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #7eb3ff 0%, #387ed1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(243, 114, 84, 0.1);
+            border-left: 3px solid var(--brand-orange);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-orange);
+            background: rgba(255, 255, 255, 0.02);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #0b131f;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(243, 114, 84, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-orange) !important;
+            fill: #152438 !important;
+        }
+
+        .svg-link {
+            stroke: #334155;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 30s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-blue);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-orange);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-orange {
+            animation: pulse-orange-glow 2s infinite;
+        }
+
+        @keyframes pulse-orange-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(243, 114, 84, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(243, 114, 84, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(243, 114, 84, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-orange to-brand-blue flex items-center justify-center text-white font-bold text-sm">Z</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Zerodha Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-orange to-brand-blue flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-orange/20">Z</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">ZERODHA</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">System Design</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-orange hover:bg-brand-orange/5 hover:border-brand-orange/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Overview & Requirements
+                    </a>
+                    <a href="#architecture" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> High-Level Architecture
+                    </a>
+                    <a href="#realtime" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Live Market Feed
+                    </a>
+                    <a href="#orders" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Order Placement Pipeline
+                    </a>
+                    <a href="#scaling" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Kubernetes & Scaling
+                    </a>
+                    <a href="#database" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Polyglot Database
+                    </a>
+                    <a href="#risk" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Risk Management (RMS)
+                    </a>
+                    <a href="#faulttolerance" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Fault Tolerance & DR
+                    </a>
+                    <a href="#observability" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">09</span> Metrics & Observability
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">10</span> Interview Cheat Sheet
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">11</span> Global System Flow
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-orange"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">System Status: Active</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.1.0 • Kite Core Specs</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-800">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-orange/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-brand-blue/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/20 text-brand-orange text-xs font-bold font-mono tracking-wider uppercase">
+                            Premium Architecture Walkthrough
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Zerodha <span class="text-gradient-orange">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light">
+                            Discover the robust, frugal, and highly efficient distributed architecture that powers India's largest retail brokerage. Learn how <strong class="text-white font-medium">10+ million clients</strong> place <strong class="text-white font-medium">15+ million orders daily</strong> with sub-50ms latency using Go, customized WebSockets, event streams, and sharded storage systems.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Core Challenge & Scalability Targets</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        At first glance, a stock trading application looks like standard e-commerce: users browse products (stocks), click buy or sell, and complete transactions. However, the financial markets present uniquely stringent engineering constraints: <strong class="text-white">perfect accuracy, atomic transactions, microsecond latency</strong>, and absolute resilience to sudden volatility spikes (e.g., during market openings, budget announcements, or global crashes).
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Functional Architecture Constraints
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Atomic Order Routing:</strong> Prevent order doubling at all costs. An order must execute exactly once, or fail explicitly, with no "hanging" state.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Strict Risk Control:</strong> Perform margin calculations and compliance checks within 10 milliseconds before allowing an order to touch the exchange.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Real-time Broadcaster:</strong> Stream millisecond tick updates to millions of active screens concurrently, minimizing bandwidth and battery drain.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-orange font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Exchange Compliance:</strong> Bridge modern stateless microservices with rigid legacy exchange architectures using specialized leased lines (FIX/FAST).</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Scalability & Performance Metrics
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Peak Concurrency</div>
+                                    <div class="text-2xl font-black text-brand-orange font-outfit mt-1">1.5 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Active WebSocket users</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Ticks Processed</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">5 Billion+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Ticks per market session</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Orders/Sec (Peak)</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">200K+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Sustained order bursts</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Validation Speed</div>
+                                    <div class="text-2xl font-black text-amber-400 font-outfit mt-1">&lt; 8ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">RMS margin checks</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="architecture" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Level System Architecture</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        Zerodha's architecture utilizes a **frugal, highly optimized multi-tier architecture** with Go as the principal backend language. Go provides extreme network performance, lightweight execution threads (goroutines), and robust memory management, which are critical for scaling high-frequency real-time connections with extremely small engineering teams.
+                    </p>
+
+                    <!-- SVG Diagram 1: High Level System Architecture -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-gray" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1e293b" />
+                                    <stop offset="100%" stop-color="#0f172a" />
+                                </linearGradient>
+                                <filter id="glow-orange" x="-10%" y="-10%" width="120%" height="120%">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#f37254" flood-opacity="0.5" />
+                                </filter>
+                                <filter id="glow-blue" x="-10%" y="-10%" width="120%" height="120%">
+                                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="#387ed1" flood-opacity="0.5" />
+                                </filter>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f37254" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background GRID -->
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Connections / Paths -->
+                            <!-- Client to CDN -->
+                            <path class="svg-link" d="M 140,225 L 220,225" marker-end="url(#arrow)" />
+                            <!-- CDN to Load Balancer -->
+                            <path class="svg-link" d="M 320,225 L 370,225" marker-end="url(#arrow)" />
+                            <!-- Load Balancer to API Gateway -->
+                            <path class="svg-link" d="M 470,225 Q 520,225 520,160 L 550,160" marker-end="url(#arrow)" />
+                            <!-- Load Balancer to Ticker -->
+                            <path class="svg-link" d="M 470,225 Q 520,225 520,290 L 550,290" marker-end="url(#arrow)" />
+                            <!-- Gateway to Services -->
+                            <path class="svg-link" d="M 670,160 Q 700,160 700,225" />
+                            <!-- Ticker to Services -->
+                            <path class="svg-link" d="M 670,290 Q 700,290 700,225" />
+                            <!-- Internal Core Services to Core Engines -->
+                            <path class="svg-link" d="M 700,225 L 750,225" marker-end="url(#arrow)" />
+
+                            <!-- 1. Client Applications Node -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">CLIENT APPS</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Kite Web / Mobile</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Vue.js, Flutter</text>
+                            </g>
+
+                            <!-- 2. Security / Ingress Node -->
+                            <g class="svg-node" transform="translate(220, 180)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-gray)" stroke="#f37254" stroke-width="1.5" filter="url(#glow-orange)" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS / SEC</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">Cloudflare WAF</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#cbd5e1" text-anchor="middle">DDoS & Cache</text>
+                            </g>
+
+                            <!-- 3. Traffic Distribution Node -->
+                            <g class="svg-node" transform="translate(370, 180)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LOAD BALANCER</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">HAProxy Cluster</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#cbd5e1" text-anchor="middle">Layer 4/7 Routing</text>
+                            </g>
+
+                            <!-- 4. HTTP / API Layer -->
+                            <g class="svg-node" transform="translate(550, 115)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">KITE CONNECT API</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Go API Gateway</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">REST, Auth, Sessions</text>
+                            </g>
+
+                            <!-- 5. Real-time Streaming Layer -->
+                            <g class="svg-node" transform="translate(550, 245)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">KITE TICKER</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">WebSocket Core</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Go Broadcaster</text>
+                            </g>
+
+                            <!-- 6. Internal Core Engine -->
+                            <g class="svg-node" transform="translate(710, 180)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-orange)" stroke="none" filter="url(#glow-orange)" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BACKEND</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">OMS / RMS</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#ffd0c5" text-anchor="middle">Exchanges</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-orange"></span> Kite Connect Gateway
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Built completely in Go, the API Gateway acts as the gateway for all HTTP/REST requests. It handles stateless routing, API rate-limiting per client token, session validation via high-speed Redis Lookups, and payload serialization under 3 milliseconds.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Kite Ticker (WebSockets)
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Kite Ticker streams live market updates to clients. Using high-performance goroutines, it handles millions of concurrent TCP WebSocket sockets, dynamically subscribing/unsubscribing clients to binary tick streams and routing feed packets with zero latency overhead.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Exchange Connector (OMS)
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Connects the internal order routing engines directly to exchange front-ends (NSE/BSE/MCX) over dedicated multiplexed leased lines. It supports raw protocol encoding (FIX/FAST) and manages network connections under absolute strict high availability.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="realtime" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Live Market Feed (Ticks) Processing</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        During active market hours, the exchange streams billions of tick changes. Broadcasting these raw rates directly to millions of screens is impossible due to bandwidth bottlenecks. Zerodha optimizes this stream using a **highly specialized Event Fanout pattern**. Instead of clients polling data, ticks are aggregated, queued in Kafka partitions, and distributed via Go WebSocket broadcast systems using dynamic binary payload packing.
+                    </p>
+
+                    <!-- SVG Diagram 2: Live Market Feed -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Definitions and Gradients -->
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#4ade80" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Connecting Flow paths -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 560,225 560,150 L 580,150" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 560,225 560,300 L 580,300" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 680,150 Q 720,150 740,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 680,300 Q 720,300 740,250" marker-end="url(#arrow)" />
+
+                            <!-- Exchange Node -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="55" y="40" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">EXCHANGES</text>
+                                <text x="55" y="60" font-family="'Inter', sans-serif" font-size="9" fill="#ffe0d8" text-anchor="middle">NSE / BSE / MCX</text>
+                                <text x="55" y="75" font-family="'Inter', sans-serif" font-size="8" fill="#ffe0d8" text-anchor="middle">UDP Multicast Feed</text>
+                            </g>
+
+                            <!-- Feed Handler Node -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FEED HANDLER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffe0d8" text-anchor="middle">Go parser (NOW)</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Binary decode</text>
+                            </g>
+
+                            <!-- Event Broker (Kafka) -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">KAFKA CLUSTER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Tick Streams</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#cbd5e1" text-anchor="middle">Ordered Partitions</text>
+                            </g>
+
+                            <!-- WebSocket Tickers (Scaled Group) -->
+                            <g class="svg-node" transform="translate(580, 105)">
+                                <rect x="0" y="0" width="100" height="80" rx="8" fill="url(#grad-gray)" stroke="#4ade80" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TICKER POD 1</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4ade80" text-anchor="middle">Goroutines fanout</text>
+                            </g>
+
+                            <g class="svg-node" transform="translate(580, 255)">
+                                <rect x="0" y="0" width="100" height="80" rx="8" fill="url(#grad-gray)" stroke="#4ade80" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TICKER POD 2</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4ade80" text-anchor="middle">Goroutines fanout</text>
+                            </g>
+
+                            <!-- Scaled Clients -->
+                            <g class="svg-node" transform="translate(730, 195)">
+                                <circle cx="30" cy="30" r="30" fill="url(#grad-orange)" />
+                                <text x="30" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENTS</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How tick distribution scales efficiently:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                            <p>
+                                If 1,000,000 users are concurrently viewing the <strong class="text-white">NIFTY 50 index</strong>, the system does not execute 1,000,000 database reads. Instead:
+                            </p>
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li>The Exchange broadcasts the UDP tick packets.</li>
+                                <li>Colocated feed handler parsers read and normalize the raw binary data into structural JSON/Protobuf formats.</li>
+                                <li>Parsed ticks are published to corresponding Kafka partitions mapped by stock index IDs.</li>
+                                <li>Stateless Go WebSocket servers consume ticks from Kafka.</li>
+                                <li>Using optimized <strong class="text-brand-orange">Goroutine-based Channels</strong>, each pod reads a single tick once and duplicates (fans out) the binary byte packets to all users currently subscribed to that symbol's active connection.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="orders" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Speed Order Placement Pipeline</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        Executing financial transactions requires microsecond precision. When a user taps 'Buy', the request is routed through a split-second pipeline that guarantees absolute security, verification, and speed. The architecture splits processing into a **synchronous critical path** (for checks) and an **asynchronous persistent path** (for ledger updates).
+                    </p>
+
+                    <!-- SVG Diagram 3: Order Execution Pipeline -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <!-- Order Service to Risk Check -->
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <!-- Risk to Queue -->
+                            <path class="svg-link" d="M 490,225 L 560,225" marker-end="url(#arrow)" />
+                            <!-- Queue to Exchange Connector -->
+                            <path class="svg-link" d="M 670,225 L 730,225" marker-end="url(#arrow)" />
+
+                            <!-- Client Node -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="40" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">CLIENT APP</text>
+                                <text x="55" y="60" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">TAP BUY / SELL</text>
+                            </g>
+
+                            <!-- Order Gateway / Service -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER SERVICE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Go HTTP Server</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Idempotent check</text>
+                            </g>
+
+                            <!-- Synchronous RMS Check -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#f37254" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RISK ENGINE (RMS)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">Go Margin Check</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Fast Redis cache</text>
+                            </g>
+
+                            <!-- Order Buffer Queue -->
+                            <g class="svg-node" transform="translate(560, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA QUEUE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Order Buffer</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Immutable log</text>
+                            </g>
+
+                            <!-- Exchange Connector -->
+                            <g class="svg-node" transform="translate(730, 180)">
+                                <rect x="0" y="0" width="60" height="90" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="30" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">NSE</text>
+                                <text x="30" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">BSE</text>
+                                <text x="30" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#ffd0c5" text-anchor="middle">FIX link</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg">1. Synchronous Margin Check (&lt; 10ms)</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Before routing the order to the exchange, the Risk Management System (RMS) validates the user's available cash margin, maximum open position limit, Daily loss circuit limits, and compliance restrictions. This data is read from high-speed distributed Redis memory, executing under 8ms to prevent blocking trading activities.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg">2. Asynchronous Execution Buffer</h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Once RMS validates the order, it's pushed to a highly partitioned Kafka Order queue. This buffers the exchange from massive downstream traffic loads. The Exchange Connector pulls sequentially from the queue, translating it into the specialized FAST/FIX socket protocol to lease-lines, and publishes updates back asynchronously.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="scaling" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Kubernetes Architecture & Preemptive Auto-Scaling</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        Retail trading experiences massive volatility surges. When the market opens at <strong class="text-white">9:15 AM</strong>, traffic ramps up by 15x within minutes. Standard reactive CPU-based auto-scaling fails because starting containers takes too long. Zerodha solves this via **preemptive metrics-driven auto-scaling** orchestrated inside Kubernetes.
+                    </p>
+
+                    <!-- SVG Diagram 4: Kubernetes Scaling -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Lines -->
+                            <path class="svg-link" d="M 230,225 L 340,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 450,225 L 560,225" marker-end="url(#arrow)" />
+
+                            <!-- Prometheus Metric Source -->
+                            <g class="svg-node" transform="translate(80, 160)">
+                                <rect x="0" y="0" width="150" height="130" rx="8" fill="url(#grad-gray)" stroke="#f37254" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">METRICS COLLECTOR</text>
+                                <text x="75" y="60" font-family="'Inter', sans-serif" font-size="10" fill="#f37254" text-anchor="middle">Prometheus Engine</text>
+                                <text x="75" y="85" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">• Web Socket Count</text>
+                                <text x="75" y="105" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">• Kafka Consumer Lag</text>
+                            </g>
+
+                            <!-- Horizontal Pod Autoscaler -->
+                            <g class="svg-node" transform="translate(340, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">K8S HPA</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Autoscaling Core</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#cbd5e1" text-anchor="middle">Decides pod targets</text>
+                            </g>
+
+                            <!-- Target Microservices Cluster -->
+                            <g class="svg-node" transform="translate(560, 130)">
+                                <rect x="0" y="0" width="160" height="190" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="80" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="13" fill="#fff" text-anchor="middle">MICROSERVICES</text>
+                                <text x="80" y="50" font-family="'Inter', sans-serif" font-size="9" fill="#ffe0d8" text-anchor="middle">Stateless Pods Scaling</text>
+
+                                <!-- Nested pods representing scaled boxes -->
+                                <rect x="15" y="70" width="130" height="30" rx="4" fill="#ffffff" fill-opacity="0.1" />
+                                <text x="80" y="88" font-family="'Outfit', sans-serif" font-weight="bold" font-size="9" fill="#fff" text-anchor="middle">Order Pods (10 -> 80)</text>
+
+                                <rect x="15" y="110" width="130" height="30" rx="4" fill="#ffffff" fill-opacity="0.1" />
+                                <text x="80" y="128" font-family="'Outfit', sans-serif" font-weight="bold" font-size="9" fill="#fff" text-anchor="middle">Ticker Pods (20 -> 120)</text>
+
+                                <rect x="15" y="150" width="130" height="30" rx="4" fill="#ffffff" fill-opacity="0.1" />
+                                <text x="80" y="168" font-family="'Outfit', sans-serif" font-weight="bold" font-size="9" fill="#fff" text-anchor="middle">Auth Pods (5 -> 40)</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Custom Scaling Metrics
+                            </h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                Zerodha's scaling rules bypass simple CPU/memory targets. Instead, the custom Prometheus metrics adapter streams active WebSocket connection requests, API request queues, and downstream Kafka consumer lag directly to Kubernetes Custom Resource Definitions (CRDs) to launch container instances preemptively *before* resources exhaust.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Graceful Circuit Breaking
+                            </h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                If downstreams fail, the API Gateway activates dynamic **rate-limit throttles and circuit breakers**. Highly granular configurations isolate slow processes (e.g. historical charting databases), ensuring that core transactions—order executions—continue with absolute priority.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="database" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Polyglot Storage & Database Partitioning</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        No single database can serve real-time high-speed transactions alongside massive analytical historical data queries. Zerodha employs **Polyglot Persistence**—allocating specific storage technologies to match highly specialized performance workloads.
+                    </p>
+
+                    <!-- SVG Diagram 5: Polyglot Database Sharding -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Path flows -->
+                            <path class="svg-link" d="M 230,225 Q 310,225 310,130 L 330,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 230,225 L 330,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 230,225 Q 310,225 310,320 L 330,320" marker-end="url(#arrow)" />
+
+                            <!-- Write Router Node -->
+                            <g class="svg-node" transform="translate(80, 180)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-gray)" stroke="#f37254" stroke-width="1.5" />
+                                <text x="75" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">DATA INGEST LAYER</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">Kite Broker Routers</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Routes by query load type</text>
+                            </g>
+
+                            <!-- PostgreSQL Partition Cluster -->
+                            <g class="svg-node" transform="translate(340, 75)">
+                                <rect x="0" y="0" width="180" height="100" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="90" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">POSTGRESQL SHARDS</text>
+                                <text x="90" y="50" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Transactional Master-Replica</text>
+                                <text x="90" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">• Partitioned by user accounts</text>
+                                <text x="90" y="85" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">• ACID compliant order states</text>
+                            </g>
+
+                            <!-- Redis Caching cluster -->
+                            <g class="svg-node" transform="translate(340, 180)">
+                                <rect x="0" y="0" width="180" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1" />
+                                <text x="90" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS CLUSTER</text>
+                                <text x="90" y="50" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Fast In-Memory Cache</text>
+                                <text x="90" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">• User sessions & margins</text>
+                                <text x="90" y="82" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">• Real-time instruments list</text>
+                            </g>
+
+                            <!-- TimescaleDB/Clickhouse Columnar Store -->
+                            <g class="svg-node" transform="translate(340, 280)">
+                                <rect x="0" y="0" width="180" height="100" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="90" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLICKHOUSE / TSDB</text>
+                                <text x="90" y="50" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">Columnar analytics storage</text>
+                                <text x="90" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#ffd0c5" text-anchor="middle">• Trillions of historical ticks</text>
+                                <text x="90" y="85" font-family="'Inter', sans-serif" font-size="8" fill="#ffd0c5" text-anchor="middle">• Optimized for charts & PnL</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">PostgreSQL (User Sharded)</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                To prevent single database locks, user accounts are sharded across separate PostgreSQL physical instances. All ACID-critical operations, such as order books, active trades, and wallet transactions, execute localized queries within their corresponding isolated database.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">Redis In-Memory Engine</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Acts as an ultra-fast cache storing active session variables, security tokens, and dynamic system state indicators. Real-time instrument lists containing thousands of stock attributes are cached directly in Redis to avoid complex database joins.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-2">
+                            <h4 class="font-outfit font-bold text-white text-base">Columnar Analytical Store</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Historical charts and backtesting metrics are served from columnar-oriented time-series databases like ClickHouse. ClickHouse stores millions of historical ticks in a compressed vector format, processing complex analytical aggregation queries in fractions of a millisecond.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="risk" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Risk Management Engine (RMS)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        The Risk Management System (RMS) is the financial firewall of Zerodha. If a client attempts to buy leverage options without matching capital, the broker is exposed to regulatory penalties and catastrophic losses. Every single order is validated by a custom high-performance RMS engine before it leaves the internal network.
+                    </p>
+
+                    <!-- SVG Diagram 6: Risk Management System -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <g stroke="#ffffff" stroke-opacity="0.02" stroke-width="1">
+                                <path d="M 0,50 L 800,50 M 0,100 L 800,100 M 0,150 L 800,150 M 0,200 L 800,200 M 0,250 L 800,250 M 0,300 L 800,300 M 0,350 L 800,350 M 0,400 L 800,400" />
+                                <path d="M 100,0 L 100,450 M 200,0 L 200,450 M 300,0 L 300,450 M 400,0 L 400,450 M 500,0 L 500,450 M 600,0 L 600,450 M 700,0 L 700,450" />
+                            </g>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 230,225 L 340,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 470,225 L 580,225" marker-end="url(#arrow)" />
+
+                            <!-- Order Request -->
+                            <g class="svg-node" transform="translate(80, 175)">
+                                <rect x="0" y="0" width="150" height="100" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="75" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">ORDER REQUEST</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">Required Capital</text>
+                                <text x="75" y="75" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8" text-anchor="middle">Margin: ₹50,000</text>
+                            </g>
+
+                            <!-- RMS Verification Gate -->
+                            <g class="svg-node" transform="translate(340, 160)">
+                                <rect x="0" y="0" width="130" height="130" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="65" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">RMS VALIDATOR</text>
+                                <text x="65" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Synchronous gate</text>
+                                <text x="65" y="80" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">• Cash check</text>
+                                <text x="65" y="95" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">• Daily loss limit</text>
+                                <text x="65" y="110" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">• Volatility filter</text>
+                            </g>
+
+                            <!-- Decision Node -->
+                            <g class="svg-node" transform="translate(580, 160)">
+                                <rect x="0" y="0" width="140" height="130" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="70" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">DECISION PATH</text>
+                                <text x="70" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fff" text-anchor="middle">If Passed: Route</text>
+
+                                <rect x="15" y="70" width="110" height="20" rx="4" fill="#ffffff" fill-opacity="0.15" />
+                                <text x="70" y="83" font-family="'Inter', sans-serif" font-size="8" fill="#fff" text-anchor="middle">Forward to Exchange</text>
+
+                                <rect x="15" y="95" width="110" height="20" rx="4" fill="#000000" fill-opacity="0.2" />
+                                <text x="70" y="108" font-family="'Inter', sans-serif" font-size="8" fill="#fff" text-anchor="middle">If Failed: Auto-Reject</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                        <h3 class="text-xl font-outfit font-bold text-white">Example Scenario: Option Volatility Surge</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-light">
+                            Suppose an retail client with a total account cash balance of <strong class="text-white">₹10,000</strong> tries to place an order to buy call options value <strong class="text-white">₹10,00,000</strong> during extreme market volatility. 
+                            If the system allows this to execute, any bad price movement exposes Zerodha to massive financial debt.
+                            The RMS interceptor captures this immediately: it calculates the required span and exposure margins from in-memory cached files in Redis, flags insufficient funds, and immediately short-circuits and auto-rejects the order at the backend system within <strong class="text-brand-orange">&lt; 8 milliseconds</strong>, before the request ever leaves the internal network.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="faulttolerance" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Fault Tolerance & Disaster Recovery</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        In financial platforms, database corruption or data loss is unacceptable. Zerodha ensures high availability through an **Active-Active warm-failover multi-region architecture**, combined with transactional replication and immediate self-healing capabilities.
+                    </p>
+
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-orange"></span> Cross-Region Replication
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Transactional database masters asynchronously replicate data across physical geographical regions (e.g. primary region in Mumbai to disaster recovery site in Bangalore). All analytical time-series logs are continuously backed up in secondary cloud storage buckets.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Active Session Failover
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                User sessions and authorization tokens cached in Redis are continuously mirrored to a fallback cluster. If an active region faces compute failure, the DNS routing switches to the recovery region instantly, preserving logged-in sessions without forcing re-authorization.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Partition Isolation
+                            </h3>
+                            <p class="text-slate-400 text-xs leading-relaxed font-light">
+                                Since PostgreSQL and Kafka storage topics are strictly partitioned/sharded by Client IDs, a database corrupt or partition crash on one cluster shard never compromises the entire user base—it strictly isolates failure to a tiny subset of clients.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 9 -->
+                <section id="observability" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">09</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Monitoring & Metrics Observability</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        During extreme volatility, keeping track of latency drops across thousands of microservices is essential. Zerodha tracks the health of its entire infrastructure using an **OpenTelemetry-instrumented metrics pipeline** aggregated on global Grafana dashboards.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white">Critical Health Indicators</h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
+                                    <span><strong class="text-white">API Latency Percentiles:</strong> Tracking p99 and p99.9 latency of all core HTTP endpoints.</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
+                                    <span><strong class="text-white">Kafka Consumer Lag:</strong> Monitoring event brokers to identify slow transactional subscribers.</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
+                                    <span><strong class="text-white">Connection Count:</strong> Tracking WebSocket connection limits across active fanout clusters.</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
+                                    <span><strong class="text-white">Exchange Line Latency:</strong> Monitoring round-trip network times through colocated servers.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-4">
+                            <h3 class="text-xl font-outfit font-bold text-white">Monitoring Technology Stack</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-950/30 border border-white/5">
+                                    <span class="text-slate-300 font-medium text-xs">Prometheus</span>
+                                    <span class="text-[10px] bg-brand-orange/10 text-brand-orange border border-brand-orange/20 px-2 py-0.5 rounded font-mono font-bold uppercase">Metrics Engine</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-950/30 border border-white/5">
+                                    <span class="text-slate-300 font-medium text-xs">Grafana</span>
+                                    <span class="text-[10px] bg-brand-blue/10 text-brand-blue border border-brand-blue/20 px-2 py-0.5 rounded font-mono font-bold uppercase">Visualization</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-950/30 border border-white/5">
+                                    <span class="text-slate-300 font-medium text-xs">OpenTelemetry & Jaeger</span>
+                                    <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase">Distributed Tracing</span>
+                                </div>
+                                <div class="flex justify-between items-center p-3 rounded-lg bg-slate-950/30 border border-white/5">
+                                    <span class="text-slate-300 font-medium text-xs">ELK & Vector</span>
+                                    <span class="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-mono font-bold uppercase">Structured Logs</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 10 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">10</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">System Design Interview Cheat Sheet</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light">
+                        Use this cheat sheet to confidently tackle high-frequency trading platform or fintech system design interview questions.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q1. How does the system scale to support millions of real-time WebSocket connections?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                <strong class="text-white">Answer:</strong> Establish stateless WebSocket Broadcast servers (Ticker Pods) behind an HAProxy Layer 4 Load Balancer. The Load Balancer distributes incoming TCP connections evenly. The Ticker pods do not fetch database records; instead, they subscribe to specialized Kafka partitions for tick updates. Using Go's highly optimized runtime scheduler, goroutines fanout incoming tick events directly into corresponding active TCP client connection buffers.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q2. Why is Kafka selected instead of standard pub/sub systems like RabbitMQ for tick feeds?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                <strong class="text-white">Answer:</strong> Kafka acts as an immutable, partitioned, append-only log, enabling exceptionally high write-throughput (millions of ticks/sec). It allows multiple independent microservice consumers (real-time websocket broadcasters, historical DB loggers, compliance engines) to consume from the same topic partitions at their own speed (backpressure protection) without degrading database write performance.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-orange">Q3. How is the system safeguarded against double-order processing?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                <strong class="text-white">Answer:</strong> Enforce strict **Idempotency Keys** on the client applications. Every tap of the Buy/Sell button generates a unique Client Request ID (e.g., UUID-timestamp-hash). When the API Gateway receives the request, it checks for this key in a distributed Redis database with a set TTL (Time-To-Live, e.g., 60 seconds). If a duplicate request with the identical key is intercepted, the system immediately returns the pending or completed state, preventing duplicate order placements.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q4. How does the database design ensure high transactional write throughput under volatile trading hours?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light">
+                                <strong class="text-white">Answer:</strong> Employ physical **Database Sharding** partitioned by Client Account IDs. Instead of single PostgreSQL clusters choking on lock queues, users AB1234 and XY5678 query completely separate physical PostgreSQL instances. Caching active holdings, user margins, and security tokens in Redis reduces PostgreSQL read-load to zero, dedicating full physical capacity to transactional order placement.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 11 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-orange/10 text-brand-orange border border-brand-orange/20 font-mono text-xs font-bold">11</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Global End-to-End System Flow</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology representing the complete trading ecosystem working in synergy. It traces how **real-time feed ticks** and **transactional order requests** flow concurrently through our microservices cluster, sharded databases, and direct exchange leased lines.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 900 550" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-orange" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff9e7d" />
+                                    <stop offset="100%" stop-color="#f37254" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#387ed1" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#4ade80" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <linearGradient id="grad-amber" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#fbbf24" />
+                                    <stop offset="100%" stop-color="#d97706" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-orange" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#f37254" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#387ed1" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,0 L 100,550 M 200,0 L 200,550 M 300,0 L 300,550 M 400,0 L 400,550 M 500,0 L 500,550 M 600,0 L 600,550 M 700,0 L 700,550 M 800,0 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- User App to Load Balancer -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- API / TRANSACTION PATH (UPPER ROUTE) -->
+                            <!-- Load Balancer to API Gateway -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- API Gateway to Order Routing -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Order Service to RMS check -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- RMS check to Kafka Queue -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+                            <!-- Kafka Queue down to Exchange Connector -->
+                            <path class="svg-link" d="M 865,225 L 865,260 L 810,300" marker-end="url(#arrow-blue)" />
+                            <!-- Exchange Connector to Exchange matching engine -->
+                            <path class="svg-link" d="M 700,320 L 640,320" marker-end="url(#arrow-orange)" />
+
+                            <!-- BROADCAST FEED PATH (LOWER ROUTE) -->
+                            <!-- Exchange feeds to Feed Handler -->
+                            <path class="svg-link" d="M 530,320 L 490,320" marker-end="url(#arrow-orange)" />
+                            <!-- Feed Handler up to Kafka Streams -->
+                            <path class="svg-link" d="M 435,350 L 435,395" marker-end="url(#arrow-gray)" />
+                            <!-- Kafka Streams to Ticker Pods -->
+                            <path class="svg-link" d="M 490,430 L 530,430" marker-end="url(#arrow-green)" />
+                            <!-- Ticker Pods WebSockets directly back to User App -->
+                            <path class="svg-link" d="M 530,440 Q 280,440 280,320 Q 280,290 180,285" marker-end="url(#arrow-green)" />
+
+                            <!-- PERSISTENCE DB CONNECTIONS -->
+                            <!-- Order Service to PG Shards -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,135 L 585,85" marker-end="url(#arrow-gray)" />
+                            <!-- RMS to Redis margins -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 725,135 L 725,85" marker-end="url(#arrow-gray)" />
+                            <!-- Kafka Streams to ClickHouse TimeSeries -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 435,465 L 435,505 L 530,505" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Client Mobile / Web UI -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER APP (KITE)</text>
+                                <text x="75" y="52" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">HTTP Orders (API)</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">WebSocket Ticks Feed</text>
+                            </g>
+
+                            <!-- 2. Gateway Proxy / Load Balancer -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS LB</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">HAProxy Layer 7</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">SSL & Routing</text>
+                            </g>
+
+                            <!-- 3. API Gateway -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API GATEWAY</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Auth & JWT Check</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Session Lookup</text>
+                            </g>
+
+                            <!-- 4. Go Order Service -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER SERVICE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Go Router (OMS)</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Idempotent Keys</text>
+                            </g>
+
+                            <!-- 5. Risk Management Engine -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#f37254" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RISK ENGINE (RMS)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f37254" text-anchor="middle">Margin calculator</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Strict &lt; 10ms Gate</text>
+                            </g>
+
+                            <!-- 6. Kafka Order Broker -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ORDER QUEUE</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Kafka Topic</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sequencing Log</text>
+                            </g>
+
+                            <!-- 7. Exchange Leased-Line Connector -->
+                            <g class="svg-node" transform="translate(700, 275)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CONNECTOR</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffe0d8" text-anchor="middle">FIX/FAST encoder</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Exchange gateway</text>
+                            </g>
+
+                            <!-- 8. Core Stock Exchange Matching Engine -->
+                            <g class="svg-node" transform="translate(530, 275)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-orange)" stroke="none" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">EXCHANGE (NSE)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffe0d8" text-anchor="middle">Order Matching</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#ffe0d8" text-anchor="middle">Atomic Settlement</text>
+                            </g>
+
+                            <!-- 9. Exchange Ticks Feed Handler -->
+                            <g class="svg-node" transform="translate(380, 275)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-gray)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FEED HANDLER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">UDP Parser</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Translates ticks</text>
+                            </g>
+
+                            <!-- 10. Kafka Ticks Queue -->
+                            <g class="svg-node" transform="translate(380, 395)">
+                                <rect x="0" y="0" width="110" height="70" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA STREAM</text>
+                                <text x="55" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ordered Tick broker</text>
+                            </g>
+
+                            <!-- 11. Go WebSocket Ticker Pods -->
+                            <g class="svg-node" transform="translate(530, 395)">
+                                <rect x="0" y="0" width="110" height="70" rx="8" fill="url(#grad-gray)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="55" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KITE TICKER</text>
+                                <text x="55" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#22c55e" text-anchor="middle">WebSockets Broadcaster</text>
+                            </g>
+
+                            <!-- 12. PostgreSQL Shards DB -->
+                            <g class="svg-node" transform="translate(530, 15)">
+                                <rect x="0" y="0" width="110" height="70" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">POSTGRES SHARDS</text>
+                                <text x="55" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Transactional sharded accounts</text>
+                            </g>
+
+                            <!-- 13. Redis Margin cache -->
+                            <g class="svg-node" transform="translate(670, 15)">
+                                <rect x="0" y="0" width="110" height="70" rx="8" fill="url(#grad-gray)" stroke="#387ed1" stroke-width="1" />
+                                <text x="55" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS MARGINS</text>
+                                <text x="55" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Ultra-low latency validation</text>
+                            </g>
+
+                            <!-- 14. Clickhouse Time Series DB -->
+                            <g class="svg-node" transform="translate(530, 485)">
+                                <rect x="0" y="0" width="110" height="50" rx="8" fill="url(#grad-amber)" stroke="none" />
+                                <text x="55" y="22" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLICKHOUSE</text>
+                                <text x="55" y="37" font-family="'Inter', sans-serif" font-size="8" fill="#ffe29d" text-anchor="middle">Historical Chart ticks</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-orange"></span> Lifecycle of a Trade: Step-by-Step System Journey
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Continuous Feeds & Dynamic Ticks (Kite Ticker Layer)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        The exchange matching engines continuously stream multicast UDP binary packets containing millisecond-level tick updates. Our co-located **Feed Handler** Go scripts intercept this feed, parse raw formats, and publish ticks straight into highly ordered partitions of a **Kafka Ticks Topic**. The stateless **Kite Ticker** pods consume from Kafka, routing compressed data packages to your active screen via established, high-capacity WebSockets connection.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">User Transaction Action & Secure Gate Ingress</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        When you tap the buy/sell button on the Kite interface, a secure HTTP POST request containing a unique client-side **Idempotency Key** is routed to our **Ingress Load Balancers**. HAProxy filters traffic, decrypts SSL, and forwards it to the **API Gateway**. The gateway performs session lookups, verifies JWT authorization signatures, and checks transaction rate-limiting counts under 3ms.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Synchronous Risk Shield Interception (RMS Phase)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        The vetted order lands in the **Order microservice**, which routes it to the **Risk Management System (RMS)**. To satisfy strict financial compliance, the RMS validates account metrics: available cash balances, daily circuit loss controls, margin exposure formulas, and blocklists. It reads this data from an in-memory replicated **Redis Margin Cache**, concluding synchronous validation in **&lt; 8ms**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Decoupled Queue Serialization (Kafka Buffer)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        Once the RMS approves the transaction, it is instantly serialized and pushed into a highly partitioned, partition-keyed **Kafka Order Queue**. Partition-keying ensures that all transactions originating from a single Client Account ID land sequentially in the same queue broker, preserving strict causal execution order and preventing race conditions or duplications.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-orange/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-orange/10 border border-brand-orange/20 flex items-center justify-center font-mono font-bold text-brand-orange flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Protocol Translation & Exchange Leased Line Delivery</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        The dedicated **Exchange Connector** service consumes events from the Kafka order partition. It encodes the structural microservice data package into the rigid **FIX/FAST protocol** natively required by the exchange matching hardware. This encoded message is pushed directly over multiplexed, high-capacity, low-latency physical leased lines to the NSE/BSE co-located routers.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Atomic Execution & Real-Time Push Feedback</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        The exchange matching core completes the trade execution and immediately returns an execution report back over the leased line. The Exchange Connector parses the message, publishes an update back into Kafka, and prompts the **Kite Ticker** WebSocket cluster to push an instant "Order Completed" visual notification to your screen in **&lt; 50ms total round-trip**.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Double-Entry Asynchronous Settlement & Historical Analytics</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm">
+                                        In the background, async consumer processes consume the execution logs. They write a double-entry accounting record to your isolated **PostgreSQL DB Account Shard** to settle ledger wallets, update open portfolio positions, and adjust holdings. Simultaneously, raw trade details are published to **ClickHouse** to index historical charting data points and populate post-trade tax analytics.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Footer Section -->
+                <footer class="text-center py-12 text-slate-500 border-t border-slate-800 text-xs font-light">
+                    <p class="mb-2 font-mono">Zerodha System Design Masterclass • Frugal, Scalable, Reliable</p>
+                    <p>© 2026 Zerodha Engineering Guide. Curated with absolute dedication to premium web craft.</p>
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- IntersectionObserver and Mobile Toggle Drawer Scripts -->
+    <script>
+        // DOM Elements
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const sidebarNav = document.getElementById('sidebar-nav');
+        const menuIcon = document.getElementById('menu-icon');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        // Drawer Menu Toggle for Mobile Layout
+        menuToggleBtn.addEventListener('click', () => {
+            sidebarNav.classList.toggle('-translate-x-full');
+            
+            // Toggle hamburger icon state
+            if (sidebarNav.classList.contains('-translate-x-full')) {
+                menuIcon.setAttribute('d', 'M4 6h16M4 12h16m-7 6h7');
+            } else {
+                menuIcon.setAttribute('d', 'M6 18L18 6M6 6l12 12');
+            }
+        });
+
+        // Close sidebar on navigate (Mobile)
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024) {
+                    sidebarNav.classList.add('-translate-x-full');
+                    menuIcon.setAttribute('d', 'M4 6h16M4 12h16m-7 6h7');
+                }
+            });
+        });
+
+        // Active Link Highlighting with IntersectionObserver
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -60% 0px', // Captures active sections near center-top of viewport
+            threshold: 0
+        };
+
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    
+                    // Reset active states
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${id}`) {
+                            link.classList.add('active');
+                            
+                            // Scroll sidebar nav automatically to keep active item in view if needed
+                            link.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    });
+                }
+            });
+        }, observerOptions);
+
+        // Track all sections
+        sections.forEach(section => {
+            sectionObserver.observe(section);
+        });
+    </script>
+</body>
+
+</html>

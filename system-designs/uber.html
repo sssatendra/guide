@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Uber System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#276ef1',
+                            silver: '#eeeeee',
+                            dark: '#0a0a0a',
+                            slate: '#161616',
+                            card: 'rgba(20, 20, 20, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-blue: #276ef1;
+            --brand-silver: #eeeeee;
+            --brand-dark: #0a0a0a;
+            --brand-slate: #161616;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #222222;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-blue);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(20, 20, 20, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(39, 110, 241, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(39, 110, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(22, 22, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #a5c3ff 0%, #276ef1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(39, 110, 241, 0.08);
+            border-left: 3px solid var(--brand-blue);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-blue);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #0d0d0d;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(39, 110, 241, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-blue) !important;
+            fill: #151515 !important;
+        }
+
+        .svg-link {
+            stroke: #222222;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-blue);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-blue);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-blue {
+            animation: pulse-blue-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-blue-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(39, 110, 241, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(39, 110, 241, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(39, 110, 241, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-700 flex items-center justify-center text-white font-bold text-sm">U</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Uber Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-blue/20">U</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">UBER</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Real-time Dispatch</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Dispatch Scale
+                    </a>
+                    <a href="#geospatial" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Geospatial Grid
+                    </a>
+                    <a href="#surge" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Surge Calculations
+                    </a>
+                    <a href="#ringpop" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Ringpop Gossip
+                    </a>
+                    <a href="#location" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Location Ingest
+                    </a>
+                    <a href="#matching" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Match Engine
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Dispatch Flow
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Dispatch latency: &lt; 100ms</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v3.8.0 • H3 Grid Hardened</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: Low-Latency Geospatial Dispatching
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Uber <span class="text-gradient-blue">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the systems that power billions of rides annually. Explore how Uber processes real-time GPS location updates at massive scale, shards geographical indexes using **Uber H3 Hexagonal Grid Mapping**, distributes driver state rings via gossip routing meshes, and calculates instant matching parameters.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Real-time Dispatch Challenge</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Powering a real-time ride-sharing dispatch network represents one of the hardest concurrent spatial synchronization problems in software engineering. Rather than static maps, the system must process hundreds of thousands of active drivers sending location updates **every 4 seconds**, partition search indexes dynamically, verify pricing multipliers, and settle atomic transaction reservations inside millisecond windows.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">High GPS Ingestion:</strong> Continuous parsing of location telemetry packets from millions of mobile nodes simultaneously.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Geospatial Searching:</strong> Querying active driver states in under 50ms inside local coordinate spaces.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Surge Pricing Scales:</strong> Aggregating supply-demand thresholds on-the-fly inside dynamic cellular grid partitions.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Atomic Match Locks:</strong> Ensuring that one driver cannot be booked by two concurrent riders simultaneously (double booking prevention).</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Drivers</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">6 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Global driver mesh</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Ingestion Ingest</div>
+                                    <div class="text-2xl font-black text-slate-300 font-outfit mt-1">1.5 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Telemetry writes/sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Daily Trips Settle</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">28 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Rides processed daily</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Matching Latency</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">&lt; 80ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Search loop resolve</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="geospatial" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Geospatial Grid Partitioning (H3 Hexagonal Indexing)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Traditional relational database geographic indexing (like R-Trees or bounding boxes) requires intensive trigonometric mathematics that throttles CPU performance when queried millions of times per second. To solve this, Uber developed the **H3 Spatial Indexing Grid**—a hierarchical, hexagonal geospatial coordinate system that partitions the surface of the earth into concentric cells.
+                    </p>
+
+                    <!-- SVG Diagram 1: Geospatial H3 hexagons -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a5c3ff" />
+                                    <stop offset="100%" stop-color="#276ef1" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#1c1c24" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid Hexagons mapping -->
+                            <g stroke="#222" stroke-width="1.5">
+                                <!-- Center Hexagon -->
+                                <polygon points="400,165 460,200 460,270 400,305 340,270 340,200" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="2" class="svg-node" />
+                                <!-- Adjacent Hexagons -->
+                                <polygon points="400,25 460,60 460,130 400,165 340,130 340,60" fill="url(#grad-dark)" stroke="#334155" />
+                                <polygon points="520,95 580,130 580,200 520,235 460,200 460,130" fill="url(#grad-dark)" stroke="#334155" />
+                                <polygon points="520,235 580,270 580,340 520,375 460,340 460,270" fill="url(#grad-dark)" stroke="#334155" />
+                                <polygon points="400,305 460,340 460,410 400,445 340,410 340,340" fill="url(#grad-dark)" stroke="#334155" />
+                                <polygon points="280,235 340,270 340,340 280,375 220,340 220,270" fill="url(#grad-dark)" stroke="#334155" />
+                                <polygon points="280,95 340,130 340,200 280,235 220,200 220,130" fill="url(#grad-dark)" stroke="#334155" />
+                            </g>
+
+                            <!-- Driver Dots inside Center Hexagon -->
+                            <circle cx="370" cy="220" r="4" fill="#276ef1" />
+                            <circle cx="430" cy="210" r="4" fill="#276ef1" />
+                            <circle cx="410" cy="260" r="4" fill="#276ef1" />
+                            <circle cx="380" cy="270" r="4" fill="#475569" />
+
+                            <!-- Rider Query center -->
+                            <circle cx="400" cy="235" r="8" fill="#ff4b4b" />
+                            <!-- Search Radius -->
+                            <circle cx="400" cy="235" r="70" fill="none" stroke="#ff4b4b" stroke-dasharray="4,4" stroke-opacity="0.5" />
+
+                            <text x="400" y="240" font-family="'Outfit', sans-serif" font-weight="bold" font-size="8" fill="#fff" text-anchor="middle">RIDER</text>
+                            <text x="400" y="150" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#276ef1" text-anchor="middle">H3 INDEX: 8928308280fffff</text>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Hexagon Geocodes
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Hexagons are chosen because they possess a unique geometric property: **the distance between the center of a hexagon and all of its 6 neighboring centers is identical**. This makes spatial search calculations (like k-ring neighbor lookups) exceptionally simple, stable, and highly performant compared to square grids.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Index Resolution Scaling
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                H3 supports 16 resolutions. In dense metropolitan areas (like Manhattan), Uber indices coordinates at **Resolution 8** or **9** (covering average cell areas of 0.7 to 0.1 sq km). This enables high-granularity location mapping without inflating indexes.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="surge" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Surge Pricing & Dynamic Match Loops</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Dynamic surge pricing serves a critical operational goal: balancing the marketplace by incentivizing more drivers to enter a high-demand zone while throttling ride requests. To perform this calculation in real-time, demand events and supply availability are aggregated inside H3 hexagons continuously.
+                    </p>
+
+                    <!-- SVG Diagram 2: Surge Matching Loop -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Ingest paths converging to aggregator -->
+                            <path class="svg-link" d="M 140,140 Q 190,140 190,205 L 210,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 140,310 Q 190,310 190,245 L 210,245" marker-end="url(#arrow)" />
+
+                            <!-- Aggregator to Surge calculator -->
+                            <path class="svg-link" d="M 330,225 L 390,225" marker-end="url(#arrow)" />
+                            <!-- Surge calculator to Redis cache -->
+                            <path class="svg-link" d="M 510,225 L 570,225" marker-end="url(#arrow)" />
+
+                            <!-- Active Riders Inflow -->
+                            <g class="svg-node" transform="translate(20, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff4b4b" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DEMAND STREAM</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff4b4b" text-anchor="middle">Active riders searching</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Kafka Ingestion</text>
+                            </g>
+
+                            <!-- Active Drivers Inflow -->
+                            <g class="svg-node" transform="translate(20, 265)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SUPPLY STREAM</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Driver coordinates</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Gossip Ingestion</text>
+                            </g>
+
+                            <!-- Apache Flink Stream Aggregator -->
+                            <g class="svg-node" transform="translate(210, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FLINK STREAM</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">H3 cell grouping</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">10-second aggregations</text>
+                            </g>
+
+                            <!-- Dynamic Surge Pricing Calculator -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e5a93b" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SURGE CALCULATOR</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e5a93b" text-anchor="middle">Demand/Supply ratio</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Multipliers recalculation</text>
+                            </g>
+
+                            <!-- Redis Cache (Surge Cache Map) -->
+                            <g class="svg-node" transform="translate(570, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS SURGE MAP</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Active index values</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Consulted under &lt; 2ms</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Surge pricing processing loop:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Real-time Demands Accumulation:</strong> Every search click, fare estimation lookup, or booking request is tagged with its H3 spatial geocode and streamed directly to Kafka.</li>
+                                <li><strong>Stream Processing Aggregations:</strong> **Apache Flink** consumes events from Kafka, grouping demand and driver counts inside each H3 hexagon in a rolling 10-second window.</li>
+                                <li><strong>Dynamic Surge Calculation:</strong> The Surge Engine compares the active supply-demand ratio. If demand outpaces supply, a surge multiplier (e.g. `1.8x`) is computed.</li>
+                                <li><strong>Edge caching lookup:</strong> The newly calculated H3 cell multipliers are cached inside localized **Redis databases**. When user apps query fare estimations, the gateway performs a Redis geolookup to apply multipliers in under 2ms.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="ringpop" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Distributed Location State Rings (Ringpop)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Managing GPS location states for millions of active drivers on a centralized database cluster creates severe bottlenecking. Uber solves this by distributing driver states across an active-active node mesh governed by **Ringpop**—a custom-developed distributed application sharding framework based on Swim Gossip protocols and consistent hashing.
+                    </p>
+
+                    <!-- SVG Diagram 3: Ringpop Hashing Rings -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Node Ring Circle -->
+                            <circle cx="400" cy="225" r="130" fill="none" stroke="#222" stroke-width="4" />
+                            <!-- Gossip communication paths -->
+                            <path d="M 400,95 L 491,290 M 491,290 L 308,290 M 308,290 L 400,95" stroke="#276ef1" stroke-width="1.5" stroke-opacity="0.3" stroke-dasharray="4,4" />
+
+                            <!-- Dynamic Consistent Hash Nodes -->
+                            <!-- Node 1 -->
+                            <g class="svg-node" transform="translate(350, 50)">
+                                <rect x="0" y="0" width="100" height="60" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="2" />
+                                <text x="50" y="25" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">DISPATCH NODE A</text>
+                                <text x="50" y="42" font-family="'Inter', sans-serif" font-size="8" fill="#276ef1" text-anchor="middle">IP: 10.0.1.45</text>
+                            </g>
+
+                            <!-- Node 2 -->
+                            <g class="svg-node" transform="translate(530, 260)">
+                                <rect x="0" y="0" width="100" height="60" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="2" />
+                                <text x="50" y="25" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">DISPATCH NODE B</text>
+                                <text x="50" y="42" font-family="'Inter', sans-serif" font-size="8" fill="#276ef1" text-anchor="middle">IP: 10.0.2.12</text>
+                            </g>
+
+                            <!-- Node 3 -->
+                            <g class="svg-node" transform="translate(170, 260)">
+                                <rect x="0" y="0" width="100" height="60" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="2" />
+                                <text x="50" y="25" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">DISPATCH NODE C</text>
+                                <text x="50" y="42" font-family="'Inter', sans-serif" font-size="8" fill="#276ef1" text-anchor="middle">IP: 10.0.3.89</text>
+                            </g>
+
+                            <!-- Driver Location update input -->
+                            <path class="svg-link" d="M 120,120 Q 230,120 230,225 L 210,270" marker-end="url(#arrow)" />
+                            <text x="140" y="100" font-family="'Inter', sans-serif" font-size="9" fill="#94a3b8">Driver Update (hashed to Node C)</text>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Ringpop Gossip Mechanics
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            Ringpop implements decentralized scaling by assigning driver location states to dedicated microservice nodes.
+                            <br><br>
+                            - **Consistent Hashing:** Driver UUIDs are hashed to assign them to specific nodes in the Ringpop ring. That node holds the driver's current spatial location and active state in memory.
+                            - **Gossip Protocol:** The nodes communicate constantly using Swim gossip protocols. If Node A collapses, Node B and C discover the failure in under 2 seconds and re-shard the ring without a central supervisor.
+                            - **No Database Overhead:** Because locations are stored directly in-memory across the node ring, dispatch queries bypass datastores, achieving **&lt; 5ms** lookup speeds.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="location" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Low-Latency Location Ingestion</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Ingesting 1.5 million GPS location updates per second from active driver devices requires highly optimized ingress pipelines. Standard HTTP connections introduce substantial TLS handshake overhead. Uber optimizes this with persistent **WebSocket gateways** combined with Kafka streaming.
+                    </p>
+
+                    <!-- SVG Diagram 4: Location Ingest Pipeline -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 L 560,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 670,225 L 700,225" marker-end="url(#arrow)" />
+
+                            <!-- Driver GPS -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DRIVER APP</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Sends coordinate</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Every 4 seconds</text>
+                            </g>
+
+                            <!-- WebSocket Gateway Proxy -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WEBSOCKET GTW</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Persistent channels</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Low connection overhead</text>
+                            </g>
+
+                            <!-- Apache Kafka Broker -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA TOPIC</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">H3-partitioned log</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">High write buffer</text>
+                            </g>
+
+                            <!-- Ringpop Node Mesh (in-memory) -->
+                            <g class="svg-node" transform="translate(560, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#e5a93b" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RINGPOP IN-MEM</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e5a93b" text-anchor="middle">Driver Location Map</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Updates in 5ms</text>
+                            </g>
+
+                            <!-- Database Storage (Cassandra) -->
+                            <g class="svg-node" transform="translate(700, 190)">
+                                <rect x="0" y="0" width="80" height="70" rx="8" fill="#22c55e" stroke="none" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">CASSANDRA</text>
+                                <text x="40" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Historical logs</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Location Ingress Pipeline
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            To maintain continuous tracking, the driver app opens a **persistent WebSocket connection** with localized WebSocket gateways. 
+                            <br><br>
+                            Every 4 seconds, the app pushes small JSON geopacket updates containing `[driver_id, lat, lng, H3_cell_id]`. The gateway converts this into binary payload bytes and pushes it instantly to highly partitioned **Kafka topics**. Specialized stream brokers parse events in parallel, update the in-memory **Ringpop location map** for immediate dispatch matching, and write logs asynchronously to **Cassandra database clusters** to capture historical driving metrics.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="matching" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dynamic Marketplace Match Engine</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When a rider taps "Request Ride", the system initiates the **Marketplace Matching Engine**. The engine searches for matching active drivers in close geographic proximity. To prevent two users booking the same driver simultaneously, matching reservations must execute under **atomic transaction locks**.
+                    </p>
+
+                    <!-- SVG Diagram 5: Match Engine Locks -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 320,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Engine sharding to Redis lock & Driver notification -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Rider Request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RIDER APPS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Taps request ride</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">H3 geocoded</text>
+                            </g>
+
+                            <!-- Ingress Gateway router -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS GATEWAY</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Zuul spatial router</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Routes by H3 geocode</text>
+                            </g>
+
+                            <!-- Marketplace Match Engine (Go-based) -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MATCH ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">k-ring search</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Finds best driver</text>
+                            </g>
+
+                            <!-- Redis Redlock (Atomic reservation) -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff4b4b" stroke-width="2" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS REDLOCK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff4b4b" text-anchor="middle">Acquires driver lock</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Prevents double booking</text>
+                            </g>
+
+                            <!-- Driver Screen dispatch dispatch -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DRIVER DISPATCH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Pushes match offer</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Driver has 15s to accept</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span> The Matching Resolution Loop
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            When a rider searches for a ride, the **Match Engine** queries in-memory driver location rings for active driver states inside the rider's local **H3 cell** and adjacent cells (using k-ring hexagonal expansion).
+                            <br><br>
+                            Once a candidate driver is identified, the engine immediately attempts to acquire a short-lived **Redis distributed lock (Redlock)** using the driver's unique UUID as the key. If the lock is successfully acquired, it guarantees that no other concurrent Match engine thread can book that driver. The match offer is pushed to the driver's screen via WebSockets. If the driver accepts, the lock is committed to trip creation; if they decline or time out, the lock is released instantly to make the driver available for other matching queries.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Expert Interview Q&A</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Prepare for senior-level engineering and architecture interviews. Review the technical geospatial matching questions and production-ready answers.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q1. How does the system handle massive coordinate ingestion updates without dropping packets?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By buffering ingestion spikes through persistent WebSocket gateways that translate and forward geopacket updates directly into highly partitioned **Apache Kafka topics** partitioned by H3 cell geocodes. Consumers parse events in parallel asynchronously to update Ringpop location meshes instantly, shielding database storage writes.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q2. Why is H3 hexagonal indexing selected over standard geospatial coordinate bounding boxes?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Bounding boxes have irregular distances from center points to corners. Hexagons possess identical distances from their centers to all 6 adjacent neighboring centers. This geometric property allows the match engine to execute circular k-ring search expansions using simple index ID additions rather than complex CPU-heavy trigonometry.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q3. How is the "double booking" problem prevented when millions of concurrent users request rides?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By executing matching reservations under atomic distributed locks in **Redis (Redlock)**. When a driver is selected, the engine acquires a lock using `SET driver_uuid lock_token NX PX 15000`. Only the thread that successfully acquires this lock can dispatch the trip offer, preventing double-bookings.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q4. How does the system tolerate high node churn on the Ringpop location rings?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Ringpop sharding nodes communicate continuously via Swim gossip protocols. If Node A collapses, gossip broadcasts allow the remaining nodes to detect the failure in under 2 seconds. The consistent hashing rings automatically re-shard driver allocations across active nodes without requiring manual cluster adjustments.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified End-to-End Dispatch Flow</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology powering Uber's real-time marketplace. It traces GPS location ingestions, Ringpop Gossip sharding, Flink surge streams, dynamic match lookups, and Redis Redlocks.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 -80 900 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a5c3ff" />
+                                    <stop offset="100%" stop-color="#276ef1" />
+                                </linearGradient>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#22c55e" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#ff4b4b" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0a0a0f" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#276ef1" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,-50 L 900,-50 M 0,0 L 900,0 M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,-80 L 100,550 M 200,-80 L 200,550 M 300,-80 L 300,550 M 400,-80 L 400,550 M 500,-80 L 500,550 M 600,-80 L 600,550 M 700,-80 L 700,550 M 800,-80 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- Driver to WebSocket Gateway -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- UPPER ROUTE (INGESTION & SURGE) -->
+                            <!-- Gateway to Ingestion Kafka -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- Ingest Kafka to Flink Stream -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Flink Stream to Surge Calculator -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- Surge to Redis Surge Cache map -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+
+                            <!-- LOWER ROUTE (DISPATCH MATCHING) -->
+                            <!-- Gateway to Match Engine -->
+                            <path class="svg-link" d="M 330,290 Q 380,320 380,380 L 400,380" marker-end="url(#arrow-blue)" />
+                            <!-- Match Engine directly back to Client -->
+                            <path class="svg-link" d="M 510,380 Q 280,380 280,320 Q 280,290 180,285" marker-end="url(#arrow-blue)" />
+
+                            <!-- REDLOCK VALIDATIONS -->
+                            <!-- Ringpop in-memory state lookup -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,15 L 585,65" marker-end="url(#arrow-gray)" />
+                            <!-- Match engine reservation locks -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 640,100 L 730,100 L 730,340 M 730,340 L 510,380" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Driver / Rider Apps -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">CLIENT APPS</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Coordinates Ingest</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#ff4b4b" text-anchor="middle">Match Queries</text>
+                            </g>
+
+                            <!-- 2. WebSocket Gateway -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WS GATEWAY</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">Connection Hub</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Persistent tunnels</text>
+                            </g>
+
+                            <!-- 3. Ingest Kafka -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGEST KAFKA</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Coordinates topic</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">H3-partitioned log</text>
+                            </g>
+
+                            <!-- 4. Flink Stream Aggregator -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FLINK STREAM</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Cell aggregators</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dynamic ratios</text>
+                            </g>
+
+                            <!-- 5. Dynamic Surge Calculator -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SURGE CALCULATOR</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Multipliers recalculate</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">10s dynamic loop</text>
+                            </g>
+
+                            <!-- 6. Redis Surge Cache map -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS SURGE</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Surge index map</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Consulted under &lt;2ms</text>
+                            </g>
+
+                            <!-- 7. Marketplace Match Engine -->
+                            <g class="svg-node" transform="translate(400, 335)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#276ef1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MATCH ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#276ef1" text-anchor="middle">k-ring hexagon</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Driver selections</text>
+                            </g>
+
+                            <!-- 8. Ringpop Node Mesh (in-memory) -->
+                            <g class="svg-node" transform="translate(530, -50)">
+                                <rect x="0" y="0" width="110" height="65" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RINGPOP IN-MEM</text>
+                                <text x="55" y="47" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Decentralized sharding</text>
+                            </g>
+
+                            <!-- 9. Redis Redlock (Distributed lock) -->
+                            <g class="svg-node" transform="translate(530, 65)">
+                                <rect x="0" y="0" width="110" height="45" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">REDIS REDLOCK</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-blue"></span> Ride Ingress & Matching Journey: Step-by-Step
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">GPS Location Ingress (Driver Telemetry Ingest)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Driver devices open secure persistent **WebSocket connections** with regional gateways. Every 4 seconds, the app pushes geopackets `[driver_id, lat, lng, H3_cell_id]`. The gateway routes packets directly to H3-partitioned **Kafka topics** to buffer coordinates under massive ingress write-spikes.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Decentralized Memory Mapping (Ringpop Ring Ingest)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Consumer threads parse Kafka partitions, hashing driver UUIDs to assign them to specific nodes in the **Ringpop ring**. The matching node receives the coordinates and caches the driver's current spatial position and active state directly in memory, bypassing database write-spikes.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Flink Surge Aggregations</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        In parallel, active driver locations and user fare search requests are consumed by **Apache Flink stream processors**. Flink dynamically computes supply-demand density ratios inside each **H3 spatial cell** every 10 seconds.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Surge Multiplier Cache Propagation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        If supply-demand ratio thresholds are breached, the Surge Pricing Engine computes surge multipliers and writes them directly to **Redis Surge Cache maps** indexed by H3 cell geocodes to shield estimators from relational lookup latencies.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Rider Query & Spatial k-ring Search</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When a rider requests a trip, the Zuul router translates their coordinate to an H3 cell index and forwards it to the **Match Engine**. The engine performs circular k-ring hexagonal expansion lookups across Ringpop nodes, identifying the closest active driver candidates in under 50ms.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Atomic Lock Reservation (Redis Redlock Gate)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Once a candidate driver is selected, the engine immediately attempts to acquire a short-lived **Redis distributed lock (Redlock)** using the driver's unique UUID as the key. Successful acquisition ensures that no other concurrent Match thread can book this driver.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">WebSocket Offer Dispatch & Settle</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The dispatch coordinates are sent to the driver's WebSocket connection channel. The driver has 15 seconds to accept. If accepted, the trip is committed to Cassandra DB and the rider is notified. If declined or timed out, the lock is released instantly, returning the driver to the active pool.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-sm">U</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Uber</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#geospatial" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Geospatial Grid</a>
+                    <a href="#surge" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Surge Calculations</a>
+                    <a href="#ringpop" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Ringpop Gossip</a>
+                    <a href="#location" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Location Ingest</a>
+                    <a href="#matching" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Match Engine</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Dispatch Flow</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">H3 Grid Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

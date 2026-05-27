@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stripe High-Integrity Payments System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            purple: '#635bff',
+                            blue: '#0a2540',
+                            cyan: '#00d4b2',
+                            dark: '#030814',
+                            slate: '#081226',
+                            card: 'rgba(8, 18, 38, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-purple: #635bff;
+            --brand-blue: #0a2540;
+            --brand-cyan: #00d4b2;
+            --brand-dark: #030814;
+            --brand-slate: #081226;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #030814;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #11223f;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-purple);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(8, 18, 38, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(99, 91, 255, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(99, 91, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(8, 18, 38, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-purple {
+            background: linear-gradient(135deg, #00d4b2 0%, #635bff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(99, 91, 255, 0.08);
+            border-left: 3px solid var(--brand-purple);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-purple);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #050d1d;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(99, 91, 255, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-purple) !important;
+            fill: #0c1a32 !important;
+        }
+
+        .svg-link {
+            stroke: #12223c;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-purple);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-purple);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-purple {
+            animation: pulse-purple-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-purple-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(99, 91, 255, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(99, 91, 255, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(99, 91, 255, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-purple to-indigo-700 flex items-center justify-center text-white font-bold text-sm font-outfit">S</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Stripe Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-purple to-indigo-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-purple/20">S</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">STRIPE</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">High-Integrity Payments</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-purple hover:bg-brand-purple/5 hover:border-brand-purple/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Payment Scale
+                    </a>
+                    <a href="#idempotency" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Idempotency Keys
+                    </a>
+                    <a href="#ledger" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Double-Entry Ledger
+                    </a>
+                    <a href="#tokenization" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> PCI Tokenization
+                    </a>
+                    <a href="#webhooks" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Webhook Pipelines
+                    </a>
+                    <a href="#ratelimit" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Rate Limiter
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Blueprint
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-purple pulse-purple"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Uptime: 99.999%</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.7.0 • Ledger Settled</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-purple/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-cyan-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-purple/10 border border-brand-purple/20 text-brand-purple text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Integrity Payment Rails
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Stripe <span class="text-gradient-purple">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the systems powering global payment transactions with absolute integrity. Explore **idempotency key routing gates** preventing double-charges, transaction-safe **double-entry ledger databases**, PCI-compliant tokenizer vaults, and event-driven **Webhook delivery meshes**.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Payment Ingestion vs. Ledger Accounting Planes</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Processing payment transactions requires complete separation of planes to maintain high system reliability. Capturing, validating, tokenizing card numbers, and verifying limits must execute instantly in the fast-path ingestion gateway. Writing accounting records, settlements, and bank audits must run in decoupled, highly consistent ledger transactional planes, guaranteeing that a single network drop never corrupts financial account balances.
+                    </p>
+
+                    <!-- SVG Diagram 1: Ingestion vs Ledger -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-purple" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#00d4b2" />
+                                    <stop offset="100%" stop-color="#635bff" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Sockets to Gateways -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Gateways to internal routing vs authentication -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 525,130 Q 575,130 575,200 L 595,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 525,320 Q 575,320 575,250 L 595,250" marker-end="url(#arrow)" />
+
+                            <!-- Active Clients Requests -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT PAYMENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#635bff" text-anchor="middle">HTTPS Requests</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">HTTPS Inbound API</text>
+                            </g>
+
+                            <!-- Ingestion API Gateway -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API GATEWAY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#635bff" text-anchor="middle">Idempotency Checks</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fires validation</text>
+                            </g>
+
+                            <!-- Ingestion write plane -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CHARGE WORKERS</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#00d4b2" text-anchor="middle">Bank connectors</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Authenticates card</text>
+                            </g>
+
+                            <!-- Ledger Settlement accounting plane -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LEDGER SYSTEM</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#00d4b2" text-anchor="middle">Double-entry logs</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Atomic zero-sum balances</text>
+                            </g>
+
+                            <!-- Highly Consistent Database (PostgreSQL Shard) -->
+                            <g class="svg-node" transform="translate(595, 180)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TRANSACT DB</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#635bff" text-anchor="middle">Consensus Ledger</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Strict ACID safety</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-purple"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-purple font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Idempotency Checks:</strong> Ensuring network failures never cause double-charges for a single payment submit.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-purple font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Double-Entry Safety:</strong> Guaranteeing all ledger transactions debit from a source and credit a destination with perfect zero-sum integrity.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-purple font-bold font-mono">•</span>
+                                    <span><strong class="text-white">PCI Isolation:</strong> Bypassing gateway access to raw credit card details using isolated tokenizer sandboxes.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-cyan-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Uptime Reliability</div>
+                                    <div class="text-2xl font-black text-brand-purple font-outfit mt-1">99.999%</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Global API system SLA</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Transaction TPS</div>
+                                    <div class="text-2xl font-black text-cyan-400 font-outfit mt-1">20,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Peak concurrent payments/sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Idempotency Sync</div>
+                                    <div class="text-2xl font-black text-cyan-500 font-outfit mt-1">&lt; 1.5ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Redis distributed lock TTL check</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Ledger Commits</div>
+                                    <div class="text-2xl font-black text-brand-cyan font-outfit mt-1">&lt; 5ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Time to complete ledger commit</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="idempotency" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Idempotency Key Matching Gates (Preventing Double-Charges)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        If a user clicks "Pay" and their network drops during the API transit, the app retries the submit. Without protection, this would charge the customer twice. Stripe prevents this by requiring an **Idempotency Key** inside request headers, evaluating key locks dynamically inside high-speed **Redis memory partitions**.
+                    </p>
+
+                    <!-- SVG Diagram 2: Idempotency Key matching -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Paths -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Router splits to Redis node clusters -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Client sends payments retry -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API RETRY INPUT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Idempotency: key_x28</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Concurrent submit</text>
+                            </g>
+
+                            <!-- Gateway Key checker -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KEY CHECKER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Acquires Redis lock</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Inspects databases</text>
+                            </g>
+
+                            <!-- Scenario A: Key exists (returns cached response) -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="130" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="65" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KEY DETECTED</text>
+                                <text x="65" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#00d4b2" text-anchor="middle">Returns cached response</text>
+                                <text x="65" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Bypasses bank charge</text>
+                            </g>
+
+                            <!-- Scenario B: New key (locks & charges) -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="130" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="65" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">NEW KEY INSERT</text>
+                                <text x="65" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Locks: SET key NX</text>
+                                <text x="65" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Starts transactions</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-purple"></span> Atomic Lock Acquisition
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                When a charge request arrives, the gateway queries an in-memory Redis cluster to acquire a lock using the idempotency key (`SET key_id lock_token NX PX 10000`). If the key is already processing, the request waits or returns the active state, protecting the payment processing system from concurrent double-charge triggers.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-cyan"></span> Response Cache Storage
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Once a transaction finishes successfully, the complete API response payload (status, charge ID, receipts) is cached in Redis alongside the idempotency key with a 24-hour TTL. If a retry with the identical key is parsed, the cache instantly returns the stored response, bypassing secondary bank charges.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="ledger" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Double-Entry Accounting Ledgers (Atomic Financial Commits)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Managing financial accounts requires absolute consistency. Simply incrementing or decrementing balance values (`UPDATE balance SET value = value - 100`) leads to severe reconciliation issues during server failures. Stripe resolves this by using an immutable **Double-Entry Accounting Ledger**, guaranteeing that every transaction contains a matching set of debits and credits that sum to exactly zero.
+                    </p>
+
+                    <!-- SVG Diagram 3: Double Entry Ledger -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Ledger splits to Debit vs Credit -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active Transaction Inbound -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TRANSACTION</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Amount: $100.00</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">A -> B payment</text>
+                            </g>
+
+                            <!-- Ledger commit engine -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LEDGER COMPILER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Builds zero-sum logs</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ensures atomic commits</text>
+                            </g>
+
+                            <!-- SQL Database ACID settlement -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACID ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#00d4b2" text-anchor="middle">Two-phase commit</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Locks rows securely</text>
+                            </g>
+
+                            <!-- Ledger Row 1: Source (Debit) -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SOURCE (DEBIT)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Account A: -$100.00</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Immutable record</text>
+                            </g>
+
+                            <!-- Ledger Row 2: Destination (Credit) -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DEST (CREDIT)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Account B: +$100.00</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Immutable record</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How ordered ledger transactions operate:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Immutable Event Sourcing:</strong> Balance values are never updated directly. Every payment generates a set of immutable ledger rows inside sharded relational SQL databases (e.g., debits from the customer's wallet and credits to Stripe's asset account).</li>
+                                <li><strong>Zero-Sum Validation:</strong> Before database commit, the ledger validation engine verifies if the sum of credits and debits inside the transaction equals exactly zero (`Debit + Credit = 0`). If it does not, the transaction is rejected instantly.</li>
+                                <li><strong>Strict Two-Phase Locks:</strong> To update multiple user account records safely across different database partitions, Stripe runs a **Two-Phase Commit (2PC)** protocol combined with row-level locks, ensuring total ACID safety.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="tokenization" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">PCI-Compliant Card Tokenization (Vault Isolation)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Storing raw credit card numbers on standard application servers exposes systems to severe security threats and legal issues. Stripe isolates raw payment data from standard servers using an isolated **PCI-Compliant Tokenizer Sandbox** combined with secure **Vault HSM storage**.
+                    </p>
+
+                    <!-- SVG Diagram 4: Tokenizer Vault -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Vault splits to tokenizer and gate -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 520,130 Q 565,130 565,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 520,320 Q 565,320 565,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- Active raw card input -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CARD INPUT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Raw Card numbers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Client browser post</text>
+                            </g>
+
+                            <!-- Isolated Tokenizer Gateway -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TOKEN ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">PCI sandbox</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Filters card data</text>
+                            </g>
+
+                            <!-- HSM Secure Token Vault -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">VAULT HARDWARE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#00d4b2" text-anchor="middle">Saves card details</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Outputs token key</text>
+                            </g>
+
+                            <!-- Standard Application Server (Stripe App Core) -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">APP GATEWAY</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#00d4b2" text-anchor="middle">Receives stateless token</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sees zero card numbers</text>
+                            </g>
+
+                            <!-- Stripe API endpoint response -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API SUCCESS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Charge complete</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Perfect PCI compliance</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-purple"></span> Zero-Card-Data Architecture
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            When users enter credit card details on a Stripe checkout form, the browser posts the data directly to isolated **Tokenizer Sandboxes**, bypassing standard application servers completely. The sandbox writes the card details to secure, hardware-protected HSM databases and returns a stateless token (`tok_182x`). Application servers process payments using this token, eliminating data leak vulnerabilities.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="webhooks" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Event-Driven Webhook Delivery Pipeline</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Notifying external merchant servers when a payment settles requires a resilient asynchronous event distribution mesh. External servers can suffer from latency, drops, or crashes; executing notifications synchronously would block payment gateway resources. Stripe resolves this using an event-driven **Webhook Delivery Pipeline** backed by sharded **Apache Kafka queues**.
+                    </p>
+
+                    <!-- SVG Diagram 5: Webhook pipeline -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Worker splits to merchant vs DLQ -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active Charge Completed Event -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CHARGE COMPLETE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Dispatches webhook</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Assembled json payload</text>
+                            </g>
+
+                            <!-- Kafka Event Log Queue -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA LOG</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Partitioned event log</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Hashed by Merchant ID</text>
+                            </g>
+
+                            <!-- Webhook Delivery workers -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#00d4b2" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DELIVERY ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#00d4b2" text-anchor="middle">Go webhook workers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Exponential backoff</text>
+                            </g>
+
+                            <!-- Target Merchant Endpoint A (successful) -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MERCHANT OK</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Response: HTTP 200</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Saves transaction state</text>
+                            </g>
+
+                            <!-- Dead-Letter Queue (after 5 failures) -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ef4444" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DLQ ARCHIVE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ef4444" text-anchor="middle">Stored in archive DLQ</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Manual retry triggers</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How Webhook Delivery mesh ensures reliability:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-purple font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Exponential Backoff Retries:</strong> If a merchant's server returns a non-200 code or times out, Stripe schedules a retry. The retry interval increases exponentially (e.g., 10s, 30s, 5m, 1h, up to 3 days), protecting failing merchant endpoints from traffic spikes.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-purple font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Dead-Letter Queues (DLQ):</strong> If the webhook fails after 5 retries, the event is routed to a **Dead-Letter Queue (DLQ)**. Merchants can inspect these events in their Stripe Dashboard and trigger manual retries once their systems recover.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="ratelimit" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Speed Rate Limiting (Token Bucket Shield)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Protecting APIs from bad actors, resource leaks, or flash mobs requires a distributed, highly performant rate limiter. Striking relational databases on every API hit to verify quotas is computationally impossible. Stripe resolves this by holding request quotas in sharded **Redis clusters**, utilizing the **Token Bucket Algorithm**.
+                    </p>
+
+                    <!-- SVG Diagram 6: Token Bucket Rate Limiter -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Limiter splits to Allowed vs throttled -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <!-- Active API request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API INBOUND</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Key: merchant_id_2a</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Hits Stripe API</text>
+                            </g>
+
+                            <!-- Redis Token Bucket Limiter -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TOKEN BUCKET</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Checks Redis token</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Runs Redis script</text>
+                            </g>
+
+                            <!-- Route A: Token exists (Allowed) -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REQUEST ALLOW</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Decrements token OK</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Passes to gateway</text>
+                            </g>
+
+                            <!-- Route B: Bucket empty (HTTP 429) -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ef4444" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">THROTTLE REJECT</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ef4444" text-anchor="middle">Returns HTTP 429</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">No token available</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-purple"></span> Atomic Redis Token Bucket
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            Every merchant ID is mapped to a Redis key holding two values: the **current token count** and the **last request timestamp**. Gateways evaluate quotas by executing atomic **Lua scripts** directly on Redis shards. This checks, updates, and decrements tokens in a single round-trip, preventing race conditions and keeping check latency under **1.2ms**.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: INTERVIEW QA -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Architect Interview Q&A</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Q1 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-purple">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q1: How does Stripe ensure idempotency locks do not persist forever if a downstream transaction crashes?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Idempotency keys are cached in Redis with a short lock TTL of **10 seconds** (`PX 10000`). If a charge worker crashes or network connections fail during bank authentication, the lock expires automatically. The client can retry the payment safely, acquiring a new lock, while stale responses are pruned.
+                            </p>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-purple">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q2: Why is a double-entry ledger database superior to standard relational updates for financial records?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Relational updates (`UPDATE balance SET value = value - 100`) are destructive. If a transaction fails mid-update, the original state is lost, causing severe financial discrepancy. A **Double-Entry Ledger** is strictly append-only. It records debits and credits as separate, immutable event rows, ensuring that a sum check always reconciles to exactly zero, simplifying auditing.
+                            </p>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-purple">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q3: How does Stripe maintain strict PCI compliance while letting developers customize checkout experiences?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                We utilize isolated checkout frames (e.g., Stripe Elements). These load in isolated `iFrame` sandboxes hosted on Stripe's PCI-certified origin server. Raw card inputs entered on merchant sites are posted directly to Stripe's tokenization vault from inside the iFrame. The merchant's parent application only interacts with stateless tokens, removing server vulnerability.
+                            </p>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-purple">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q4: How do Lua scripts optimize Token Bucket Rate Limiter latency inside Redis?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Standard rate limit checks require multiple round-trips: reading the token count, evaluating timestamps, updating, and writing back. If a user floods requests, this can saturate connections. Executing rate checks via a **Redis Lua script** compiles the entire multi-step algorithm into a single atomic operation executed directly on the Redis engine, keeping checks to sub-1ms.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: UNIFIED BLUEPRINT -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-purple/10 text-brand-purple border border-brand-purple/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified Payment Ingestion Blueprint</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Here is the end-to-end global payment transaction blueprint, detailing the journey of a payment request from the client's screen, through tokenization sandboxes, idempotency check locks, transaction ledgers, bank connectors, and webhook retry engines, directly to the merchant database.
+                    </p>
+
+                    <!-- SVG Diagram 7: Unified Blueprint -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 900 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-purple" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#00d4b2" />
+                                    <stop offset="100%" stop-color="#635bff" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#081226" />
+                                    <stop offset="100%" stop-color="#030814" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path connections -->
+                            <path class="svg-link" d="M 130,130 L 200,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,130 L 380,130" marker-end="url(#arrow)" />
+                            
+                            <!-- Master splits to active EU gateway vs offline SQS -->
+                            <path class="svg-link" d="M 490,130 L 560,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 435,175 L 435,270" marker-end="url(#arrow)" />
+
+                            <!-- Offline route down -->
+                            <path class="svg-link" d="M 435,360 L 435,420" marker-end="url(#arrow)" />
+                            
+                            <path class="svg-link" d="M 495,465 L 560,465" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 670,465 Q 730,465 730,360 L 730,175" marker-end="url(#arrow)" />
+
+                            <!-- Client sends payment -->
+                            <g class="svg-node" transform="translate(20, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT PAY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Submit raw card</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Generates key_x2a</text>
+                            </g>
+
+                            <!-- PCI Tokenization Vault -->
+                            <g class="svg-node" transform="translate(200, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TOKEN VAULT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Isolates raw card</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Returns tok_88</text>
+                            </g>
+
+                            <!-- Ingestion API Gateway -->
+                            <g class="svg-node" transform="translate(380, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#635bff" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGEST GATEWAY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#635bff" text-anchor="middle">Acquires Redis lock</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Checks idempotency</text>
+                            </g>
+
+                            <!-- Charge processing workers (bank APIs) -->
+                            <g class="svg-node" transform="translate(560, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CHARGE WORKER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Bank dynamic check</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Settle: Approved</text>
+                            </g>
+
+                            <!-- Immutable Accounting Ledger -->
+                            <g class="svg-node" transform="translate(380, 270)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ef4444" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LEDGER DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ef4444" text-anchor="middle">Appends transactions</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Zero-sum balance</text>
+                            </g>
+
+                            <!-- Kafka webhook event log -->
+                            <g class="svg-node" transform="translate(380, 420)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#38bdf8" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA WEBHOOK</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#38bdf8" text-anchor="middle">Stores hook logs</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Merchant partitions</text>
+                            </g>
+
+                            <!-- Webhook Delivery Workers -->
+                            <g class="svg-node" transform="translate(560, 420)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DELIVER WORK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Exponential backoff</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">DLQ fallback active</text>
+                            </g>
+
+                            <!-- Merchant Receiver Database -->
+                            <g class="svg-node" transform="translate(730, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MERCHANT CORE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Updates order status</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sub-20ms delivery</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Unified Payment Settlement Walkthrough:</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">01</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">PCI-Compliant Tokenization</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Alice submits payment card details inside isolated iFrame sandboxes, writing raw numbers directly to Stripe's tokenizer vault and returning a stateless token.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">02</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Idempotency check key validation</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The API Ingestion gateway attempts to acquire a short-lived Redis lock using the idempotency key. If a retry is detected, the gateway returns the cached response instantly.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">03</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Token Bucket Rate Limiting</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            A high-performance rate-limiting check executes an atomic Redis Lua script, validating and decrementing available merchant tokens under 1ms.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">04</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Bank API Authentication</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The charge worker retrieves the card details securely using the token and negotiates transactions with external banking network gateways.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">05</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Atomic Double-Entry commits</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Once authorized by the bank, the ledger engine inserts immutable zero-sum debit/credit rows, preserving transactional integrity.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">06</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Webhook Kafka Logging</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The successful payment transaction triggers a Kafka event payload dispatch, logging a pending notification for the merchant.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-purple/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-purple/10 border border-brand-purple/20 flex items-center justify-center font-mono font-bold text-brand-purple flex-shrink-0">07</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Resilient Webhook Dispatch</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Go-based webhook workers read Kafka logs and deliver payloads to merchant endpoints, retrying with exponential backoff and using DLQs during failures.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-purple to-indigo-700 flex items-center justify-center text-white font-black text-sm">S</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Stripe</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-purple hover:bg-brand-purple/5 hover:border-brand-purple/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#idempotency" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Idempotency Keys</a>
+                    <a href="#ledger" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Double-Entry Ledger</a>
+                    <a href="#tokenization" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">PCI Tokenization</a>
+                    <a href="#webhooks" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Webhook Pipelines</a>
+                    <a href="#ratelimit" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Rate Limiter</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Blueprint</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-purple pulse-purple"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Ledger settlement Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

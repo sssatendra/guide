@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eBay System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#0064d2',
+                            red: '#e53238',
+                            gold: '#f5af02',
+                            green: '#86b817',
+                            dark: '#0b0f16',
+                            slate: '#161c28',
+                            card: 'rgba(20, 27, 40, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-blue: #0064d2;
+            --brand-red: #e53238;
+            --brand-gold: #f5af02;
+            --brand-green: #86b817;
+            --brand-dark: #0b0f16;
+            --brand-slate: #161c28;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0b0f16;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-blue);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(20, 27, 40, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(0, 100, 210, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(0, 100, 210, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(22, 28, 40, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-blue {
+            background: linear-gradient(135deg, #7eb3ff 0%, #0064d2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(0, 100, 210, 0.08);
+            border-left: 3px solid var(--brand-blue);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-blue);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #0f1522;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(0, 100, 210, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-blue) !important;
+            fill: #1a2336 !important;
+        }
+
+        .svg-link {
+            stroke: #25334e;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-blue);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-blue);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-blue {
+            animation: pulse-blue-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-blue-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(0, 100, 210, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(0, 100, 210, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(0, 100, 210, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-700 flex items-center justify-center text-white font-bold text-sm">E</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">eBay Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-blue/20">E</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">EBAY</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Real-Time Bidding</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Bidding Scale
+                    </a>
+                    <a href="#concurrency" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Concurrent Locks
+                    </a>
+                    <a href="#sequencing" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Bid Sequencing
+                    </a>
+                    <a href="#broadcaster" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Live Broadcasts
+                    </a>
+                    <a href="#settlement" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Bid Settlement
+                    </a>
+                    <a href="#proxy" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Proxy Bidding
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Bidding Blueprint
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Settlement: &lt; 5ms</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.1.2 • Redlock Consolidated</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Velocity Live Auctions
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            eBay <span class="text-gradient-blue">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the systems that power millisecond auction updates. Explore how eBay achieves strict bidding sequence serialization using **partition-keyed Kafka topics**, handles concurrent auction locks using **Redis Redlock consensus**, and broadcasts active bids via high-throughput WebSockets.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">The Live Bidding Scale</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Live e-commerce bidding presents a complex concurrent transactions challenge. While catalog navigation is highly read-intensive, the closing seconds of a popular auction trigger hundreds of thousands of concurrent writes on a **single item record**. Standard relational databases immediately choke under lock queues. Building this at scale requires strict queue sequencing, in-memory distributed locks, and real-time WebSocket broadcasting meshes.
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">FIFO Sequencing:</strong> Guaranteeing that bids on an item are processed in absolute chronological order down to the millisecond.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Atomic Bid Settle:</strong> Acquiring dynamic locks on individual items to prevent double-bids or stale-bids.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Real-Time Broadcast:</strong> Fanning out the winning bid value instantly to all active watchers under 50ms.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Proxy Bidding Engine:</strong> Managing automated bids matching against player max caps without database locks.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Auctions</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">1.8 Billion+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Simultaneous listings</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Bidding TPS</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">50,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Peak concurrent writes/sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Watchers</div>
+                                    <div class="text-2xl font-black text-emerald-500 font-outfit mt-1">10M+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Connected WebSockets</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Settle Speed</div>
+                                    <div class="text-2xl font-black text-brand-gold font-outfit mt-1">&lt; 5ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Bid lock + update execution</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="concurrency" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Concurrent Bidding Locks (Redis Redlock Consensus)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When thousands of users submit a bid on the same item during its final 3 seconds, writing directly to a database creates massive locking queues. eBay prevents this by placing an **in-memory distributed lock** on the active item ID SKU inside sharded **Redis clusters**, utilizing the **Redlock Consensus Algorithm** to ensure atomic reservation.
+                    </p>
+
+                    <!-- SVG Diagram 1: Bidding Redlocks -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#0064d2" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Coordinator splits to Redis node clusters -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Bidders Influx -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BIDDERS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Submit concurrent bids</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Prime closing seconds</text>
+                            </g>
+
+                            <!-- Bid lock Coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDLOCK COORD</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Distributed locks</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Requires majority</text>
+                            </g>
+
+                            <!-- Redis Lock Node 1 -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS NODE A</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Acquires lock: OK</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Active master</text>
+                            </g>
+
+                            <!-- Redis Lock Node 2 -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS NODE B</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Acquires lock: OK</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Active master</text>
+                            </g>
+
+                            <!-- Redis Lock Node 3 -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e53238" stroke-width="1" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS NODE C</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e53238" text-anchor="middle">Lock Timeout/Fail</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Network split drop</text>
+                            </g>
+
+                            <text x="620" y="225" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e">Consensus Met (2/3 OK)</text>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Consensus Lock Routing
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                When a bid is processed, the coordinator attempts to write a short-lived key containing the bid token (`SET item_uuid bid_token NX PX 500`) across 3 sharded Redis master instances in parallel. If at least 2 out of the 3 instances successfully acknowledge the write, consensus is met, the lock is acquired, and the transaction is committed, guaranteeing absolute safety from concurrent bid-race conditions.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-gold"></span> Dynamic TTL Management
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The lock has an extremely short TTL (Time-To-Live) of 500ms. If a payment check fails or network drops occur, the lock expires automatically, returning the active item to availability pool instantly.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="sequencing" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">FIFO Bid Sequencing & Partition Queues</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Deciding the absolute winner in the final millisecond requires strict first-in-first-out (FIFO) sequencing. Bids cannot be processed in random multithreaded pathways; they must traverse highly ordered partition channels inside **Apache Kafka topics**.
+                    </p>
+
+                    <!-- SVG Diagram 2: Bid Sequencing Queues -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Ingest splits to Kafka Partitions -->
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,140 L 200,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,310 L 200,310" marker-end="url(#arrow)" />
+
+                            <!-- Consumer reads -->
+                            <path class="svg-link" d="M 310,140 Q 365,140 365,205 L 380,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,310 Q 365,310 365,245 L 380,245" marker-end="url(#arrow)" />
+
+                            <!-- Settle out -->
+                            <path class="svg-link" d="M 500,225 L 560,225" marker-end="url(#arrow)" />
+
+                            <!-- Client Influx -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BID INPUTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Dynamic checkouts</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Millions/min</text>
+                            </g>
+
+                            <!-- Kafka Partition 1 (Item ID Hashed) -->
+                            <g class="svg-node" transform="translate(200, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 1</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Strict FIFO order</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Item: #9283_a</text>
+                            </g>
+
+                            <!-- Kafka Partition 2 -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 2</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Strict FIFO order</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Item: #9283_b</text>
+                            </g>
+
+                            <!-- Kafka Partition 3 -->
+                            <g class="svg-node" transform="translate(200, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 3</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Strict FIFO order</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Item: #9283_c</text>
+                            </g>
+
+                            <!-- Bidding State Engine (Go consumers) -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">STATE ENGINE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Consumes in order</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Verifies bid delta</text>
+                            </g>
+
+                            <!-- Atomic Bid Committed State -->
+                            <g class="svg-node" transform="translate(560, 190)">
+                                <rect x="0" y="0" width="100" height="70" rx="8" fill="#22c55e" stroke="none" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#020710" text-anchor="middle">BID SETTLED</text>
+                                <text x="50" y="50" font-family="'Inter', sans-serif" font-size="8" fill="#020710" text-anchor="middle">Committed to disk</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How ordered sequencing operates:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Hash-Key Partitioning:</strong> Every incoming bid request is routed to Kafka using the unique **Item UUID** as the partition hash key. This guarantees that all bids on a specific item end up in the exact same Kafka partition.</li>
+                                <li><strong>Sequential Log Consumption:</strong> Within a partition, Kafka guarantees absolute ordering. Go-based partition consumers process bids one-by-one sequentially, preventing out-of-order race conditions.</li>
+                                <li><strong>Validation Engine:</strong> The consumer thread checks: "Is this bid higher than the active bid + increment value?" If yes, it is committed; if no, it is discarded instantly.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="broadcaster" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Millisecond Bids Broadcast (WebSocket Mesh)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Once a bid is committed to the database, the new price must be broadcast to all active watchers on that item instantly to trigger the next round of bids. Standard HTTP polling introduces 5-second lags; eBay resolves this using a **WebSocket Broadcaster Fan-Out Mesh**.
+                    </p>
+
+                    <!-- SVG Diagram 3: WebSocket Ticker mesh -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#0064d2" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Proxy splitting to watchers -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active Bid Settle -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">COMMIT EVENT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">New bid committed</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Dispatches event</text>
+                            </g>
+
+                            <!-- Kafka Broadcast Topic -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA LOG</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Broadcast Topic</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Publishes price updates</text>
+                            </g>
+
+                            <!-- Go WebSocket Ticker Gateway -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WS TICKER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Go Broadcaster</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ffans out ticks</text>
+                            </g>
+
+                            <!-- Watcher Client A -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WATCHER A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Active browser socket</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Renders new price</text>
+                            </g>
+
+                            <!-- Watcher Client B -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WATCHER B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Active browser socket</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Renders new price</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> High-Throughput Broadcaster Fan-out
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            When the state engine commits a new bid, it dispatches a lightweight JSON event payload to the **Kafka Broadcast Topic**. Decentralized **Go WebSocket gateway nodes** consume the event, locate the active websocket connections subscribed to that item UUID, and push the price update down open channels to all active screens in under **35ms**, resulting in continuous, responsive updates.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="settlement" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Speed Bid Settlement Ledger</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Committing bid states to persistent storage requires absolute consistency while avoiding write latency. eBay utilizes sharded **PostgreSQL database databases** indexed by Item UUIDs combined with dynamic write buffers to achieve millisecond transaction execution.
+                    </p>
+
+                    <!-- SVG Diagram 4: Bid Ledger Settlement -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 320,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- DB splits -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active Bid Event -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE BID</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Saves bid details</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Updates ledger</text>
+                            </g>
+
+                            <!-- Ingress Bid controller -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS PROXY</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Validation Gateway</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Checks constraints</text>
+                            </g>
+
+                            <!-- Sharded Postgres database database -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">POSTGRES DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Sharded accounts</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Keyed sharding</text>
+                            </g>
+
+                            <!-- Ledger Book (Master) -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LEDGER DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Transaction logs</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Strict audit checks</text>
+                            </g>
+
+                            <!-- Read Cache (Redis) -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS READ MAP</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">Active cache index</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Zero DB latency read</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Sharded Ledger Settlements
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            When the state engine validates a bid, the transactional details (bid UUID, bidder account, dynamic values, timestamp) are written directly to **sharded PostgreSQL database databases** partitioned by item UUIDs.
+                            <br><br>
+                            To prevent database read-locks from choking active writes, concurrent read queries (such as item auctions loading pages) are routed directly to high-capacity **Redis caches** containing active bid indices. When a transaction commits, the Redis cache is updated instantly in under 1.2ms, allowing database disk transactions to execute sequentially in the background.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="proxy" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Automated Proxy Bidding Engine</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        A massive portion of live bidding traffic is generated by automated proxy bidding bots (which immediately raise the price when other users submit a bid up to a predefined limit). Executing these automated loops over standard DB writes creates infinite circular loops. eBay solves this using an **In-Memory Proxy Bidding Engine**.
+                    </p>
+
+                    <!-- SVG Diagram 5: Automated Proxy Bidding -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Flows -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Proxy engine sharding to Redis caps & Autocommit -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active Bid update -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE USER BID</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Raises item price</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Triggers proxy check</text>
+                            </g>
+
+                            <!-- In-Memory Proxy Bidding Engine -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PROXY ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Scans active limits</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Pushes delta bid</text>
+                            </g>
+
+                            <!-- Redis Proxy Limits cache -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ffc72c" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS BOT CAPS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ffc72c" text-anchor="middle">User max caps</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Decoupled proxy storage</text>
+                            </g>
+
+                            <!-- Auto-Raised Bid Settle -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#1fdb6d" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AUTO-COMMIT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#1fdb6d" text-anchor="middle">Committed price</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Increments price automatically</text>
+                            </g>
+
+                            <!-- Notify Watchers -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">NOTIFY CHANNEL</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Ffans out new price</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">WebSocket dispatches</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Decoupled Proxy Calculations
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed font-sans font-light">
+                            When you set a maximum bid of $500 on a $200 item, the system does not place a $500 bid instantly.
+                            <br><br>
+                            Instead, your max cap is encrypted and cached inside highly available **Redis clusters**.
+                            When another user places an active bid of $210, the **Proxy Bidding Engine** intercepts the request, reads your Redis bot cap, computes the required delta increment (e.g. $215), and commits the auto-raised bid instantly in under **&lt; 2.5ms**.
+                            This entirely in-memory evaluation avoids database roundtrips, allowing thousands of bot updates to settle under peak seconds.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Expert Interview Q&A</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Prepare for elite system design loops. Study the exact technical distributed locking and bid sequencing questions and production-ready answers.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q1. How does the system handle an instantaneous connection crash during an active lock reservation?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By applying short-lived lease durations to Redis distributed locks (**500ms TTL**). If the network crashes mid-transaction, the lock expires automatically, returning the active item to availability pool without blocking other bids.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q2. Why is partition-keyed sharding selected in Kafka over standard concurrent queues?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> Partition-keyed sharding using Item UUIDs ensures that all bids on a specific item always land in the exact same Kafka partition. Within a partition, Kafka guarantees absolute chronological ordering, allowing Go partition consumers to process bids sequentially and prevent concurrent out-of-order race conditions.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q3. How is database thread starvation prevented during peak closing seconds?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By separating write execution pipelines from active read traffic. Bids settle asynchronously on sharded PostgreSQL databases. Active read requests (e.g. watchers loading auction pages) are routed directly to high-capacity **Redis caches** containing active bid indices. When a transaction commits, the cache is updated instantly in under 1.2ms, allowing datastores to execute writes in the background.
+                            </p>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3">
+                            <h3 class="text-lg font-outfit font-bold text-white text-gradient-blue">Q4. How does the system scale proxy bots calculations without database lockups?</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed font-light font-sans">
+                                <strong class="text-white">Answer:</strong> By computing bot updates **in-memory**. User maximum caps are cached inside Redis clusters. When other users place a bid, the in-memory **Proxy Bidding Engine** reads the cap, computes the delta increment, and commits the auto-raised bid in under 2.5ms without executing database lockups.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8 -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified Bidding Blueprint</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Below is the ultimate, unified architecture topology powering eBay's real-time live bidding network. It traces bidder clicks to partitioned Kafka queues, in-memory distributed locks, proxy bidding engines, and high-capacity WebSocket broadcasters.
+                    </p>
+
+                    <!-- Comprehensive Unified SVG Diagram -->
+                    <div class="svg-container glass-card p-6 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 -80 900 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#0064d2" />
+                                </linearGradient>
+                                <linearGradient id="grad-red" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#ff7e86" />
+                                    <stop offset="100%" stop-color="#e53238" />
+                                </linearGradient>
+                                <linearGradient id="grad-gold" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#fef08a" />
+                                    <stop offset="100%" stop-color="#f5af02" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161c28" />
+                                    <stop offset="100%" stop-color="#0b0f16" />
+                                </linearGradient>
+                                <marker id="arrow-gray" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                                <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#0064d2" />
+                                </marker>
+                            </defs>
+
+                            <!-- Background Grid -->
+                            <g stroke="#ffffff" stroke-opacity="0.015" stroke-width="1">
+                                <path d="M 0,-50 L 900,-50 M 0,0 L 900,0 M 0,50 L 900,50 M 0,100 L 900,100 M 0,150 L 900,150 M 0,200 L 900,200 M 0,250 L 900,250 M 0,300 L 900,300 M 0,350 L 900,350 M 0,400 L 900,400 M 0,450 L 900,450 M 0,500 L 900,500" />
+                                <path d="M 100,-80 L 100,550 M 200,-80 L 200,550 M 300,-80 L 300,550 M 400,-80 L 400,550 M 500,-80 L 500,550 M 600,-80 L 600,550 M 700,-80 L 700,550 M 800,-80 L 800,550" />
+                            </g>
+
+                            <!-- ─── PATHS / NETWORKS ─── -->
+                            <!-- Bidder to Gateway -->
+                            <path class="svg-link" d="M 180,275 L 230,275" marker-end="url(#arrow-gray)" />
+                            
+                            <!-- UPPER ROUTE (LOCKING & SEQUENCING) -->
+                            <!-- Ingress LB to 2PC Coordinator -->
+                            <path class="svg-link" d="M 330,260 Q 380,230 380,180 L 400,180" marker-end="url(#arrow-blue)" />
+                            <!-- Coordinator to sharded Order DB -->
+                            <path class="svg-link" d="M 500,180 L 530,180" marker-end="url(#arrow-blue)" />
+                            <!-- Sharded Order DB to Inventory Lock -->
+                            <path class="svg-link" d="M 640,180 L 670,180" marker-end="url(#arrow-blue)" />
+                            <!-- Inventory Lock to SQS Queue -->
+                            <path class="svg-link" d="M 780,180 L 810,180" marker-end="url(#arrow-blue)" />
+
+                            <!-- LOWER ROUTE (BROADCAST FAN-OUT) -->
+                            <!-- Ingest to SQS async downstream -->
+                            <path class="svg-link" d="M 330,290 Q 380,320 380,380 L 400,380" marker-end="url(#arrow-blue)" />
+                            <!-- Async lambda directly back to Client -->
+                            <path class="svg-link" d="M 510,380 Q 280,380 280,320 Q 280,290 180,285" marker-end="url(#arrow-blue)" />
+
+                            <!-- REDLOCK CONNECTIONS -->
+                            <!-- Ringpop in-memory state lookup -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 585,15 L 585,65" marker-end="url(#arrow-gray)" />
+                            <!-- Match engine reservation locks -->
+                            <path class="svg-link" stroke-dasharray="2,2" d="M 640,100 L 730,100 L 730,340 M 730,340 L 510,380" marker-end="url(#arrow-gray)" />
+
+                            <!-- ─── GRAPH NODES ─── -->
+
+                            <!-- 1. Client Bidder App -->
+                            <g class="svg-node" transform="translate(30, 230)">
+                                <rect x="0" y="0" width="150" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1.5" />
+                                <text x="75" y="30" font-family="'Outfit', sans-serif" font-weight="bold" font-size="12" fill="#fff" text-anchor="middle">USER APP (EBAY)</text>
+                                <text x="75" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Submits bid</text>
+                                <text x="75" y="70" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">WebSocket broadcasts</text>
+                            </g>
+
+                            <!-- 2. API Ingress Gateway -->
+                            <g class="svg-node" transform="translate(230, 230)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGRESS GATE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Zuul spatial router</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">SSL termination</text>
+                            </g>
+
+                            <!-- 3. Redlock Coordinator -->
+                            <g class="svg-node" transform="translate(400, 135)">
+                                <rect x="0" y="0" width="100" height="90" rx="8" fill="url(#grad-dark)" stroke="#387ed1" stroke-width="1.5" />
+                                <text x="50" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDLOCK ENGINE</text>
+                                <text x="50" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#387ed1" text-anchor="middle">Consensus locks</text>
+                                <text x="50" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">500ms dynamic TTL</text>
+                            </g>
+
+                            <!-- 4. Sharded Bidding Queue (Kafka Partition) -->
+                            <g class="svg-node" transform="translate(530, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#0064d2" stroke-width="2" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BID QUEUE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#0064d2" text-anchor="middle">Strict FIFO log</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Partitioned by Item</text>
+                            </g>
+
+                            <!-- 5. PostgreSQL Shards DB -->
+                            <g class="svg-node" transform="translate(670, 135)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LEDGER DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">Persistent shards</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Saves bid details</text>
+                            </g>
+
+                            <!-- 6. Active Watchers Broadcaster (WebSockets) -->
+                            <g class="svg-node" transform="translate(810, 135)">
+                                <rect x="0" y="0" width="80" height="90" rx="8" fill="url(#grad-dark)" stroke="#22c55e" stroke-width="1.5" />
+                                <text x="40" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WS TICKER</text>
+                                <text x="40" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#22c55e" text-anchor="middle">Go Broadcaster</text>
+                                <text x="40" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ffans out ticks</text>
+                            </g>
+
+                            <!-- 7. In-Memory Proxy Bidding Engine -->
+                            <g class="svg-node" transform="translate(400, 335)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ff9900" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PROXY ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ff9900" text-anchor="middle">In-memory bot engine</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Computes delta increments</text>
+                            </g>
+
+                            <!-- 8. Redis Proxy Limits cache -->
+                            <g class="svg-node" transform="translate(530, -50)">
+                                <rect x="0" y="0" width="110" height="65" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BOT LIMITS</text>
+                                <text x="55" y="47" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">User max caps</text>
+                            </g>
+
+                            <!-- 9. Redis Active Bids Cache -->
+                            <g class="svg-node" transform="translate(530, 65)">
+                                <rect x="0" y="0" width="110" height="45" rx="8" fill="url(#grad-red)" stroke="none" />
+                                <text x="55" y="27" font-family="'Outfit', sans-serif" font-weight="bold" font-size="10" fill="#fff" text-anchor="middle">ACTIVE BIDS CACHE</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step-by-Step Points-Wise Breakdown -->
+                    <div class="space-y-6 pt-6">
+                        <h3 class="text-2xl font-outfit font-black text-white flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-blue"></span> Live Bidding Lifecycle: Step-by-Step
+                        </h3>
+                        
+                        <div class="space-y-4 font-sans font-light text-slate-300 text-sm md:text-base leading-relaxed">
+                            
+                            <!-- Step 1 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">01</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">User Bid Submission (Ingress Gateway Ingest)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        When a user submits a bid, a secure session opens via regional Ingress gateways. Gateways decrypt SSL, validate user sessions, and check rate-limiting tokens in under 3ms.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">02</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Distributed Lock Acquisition (Redis Redlock Consensus)</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The coordinator attempts to write the bid key across 3 sharded Redis master instances in parallel. If at least 2 instances acknowledge the write, consensus is met, the lock is acquired, and the transaction proceeds.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">03</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Kafka FIFO Sequencing</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Approved bids publish to highly ordered **Kafka partitions** sharded by Item UUIDs. Partition consumers process bids sequentially, preventing out-of-order race conditions.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">04</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Bid Valuation & State Commitment</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The state engine consumer thread validates if the bid is higher than the active bid + increment value. If valid, the new active bid state is committed.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 5 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">05</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">In-Memory Proxy Bidding Evaluation</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        In parallel, the **Proxy Bidding Engine** reads encrypted maximum caps from Redis, computes required delta increments, and commits the auto-raised bid in under 2.5ms without executing database locks.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 6 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">06</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">Sharded DB Ledger Settlement</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        Approved transactional details write directly to **sharded PostgreSQL database shards** partitioned by Item UUIDs in the background, keeping disk transactions decoupled.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Step 7 -->
+                            <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">07</div>
+                                <div class="space-y-1.5">
+                                    <h4 class="font-outfit font-bold text-white text-base">WebSocket Broadcast Fan-out</h4>
+                                    <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                        The committed bid price publishes to a **Kafka Broadcast Topic**. Go-based WebSocket gateways consume the event and push the price update down open channels to all active watchers in under 35ms.
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-sm">E</span>
+                        <h2 class="font-outfit font-bold text-white text-base">eBay</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#concurrency" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Concurrent Locks</a>
+                    <a href="#sequencing" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Bid Sequencing</a>
+                    <a href="#broadcaster" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Live Broadcasts</a>
+                    <a href="#settlement" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Bid Settlement</a>
+                    <a href="#proxy" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Proxy Bidding</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Bidding Blueprint</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Redlock Consensus Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

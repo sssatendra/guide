@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile E2E Testing Mastery — Detox, Appium & WebdriverIO</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c10;
+    --surface: #14161d;
+    --surface2: #1c1f29;
+    --border: rgba(255,255,255,0.06);
+    --text: #e2e4e9;
+    --muted: #707584;
+    --accent: #8b5cf6;
+    --accent-glow: rgba(139,92,246,0.15);
+    --accent2: #38bdf8;
+    --accent3: #10b981;
+    --accent4: #f43f5e;
+    --accent5: #fbbf24;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Fraunces', serif;
+    --body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 270px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .main { flex: 1; max-width: 820px; padding: 3rem 3.5rem; overflow-x: hidden; }
+
+  /* Sidebar logo */
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .sidebar-logo .tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .sidebar-logo h2 { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--text); }
+  .nav-section { padding: 0.25rem 0; }
+  .nav-section-title { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 0.75rem 1.5rem 0.25rem; }
+  .nav-link {
+    display: block;
+    padding: 0.4rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(139,92,246,0.05); }
+
+  /* Progress bar */
+  .progress-bar { position: fixed; top: 0; left: 0; width: 0; height: 2px; background: var(--accent); z-index: 100; transition: width 0.1s; }
+
+  /* Sticky Main Header */
+  .main-header {
+    position: sticky;
+    top: 0;
+    background: rgba(11, 12, 16, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 3.5rem;
+    margin: -3rem -3.5rem 3rem -3.5rem;
+    z-index: 90;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: color 0.2s, transform 0.2s;
+    font-weight: 500;
+  }
+
+  .back-btn:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+  }
+
+  .back-btn svg {
+    transition: transform 0.2s;
+  }
+
+  .back-btn:hover svg {
+    transform: translateX(-2px);
+  }
+
+  .menu-toggle {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .menu-toggle:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+  }
+
+  /* Search box styling */
+  .search-wrapper {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+  }
+
+  .search-input-header {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 36px 8px 16px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+
+  .search-input-header:focus {
+    background: rgba(28, 31, 41, 0.6);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+
+  .search-icon-svg {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    width: 14px;
+    height: 14px;
+    transition: color 0.2s;
+  }
+
+  .search-input-header:focus ~ .search-icon-svg {
+    color: var(--accent);
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+  }
+
+  .search-clear-btn:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .search-highlight {
+    background: rgba(139, 92, 246, 0.25);
+    color: #fff;
+    border-bottom: 2px solid var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  /* Content sections */
+  section { margin-bottom: 4rem; padding-top: 1rem; }
+  section:first-of-type { padding-top: 0; }
+
+  .section-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+  h1 { font-family: var(--display); font-size: 38px; font-weight: 600; line-height: 1.2; color: var(--text); margin-bottom: 1rem; }
+  h2 { font-family: var(--display); font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 1rem; margin-top: 0.5rem; }
+  h3 { font-family: var(--body); font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; margin-top: 1.5rem; }
+  p { color: #abb2bf; margin-bottom: 1rem; }
+  strong { color: var(--text); font-weight: 500; }
+
+  /* Hero intro */
+  .hero { margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+  .hero p { font-size: 17px; color: #8e95a5; max-width: 600px; }
+
+  /* Callout cards */
+  .callout {
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    border-left: 3px solid;
+    font-size: 14px;
+  }
+  .callout-info { background: rgba(56,189,248,0.08); border-color: var(--accent2); color: #7dd3fc; }
+  .callout-warn { background: rgba(251,191,36,0.08); border-color: var(--accent5); color: #fde047; }
+  .callout-tip { background: rgba(16,185,129,0.08); border-color: var(--accent3); color: #6ee7b7; }
+  .callout-danger { background: rgba(244,63,94,0.08); border-color: var(--accent4); color: #fda4af; }
+  .callout strong { color: inherit; }
+
+  /* Code blocks */
+  pre {
+    background: #06070a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  code { font-family: var(--mono); font-size: 13px; }
+  p code, li code {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent2);
+    font-size: 12px;
+  }
+  .kw { color: #c084fc; }
+  .str { color: #34d399; }
+  .cm { color: #5c6370; font-style: italic; }
+  .attr { color: #60a5fa; }
+  .val { color: #fcd34d; }
+  .tag-c { color: #f87171; }
+
+  /* Conformance grid */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.5rem 0; }
+  .card-3 {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .card-3::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .card-detox::before { background: var(--accent); }
+  .card-appium::before { background: var(--accent2); }
+  .card-wdio::before { background: var(--accent3); }
+  .card-3-name { font-family: var(--mono); font-size: 18px; font-weight: 500; margin-bottom: 4px; }
+  .card-detox .card-3-name { color: var(--accent); }
+  .card-appium .card-3-name { color: var(--accent2); }
+  .card-wdio .card-3-name { color: var(--accent3); }
+  .card-3-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Table styling */
+  .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: #abb2bf; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code { color: #f472b6; }
+
+  /* Interview prep box */
+  .interview-box {
+    background: linear-gradient(135deg, rgba(139,92,246,0.05), rgba(56,189,248,0.05));
+    border: 1px solid rgba(139,92,246,0.18);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .interview-box h3 { color: var(--accent); font-size: 13px; font-family: var(--mono); letter-spacing: 0.08em; margin-bottom: 1rem; margin-top: 0; }
+  .interview-box p { font-size: 14px; color: #abb2bf; margin-bottom: 0.5rem; }
+  .interview-box p:last-child { margin-bottom: 0; }
+  .interview-box strong { color: var(--accent2); }
+
+  /* Section divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2rem 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Keyboards / Badges */
+  .kb-shortcut {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-family: var(--mono);
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .search-input-header:focus ~ .kb-shortcut {
+    display: none;
+  }
+
+  /* Mobile sidebar drawer */
+  .mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(11, 12, 16, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobile-nav-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 2rem 0;
+    z-index: 1001;
+    overflow-y: auto;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+  }
+
+  .mobile-sidebar.active {
+    right: 0;
+  }
+
+  .mobile-sidebar-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .mobile-sidebar-close:hover {
+    color: var(--text);
+  }
+
+  /* Responsive styling */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 2rem 1.5rem; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .main-header {
+      margin: -2rem -1.5rem 2rem -1.5rem;
+      padding: 1rem 1.5rem;
+    }
+    .menu-toggle { display: inline-flex; }
+    .search-wrapper { max-width: 180px; }
+    .kb-shortcut { display: none; }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+  li { color: #abb2bf; font-size: 14px; margin-bottom: 0.4rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="layout">
+  <nav class="sidebar" aria-label="Table of contents">
+    <div class="sidebar-logo">
+      <div class="tag">// TESTING MASTERY</div>
+      <h2>Mobile E2E Hub</h2>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">CORE CONCEPTS</div>
+      <a href="#overview" class="nav-link active">Comparison & Overview</a>
+      <a href="#architecture" class="nav-link">Architectural Differences</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">DETOX DEEP DIVE</div>
+      <a href="#detox-arch" class="nav-link">Espresso & EarlGrey Sync</a>
+      <a href="#detox-config" class="nav-link">Configuration & Matchers</a>
+      <a href="#detox-code" class="nav-link">Detox Login Blueprint</a>
+      <a href="#detox-troubleshoot" class="nav-link">Troubleshooting Sync</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">APPIUM MASTERY</div>
+      <a href="#appium-w3c" class="nav-link">W3C WebDriver Protocol</a>
+      <a href="#appium-config" class="nav-link">Server & Capabilities</a>
+      <a href="#appium-code" class="nav-link">Appium JS Blueprint</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">WEBDRIVERIO FLOW</div>
+      <a href="#wdio-framework" class="nav-link">Native Selector Engine</a>
+      <a href="#wdio-hybrid" class="nav-link">Context Switching</a>
+      <a href="#wdio-code" class="nav-link">WDIO Mobile Blueprint</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">ELITE PREP</div>
+      <a href="#matrix" class="nav-link">Framework Selection Matrix</a>
+      <a href="#interview" class="nav-link">Senior Interview Q&A</a>
+    </div>
+  </nav>
+
+  <main class="main" id="main-content">
+
+    <!-- STICKY HEADER -->
+    <header class="main-header" aria-label="Page controls">
+      <div class="header-left">
+        <a href="index.html" class="back-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Hub
+        </a>
+        <button class="menu-toggle" aria-expanded="false" aria-label="Open navigation menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          Menu
+        </button>
+      </div>
+      <div class="search-wrapper">
+        <input type="text" class="search-input-header" placeholder="Search guide or Q&A..." aria-label="Search guide content">
+        <span class="kb-shortcut" aria-hidden="true">/</span>
+        <button class="search-clear-btn" aria-label="Clear search" type="button">&times;</button>
+        <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero" id="overview">
+      <div class="section-eyebrow">01 — OVERVIEW & COMPARISON</div>
+      <h1>Mobile Testing Mastery<br><em style="font-style:italic;color:#6d7684;">Detox vs. Appium vs. WebdriverIO</em></h1>
+      <p>Automating mobile tests requires choosing between vastly different paradigms. From high-speed **gray-box synchronization** to W3C-compliant **black-box remote protocol wrappers**, this guide covers senior-level architecture, implementations, and interview pipelines.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="card-3 card-detox">
+        <div class="card-3-name">Detox</div>
+        <div class="card-3-desc">Gray-box test runner for React Native. Monitored loop synchronization with EarlGrey & Espresso prevents flakiness by awaiting idle states.</div>
+      </div>
+      <div class="card-3 card-appium">
+        <div class="card-3-name">Appium</div>
+        <div class="card-3-desc">Cross-platform black-box framework wrapping native OS engines (XCUITest & UiAutomator2) under W3C WebDriver.</div>
+      </div>
+      <div class="card-3 card-wdio">
+        <div class="card-3-name">WebdriverIO</div>
+        <div class="card-3-desc">Premium JavaScript framework offering unified APIs over Web, Appium, and Hybrid context engines with outstanding selectors.</div>
+      </div>
+    </div>
+
+    <!-- ARCHITECTURE -->
+    <section id="architecture">
+      <div class="section-eyebrow">02 — ARCHITECTURAL DIFFERENCES</div>
+      <h2>Black-Box vs. Gray-Box paradigms</h2>
+      <p>The core battle in mobile E2E automation centers around **thread synchronization and application internals visibility**.</p>
+      
+      <div class="callout callout-info">
+        <strong>Gray-Box (Detox):</strong> The test runner and the application run in the same environment. The test code has direct insight into the main UI thread, network requests, and React Native bridge queues.
+      </div>
+      
+      <div class="callout callout-warn">
+        <strong>Black-Box (Appium & WDIO):</strong> The runner executes completely external to the application process, dispatching remote HTTP commands across WebDriver sessions. It is completely blind to internal asynchronous states.
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Detox</th>
+              <th>Appium</th>
+              <th>WebdriverIO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Philosophy</strong></td>
+              <td>Gray-Box (Internal Sync)</td>
+              <td>Black-Box (External Driver)</td>
+              <td>Fluent Driver Wrapper (Black-Box)</td>
+            </tr>
+            <tr>
+              <td><strong>Flakiness</strong></td>
+              <td>Very Low (Auto-Sync)</td>
+              <td>Moderate to High</td>
+              <td>Moderate (Mitigated by WDIO Waits)</td>
+            </tr>
+            <tr>
+              <td><strong>Execution Speed</strong></td>
+              <td>Extremely Fast (Local Loop)</td>
+              <td>Slow (HTTP Roundtrips)</td>
+              <td>Slow to Moderate (Optimized client)</td>
+            </tr>
+            <tr>
+              <td><strong>Real Devices</strong></td>
+              <td>Limited / Highly Complex</td>
+              <td>Excellent native support</td>
+              <td>Excellent (Via Appium backend)</td>
+            </tr>
+            <tr>
+              <td><strong>Non-React Native</strong></td>
+              <td>Not Recommended</td>
+              <td>Native iOS/Android supported</td>
+              <td>Supported (Hybrid & Webview too)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="section-divider">DETOX DEEP DIVE</div>
+
+    <!-- DETOX ARCHITECTURE -->
+    <section id="detox-arch">
+      <div class="section-eyebrow">03 — ESPRESSO & EARLGREY SYNC</div>
+      <h2>Inside Detox Auto-Synchronization</h2>
+      <p>Detox does not use implicit, explicit, or sleep intervals. It coordinates directly with the operating system's native testing mechanisms:</p>
+      <ul>
+        <li><strong>EarlGrey (iOS):</strong> A iOS white-box testing library that monitors the dispatch queues, network connections, animations, and the main run loop.</li>
+        <li><strong>Espresso (Android):</strong> The gold standard Android framework tracking tasks in the message queues and async task threads.</li>
+      </ul>
+      <p>Detox intercepts native thread execution and blocks test assertions until all async tasks (like network fetches, layout calculations, and animations) drop to zero activity.</p>
+    </section>
+
+    <!-- DETOX CONFIGURATION -->
+    <section id="detox-config">
+      <div class="section-eyebrow">04 — CONFIGURATION & MATCHERS</div>
+      <h2>Configuring Detox</h2>
+      <p>The standard configuration in modern Detox builds uses `.detoxrc.js` to map configurations:</p>
+<pre><span class="cm">// .detoxrc.js</span>
+module.exports = {
+  <span class="attr">testRunner</span>: {
+    <span class="attr">args</span>: {
+      <span class="attr">$0</span>: <span class="str">'jest'</span>,
+      <span class="attr">config</span>: <span class="str">'e2e/jest.config.js'</span>
+    },
+    <span class="attr">binaryPath</span>: <span class="str">'bin/jest'</span>
+  },
+  <span class="attr">apps</span>: {
+    <span class="attr">ios.sim</span>: {
+      <span class="attr">type</span>: <span class="str">'ios.app'</span>,
+      <span class="attr">binaryPath</span>: <span class="str">'ios/build/Build/Products/Debug-iphonesimulator/MyApp.app'</span>,
+      <span class="attr">build</span>: <span class="str">'xcodebuild -workspace ios/MyApp.xcworkspace -scheme MyApp -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build'</span>
+    },
+    <span class="attr">android.emu</span>: {
+      <span class="attr">type</span>: <span class="str">'android.apk'</span>,
+      <span class="attr">binaryPath</span>: <span class="str">'android/app/build/outputs/apk/debug/app-debug.apk'</span>,
+      <span class="attr">build</span>: <span class="str">'cd android && ./gradlew assembleDebug assembleAndroidTest -DtestBuildType=debug'</span>
+    }
+  },
+  <span class="attr">devices</span>: {
+    <span class="attr">simulator</span>: {
+      <span class="attr">type</span>: <span class="str">'ios.simulator'</span>,
+      <span class="attr">device</span>: { <span class="attr">type</span>: <span class="str">'iPhone 15'</span> }
+    },
+    <span class="attr">emulator</span>: {
+      <span class="attr">type</span>: <span class="str">'android.emulator'</span>,
+      <span class="attr">device</span>: { <span class="attr">avdName</span>: <span class="str">'Pixel_Emu'</span> }
+    }
+  },
+  <span class="attr">configurations</span>: {
+    <span class="attr">ios</span>: {
+      <span class="attr">device</span>: <span class="str">'simulator'</span>,
+      <span class="attr">app</span>: <span class="str">'ios.sim'</span>
+    },
+    <span class="attr">android</span>: {
+      <span class="attr">device</span>: <span class="str">'emulator'</span>,
+      <span class="attr">app</span>: <span class="str">'android.emu'</span>
+    }
+  }
+};</pre>
+    </section>
+
+    <!-- DETOX CODE BLUEPRINT -->
+    <section id="detox-code">
+      <div class="section-eyebrow">05 — DETOX LOGIN BLUEPRINT</div>
+      <h2>Production-Ready Detox Test</h2>
+      <p>Note how Detox uses an intuitive locator syntax leveraging native accessibility identifiers (`testID` in React Native):</p>
+<pre><span class="cm">// e2e/loginFlow.test.js</span>
+describe(<span class="str">'Enterprise Authentication Loop'</span>, () => {
+  beforeAll(<span class="kw">async</span> () => {
+    <span class="kw">await</span> device.launchApp({ <span class="attr">newInstance</span>: <span class="val">true</span> });
+  });
+
+  beforeEach(<span class="kw">async</span> () => {
+    <span class="kw">await</span> device.reloadReactNative();
+  });
+
+  it(<span class="str">'should successfully authorize standard profile'</span>, <span class="kw">async</span> () => {
+    <span class="cm">// Find input via testID accessibility identifier</span>
+    <span class="kw">const</span> usernameInput = element(by.id(<span class="str">'usernameInput'</span>));
+    <span class="kw">const</span> passwordInput = element(by.id(<span class="str">'passwordInput'</span>));
+    <span class="kw">const</span> loginButton = element(by.id(<span class="str">'loginButton'</span>));
+
+    <span class="kw">await</span> expect(usernameInput).toBeVisible();
+    
+    <span class="cm">// Direct native input injection</span>
+    <span class="kw">await</span> usernameInput.typeText(<span class="str">'senior_developer'</span>);
+    <span class="kw">await</span> passwordInput.typeText(<span class="str">'SuperSecretPwd123'</span>);
+    <span class="kw">await</span> passwordInput.tapReturnKey();
+    
+    <span class="kw">await</span> loginButton.tap();
+
+    <span class="cm">// Assert post-login states</span>
+    <span class="kw">await</span> expect(element(by.text(<span class="str">'Welcome, Architect'</span>))).toBeVisible();
+    <span class="kw">await</span> expect(element(by.id(<span class="str">'dashboardRoot'</span>))).toExist();
+  });
+});</pre>
+    </section>
+
+    <!-- DETOX TROUBLESHOOT -->
+    <section id="detox-troubleshoot">
+      <div class="section-eyebrow">06 — TROUBLESHOOTING SYNC</div>
+      <h2>Taming the Sync Engine</h2>
+      <p>Sometimes, infinite animations (like spinning loaders) or repetitive network polling loops will block Detox indefinitely, resulting in **Jest timeouts**.</p>
+      
+      <div class="callout callout-danger">
+        <strong>The Problem:</strong> If a React Native app is polling a backend endpoint every 2 seconds, Detox's network synchronization layer thinks the app is continuously busy and will never proceed.
+      </div>
+
+      <h3>Solution A: Temporary synchronization bypass</h3>
+<pre><span class="cm">// Bypass sync for unstable network polling elements</span>
+<span class="kw">await</span> device.disableSynchronization();
+<span class="kw">await</span> element(by.id(<span class="str">'submitPollingBtn'</span>)).tap();
+<span class="cm">// Re-enable to resume automatic safety loops</span>
+<span class="kw">await</span> device.enableSynchronization();</pre>
+
+      <h3>Solution B: Native animation suppression (Android Gradle)</h3>
+      <p>Ensure that animations are automatically stripped during Gradle builds in your debug environments:</p>
+<pre><span class="cm">// android/app/build.gradle</span>
+android {
+    testOptions {
+        animationsDisabled = <span class="val">true</span>
+    }
+}</pre>
+    </section>
+
+    <div class="section-divider">APPIUM MASTERY</div>
+
+    <!-- APPIUM ARCHITECTURE -->
+    <section id="appium-w3c">
+      <div class="section-eyebrow">07 — W3C WEBDRIVER PROTOCOL</div>
+      <h2>Appium's Client-Server Architecture</h2>
+      <p>Appium sits as a middle-tier translation proxy. It receives standard W3C HTTP WebDriver calls from the test suite client and translates them to native platform drivers:</p>
+      <ul>
+        <li><strong>Android:</strong> Proxies commands to **UiAutomator2** or **Espresso Server** running inside the simulator.</li>
+        <li><strong>iOS:</strong> Proxies commands to Apple's native **XCUITest driver**.</li>
+      </ul>
+      <p>This allows using any language compiler (JS, Python, Java, C#) to write test assertions that execute on physical target hardware.</p>
+    </section>
+
+    <!-- APPIUM CONFIGURATION -->
+    <section id="appium-config">
+      <div class="section-eyebrow">08 — SERVER & CAPABILITIES</div>
+      <h2>W3C Desired Capabilities</h2>
+      <p>Desired capabilities describe the device parameters for the Appium Server instance to initialize the driver session:</p>
+<pre><span class="cm">// Appium Capabilities (W3C standard format)</span>
+const capabilities = {
+  <span class="str">"platformName"</span>: <span class="str">"iOS"</span>,
+  <span class="str">"appium:deviceName"</span>: <span class="str">"iPhone 15 Pro"</span>,
+  <span class="str">"appium:platformVersion"</span>: <span class="str">"17.2"</span>,
+  <span class="str">"appium:automationName"</span>: <span class="str">"XCUITest"</span>,
+  <span class="str">"appium:app"</span>: <span class="str">"/path/to/build/MyApp.app"</span>,
+  <span class="str">"appium:noReset"</span>: <span class="val">true</span>,
+  <span class="str">"appium:newCommandTimeout"</span>: <span class="val">240</span>
+};</pre>
+    </section>
+
+    <!-- APPIUM CODE BLUEPRINT -->
+    <section id="appium-code">
+      <div class="section-eyebrow">09 — APPIUM JS BLUEPRINT</div>
+      <h2>Pure Appium JavaScript Driver Test</h2>
+      <p>Using the official Webdriver client library (`webdriver` or `appium`) to manage sessions:</p>
+<pre><span class="kw">import</span> { remote } <span class="kw">from</span> <span class="str">'webdriverio'</span>;
+
+describe(<span class="str">'Appium Direct Native Flow'</span>, () => {
+  <span class="kw">let</span> driver;
+
+  before(async () => {
+    driver = await remote({
+      <span class="attr">path</span>: <span class="str">'/wd/hub'</span>,
+      <span class="attr">port</span>: <span class="val">4723</span>,
+      <span class="attr">capabilities</span>
+    });
+  });
+
+  after(async () => {
+    <span class="kw">await</span> driver.deleteSession();
+  });
+
+  it(<span class="str">'should select and submit'</span>, async () => {
+    <span class="cm">// Locating via Accessibility Identifier (~ is shorthand)</span>
+    <span class="kw">const</span> submitButton = <span class="kw">await</span> driver.$(<span class="str">'~submitBtnId'</span>);
+    
+    <span class="kw">await</span> submitButton.waitForDisplayed({ <span class="attr">timeout</span>: <span class="val">5000</span> });
+    <span class="kw">await</span> submitButton.click();
+    
+    <span class="cm">// Asserting header matches</span>
+    <span class="kw">const</span> header = <span class="kw">await</span> driver.$(<span class="str">'//XCUIElementTypeStaticText[@name="Success"]'</span>);
+    <span class="kw">await</span> expect(header).toBeDisplayed();
+  });
+});</pre>
+    </section>
+
+    <div class="section-divider">WEBDRIVERIO FLOW</div>
+
+    <!-- WDIO FRAMEWORK -->
+    <section id="wdio-framework">
+      <div class="section-eyebrow">10 — NATIVE SELECTOR ENGINE</div>
+      <h2>WebdriverIO Native Selector Engine</h2>
+      <p>WebdriverIO makes mobile automation painless by packaging Appium drivers under modern **fluent API abstractions**. Locator selectors are resolved automatically on the backend:</p>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Format</th>
+              <th>Platform Target</th>
+              <th>Under-the-hood Mechanism</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>$('~ID')</code></td>
+              <td>Both Platforms</td>
+              <td>Accessibility ID Selector (Highly Recommended)</td>
+            </tr>
+            <tr>
+              <td><code>$('android=new UiSelector().text("OK")')</code></td>
+              <td>Android Only</td>
+              <td>Direct UI Automator API Access (Very powerful)</td>
+            </tr>
+            <tr>
+              <td><code>$('-ios class chain:**/XCUIElementTypeButton[`name == "OK"`]')</code></td>
+              <td>iOS Only</td>
+              <td>XCUITest Class Chain Selector (Fastest on iOS)</td>
+            </tr>
+            <tr>
+              <td><code>$('//button')</code></td>
+              <td>Both Platforms</td>
+              <td>XPath Engine (Slowest; avoid nesting deeply)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- WDIO HYBRID -->
+    <section id="wdio-hybrid">
+      <div class="section-eyebrow">11 — CONTEXT SWITCHING</div>
+      <h2>Hybrid Apps & Webviews</h2>
+      <p>A hybrid application contains both native wrappers and embedded WebViews. To automate web interactions inside a native frame, you must perform a context switch:</p>
+<pre><span class="cm">// Context switching pipeline in WebdriverIO</span>
+async <span class="kw">function</span> <span class="attr">switchToWebView</span>(driver) {
+  <span class="kw">const</span> contexts = <span class="kw">await</span> driver.getContexts();
+  
+  <span class="cm">// contexts = ['NATIVE_APP', 'WEBVIEW_com.myenterprise.app']</span>
+  <span class="kw">const</span> webviewContext = contexts.find(c => c.includes(<span class="str">'WEBVIEW'</span>));
+  
+  <span class="kw">if</span> (webviewContext) {
+    <span class="kw">await</span> driver.switchContext(webviewContext);
+    console.log(<span class="str">'Switched context to WebView! DOM elements are now accessible.'</span>);
+  } <span class="kw">else</span> {
+    <span class="kw">throw new Error</span>(<span class="str">'WebView context not found.'</span>);
+  }
+}
+
+async <span class="kw">function</span> <span class="attr">switchToNative</span>(driver) {
+  <span class="kw">await</span> driver.switchContext(<span class="str">'NATIVE_APP'</span>);
+}</pre>
+    </section>
+
+    <!-- WDIO CODE BLUEPRINT -->
+    <section id="wdio-code">
+      <div class="section-eyebrow">12 — WDIO MOBILE BLUEPRINT</div>
+      <h2>Unified WebdriverIO Mobile Flow</h2>
+      <p>The standard `wdio.conf.js` integration allows writing structured, clean code blocks:</p>
+<pre><span class="cm">// wdio.conf.js</span>
+export <span class="kw">const</span> config = {
+  <span class="attr">runner</span>: <span class="str">'local'</span>,
+  <span class="attr">port</span>: <span class="val">4723</span>,
+  <span class="attr">specs</span>: [<span class="str">'./test/specs/**/*.js'</span>],
+  <span class="attr">services</span>: [<span class="str">'appium'</span>],
+  <span class="attr">capabilities</span>: [{
+    <span class="attr">platformName</span>: <span class="str">'Android'</span>,
+    <span class="str">'appium:deviceName'</span>: <span class="str">'Emulator'</span>,
+    <span class="str">'appium:automationName'</span>: <span class="str">'UiAutomator2'</span>,
+    <span class="str">'appium:app'</span>: <span class="str">'./bin/app-debug.apk'</span>
+  }]
+};
+
+<span class="cm">// test/specs/test.spec.js</span>
+describe(<span class="str">'Hybrid App Checkout'</span>, () => {
+  it(<span class="str">'should purchase items in WebView'</span>, async () => {
+    <span class="cm">// 1. Click native shop entry button</span>
+    <span class="kw">const</span> shopBtn = <span class="kw">await</span> $(<span class="str">'~native-shop-icon'</span>);
+    <span class="kw">await</span> shopBtn.click();
+
+    <span class="cm">// 2. Switch context to purchase WebView</span>
+    <span class="kw">await</span> browser.waitUntil(async () => {
+      <span class="kw">const</span> ctx = <span class="kw">await</span> browser.getContexts();
+      <span class="kw">return</span> ctx.length > <span class="val">1</span>;
+    }, { <span class="attr">timeout</span>: <span class="val">8000</span> });
+    
+    <span class="kw">const</span> contexts = <span class="kw">await</span> browser.getContexts();
+    <span class="kw">await</span> browser.switchContext(contexts[<span class="val">1</span>]);
+
+    <span class="cm">// 3. Interact with standard DOM inputs inside the webview context</span>
+    <span class="kw">const</span> checkoutInput = <span class="kw">await</span> $(<span class="str">'#checkout-email-input'</span>);
+    <span class="kw">await</span> checkoutInput.setValue(<span class="str">'lead_architect@enterprise.com'</span>);
+    
+    <span class="kw">const</span> purchaseBtn = <span class="kw">await</span> $(<span class="str">'input[type="submit"]'</span>);
+    <span class="kw">await</span> purchaseBtn.click();
+
+    <span class="cm">// 4. Return control back to native wrapper thread</span>
+    <span class="kw">await</span> browser.switchContext(<span class="str">'NATIVE_APP'</span>);
+    <span class="kw">await</span> expect($(<span class="str">'~native-success-badge'</span>)).toBeDisplayed();
+  });
+});</pre>
+    </section>
+
+    <div class="section-divider">COMPARATIVE SELECTION</div>
+
+    <!-- SELECTION MATRIX -->
+    <section id="matrix">
+      <div class="section-eyebrow">13 — FRAMEWORK SELECTION MATRIX</div>
+      <h2>Framework Selection Decision Matrix</h2>
+      <p>Use this architectural reference when advising startup vs. enterprise infrastructure scaling decisions:</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Criteria</th>
+              <th>Choose Detox</th>
+              <th>Choose Appium / WebdriverIO</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Stack Composition</strong></td>
+              <td>Solely React Native projects.</td>
+              <td>Native iOS/Android, Hybrid, Flutter, or Web.</td>
+            </tr>
+            <tr>
+              <td><strong>Team Background</strong></td>
+              <td>React Native / Frontend developers.</td>
+              <td>Dedicated QA Automation Engineers.</td>
+            </tr>
+            <tr>
+              <td><strong>Pipeline Constraints</strong></td>
+              <td>Needs fast local feedback and low CI noise.</td>
+              <td>Requires massive coverage, real device farms (SauceLabs, BrowserStack).</td>
+            </tr>
+            <tr>
+              <td><strong>Third-party SDK Integration</strong></td>
+              <td>Difficult. Mocking needed for Google Auth / Stripe.</td>
+              <td>Excellent. Cross-app automation support.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- INTERVIEW PREP -->
+    <section id="interview">
+      <div class="section-eyebrow">14 — SENIOR INTERVIEW Q&A</div>
+      <h2>Elite Interview Q&A — Mobile Testing</h2>
+
+      <div class="interview-box">
+        <h3>Q: How does Detox avoid the use of implicit and explicit wait loops, and what is idle resources tracking?</h3>
+        <p><strong>Say:</strong> "Detox achieves automatic synchronization by being a gray-box runner. It compiles and embeds native hooks (via EarlGrey on iOS and Espresso on Android) inside the test binary. These hooks monitor the system queue for any network actions, timer schedules, React Native bridge traffic, and animations. The runner automatically blocks command execution and assertions until the monitored thread resources go completely idle. This entirely eliminates hardcoded wait sleeps, making tests deterministic and fast."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: Under what conditions does the Detox sync loop fail, and how do you resolve it?</h3>
+        <p><strong>Say:</strong> "The auto-sync engine hangs if the app has continuous asynchronous execution. For example, if there is a persistent WebSocket connection, recursive network polling, or infinite UI loop loaders (like an active spinner). Since resources never drop to idle, Detox hits a test timeout. We resolve this by either disabling synchronization temporarily using <code>device.disableSynchronization()</code> for that specific step, or by adjusting the React Native code to suppress animations and polling inside the test environment using configuration flags."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: In WebdriverIO, how do you handle hybrid applications, and what is the context switching process?</h3>
+        <p><strong>Say:</strong> "Hybrid mobile apps run native wrappers alongside one or more embedded HTML WebViews. To interact with elements inside a WebView, we must switch the driver's target context. In WebdriverIO, I call <code>browser.getContexts()</code> which returns an array such as <code>['NATIVE_APP', 'WEBVIEW_com.myapp']</code>. I then target the web container with <code>browser.switchContext('WEBVIEW_com.myapp')</code>. Once switched, the API queries the DOM tree instead of native elements. When finished, I switch back by passing <code>'NATIVE_APP'</code>."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: Why is Accessibility ID preferred over XPath for locating mobile elements in Appium/WDIO?</h3>
+        <p><strong>Say:</strong> "First, **performance**. Computing XPath queries on mobile requires UiAutomator2 or XCUITest to recursively walk the entire application hierarchy XML tree, which takes hundreds of milliseconds on deep trees. Accessibility ID matches instantly via direct operating system lookups. Second, **stability**. XPath changes when layouts or visual structures adjust, making tests extremely fragile. Accessibility IDs remain static across design refactors."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: How do you mock third-party native views or SDKs (like Facebook Auth or Google Maps) in Detox?</h3>
+        <p><strong>Say:</strong> "Since Detox is restricted to gray-box testing, interacting with third-party apps or system dialogues (like a Chrome Custom Tab for SSO login or a system push prompt) is difficult or blocked. We handle this by **compiling a mock build flavor** (e.g. using React Native mock files like `.e2e.js` or dependency injection). We mock out the authentication module or maps wrapper to immediately trigger mock successful callbacks in debug configurations rather than launching actual native external sheets."</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = (window.scrollY / total) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const sections = document.querySelectorAll('section, .hero');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + entry.target.id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // --- Search and Mobile Menu Logic ---
+  const searchInput = document.querySelector('.search-input-header');
+  const searchClearBtn = document.querySelector('.search-clear-btn');
+  const shortcutHint = document.querySelector('.kb-shortcut');
+  const desktopSidebar = document.querySelector('.sidebar');
+  
+  // Store original HTML of each section to cleanly restore on query reset
+  const originalHTMLMap = new Map();
+  const searchTargets = document.querySelectorAll('section, .hero, .main > p, .main > ul, .main > .callout, .grid-3');
+  
+  searchTargets.forEach((el) => {
+    originalHTMLMap.set(el, el.innerHTML);
+  });
+
+  // Recursive highlight text nodes
+  function highlightText(element, regex) {
+    const nodes = [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+      const parent = node.parentNode;
+      if (parent) {
+        const parentTag = parent.tagName.toUpperCase();
+        if (parentTag !== 'SCRIPT' && parentTag !== 'STYLE' && parentTag !== 'CODE' && parentTag !== 'PRE') {
+          nodes.push(node);
+        }
+      }
+    }
+    
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const textNode = nodes[i];
+      const match = textNode.nodeValue.match(regex);
+      if (match) {
+        const span = document.createElement('span');
+        span.innerHTML = textNode.nodeValue.replace(regex, '<mark class="search-highlight">$1</mark>');
+        textNode.parentNode.replaceChild(span, textNode);
+      }
+    }
+  }
+
+  // Handle Search Input
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length > 0) {
+      searchClearBtn.style.display = 'flex';
+      if (shortcutHint) shortcutHint.style.display = 'none';
+      
+      const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      
+      searchTargets.forEach(el => {
+        el.innerHTML = originalHTMLMap.get(el);
+        const text = el.textContent.toLowerCase();
+        if (text.includes(query)) {
+          el.style.display = '';
+          highlightText(el, regex);
+        } else {
+          el.style.display = 'none';
+        }
+      });
+      
+      // Dim unmatched navigation sidebar links
+      navLinks.forEach(link => {
+        const targetId = link.getAttribute('href').substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          if (targetEl.style.display === 'none') {
+            link.style.opacity = '0.25';
+            link.style.pointerEvents = 'none';
+          } else {
+            link.style.opacity = '1';
+            link.style.pointerEvents = 'auto';
+          }
+        }
+      });
+    } else {
+      resetSearch();
+    }
+  });
+
+  function resetSearch() {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    if (shortcutHint) shortcutHint.style.display = 'flex';
+    
+    searchTargets.forEach(el => {
+      el.innerHTML = originalHTMLMap.get(el);
+      el.style.display = '';
+    });
+    
+    navLinks.forEach(link => {
+      link.style.opacity = '1';
+      link.style.pointerEvents = 'auto';
+    });
+  }
+
+  searchClearBtn.addEventListener('click', resetSearch);
+
+  // Focus search with '/' shortcut key
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // Mobile Menu Logic
+  const menuToggle = document.querySelector('.menu-toggle');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  const mobileSidebar = document.getElementById('mobileSidebar');
+
+  // Clone sidebar content dynamically
+  if (mobileSidebar && desktopSidebar) {
+    const desktopLogo = desktopSidebar.querySelector('.sidebar-logo')?.outerHTML || '';
+    const desktopLinks = Array.from(desktopSidebar.querySelectorAll('.nav-section')).map(sec => sec.outerHTML).join('');
+    
+    mobileSidebar.innerHTML = `
+      <button class="mobile-sidebar-close" aria-label="Close menu">&times;</button>
+      ${desktopLogo}
+      <div style="padding: 1rem 0;">
+        ${desktopLinks}
+      </div>
+    `;
+
+    mobileSidebar.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        closeMobileMenu();
+      });
+    });
+
+    const closeBtn = mobileSidebar.querySelector('.mobile-sidebar-close');
+    closeBtn?.addEventListener('click', closeMobileMenu);
+  }
+
+  function openMobileMenu() {
+    mobileNavOverlay.style.display = 'block';
+    mobileNavOverlay.offsetHeight;
+    mobileNavOverlay.classList.add('active');
+    mobileSidebar.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    menuToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMobileMenu() {
+    mobileNavOverlay.classList.remove('active');
+    mobileSidebar.classList.remove('active');
+    document.body.style.overflow = '';
+    menuToggle.setAttribute('aria-expanded', 'false');
+    setTimeout(() => {
+      if (!mobileNavOverlay.classList.contains('active')) {
+        mobileNavOverlay.style.display = 'none';
+      }
+    }, 300);
+  }
+
+  menuToggle?.addEventListener('click', openMobileMenu);
+  mobileNavOverlay?.addEventListener('click', closeMobileMenu);
+</script>
+
+<!-- MOBILE NAV OVERLAY & SIDEBAR -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<aside class="mobile-sidebar" id="mobileSidebar" aria-label="Mobile navigation"></aside>
+
+</body>
+</html>

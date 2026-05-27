@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhatsApp Socket Scaling System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#25d366',
+                            teal: '#075e54',
+                            darkgreen: '#128c7e',
+                            lightgreen: '#dcf8c6',
+                            dark: '#080d0b',
+                            slate: '#0f1714',
+                            card: 'rgba(15, 23, 20, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-green: #25d366;
+            --brand-teal: #075e54;
+            --brand-darkgreen: #128c7e;
+            --brand-dark: #080d0b;
+            --brand-slate: #0f1714;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #080d0b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #15221d;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-green);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(15, 23, 20, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(37, 211, 102, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(37, 211, 102, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(15, 23, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-green {
+            background: linear-gradient(135deg, #a7f3d0 0%, #25d366 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(37, 211, 102, 0.08);
+            border-left: 3px solid var(--brand-green);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-green);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #0b1411;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(37, 211, 102, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-green) !important;
+            fill: #0e1e19 !important;
+        }
+
+        .svg-link {
+            stroke: #162a22;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-green);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-green);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-green {
+            animation: pulse-green-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-green-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(37, 211, 102, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(37, 211, 102, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(37, 211, 102, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-green to-emerald-700 flex items-center justify-center text-white font-bold text-sm">W</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">WhatsApp Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-green to-emerald-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-green/20">W</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">WHATSAPP</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Socket Scale & Chat</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-green hover:bg-brand-green/5 hover:border-brand-green/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-green" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Messaging Scale
+                    </a>
+                    <a href="#signal" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> E2E Encryption
+                    </a>
+                    <a href="#sockets" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> epoll Socket Scaling
+                    </a>
+                    <a href="#offline" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Offline Queues
+                    </a>
+                    <a href="#ack" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Message state (ACKs)
+                    </a>
+                    <a href="#routing" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Global Routing
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Chat Blueprint
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-green pulse-green"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Sockets: 1M+/Node</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.4.0 • Signal Engine</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-green/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-emerald-600/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-green/10 border border-brand-green/20 text-brand-green text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: 100M+ Concurrent Connections
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            WhatsApp <span class="text-gradient-green">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the engineering behind a messaging system handling **billions of messages daily**. Explore Erlang/Go socket managers holding **1M+ active connections per host**, Signal-powered **Double Ratchet E2E Encryption key exchanges**, offline buffering delivery systems, and real-time delivery state tracking.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Throughput Socket Gateway Isolation</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        A global chat infrastructure must isolate massive raw socket connections from heavy business workflows. Holding millions of TCP sockets open requires lean gateways, while authentication, user profiles, and key distribution operate on separate microservices. This prevents gateway nodes from running out of RAM or CPU and ensures a connection drop never impacts transactional databases.
+                    </p>
+
+                    <!-- SVG Diagram 1: Gateway Isolation -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#25d366" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Sockets to Gateways -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Gateways to internal routing vs authentication -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 400,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <!-- Active Clients Sockets -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE CLIENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#25d366" text-anchor="middle">TCP WebSockets</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Persistent Links</text>
+                            </g>
+
+                            <!-- WebSocket Gateway Instances -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SOCKET GWAY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#25d366" text-anchor="middle">Erlang / Go epoll</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Conns Decoupled</text>
+                            </g>
+
+                            <!-- Chat Message Router -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MESSAGE ROUTER</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34d399" text-anchor="middle">Routes live packets</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sub-5ms dispatch</text>
+                            </g>
+
+                            <!-- Authentication Service -->
+                            <g class="svg-node" transform="translate(400, 180)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AUTH GATEWAYS</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34d399" text-anchor="middle">Session validations</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Checks active tokens</text>
+                            </g>
+
+                            <!-- Key Management Server (Signal keys) -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PREKEY SERVER</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#10b981" text-anchor="middle">Signal prekey bundles</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Key exchange engine</text>
+                            </g>
+
+                            <text x="600" y="230" font-family="'Inter', sans-serif" font-size="9" fill="#10b981">Internal Microservices decoupled</text>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-green"></span> Engineering Metrics
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Connection Decoupling:</strong> Socket servers are strictly stateless. They maintain map index references of `UserID -> Connection Socket ID` in local RAM.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Lean Memory footprint:</strong> Every socket connection allocates less than 10KB of memory by tuning raw TCP read/write buffer thresholds on Linux.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Failover Resiliency:</strong> If a socket gateway node goes offline, users simply reconnect to a different cluster node automatically without loss of data.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Connections</div>
+                                    <div class="text-2xl font-black text-brand-green font-outfit mt-1">100 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Concurrent connections</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Socket Capacity</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">1.2 Million+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">TCP links per server node</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Message Volume</div>
+                                    <div class="text-2xl font-black text-emerald-500 font-outfit mt-1">100 Billion+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Daily messages routed</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Routing Speed</div>
+                                    <div class="text-2xl font-black text-emerald-300 font-outfit mt-1">&lt; 15ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Live active user delivery</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="signal" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Signal End-to-End Encryption (Double Ratchet Handshake)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        End-to-End encryption must guarantee that messages are unreadable by anyone—including the chat servers themselves. WhatsApp utilizes the **Signal Protocol** with the **Double Ratchet Algorithm** to rotate keys dynamically on every single message. This establishes forward secrecy (past messages are safe if current keys leak) and break-in recovery.
+                    </p>
+
+                    <!-- SVG Diagram 2: Signal Handshake -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 500,225 L 570,225" marker-end="url(#arrow)" />
+
+                            <!-- Client Alice -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SENDER (ALICE)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">1. Requests Prekeys</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Computes Master Secret</text>
+                            </g>
+
+                            <!-- Prekey Directory Server -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KEY DIRECTORY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Stores Bob's prekeys</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Hands over key package</text>
+                            </g>
+
+                            <!-- Double Ratchet Key Rotation -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DOUBLE RATCHET</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Derives message keys</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Rotates on every text</text>
+                            </g>
+
+                            <!-- Receiver Bob -->
+                            <g class="svg-node" transform="translate(570, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RECEIVER (BOB)</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Decrypts payload</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Matches local keys</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Extended Triple DH (X3DH)
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                To message a user who is currently offline, Alice requests Bob's **One-Time Prekeys**, **Signed Prekeys**, and **Identity Keys** from the directory server. She uses these keys alongside her own keys to run a **Triple Diffie-Hellman (3DH)** exchange. This generates a shared master key, enabling secure E2E communication without Bob having to be online.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Symmetric/Asymmetric Ratchet Loop
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The **Double Ratchet** algorithm combines a Diffie-Hellman key exchange (asymmetric) with a KDF chain (symmetric). Every message uses unique encryption keys derived from the symmetric ratchet, which step forward with every message. When users reply, a new Diffie-Hellman exchange is calculated (asymmetric ratchet), updating the root chain key for total isolation.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="sockets" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Scaling to 1M+ Sockets/Host (Linux epoll Optimization)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Holding 1,000,000 active socket connections on a single machine requires bypassing classic thread-per-connection thread models. In standard models, 1M threads would immediately trigger out-of-memory crashes due to stack allocation sizes. WhatsApp resolves this by running Go/Erlang's **non-blocking asynchronous I/O multiplexers** backed by the Linux kernel's **epoll event loop**.
+                    </p>
+
+                    <!-- SVG Diagram 3: epoll Connection Mesh -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Clients to socket array -->
+                            <path class="svg-link" d="M 130,130 Q 180,130 180,200 L 200,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,320 Q 180,320 180,250 L 200,250" marker-end="url(#arrow)" />
+
+                            <!-- Epoll to event workers -->
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 550,225 550,150 L 580,150" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 550,225 550,300 L 580,300" marker-end="url(#arrow)" />
+
+                            <!-- 1M Clients Sockets -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE PORTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">1M concurrent links</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Idle TCP connections</text>
+                            </g>
+
+                            <!-- Linux kernel epoll listener -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EPOLL INTERFACE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Asynchronous I/O</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Polls active descriptors</text>
+                            </g>
+
+                            <!-- Connection event registry -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EVENT HUB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Triggers on network packet</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dispatches instantly</text>
+                            </g>
+
+                            <!-- Worker Coroutine A (active) -->
+                            <g class="svg-node" transform="translate(580, 105)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WORKER A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Processes text</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Frees immediately</text>
+                            </g>
+
+                            <!-- Worker Coroutine B (idle) -->
+                            <g class="svg-node" transform="translate(580, 255)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WORKER B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sleep state</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Awaiting next trigger</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How Socket Scale is Achieved:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Epoll Thread Decoupling:</strong> Go routines or Erlang processes do not map directly to open TCP connections. Linux's `epoll_wait` keeps connections completely idle in kernel buffers, notifying user space *only* when a network packet arrives on a file descriptor.</li>
+                                <li><strong>TCP Buffer Scaling:</strong> System defaults are tuned (`sysctl.conf`). The minimum read/write memory allocations are compressed to `4096 bytes`, preventing the system memory from running out under massive concurrent loads.</li>
+                                <li><strong>Connection Table Hashing:</strong> Active sockets are registered inside a sharded hash map on each gateway node. This provides O(1) lookups to write outgoing packets to specific user socket descriptors.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="offline" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Offline Buffering & Remote Wakeup Dispatch</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        If a recipient is offline, the gateway cannot deliver the message immediately. Keeping connection threads waiting during offline periods would waste massive thread resources. WhatsApp resolves this by staging messages in **sharded MongoDB/PostgreSQL clusters** as offline queues, waking target devices using **APNS/FCM push notifications**.
+                    </p>
+
+                    <!-- SVG Diagram 4: Offline queueing -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Queue splits to DB vs FCM -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 520,130 Q 560,130 560,200 L 580,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 520,320 Q 560,320 560,250 L 580,250" marker-end="url(#arrow)" />
+
+                            <!-- Active Incoming text -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">LIVE PACKET</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Recipient offline</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Redirecting packet</text>
+                            </g>
+
+                            <!-- Offline coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">OFFLINE ENGI</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Stages buffers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Splits flows</text>
+                            </g>
+
+                            <!-- Sharded Message Vault (Database) -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SHARDED DB</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Saves payload: OK</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Indexed by recipient</text>
+                            </g>
+
+                            <!-- Apple APNS / Google FCM Gateways -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PUSH SERVICE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Triggers APNS/FCM</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dispatches wakeup</text>
+                            </g>
+
+                            <!-- Client Wakes up & Connects -->
+                            <g class="svg-node" transform="translate(580, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT UP</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Fetches offline</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Flushes cache</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Offline Staging & Queue Flushes
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            When the gateway detects a dead socket, it passes the payload to the **Offline Engine**. The message is written to sharded database nodes indexed by target `UserID` and marked as pending. Simultaneously, a push notification triggers. Once the client regains network coverage, it establishes a new WebSocket link to a gateway, automatically flushes all pending database payloads sequentially, and flushes the server database rows.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="ack" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Real-Time Delivery State Tracking (ACK Packet Streams)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Providing real-time visual feedback (single gray tick, double gray tick, double blue tick) requires a fast, low-overhead handshake system. Treating each state change as a heavy database write would immediately saturate database clusters under massive read/write scales. WhatsApp resolves this by routing status updates as lightweight **ACK packet streams**.
+                    </p>
+
+                    <!-- SVG Diagram 5: ACK Packet Streams -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Router splits to sender client -->
+                            <path class="svg-link" d="M 490,225 Q 540,225 540,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 540,225 540,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Recipient Client triggers ACK -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RECIPIENT DEV</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Receives text payload</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Fires ACK packet</text>
+                            </g>
+
+                            <!-- Gateway Node -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">GATEWAY NODE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Parses ACK payload</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Converts to status</text>
+                            </g>
+
+                            <!-- Dynamic Router Mesh -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ROUTER MESH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Locates sender node</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Redirects routing</text>
+                            </g>
+
+                            <!-- Sender Client (gets double gray tick) -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SENDER ACTIVE</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Receives status</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Renders double ticks</text>
+                            </g>
+
+                            <!-- State Store (Redis cache log) -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">STATE LOG</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Updates message ID</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Persistent cache log</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How ACK Packets Achieve Sub-30ms Latency:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Stateless Handshakes:</strong> ACK packets bypass database transaction engines completely if both users are online. The gateway routes the status change directly to the sender's active socket, maintaining total memory agility.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-green font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Batch Updates:</strong> In busy group chats, ACK packets are batched locally on client devices, dispatching updates in 500ms intervals to prevent connection socket flooding.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="routing" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Consistent Hashing & Global Connection Routing</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Routing packets between users connected to different data centers requires a dynamic, highly scalable look-up index. Scanning global SQL maps on every text would create massive operational bottlenecks. WhatsApp resolves this using **Consistent Hashing Rings** combined with **Redis-backed Global Session Maps**.
+                    </p>
+
+                    <!-- SVG Diagram 6: Global routing mesh -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Hashing Ring routing -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <!-- Client sends message -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SENDER NODE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Connected: Gway A</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Target: User Bob</text>
+                            </g>
+
+                            <!-- Consistent Hash Ring Coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">HASH RING</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Consistent Hashing</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Locates target hash</text>
+                            </g>
+
+                            <!-- Datacenter 1 (US Master node) -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="130" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="65" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">US DATACENTER</text>
+                                <text x="65" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Gway Node 12: Active</text>
+                                <text x="65" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Reroutes packet</text>
+                            </g>
+
+                            <!-- Datacenter 2 (EU Node) -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="130" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="65" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EU DATACENTER</text>
+                                <text x="65" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Gway Node 44: Idle</text>
+                                <text x="65" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">No connection found</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Hash Ring Partition Hashing
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                Active user IDs are hashed onto a global consistent hashing circle. This divides connection registries evenly across gateway instances, preventing hot spots and letting operations scale clusters up or down dynamically without breaking active user connections.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Global Routing Session Map
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                To locate which specific gateway node a recipient is connected to, gateways query a high-speed sharded Redis cluster. This cluster serves as a **Global Session Registry**, returning the IP of the active recipient gateway node in under 2ms.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: INTERVIEW QA -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Architect Interview Q&A</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Q1 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-green">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q1: How does WhatsApp ensure 1M+ active connections do not consume too much RAM?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Operating systems default to heavy buffer sizes per TCP connection. To scale to 1M+ active channels per node, we reduce TCP buffer allocations to `4096 bytes` inside the kernel using `sysctl` configs. Additionally, the socket gateway layer is written in Erlang/Go, which relies on lightweight coroutines/processes instead of standard system threads, allocating just `2KB - 10KB` per connection.
+                            </p>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-green">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q2: What happens to messages when the receiver is completely offline?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                If a receiver's socket connection is closed, the messaging plane immediately writes the payload to **sharded MongoDB/Cassandra databases** acting as offline buffer queues. A push notification is then dispatched via Apple APNS or Google FCM. Once the client's device wakes up and connects, it fetches pending payloads sequentially, updates their state, and deletes them from the server.
+                            </p>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-green">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q3: Why is the Signal Protocol's Double Ratchet superior to single-key E2E encryption?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Single-key systems are highly fragile; if a hacker compromises a session key, they can decrypt all historical and future messages. The **Double Ratchet** protocol addresses this by regenerating new symmetric keys for every message and updating the master key on every response. This ensures **Forward Secrecy** and **Break-in Recovery**, meaning compromised keys only expose a tiny message window.
+                            </p>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-green">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q4: How does WhatsApp avoid heavy database transactional writes for double/blue ticks?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Delivery status updates (sent, delivered, read) operate as stateless **ACK packets**. If both clients are active online, the gateway routes status packets directly to open sockets, bypassing storage engines entirely. Updates are only batched and persisted in Redis if the sender is offline, minimizing database locking overheads.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: UNIFIED BLUEPRINT -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-green/10 text-brand-green border border-brand-green/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified Messaging Blueprint</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Here is the end-to-end global message routing blueprint, detailing the journey of a text payload from Alice's device, through local socket servers, Signal encryption layers, offline databases, global datacenter router maps, and FCM push servers, to Bob's receiver screen.
+                    </p>
+
+                    <!-- SVG Diagram 7: Unified Blueprint -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 900 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-green" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#a7f3d0" />
+                                    <stop offset="100%" stop-color="#25d366" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#0f1714" />
+                                    <stop offset="100%" stop-color="#080d0b" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path connections -->
+                            <path class="svg-link" d="M 130,130 L 200,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,130 L 380,130" marker-end="url(#arrow)" />
+                            
+                            <!-- Master splits to active EU gateway vs offline SQS -->
+                            <path class="svg-link" d="M 490,130 L 560,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 435,175 L 435,270" marker-end="url(#arrow)" />
+
+                            <!-- Offline route down -->
+                            <path class="svg-link" d="M 435,360 L 435,420" marker-end="url(#arrow)" />
+                            
+                            <path class="svg-link" d="M 495,465 L 560,465" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 670,465 Q 730,465 730,360 L 730,175" marker-end="url(#arrow)" />
+
+                            <!-- Client Alice -->
+                            <g class="svg-node" transform="translate(20, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ALICE CLIENT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">E2E double-ratchet</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sends text pack</text>
+                            </g>
+
+                            <!-- US Gateway Node (Gateway A) -->
+                            <g class="svg-node" transform="translate(200, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">US GWAY NODE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">1M+ epoll sockets</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Authenticates token</text>
+                            </g>
+
+                            <!-- Global Dispatch Router -->
+                            <g class="svg-node" transform="translate(380, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#25d366" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ROUTER MESH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#25d366" text-anchor="middle">Consistent Hashing</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Checks session map</text>
+                            </g>
+
+                            <!-- Recipient EU Gateway Node (Bob Online) -->
+                            <g class="svg-node" transform="translate(560, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">EU GWAY NODE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Active Bob socket</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Routes live text</text>
+                            </g>
+
+                            <!-- Offline Cache Buffer (Bob Offline) -->
+                            <g class="svg-node" transform="translate(380, 270)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ef4444" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">OFFLINE DB</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ef4444" text-anchor="middle">Stages messages</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Recipient Offline</text>
+                            </g>
+
+                            <!-- FCM/APNS Push Gateway -->
+                            <g class="svg-node" transform="translate(380, 420)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#38bdf8" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FCM/APNS GATE</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#38bdf8" text-anchor="middle">Dispatches APNS/FCM</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Wakes device</text>
+                            </g>
+
+                            <!-- Bob's Reconnected Device -->
+                            <g class="svg-node" transform="translate(560, 420)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BOB DEVICE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Wakes up & connects</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Flushes cache DB</text>
+                            </g>
+
+                            <!-- Receiver Bob Final Screen -->
+                            <g class="svg-node" transform="translate(730, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BOB SCREEN</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Decrypts payload</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Double blue ticks</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Unified Chat Routing Walkthrough:</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">01</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Signal Key Exchange Initiated</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Alice initiates a secure chat by requesting Bob's public prekeys from the directory server, establishing an E2E Double Ratchet session.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">02</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">E2E Encrypted Payload Send</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Alice encrypts the text using unique symmetric message keys and dispatches it over her open WebSocket connection.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">03</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Linux epoll Socket Handling</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The US Socket Gateway processes the packet using a non-blocking epoll worker thread, preserving O(1) gateway RAM agility.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">04</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Consistent Hashing Lookups</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The dispatcher checks consistent hashing rings and the global Redis session maps to locate Bob's active recipient gateway.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">05</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Offline Buffer Queue Staging</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            If Bob is offline, the dispatcher saves the payload to sharded offline tables and triggers an APNS/FCM device wakeup.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">06</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Device Wakeup & Cache Flush</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Bob's client reconnects, establishes a WebSocket session, flushes database pending payloads, and clears server storage.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-green/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center font-mono font-bold text-brand-green flex-shrink-0">07</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Stateless ACK Delivery Loop</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The receiver's screen decrypts the text and fires an ACK packet back. The gateway delivers gray/blue ticks in under 30ms.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-green to-emerald-700 flex items-center justify-center text-white font-black text-sm">W</span>
+                        <h2 class="font-outfit font-bold text-white text-base">WhatsApp</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-green hover:bg-brand-green/5 hover:border-brand-green/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#signal" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">E2E Encryption</a>
+                    <a href="#sockets" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">epoll Sockets</a>
+                    <a href="#offline" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Offline Queues</a>
+                    <a href="#ack" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Delivery States</a>
+                    <a href="#routing" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Global Routing</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Chat Blueprint</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-green pulse-green"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Socket scaling Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

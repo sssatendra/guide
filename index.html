@@ -458,6 +458,9 @@
           <button class="tab-btn" onclick="switchTab('interview')">
             Interview Prep <span class="tab-count" id="count-interview">0</span>
           </button>
+          <button class="tab-btn" onclick="switchTab('system-designs')">
+            Live System Designs <span class="tab-count" id="count-sys-designs">0</span>
+          </button>
         </div>
 
         <input type="text" class="search-input" placeholder="Search guides..." oninput="filterGuides(this.value)">
@@ -972,6 +975,26 @@
           </div>
         </a>
 
+        <!-- Mobile E2E Testing Mastery (Detox, Appium, WebdriverIO) -->
+        <a href="mobile-testing-mastery.html" class="track-card card-interview" style="--theme-color: #8b5cf6; --theme-glow: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📱</div>
+              <span class="card-level">Elite Prep</span>
+            </div>
+            <h3 class="card-title">Mobile E2E Automation</h3>
+            <p class="card-desc">Master senior mobile testing pipelines. Espresso/EarlGrey synchronization in Detox, Desired Capabilities in Appium, context-switching in WebdriverIO, and flakiness reduction.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">14 Sections</span>
+            <div class="start-btn">
+              Prepare Now
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
 
         <!-- JS Interview Guide -->
         <a href="javascript-interview-guide.html" class="track-card card-interview" style="--theme-color: var(--color-js); --theme-glow: rgba(234,179,8,0.15);">
@@ -1183,6 +1206,218 @@
           </div>
         </a>
 
+        <!-- ── LIVE SYSTEM DESIGN TRACKS ── -->
+
+        <!-- Zerodha System Design Case Study -->
+        <a href="system-designs/zerodha.html" class="track-card card-system-designs" style="--theme-color: #f37254; --theme-glow: rgba(243, 114, 84, 0.2); border: 1px solid rgba(243, 114, 84, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📈</div>
+              <span class="card-level">Case Study</span>
+            </div>
+            <h3 class="card-title">Zerodha: High-Frequency Core</h3>
+            <p class="card-desc">Sub-50ms trading scales. Custom Go WebSocket tick fanout, partition-keyed Kafka queues, in-memory RMS margin gates, and sharded PostgreSQL transaction books.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #f37254;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Stripe System Design Case Study -->
+        <a href="system-designs/stripe.html" class="track-card card-system-designs" style="--theme-color: #635bff; --theme-glow: rgba(99, 91, 255, 0.2); border: 1px solid rgba(99, 91, 255, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">💳</div>
+              <span class="card-level">Case Study</span>
+            </div>
+            <h3 class="card-title">Stripe: Payment Gateway</h3>
+            <p class="card-desc">High-integrity transactions scale. Distributed idempotency check keys, double-entry accounting ledgers, PCI-compliant card tokenizers, and resilient webhooks dispatchers.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #635bff;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Netflix System Design Case Study -->
+        <a href="system-designs/netflix.html" class="track-card card-system-designs" style="--theme-color: #e50914; --theme-glow: rgba(229, 9, 20, 0.2); border: 1px solid rgba(229, 9, 20, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🎬</div>
+              <span class="card-level">Case Study</span>
+            </div>
+            <h3 class="card-title">Netflix: Global Streaming</h3>
+            <p class="card-desc">Scale open-connect CDN topologies. Dynamic adaptive bitrate algorithms, active-active Cassandra replication sharding, and resilient microservices fallbacks.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #e50914;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Hotstar Live Broadcast Case Study -->
+        <a href="system-designs/hotstar.html" class="track-card card-system-designs" style="--theme-color: #1fdb6d; --theme-glow: rgba(31, 219, 109, 0.2); border: 1px solid rgba(31, 219, 109, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🏏</div>
+              <span class="card-level">Case Study</span>
+            </div>
+            <h3 class="card-title">Hotstar: Live Broadcast</h3>
+            <p class="card-desc">Scale live streams to 50M+ concurrent screens. Telemetry-based multi-CDN routing, dynamic active-active ABR chunk packaging, server-side ad manifest manipulation, and Edge entitlement token caching.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #1fdb6d;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Uber System Design Case Study -->
+        <a href="system-designs/uber.html" class="track-card card-system-designs" style="--theme-color: #276ef1; --theme-glow: rgba(39, 110, 241, 0.2); border: 1px solid rgba(39, 110, 241, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🚗</div>
+              <span class="card-level" style="border-color: rgba(39, 110, 241, 0.35); color: #276ef1;">Case Study</span>
+            </div>
+            <h3 class="card-title">Uber: Real-time Dispatch</h3>
+            <p class="card-desc">Geospatial indexing structures (H3/S2 spatial libraries). High-frequency supply-demand match engines, Apache Kafka streams, and distributed ledger consistency locks.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #276ef1;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Amazon System Design Case Study -->
+        <a href="system-designs/amazon.html" class="track-card card-system-designs" style="--theme-color: #ff9900; --theme-glow: rgba(255, 153, 0, 0.2); border: 1px solid rgba(255, 153, 0, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📦</div>
+              <span class="card-level" style="border-color: rgba(255, 153, 0, 0.35); color: #ff9900;">Case Study</span>
+            </div>
+            <h3 class="card-title">Amazon: Inventory Settlement</h3>
+            <p class="card-desc">Highly available DynamoDB write structures. Master transactional ledger consistency, asynchronous job streams, and distributed lock mechanics.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #ff9900;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- eBay Bidding System Design Case Study -->
+        <a href="system-designs/ebay.html" class="track-card card-system-designs" style="--theme-color: #0064d2; --theme-glow: rgba(0, 100, 210, 0.2); border: 1px solid rgba(0, 100, 210, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🔨</div>
+              <span class="card-level" style="border-color: rgba(0, 100, 210, 0.35); color: #0064d2;">Case Study</span>
+            </div>
+            <h3 class="card-title">eBay: Real-Time Bidding</h3>
+            <p class="card-desc">Synchronized distributed lock structures. Dynamic bidding queue serialization, millisecond transaction settlement, and consensus validation loops.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #0064d2;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- WhatsApp System Design Case Study -->
+        <a href="system-designs/whatsapp.html" class="track-card card-system-designs" style="--theme-color: #25d366; --theme-glow: rgba(37, 211, 102, 0.2); border: 1px solid rgba(37, 211, 102, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">💬</div>
+              <span class="card-level" style="border-color: rgba(37, 211, 102, 0.35); color: #25d366;">Case Study</span>
+            </div>
+            <h3 class="card-title">WhatsApp: Socket Scaling</h3>
+            <p class="card-desc">Scaling Erlang/Go state socket managers to 1M+ active channels per host. Dynamic end-to-end encryption keys and offline queue delivery mechanisms.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #25d366;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Instagram System Design Case Study -->
+        <a href="system-designs/instagram.html" class="track-card card-system-designs" style="--theme-color: #e1306c; --theme-glow: rgba(225, 48, 108, 0.2); border: 1px solid rgba(225, 48, 108, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">📸</div>
+              <span class="card-level" style="border-color: rgba(225, 48, 108, 0.35); color: #e1306c;">Case Study</span>
+            </div>
+            <h3 class="card-title">Instagram: Activity Graph</h3>
+            <p class="card-desc">Fan-out on write timeline aggregation logs. High-performance media optimization filters, PostgreSQL sharding topologies, and edge cache distributions.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #e1306c;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- Google Search System Design Case Study -->
+        <a href="system-designs/google.html" class="track-card card-system-designs" style="--theme-color: #4285f4; --theme-glow: rgba(66, 133, 244, 0.2); border: 1px solid rgba(66, 133, 244, 0.35);">
+          <div class="card-top">
+            <div class="card-header-row">
+              <div class="card-icon">🔍</div>
+              <span class="card-level" style="border-color: rgba(66, 133, 244, 0.35); color: #4285f4;">Case Study</span>
+            </div>
+            <h3 class="card-title">Google: Search Indexing</h3>
+            <p class="card-desc">Distributed web crawlers. PageRank sparse matrix MapReduce structures, inverted index clusters, and sub-second search query retrieval hubs.</p>
+          </div>
+          <div class="card-footer">
+            <span class="card-duration">Active Guide</span>
+            <div class="start-btn" style="color: #4285f4;">
+              Explore Architecture
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+        </a>
+
         <!-- SPONSORED GRID AD CARD -->
         <div class="track-card sponsored-card" style="--theme-color: #a78bfa; --theme-glow: rgba(167,139,250,0.15);">
           <div class="card-top">
@@ -1273,7 +1508,8 @@
 
         const matchesTab = activeCategory === 'all' || 
                            (activeCategory === 'mastery' && card.classList.contains('card-mastery')) ||
-                           (activeCategory === 'interview' && card.classList.contains('card-interview'));
+                           (activeCategory === 'interview' && card.classList.contains('card-interview')) ||
+                           (activeCategory === 'system-designs' && card.classList.contains('card-system-designs'));
 
         const title = card.querySelector('.card-title').textContent.toLowerCase();
         const desc = card.querySelector('.card-desc').textContent.toLowerCase();
@@ -1291,10 +1527,12 @@
       const all = document.querySelectorAll('.track-card:not(.sponsored-card)').length;
       const mastery = document.querySelectorAll('.card-mastery').length;
       const interview = document.querySelectorAll('.card-interview').length;
+      const sysDesigns = document.querySelectorAll('.card-system-designs').length;
 
       document.getElementById('count-all').textContent = all;
       document.getElementById('count-mastery').textContent = mastery;
       document.getElementById('count-interview').textContent = interview;
+      document.getElementById('count-sys-designs').textContent = sysDesigns;
     }
 
     // Initialize counts on load

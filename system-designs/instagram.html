@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram Activity Graph System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            pink: '#c13584',
+                            purple: '#833ab4',
+                            orange: '#f56040',
+                            gold: '#fcaf45',
+                            dark: '#0a0508',
+                            slate: '#140c11',
+                            card: 'rgba(20, 12, 17, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-pink: #c13584;
+            --brand-purple: #833ab4;
+            --brand-orange: #f56040;
+            --brand-gold: #fcaf45;
+            --brand-dark: #0a0508;
+            --brand-slate: #140c11;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0508;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #22121c;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-pink);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(20, 12, 17, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(193, 53, 132, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(193, 53, 132, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(20, 12, 17, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-pink {
+            background: linear-gradient(135deg, #fcaf45 0%, #f56040 50%, #c13584 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(193, 53, 132, 0.08);
+            border-left: 3px solid var(--brand-pink);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-pink);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #11080e;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(193, 53, 132, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-pink) !important;
+            fill: #220f1b !important;
+        }
+
+        .svg-link {
+            stroke: #25131f;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-pink);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-pink);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-pink {
+            animation: pulse-pink-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-pink-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(193, 53, 132, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(193, 53, 132, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(193, 53, 132, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-pink to-brand-purple flex items-center justify-center text-white font-bold text-sm font-outfit">I</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Instagram Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-pink to-brand-purple flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-pink/20">I</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">INSTAGRAM</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Activity Feed Graph</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-pink hover:bg-brand-pink/5 hover:border-brand-pink/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-pink" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Activity Scale
+                    </a>
+                    <a href="#fanout" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Hybrid Feed Fan-Out
+                    </a>
+                    <a href="#transcoder" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> Media pipeline & CDN
+                    </a>
+                    <a href="#sharding" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Postgres Graph Shards
+                    </a>
+                    <a href="#cache" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Redis Timeline Cache
+                    </a>
+                    <a href="#push" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Push Dispatcher
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Feed Blueprint
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-pink pulse-pink"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Feed latency: &lt; 15ms</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.5.1 • Hybrid Fan-Out</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-pink/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-brand-purple/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-pink/10 border border-brand-pink/20 text-brand-pink text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: High-Performance Social Activity Graphs
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Instagram <span class="text-gradient-pink">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Master the mechanics of high-speed social feeds. Explore how Instagram handles massive writes using **hybrid fan-out topologies (push vs. pull)**, compresses media assets via async transcoder workers, shards high-density followers lists across **PostgreSQL table partitions**, and compiled feeds within sharded **Redis timeline indexes**.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Ingestion vs. Feed Loading Planes</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        At massive scale, social media feeds have heavily asymmetrical traffic profiles. Reading the timeline is 100x more frequent than creating a post. Therefore, writing and reading operations must traverse completely isolated execution routes. This protects the timeline consumption route from database write locks during spike events, like a major live media broadcast or viral meme storm.
+                    </p>
+
+                    <!-- SVG Diagram 1: Ingestion Planes -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-pink" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#f56040" />
+                                    <stop offset="100%" stop-color="#c13584" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Splits to Ingest vs Load feed -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 520,130 Q 570,130 570,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 520,320 Q 570,320 570,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- Active App clients -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE CLIENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#c13584" text-anchor="middle">User App Requests</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Read/Write traffic</text>
+                            </g>
+
+                            <!-- API Gateway Router -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API GATEWAY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#c13584" text-anchor="middle">Decouples planes</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dynamic route splitting</text>
+                            </g>
+
+                            <!-- Ingestion write plane -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WRITE PLANE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f56040" text-anchor="middle">Media uploads</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Async processing queues</text>
+                            </g>
+
+                            <!-- Consumption read plane -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#e1306c" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">READ PLANE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e1306c" text-anchor="middle">Timeline assembly</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fast CDN & Cache layers</text>
+                            </g>
+
+                            <!-- Storage & CDN engine -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DATA LAYER</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#f56040" text-anchor="middle">Sharded DB + Cache</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Decoupled access</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-pink"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-pink font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Hybrid Fan-Out:</strong> Compiling timelines dynamically for regular users (push model) vs. celebrity accounts (pull model).</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-pink font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Graph Sharding:</strong> Scaling relational queries like `SELECT followers WHERE user_id = X` across sharded databases.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-pink font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Media Compression:</strong> Transcoding uploads instantly into multi-bitrate H.264 video and WebP image formats.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-orange-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Users</div>
+                                    <div class="text-2xl font-black text-brand-pink font-outfit mt-1">2 Billion+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Monthly active accounts</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Upload TPS</div>
+                                    <div class="text-2xl font-black text-orange-400 font-outfit mt-1">15,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Media files uploaded / sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Feed Requests</div>
+                                    <div class="text-2xl font-black text-orange-500 font-outfit mt-1">500,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Timeline requests / sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Timeline latency</div>
+                                    <div class="text-2xl font-black text-brand-gold font-outfit mt-1">&lt; 15ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Time to first feed byte</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="fanout" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Hybrid Feed Fan-Out (Push-on-Write vs. Pull-on-Read)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When a normal user uploads a post, it is fanned out to their 500 followers by writing the post ID directly to each follower's pre-compiled **Redis timeline cache** (Push-on-Write). However, doing this for a celebrity account with 100M+ followers would trigger a massive write-amplification spike, blocking cache engines for minutes. Instagram resolves this using a **Hybrid Fan-Out Topology**.
+                    </p>
+
+                    <!-- SVG Diagram 2: Hybrid Fan-out -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Links -->
+                            <path class="svg-link" d="M 130,130 Q 180,130 180,200 L 200,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,320 Q 180,320 180,250 L 200,250" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 L 560,225" marker-end="url(#arrow)" />
+
+                            <!-- Normal User Post (Push route) -->
+                            <g class="svg-node" transform="translate(20, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">NORMAL USER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#e1306c" text-anchor="middle">500 followers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Push-on-write active</text>
+                            </g>
+
+                            <!-- Celebrity Post (Pull route) -->
+                            <g class="svg-node" transform="translate(20, 275)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CELEBRITY USER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">100M+ followers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Pull-on-read active</text>
+                            </g>
+
+                            <!-- Fanout Coordinator Engine -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">HYBRID ROUTER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Evaluates metrics</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Splits push vs pull</text>
+                            </g>
+
+                            <!-- Normal User Precompiled Timeline -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PREBUILT FEED</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Redis timeline log</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Static pre-compiled</text>
+                            </g>
+
+                            <!-- Dynamic Merge Resolver (Bob reads) -->
+                            <g class="svg-node" transform="translate(560, 180)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MERGE RESOLVER</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">Prebuilt + Celeb dynamic</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Renders in under 15ms</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-pink"></span> Push-on-Write (Normal Users)
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                When a user with a low follower count publishes a post, the transaction engine triggers an async background worker. This worker fetches the user's followers list and inserts the post ID directly into each follower's compiled Redis timeline cache. When followers open the app, the timeline loads instantly in a single Redis query without heavy database joins.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-gold"></span> Pull-on-Read (Celebrity Feeds)
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                For celebrity accounts with millions of followers, push fan-out is completely skipped to avoid write amplification. When a follower opens their feed, the app queries the follower's pre-compiled Redis timeline *and* dynamically queries active posts from celebrities they follow in real time. The **Merge Resolver** merges, sorts by timestamp, and serves the combined feed in under 15ms.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="transcoder" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">High-Speed Video Transcoding & CDN Ingestion</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Serving media assets instantly to a global audience requires strict compression. Large, raw video files uploaded from modern phone cameras would saturate client bandwidth, triggering heavy buffer lags. Instagram resolves this by immediately routing uploads through an **Async Transcoder Pipeline** that outputs multi-bitrate H.264 formats, caching them on geo-distributed **Content Delivery Networks (CDNs)**.
+                    </p>
+
+                    <!-- SVG Diagram 3: Transcoder pipeline -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Coordinator splits to transcoder workers -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 515,130 Q 565,130 565,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 515,320 Q 565,320 565,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- Ingest active mobile client -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MOBILE UPLOAD</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#e1306c" text-anchor="middle">Raw HEIC/MP4 files</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Writes to active S3</text>
+                            </g>
+
+                            <!-- Ingestion Stage (Amazon S3 bucket) -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">S3 INGEST VAULT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Raw asset storage</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Dispatches upload event</text>
+                            </g>
+
+                            <!-- Transcoder worker A (Image Resizer) -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">IMAGE COMPRES</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">Converts to WebP</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Compresses sizes</text>
+                            </g>
+
+                            <!-- Transcoder worker B (Video Multi-Bitrate Engine) -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">VIDEO CODER</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">Multi-bitrate MP4</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">H.264 slice encoding</text>
+                            </g>
+
+                            <!-- Geo-Distributed CDN caching edge -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CDN CACHE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Geo-caching edge</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sub-30ms global assets</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How media asset distribution scales:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Pre-Signed Upload URLs:</strong> Client applications request pre-signed upload URLs from the gateway to write directly to **Amazon S3 object stores**, keeping socket gateways isolated from heavy data streams.</li>
+                                <li><strong>Event-Driven Transcoding:</strong> An S3 write event publishes to a Kafka topic, waking up dynamic **resizer and transcoder coroutines**. Images are optimized into WebP, and videos are sliced into multiple resolution chunks.</li>
+                                <li><strong>Adaptive Bitrate Streaming (ABR):</strong> Sliced HLS chunks (ranging from 360p to 1080p) are cached on local CDNs. Player engines on phones dynamically request higher or lower resolution slices depending on active network speeds.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="sharding" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">PostgreSQL Graph Database Sharding</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Managing high-density social connections (followers, following, likes, comments) within a single relational database triggers severe performance degradation. Instagram solves this by splitting core tables across sharded **PostgreSQL database databases** partitioned by **Owner UUIDs**.
+                    </p>
+
+                    <!-- SVG Diagram 4: PostgreSQL Sharding -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Hashing Router splits to shards -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Active Inbound Graph query -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">USER INQUIRY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#e1306c" text-anchor="middle">Get Bob's followers</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Queries graph API</text>
+                            </g>
+
+                            <!-- DB sharding gateway coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SHARD PROXY</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Hashes User ID</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Routes lookup target</text>
+                            </g>
+
+                            <!-- Postgres DB shard A -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DB SHARD A</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">IDs: 0000 - 3333</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Stores: Followers list</text>
+                            </g>
+
+                            <!-- Postgres DB shard B -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DB SHARD B</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">IDs: 3334 - 6666</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Stores: Followers list</text>
+                            </g>
+
+                            <!-- Postgres DB shard C -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DB SHARD C</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34d399" text-anchor="middle">IDs: 6667 - FFFF</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Stores: Followers list</text>
+                            </g>
+
+                            <text x="620" y="225" font-family="'Inter', sans-serif" font-size="9" fill="#10b981">Owner-keyed routing sharding</text>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-pink"></span> Owner-Keyed Partition Hashing
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            Every relationship row is sharded by the unique **Owner User ID**. This guarantees that all comments, likes, and followers for a specific user live within the exact same database shard. When loading a user's profile metadata, the system executes quick local queries on a single shard, completely eliminating costly cross-shard relational network joins.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="cache" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Redis Timeline Caching & Index Pools</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Compiling a user's timeline by querying SQL indexes on every single scroll would create massive database bottlenecks. Instagram resolves this by keeping pre-compiled feeds cached inside sharded **Redis memory clusters** as sharded timeline log indexes.
+                    </p>
+
+                    <!-- SVG Diagram 5: Redis timelines -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Cache splits to shards -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Client sends feed fetch request -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CLIENT GET</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#e1306c" text-anchor="middle">Requests timeline</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Scrolls screen</text>
+                            </g>
+
+                            <!-- Timeline Service Proxy -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TIMELINE SERV</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#c13584" text-anchor="middle">Checks caches</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Bypasses DB</text>
+                            </g>
+
+                            <!-- Redis timeline master ring -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS RING</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#10b981" text-anchor="middle">Timeline clusters</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Holds active feed lists</text>
+                            </g>
+
+                            <!-- Timeline Cache Shard A -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CACHE SHARD A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34d399" text-anchor="middle">User: A - L</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Compiled: post lists</text>
+                            </g>
+
+                            <!-- Timeline Cache Shard B -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34d399" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CACHE SHARD B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34d399" text-anchor="middle">User: M - Z</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Compiled: post lists</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How memory feed caching performs:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-pink font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Active Cache Policies:</strong> Timelines are compiled *only* for active users who have opened the app within the last 14 days. Inactive users are pruned from memory automatically, saving massive hardware overheads.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-pink font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Redis Sorted Sets (ZSET):</strong> Feeds are stored in Redis as Sorted Sets (`ZSET`), using the **Post Timestamp** as the index score. This allows fetching the exact next 20 items (`ZREVRANGEBYSCORE`) in under 1.5ms.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="push" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Dynamic Activity Notification Ingestion (Kafka Streams)</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        When a popular creator posts, we must notify all their active followers in real time. Processing million-recipient notifications synchronously on the main thread would crash gateway nodes instantly. Instagram resolves this by passing activities to **Apache Kafka queues**, utilizing partition-keyed streams to distribute tasks safely across fan-out workers.
+                    </p>
+
+                    <!-- SVG Diagram 6: Push notification dispatcher -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Kafka splits to partition queues -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 515,130 Q 565,130 565,200 L 595,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 515,320 Q 565,320 565,250 L 595,250" marker-end="url(#arrow)" />
+
+                            <!-- Active Post Event -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CREATOR POST</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#e1306c" text-anchor="middle">New post uploaded</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Dispatches push event</text>
+                            </g>
+
+                            <!-- Kafka Ingestion broker -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">KAFKA PIPELINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Scalable log broker</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Streams activities</text>
+                            </g>
+
+                            <!-- Partition queue 1 (Owner-keyed) -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 1</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">Active notifications</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Owner: A - L</text>
+                            </g>
+
+                            <!-- Partition queue 2 -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PARTITION 2</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">Active notifications</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Owner: M - Z</text>
+                            </g>
+
+                            <!-- Push gateway dispatcher (Apple APNS / Google FCM) -->
+                            <g class="svg-node" transform="translate(595, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">PUSH GATE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">APNS/FCM wakeup</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sends notifications</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-pink"></span> Real-time Fan-out Dispatcher
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            When a new post event is processed by the fan-out router, it is immediately written to **Apache Kafka partition queues**. Hashed by Owner UUID, these queues guarantee partition isolation. Decoupled **notification worker coroutines** read events in strict sequence, query user followers caches from Redis, and dispatch push packets via Apple APNS or Google FCM in under **25ms**.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: INTERVIEW QA -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Architect Interview Q&A</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Q1 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-pink">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q1: How does Instagram prevent massive write amplification when a celebrity posts?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                If we fanned out a post by a celebrity with 100M+ followers using push-on-write, we would have to execute 100 million cache updates immediately. This would crash Redis. Instagram avoids this using a **Hybrid Fan-Out Model**. Celebrity posts are stored *only* in the celebrity's local post cache. When followers open the app, the system queries the celebrity's cache dynamically (pull-on-read) and merges it with the follower's pre-compiled feed in under 15ms.
+                            </p>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-pink">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q2: Why shard PostgreSQL tables by Owner User ID instead of Post UUID?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Sharding by Post UUID would distribute a user's comments and likes randomly across multiple database instances. Loading a profile would require querying every single database instance in the cluster, creating huge network lags. Sharding by **Owner User ID** guarantees that all relational graph items (likes, comments, followers) for a user live within the exact same database shard, keeping lookup latency to sub-2ms.
+                            </p>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-pink">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q3: How are pre-compiled timeline caches stored inside Redis efficiently?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Pre-compiled timelines are cached as **Redis Sorted Sets (ZSET)**, using the **Post Timestamp** as the sorting score. This enables sub-1.5ms timeline pagination (`ZREVRANGEBYSCORE`). To keep memory footprint low, caches are built *only* for active users who have opened the app within the last 14 days; inactive users are automatically pruned from memory.
+                            </p>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-pink">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q4: How does Adaptive Bitrate Streaming (ABR) reduce media loading times on slow networks?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                When a video is uploaded, our transcoder slices it into small 2-second segments across multiple bitrates (360p, 480p, 720p, 1080p). The client app's media player dynamically monitors active bandwidth and requests higher or lower resolution slices on the fly, preventing playback pauses even under unstable network conditions.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: UNIFIED BLUEPRINT -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-pink/10 text-brand-pink border border-brand-pink/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified Instagram Activity Blueprint</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Here is the end-to-end media upload and timeline assembly blueprint, detailing the journey of an uploaded post from the sender's device, through S3 buckets, transcoder resizers, hybrid fan-out pipelines, sharded Redis timeline stores, and global CDNs, to the receiver's screen.
+                    </p>
+
+                    <!-- SVG Diagram 7: Unified Blueprint -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 900 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-pink" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#f56040" />
+                                    <stop offset="100%" stop-color="#c13584" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#140c11" />
+                                    <stop offset="100%" stop-color="#0a0508" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path connections -->
+                            <path class="svg-link" d="M 130,130 L 200,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,130 L 380,130" marker-end="url(#arrow)" />
+                            
+                            <!-- Master splits to active EU gateway vs offline SQS -->
+                            <path class="svg-link" d="M 490,130 L 560,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 435,175 L 435,270" marker-end="url(#arrow)" />
+
+                            <!-- Offline route down -->
+                            <path class="svg-link" d="M 435,360 L 435,420" marker-end="url(#arrow)" />
+                            
+                            <path class="svg-link" d="M 495,465 L 560,465" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 670,465 Q 730,465 730,360 L 730,175" marker-end="url(#arrow)" />
+
+                            <!-- Client Alice -->
+                            <g class="svg-node" transform="translate(20, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ALICE CLIENT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#e1306c" text-anchor="middle">Uploads photo / video</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Writes pre-signed S3</text>
+                            </g>
+
+                            <!-- Ingestion Vault (S3) -->
+                            <g class="svg-node" transform="translate(200, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INGEST S3</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Saves raw media</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fires S3 write event</text>
+                            </g>
+
+                            <!-- Async Media Transcoder Engine -->
+                            <g class="svg-node" transform="translate(380, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#c13584" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TRANSCODER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#c13584" text-anchor="middle">Compresses WebP</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Multi-bitrate MP4s</text>
+                            </g>
+
+                            <!-- Global CDN Distribution Edge -->
+                            <g class="svg-node" transform="translate(560, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CDN CACHE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Geo-caching assets</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sub-30ms delivery</text>
+                            </g>
+
+                            <!-- Fan-Out Queue Routing -->
+                            <g class="svg-node" transform="translate(380, 270)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#f56040" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">FAN-OUT ENG</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#f56040" text-anchor="middle">Hybrid push vs pull</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Kafka event queue</text>
+                            </g>
+
+                            <!-- Compiled Redis Cache timelines -->
+                            <g class="svg-node" transform="translate(380, 420)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#38bdf8" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDIS TLINE</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#38bdf8" text-anchor="middle">Pre-compiled ZSETs</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sub-1.5ms read</text>
+                            </g>
+
+                            <!-- Sharded PostgreSQL Graph database -->
+                            <g class="svg-node" transform="translate(560, 420)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SHARDED PG</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Owner-keyed shards</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Followers graph index</text>
+                            </g>
+
+                            <!-- Receiver Bob Final Screen -->
+                            <g class="svg-node" transform="translate(730, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">BOB SCREEN</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Renders hybrid feed</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Loads under 15ms</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Unified Feed Assembly Walkthrough:</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">01</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Media Upload Initiated</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Alice gets a pre-signed S3 URL from the gateway and uploads her photo/video directly to S3 object storage.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">02</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Async Transcoder Wakened</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The upload triggers a transcoder worker coroutine, compressing images into WebP and slicing videos into multiple resolution chunks.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">03</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">CDN Distribution Edge Caching</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Optimized media chunks publish directly to geo-distributed CDN caching edges, keeping loading latency sub-30ms global.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">04</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Dynamic Fan-out Evaluation</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The fan-out engine evaluates Alice's follower metrics, dynamically choosing push model for normal users vs. pull model for celebrities.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">05</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Redis timeline updates</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            For normal accounts, the background worker writes the post ID directly to followers' Redis timeline cache indices.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">06</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Sharded PostgreSQL Graph writes</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Simultaneously, the main post metadata writes to owner-keyed PostgreSQL shards, ensuring relational safety.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-pink/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-pink/10 border border-brand-pink/20 flex items-center justify-center font-mono font-bold text-brand-pink flex-shrink-0">07</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Dynamic Feed Merging</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            When Bob opens his feed, the app queries his pre-compiled timeline, dynamically merges celebrity feeds, and renders the combined feed in under 15ms.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-pink to-brand-purple flex items-center justify-center text-white font-black text-sm">I</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Instagram</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-pink hover:bg-brand-pink/5 hover:border-brand-pink/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#fanout" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Hybrid Fan-Out</a>
+                    <a href="#transcoder" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Media Pipeline</a>
+                    <a href="#sharding" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Postgres Shards</a>
+                    <a href="#cache" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Redis Cache</a>
+                    <a href="#push" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Push Dispatcher</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Feed Blueprint</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-pink pulse-pink"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Hybrid Fan-out Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>

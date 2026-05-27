@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Search Indexing & Retrieval System Design Masterclass</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            blue: '#4285f4',
+                            red: '#ea4335',
+                            yellow: '#fbbc05',
+                            green: '#34a853',
+                            dark: '#0e0e0e',
+                            slate: '#161616',
+                            card: 'rgba(22, 22, 22, 0.45)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        :root {
+            --brand-blue: #4285f4;
+            --brand-red: #ea4335;
+            --brand-yellow: #fbbc05;
+            --brand-green: #34a853;
+            --brand-dark: #0e0e0e;
+            --brand-slate: #161616;
+        }
+
+        body {
+            background-color: var(--brand-dark);
+            color: #f1f5f9;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0e0e0e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #242424;
+            border-radius: 999px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-blue);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-card {
+            background: rgba(22, 22, 22, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.65);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(66, 133, 244, 0.25);
+            box-shadow: 0 12px 40px 0 rgba(66, 133, 244, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .glass-sidebar {
+            background: rgba(22, 22, 22, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* Text gradient */
+        .text-gradient-google {
+            background: linear-gradient(135deg, #4285f4 0%, #ea4335 30%, #fbbc05 60%, #34a853 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Active Navigation Link */
+        .nav-link.active {
+            color: #ffffff;
+            background: rgba(66, 133, 244, 0.08);
+            border-left: 3px solid var(--brand-blue);
+            padding-left: 15px;
+        }
+
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--brand-blue);
+            background: rgba(255, 255, 255, 0.01);
+            padding-left: 15px;
+        }
+
+        /* Premium SVG Interactive Styles */
+        .svg-container svg {
+            width: 100%;
+            height: auto;
+            max-height: 480px;
+            border-radius: 12px;
+            background: #111111;
+        }
+
+        .svg-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .svg-node:hover {
+            filter: drop-shadow(0 0 8px rgba(66, 133, 244, 0.6));
+        }
+
+        .svg-node:hover rect,
+        .svg-node:hover circle {
+            stroke: var(--brand-blue) !important;
+            fill: #151d2a !important;
+        }
+
+        .svg-link {
+            stroke: #222222;
+            stroke-width: 1.5;
+            fill: none;
+            transition: all 0.3s ease;
+            stroke-dasharray: 4, 4;
+            animation: dash 35s linear infinite;
+        }
+
+        .svg-link-active {
+            stroke: var(--brand-blue);
+            stroke-width: 2;
+            stroke-dasharray: none;
+            animation: none;
+        }
+
+        .svg-node:hover~.svg-link {
+            stroke: var(--brand-blue);
+            stroke-width: 2.5;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -1000;
+            }
+        }
+
+        /* Pulse animations for nodes */
+        .pulse-blue {
+            animation: pulse-blue-glow 2.5s infinite;
+        }
+
+        @keyframes pulse-blue-glow {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(66, 133, 244, 0.4));
+            }
+            50% {
+                filter: drop-shadow(0 0 10px rgba(66, 133, 244, 0.8));
+            }
+            100% {
+                filter: drop-shadow(0 0 2px rgba(66, 133, 244, 0.4));
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-brand-dark antialiased">
+
+    <!-- Mobile Navigation Toggle Header -->
+    <header class="lg:hidden w-full bg-brand-slate border-b border-white/5 py-4 px-6 flex items-center justify-between sticky top-0 z-40">
+        <div class="flex items-center gap-3">
+            <a href="../index.html" class="p-1 -ml-1 text-slate-400 hover:text-white flex items-center justify-center transition-colors duration-200" aria-label="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+            </a>
+            <span class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-blue to-blue-700 flex items-center justify-center text-white font-bold text-sm">G</span>
+            <span class="font-outfit font-bold tracking-tight text-lg">Google Search Masterclass</span>
+        </div>
+        <button id="menu-toggle" class="p-2 text-slate-400 hover:text-white focus:outline-none" aria-label="Toggle Menu">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path id="menu-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+            </svg>
+        </button>
+    </header>
+
+    <div class="flex min-h-screen">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-80 z-30 transform -translate-x-full lg:translate-x-0 lg:sticky lg:h-screen lg:flex-shrink-0 transition-transform duration-300 ease-in-out glass-sidebar flex flex-col justify-between">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header -->
+                <div class="p-6 border-b border-white/5 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-blue/20">G</span>
+                    <div>
+                        <h2 class="font-outfit font-extrabold text-white tracking-tight leading-none text-base">GOOGLE</h2>
+                        <span class="text-[10px] uppercase tracking-widest text-slate-400 font-semibold leading-none">Search Engine Indexing</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1.5 scrollbar-thin">
+                    <!-- Back to Main Dashboard Link -->
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        <svg class="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                        </svg>
+                        Back to Dashboard
+                    </a>
+
+                    <a href="#overview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">01</span> Retrieval Scale
+                    </a>
+                    <a href="#crawling" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">02</span> Distributed Crawler
+                    </a>
+                    <a href="#pagerank" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">03</span> PageRank MapReduce
+                    </a>
+                    <a href="#inverted" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">04</span> Inverted Indexes
+                    </a>
+                    <a href="#querypath" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">05</span> Retrieval Query Path
+                    </a>
+                    <a href="#delta" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">06</span> Real-time Index updates
+                    </a>
+                    <a href="#interview" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">07</span> Interview Q&A
+                    </a>
+                    <a href="#endtoend" class="nav-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-400 font-medium text-sm">
+                        <span class="text-xs font-bold text-slate-500 font-mono">08</span> Unified Search Engine
+                    </a>
+                </nav>
+
+                <!-- Sidebar Footer -->
+                <div class="p-6 border-t border-white/5 bg-black/10">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                        <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Query speed: &lt; 8ms</span>
+                    </div>
+                    <p class="text-[10px] text-slate-500 font-mono">Build v2.6.0 • Indexer Engine</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 w-full overflow-y-auto px-4 md:px-12 py-10 lg:py-16">
+            <div class="max-w-5xl mx-auto space-y-24">
+
+                <!-- Header / Hero Section -->
+                <div class="relative py-8 md:py-12 border-b border-slate-900">
+                    <div class="absolute -top-10 -left-10 w-48 h-48 bg-brand-blue/10 rounded-full blur-3xl opacity-30"></div>
+                    <div class="absolute -bottom-10 right-10 w-64 h-64 bg-brand-green/10 rounded-full blur-3xl opacity-30"></div>
+
+                    <div class="relative z-10 text-left space-y-4">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-blue/10 border border-brand-blue/20 text-brand-blue text-xs font-bold font-mono tracking-wider uppercase">
+                            Case Study: Scaled Global Web Indices
+                        </div>
+                        <h1 class="text-4xl md:text-6xl font-outfit font-black tracking-tight leading-none text-white">
+                            Google Search <span class="text-gradient-google">System Design</span> Masterclass
+                        </h1>
+                        <p class="text-lg md:text-xl text-slate-400 max-w-4xl leading-relaxed font-light font-sans">
+                            Deconstruct the architectures powering sub-second global web queries. Explore **distributed web crawler meshes**, parallel MapReduce PageRank matrix loops, keyword-to-document ID **Inverted Index partitions**, spelling correction engines, and real-time delta index updates.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1 -->
+                <section id="overview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">01</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Indexing vs. Query Planes</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        At hyper-scale, search engines must completely isolate the background offline indexing pipeline from the live, sub-second search query path. Scraping, analyzing, computing PageRanks, and assembling inverted indexes requires huge compute pools over days. Live query paths operate in milliseconds under strict SLAs, fetching data entirely from geo-replicated in-memory index caches.
+                    </p>
+
+                    <!-- SVG Diagram 1: Ingest vs Query -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#4285f4" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Coordinator splits to Index vs Search -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 520,130 Q 570,130 570,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 520,320 Q 570,320 570,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- Active Clients requests -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">ACTIVE CLIENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4285f4" text-anchor="middle">Search Queries</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sub-second updates</text>
+                            </g>
+
+                            <!-- Global Load Balancer -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">API ROUTER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4285f4" text-anchor="middle">Traffic Gateway</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Splits query path</text>
+                            </g>
+
+                            <!-- Offline Indexing pipeline -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">OFFLINE PLAN</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#ea4335" text-anchor="middle">Crawling & PageRank</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Heavy batch updates</text>
+                            </g>
+
+                            <!-- Online Real-time Search Plane -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34a853" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SEARCH ENGINE</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34a853" text-anchor="middle">Sub-10ms indices</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Query parsers & rankers</text>
+                            </g>
+
+                            <!-- In-Memory index storage shards -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#fbbc05" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX VAULT</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fbbc05" text-anchor="middle">Prebuilt database</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Ultra-low latency</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-brand-blue"></span> Core Challenges
+                            </h3>
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Distributed Crawling:</strong> Scalable URL frontiers respecting robots.txt configurations and politeness limits.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">PageRank MapReduce:</strong> Iterative scores calculation over sparse links graph matrixes.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Inverted index:</strong> Structuring keyword mapping arrays with document hits, counts, and offsets.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                            <h3 class="text-xl font-outfit font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Expected Scale Parameters
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Pages</div>
+                                    <div class="text-2xl font-black text-brand-blue font-outfit mt-1">100 Billion+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Pages crawled and indexed</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Query TPS</div>
+                                    <div class="text-2xl font-black text-emerald-400 font-outfit mt-1">100,000+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Queries processed / sec</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Database Size</div>
+                                    <div class="text-2xl font-black text-emerald-500 font-outfit mt-1">100 Petabytes+</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Index database scale</div>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-950/40 border border-white/5">
+                                    <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500">Query Latency</div>
+                                    <div class="text-2xl font-black text-brand-yellow font-outfit mt-1">&lt; 10ms</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">Sub-second retrieval SLA</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="crawling" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">02</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Distributed Web Crawling Mesh</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Web crawling at scale requires a highly distributed, polite coordinator cluster. Crawlers cannot dump requests indiscriminately on third-party servers; they must fetch documents respecting DNS, **Robots.txt rules**, and host politeness delay bounds. This requires a centralized **URL Frontier** queue combined with geo-replicated worker nodes.
+                    </p>
+
+                    <!-- SVG Diagram 2: Crawling Mesh -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Ingest to Frontier -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Frontier splits to workers -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <!-- Workers back to frontier -->
+                            <path class="svg-link" d="M 520,130 Q 580,130 580,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 520,320 Q 580,320 580,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- URL feed source -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">URL SOURCE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Seed URLs</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Ingestion engine</text>
+                            </g>
+
+                            <!-- Central URL Frontier Manager -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">URL FRONTIER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Prioritizes urls</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Host-hashing partitions</text>
+                            </g>
+
+                            <!-- Crawler worker node A -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CRAWLER A</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">DNS + Robots check</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fetches pages</text>
+                            </g>
+
+                            <!-- Crawler worker node B -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="120" height="90" rx="8" fill="url(#grad-dark)" stroke="#34a853" stroke-width="1.5" />
+                                <text x="60" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CRAWLER B</text>
+                                <text x="60" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34a853" text-anchor="middle">DNS + Robots check</text>
+                                <text x="60" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fetches pages</text>
+                            </g>
+
+                            <!-- Ingest parser & link extractor -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#fbbc05" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">HTML PARSER</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#fbbc05" text-anchor="middle">Extracts links</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Updates Frontier</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Central URL Frontier Priorities
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                The **URL Frontier** serves as the central control queue. To respect politeness, it hashes URL hosts into dedicated partition queues, ensuring a single domain is only requested once every few seconds. Queues are prioritized dynamically based on the page's history, update frequencies, and global PageRank scores.
+                            </p>
+                        </div>
+                        <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                            <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span> Async DNS & Robots caching
+                            </h3>
+                            <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                                DNS lookups and Robots.txt parsing are highly latent operations. Crawlers resolve this by caching DNS configurations and parsed `robots.txt` rule sets in local **Redis memory caches**, reducing page fetch delays to sub-10ms.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="pagerank" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">03</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">MapReduce PageRank Parallel Loop</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Calculating popularity ranks (PageRank scores) over a graph of 100 Billion+ linked pages requires massive computational power. We cannot run this on a single thread. Google resolves this by modeling the web as a **Sparse Links Matrix** and running score iterations in parallel using **MapReduce cluster loops**.
+                    </p>
+
+                    <!-- SVG Diagram 3: MapReduce PageRank -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Ingest splits to Map workers -->
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,140 L 200,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 130,225 Q 180,225 180,310 L 200,310" marker-end="url(#arrow)" />
+
+                            <!-- Map to shuffle -->
+                            <path class="svg-link" d="M 310,140 Q 365,140 365,205 L 380,205" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,310 Q 365,310 365,245 L 380,245" marker-end="url(#arrow)" />
+
+                            <!-- Shuffle to Reduce -->
+                            <path class="svg-link" d="M 490,225 L 560,225" marker-end="url(#arrow)" />
+
+                            <!-- Inbound sparse link matrix -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SPARSE MATRIX</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Web links graph</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Splits chunk logs</text>
+                            </g>
+
+                            <!-- Map Worker A -->
+                            <g class="svg-node" transform="translate(200, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MAP WORKER A</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Calculates outlinks</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Outputs keys: PageID</text>
+                            </g>
+
+                            <!-- Map Worker B -->
+                            <g class="svg-node" transform="translate(200, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MAP WORKER B</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Calculates outlinks</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Outputs keys: PageID</text>
+                            </g>
+
+                            <!-- Shuffle & Grouping Barrier -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#fbbc05" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SHUFFLE BLOCK</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#fbbc05" text-anchor="middle">Groups scores</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sorts by key PageID</text>
+                            </g>
+
+                            <!-- Reduce score aggregation worker -->
+                            <g class="svg-node" transform="translate(560, 180)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#34a853" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">REDUCE WORKER</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34a853" text-anchor="middle">Sums rank values</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Writes rank scores</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How PageRank MapReduce Operates:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ol class="list-decimal list-inside space-y-3 font-light text-slate-300">
+                                <li><strong>Link Matrix Map Splitting:</strong> The sparse web graph links matrix is split into blocks. Map workers compute outlinks and compile key-value pairs (`Page_ID -> Outlink_Score`).</li>
+                                <li><strong>Symmetric Key Shuffle Barrier:</strong> The system gathers all intermediate records, hashes keys, and redistributes them across the network so all values for a specific `PageID` end up at the exact same reduce node.</li>
+                                <li><strong>Reduce score convergence:</strong> The reduce worker sums all inbound incoming link scores, applies the damping coefficient factor (`PR(A) = (1-d) + d * Sum(PR(T)/C(T))`), and saves the page's active rank value.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="inverted" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">04</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Inverted Index Partition Grid</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        To resolve queries in milliseconds, search engines do not scan raw pages in real time. Instead, we compile an **Inverted Index**. This index serves as a mapping dictionary, associating individual search keywords with lists of document IDs containing those words, complete with counts and positional offsets.
+                    </p>
+
+                    <!-- SVG Diagram 4: Inverted Index -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Index partitions splits -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,115 L 390,115" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 390,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,335 L 390,335" marker-end="url(#arrow)" />
+
+                            <!-- Scraped Page logs -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">HTML DOCUMENTS</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Scraped web pages</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Tokens parsed</text>
+                            </g>
+
+                            <!-- Inverted index compiler -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX COMPILER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Word mapping arrays</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Hashes to partitions</text>
+                            </g>
+
+                            <!-- Index shard partition A -->
+                            <g class="svg-node" transform="translate(390, 70)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX SHARD A</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Keywords: A - H</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Map doc list offsets</text>
+                            </g>
+
+                            <!-- Index shard partition B -->
+                            <g class="svg-node" transform="translate(390, 180)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX SHARD B</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Keywords: I - P</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Map doc list offsets</text>
+                            </g>
+
+                            <!-- Index shard partition C -->
+                            <g class="svg-node" transform="translate(390, 290)">
+                                <rect x="0" y="0" width="125" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="62.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX SHARD C</text>
+                                <text x="62.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Keywords: Q - Z</text>
+                                <text x="62.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Map doc list offsets</text>
+                            </g>
+
+                            <text x="620" y="225" font-family="'Inter', sans-serif" font-size="9" fill="#10b981">Keyword-hashed shard partition grid</text>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Shard Partition Hash Grids
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            Inverted indexes are sharded by the unique **Keyword hash value**. This distributes lexicon indices evenly across index search servers. When a user queries "system design", the gateway parses the keywords, hashes them, and dynamically retrieves matching document ID lists from the sharded servers in parallel under 2ms.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="querypath" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">05</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Search Query Retrieval Path</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Resolving search queries under 10ms requires a streamlined pipeline. We cannot hit disk engines; queries must be processed completely in memory. The gateway parses query tokens, evaluates autocomplete lists, queries sharded inverted index caches, and scores relevance using PageRank vectors.
+                    </p>
+
+                    <!-- SVG Diagram 5: Retrieval Query Flow -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 L 380,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Router splits to caches vs shards -->
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,140 L 570,140" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 490,225 Q 545,225 545,310 L 570,310" marker-end="url(#arrow)" />
+
+                            <!-- Active query inbound -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">USER SUBMIT</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4285f4" text-anchor="middle">Dynamic query</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Awaiting results</text>
+                            </g>
+
+                            <!-- Query Parser Gateway -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">QUERY PARSER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#4285f4" text-anchor="middle">Spelling check</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Tokenizes keywords</text>
+                            </g>
+
+                            <!-- Search relevance ranker -->
+                            <g class="svg-node" transform="translate(380, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#34a853" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">SEARCH ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#34a853" text-anchor="middle">Scores relevancy</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">PageRank merges</text>
+                            </g>
+
+                            <!-- In-Memory Inverted Index cache shards -->
+                            <g class="svg-node" transform="translate(570, 95)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX CACHE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#10b981" text-anchor="middle">Sub-2ms cache fetch</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Active index blocks</text>
+                            </g>
+
+                            <!-- Autocomplete Tries Database -->
+                            <g class="svg-node" transform="translate(570, 265)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#fbbc05" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">AUTOCOMPLETE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="9" fill="#fbbc05" text-anchor="middle">Dynamic trie log</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Suggests queries</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">How Search Query Retrieval Paths scale:</h3>
+                        <div class="space-y-4 text-slate-400 text-sm leading-relaxed font-sans">
+                            <ul class="space-y-4 text-slate-400 text-sm leading-relaxed">
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Autocomplete Tries:</strong> As users type, the client queries a globally replicated **Trie Database** memory shard. This cache suggests trending queries in sub-2ms based on prefix match algorithms.</span>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="text-brand-blue font-bold font-mono">•</span>
+                                    <span><strong class="text-white">Document ID List Merges:</strong> For multi-word queries like "fast car", the engine fetches document hit lists for both "fast" and "car", executes quick intersection merges, and filters out non-matching document IDs instantly.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="delta" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">06</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Real-Time Delta Index Updates</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Re-compiling the entire web's inverted index on every minor web update is computationally impossible. Google resolves this by running a **Real-Time Delta Index Pipeline** that holds dynamic updates in memory, merging delta structures with master indexes in background batches.
+                    </p>
+
+                    <!-- SVG Diagram 6: Delta indexing -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 800 450" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path links -->
+                            <path class="svg-link" d="M 130,225 L 200,225" marker-end="url(#arrow)" />
+                            
+                            <!-- Delta splits to active indices vs merger -->
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,130 L 400,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,225 Q 360,225 360,320 L 400,320" marker-end="url(#arrow)" />
+
+                            <path class="svg-link" d="M 515,130 Q 565,130 565,200 L 590,200" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 515,320 Q 565,320 565,250 L 590,250" marker-end="url(#arrow)" />
+
+                            <!-- Active Web change notification -->
+                            <g class="svg-node" transform="translate(20, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WEB UPDATES</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Dynamic web changes</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Parsed instantly</text>
+                            </g>
+
+                            <!-- Real-time crawler coordinator -->
+                            <g class="svg-node" transform="translate(200, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DELTA INDEXER</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">compiles updates</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Isolates pipelines</text>
+                            </g>
+
+                            <!-- In-memory Delta Indexes -->
+                            <g class="svg-node" transform="translate(400, 85)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#ea4335" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DELTA CACHE</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ea4335" text-anchor="middle">Holds dynamic edits</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Writes in memory</text>
+                            </g>
+
+                            <!-- MapReduce Batch Index Merger -->
+                            <g class="svg-node" transform="translate(400, 275)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#34a853" stroke-width="1.5" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INDEX MERGER</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#34a853" text-anchor="middle">Executes batch merge</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Compresses tables</text>
+                            </g>
+
+                            <!-- Master Inverted index storage -->
+                            <g class="svg-node" transform="translate(590, 180)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MASTER INDEX</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Master indexes</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Global production indices</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="p-6 rounded-xl bg-slate-900/50 border border-white/5 space-y-3">
+                        <h3 class="font-outfit font-bold text-white text-lg flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span> Dynamic index merging
+                        </h3>
+                        <p class="text-slate-400 text-xs md:text-sm leading-relaxed font-light font-sans">
+                            When crawlers detect modifications on an active page, they do not trigger a complete rebuild of the master inverted index. Instead, modifications write directly to **In-Memory Delta caches** instantly. In the background, MapReduce processes execute scheduled batch merges, blending delta caches into the master production inverted index without creating locks.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: INTERVIEW QA -->
+                <section id="interview" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">07</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Architect Interview Q&A</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Q1 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-blue">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q1: How does Google Search resolve multi-word queries in milliseconds?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Querying a multi-word search string like "fast car" dynamically fetches matching document ID hit lists from sharded inverted indexes. Lexicon arrays containing document hits are intersected in memory, filtering out non-matching pages in sub-2ms. Results are then combined with PageRank vectors and snippets are served in under 10ms.
+                            </p>
+                        </div>
+
+                        <!-- Q2 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-blue">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q2: How does the crawl coordinator avoid getting trapped in infinite circular redirect loops?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Dynamically scraped links are resolved against a **Document URL Hash Table** using hashing algorithms before being pushed to the URL Frontier. If a link already matches a known hash value, the crawl is skipped. Advanced link parsers also flag dynamic calendar URLs or dynamic parameter loops automatically.
+                            </p>
+                        </div>
+
+                        <!-- Q3 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-blue">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q3: Why shard Inverted Indexes by Keyword Hash instead of Document ID?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Sharding by Document ID would distribute a single keyword's hits across all index nodes in the cluster. Evaluating a query would require hitting every single index node in the database, creating huge operational overheads. Sharding by **Keyword Hash** guarantees that a keyword's complete document ID hit list resides within a single partition, making lookups extremely efficient.
+                            </p>
+                        </div>
+
+                        <!-- Q4 -->
+                        <div class="glass-card rounded-2xl p-6 md:p-8 space-y-3 border-l-4 border-l-brand-blue">
+                            <h3 class="text-lg font-outfit font-extrabold text-white">Q4: How does MapReduce PageRank handle dangling pages that have no outlinks?</h3>
+                            <p class="text-slate-300 text-sm leading-relaxed font-sans font-light">
+                                Dangling pages act as score sinks, absorbing ranks without passing them on. MapReduce handles this by distributing dangling rank scores evenly across all pages in the matrix. Additionally, we apply a **damping coefficient factor** (`0.85`), which simulates a user getting bored and jumping to a random page.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: UNIFIED BLUEPRINT -->
+                <section id="endtoend" class="scroll-mt-24 space-y-8">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-1 rounded bg-brand-blue/10 text-brand-blue border border-brand-blue/20 font-mono text-xs font-bold">08</span>
+                        <h2 class="text-3xl font-outfit font-black text-white">Unified Search Engine Blueprint</h2>
+                    </div>
+
+                    <p class="text-slate-300 leading-relaxed text-base font-light font-sans">
+                        Here is the end-to-end web indexing and query retrieval blueprint, detailing the journey of web modifications through crawling queues, MapReduce matrices, sharded Inverted Indexes, spell check dictionaries, and rank servers, directly to the search results page.
+                    </p>
+
+                    <!-- SVG Diagram 7: Unified Blueprint -->
+                    <div class="svg-container glass-card p-4 rounded-2xl bg-brand-slate">
+                        <svg viewBox="0 0 900 580" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="grad-blue" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#7eb3ff" />
+                                    <stop offset="100%" stop-color="#4285f4" />
+                                </linearGradient>
+                                <linearGradient id="grad-dark" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0%" stop-color="#161616" />
+                                    <stop offset="100%" stop-color="#0e0e0e" />
+                                </linearGradient>
+                                <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                                    <path d="M 0 1 L 10 5 L 0 9 z" fill="#475569" />
+                                </marker>
+                            </defs>
+
+                            <!-- Path connections -->
+                            <path class="svg-link" d="M 130,130 L 200,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 310,130 L 380,130" marker-end="url(#arrow)" />
+                            
+                            <!-- Master splits to active EU gateway vs offline SQS -->
+                            <path class="svg-link" d="M 490,130 L 560,130" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 435,175 L 435,270" marker-end="url(#arrow)" />
+
+                            <!-- Offline route down -->
+                            <path class="svg-link" d="M 435,360 L 435,420" marker-end="url(#arrow)" />
+                            
+                            <path class="svg-link" d="M 495,465 L 560,465" marker-end="url(#arrow)" />
+                            <path class="svg-link" d="M 670,465 Q 730,465 730,360 L 730,175" marker-end="url(#arrow)" />
+
+                            <!-- Scraped Web Target -->
+                            <g class="svg-node" transform="translate(20, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#475569" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">WEB TARGET</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Scraped web pages</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Index compilation</text>
+                            </g>
+
+                            <!-- Distributed Crawling mesh -->
+                            <g class="svg-node" transform="translate(200, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">CRAWLER MESH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">URL Frontier lists</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Fetches pages</text>
+                            </g>
+
+                            <!-- Inverted index partitions -->
+                            <g class="svg-node" transform="translate(380, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#4285f4" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">INVERTED INDEX</text>
+                                x<text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#4285f4" text-anchor="middle">Keyword hashed</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Stores offsets</text>
+                            </g>
+
+                            <!-- Google Query Ranker server -->
+                            <g class="svg-node" transform="translate(560, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RANK ENGINE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">PageRank merges</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Sub-10ms retrieval</text>
+                            </g>
+
+                            <!-- MapReduce matrix rank calculations -->
+                            <g class="svg-node" transform="translate(380, 270)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#ef4444" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">MAPREDUCE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#ef4444" text-anchor="middle">Iterates PageRank</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Runs batch loops</text>
+                            </g>
+
+                            <!-- Delta dynamic indexer cache -->
+                            <g class="svg-node" transform="translate(380, 420)">
+                                <rect x="0" y="0" width="115" height="90" rx="8" fill="url(#grad-dark)" stroke="#38bdf8" stroke-width="1" />
+                                <text x="57.5" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">DELTA CACHE</text>
+                                <text x="57.5" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#38bdf8" text-anchor="middle">Holds dynamic edits</text>
+                                <text x="57.5" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Background merges</text>
+                            </g>
+
+                            <!-- Autocomplete Tries Server -->
+                            <g class="svg-node" transform="translate(560, 420)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1.5" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">TRIE SEARCH</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Suggests queries</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#cbd5e1" text-anchor="middle">Loads under 2ms</text>
+                            </g>
+
+                            <!-- Search Client Result page -->
+                            <g class="svg-node" transform="translate(730, 85)">
+                                <rect x="0" y="0" width="110" height="90" rx="8" fill="url(#grad-dark)" stroke="#10b981" stroke-width="1" />
+                                <text x="55" y="35" font-family="'Outfit', sans-serif" font-weight="bold" font-size="11" fill="#fff" text-anchor="middle">RESULT PAGE</text>
+                                <text x="55" y="55" font-family="'Inter', sans-serif" font-size="8" fill="#10b981" text-anchor="middle">Snippet compiled</text>
+                                <text x="55" y="70" font-family="'Inter', sans-serif" font-size="8" fill="#94a3b8" text-anchor="middle">Sub-10ms delivery</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 md:p-8 space-y-6">
+                        <h3 class="text-xl font-outfit font-bold text-white">Unified Web Indexing Walkthrough:</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">01</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Distributed Crawler Triggered</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The crawl mesh reads prioritized seed links from the URL Frontier, fetches pages respecting robots.txt configurations, and parses content.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">02</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">MapReduce PageRank Loop</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The MapReduce scheduler distributes web links across parallel Map and Reduce nodes, computing global PageRank popularity vectors.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">03</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Inverted Index Grid Compilation</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Tokens are parsed, grouped into keyword arrays, and written across partition-sharded inverted indexes with positional offsets.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">04</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Real-time Delta Index Updates</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Dynamic modifications detected on crawled websites write instantly to in-memory delta queues, avoiding master locks.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">05</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Query Parser spell-checks</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            When a user submits a query, the gateway parses tokens, executes spell-checks, and fetches trie autocomplete suggestions.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">06</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">In-Memory Index merges</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            The search engine pulls keyword document ID lists from cache servers in parallel, executing fast intersection merges in under 2ms.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="p-5 rounded-2xl bg-slate-900/40 border border-white/5 flex gap-4 transition-all duration-300 hover:bg-slate-900/70 hover:border-brand-blue/30">
+                                    <div class="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center font-mono font-bold text-brand-blue flex-shrink-0">07</div>
+                                    <div class="space-y-1.5">
+                                        <h4 class="font-outfit font-bold text-white text-base">Relevance Ranking & snippet serving</h4>
+                                        <p class="text-slate-400 text-xs md:text-sm font-sans">
+                                            Rank servers score hits using PageRank vectors, compile snippet descriptions, and return the search results page in under 10ms.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation Drawer Overlay -->
+    <div id="mobile-nav" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden lg:hidden transition-opacity duration-300">
+        <div class="w-80 h-full bg-brand-slate border-r border-white/5 flex flex-col justify-between py-6 px-4">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/5 mb-6">
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-gradient-to-tr from-brand-blue to-blue-700 flex items-center justify-center text-white font-black text-sm">G</span>
+                        <h2 class="font-outfit font-bold text-white text-base">Google Search</h2>
+                    </div>
+                    <button id="close-menu" class="p-2 text-slate-400 hover:text-white" aria-label="Close Menu">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <nav class="space-y-1.5">
+                    <a href="../index.html" class="flex items-center gap-3 px-3 py-2.5 mb-4 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-wider border border-white/5 bg-white/2 hover:text-brand-blue hover:bg-brand-blue/5 hover:border-brand-blue/20 transition-all duration-200">
+                        Back to Dashboard
+                    </a>
+                    <a href="#overview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Overview</a>
+                    <a href="#crawling" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Distributed Crawler</a>
+                    <a href="#pagerank" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">PageRank MapReduce</a>
+                    <a href="#inverted" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Inverted Indexes</a>
+                    <a href="#querypath" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Retrieval Query Path</a>
+                    <a href="#delta" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Real-time index updates</a>
+                    <a href="#interview" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Interview Q&A</a>
+                    <a href="#endtoend" class="mobile-nav-link block px-3 py-2 rounded-lg text-slate-300 hover:bg-white/5 transition-all text-sm font-medium">Unified Search Engine</a>
+                </nav>
+            </div>
+
+            <div class="border-t border-white/5 pt-6 bg-black/10 -mx-4 px-4">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2 h-2 rounded-full bg-brand-blue pulse-blue"></span>
+                    <span class="text-[10px] tracking-wider text-slate-400 font-bold uppercase">Search engine Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Highlighting JavaScript -->
+    <script>
+        // Mobile menu toggle logic
+        const menuToggleBtn = document.getElementById('menu-toggle');
+        const closeMenuBtn = document.getElementById('close-menu');
+        const mobileNavDrawer = document.getElementById('mobile-nav');
+
+        if (menuToggleBtn && closeMenuBtn && mobileNavDrawer) {
+            menuToggleBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.remove('hidden');
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileNavDrawer.classList.add('hidden');
+            });
+
+            // Close mobile drawer on clicking overlay background
+            mobileNavDrawer.addEventListener('click', (e) => {
+                if (e.target === mobileNavDrawer) {
+                    mobileNavDrawer.classList.add('hidden');
+                }
+            });
+
+            // Close mobile drawer on clicking navigation link
+            document.querySelectorAll('.mobile-nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileNavDrawer.classList.add('hidden');
+                });
+            });
+        }
+
+        // Active state observer for sidebar anchors
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -60% 0px', // Trigger highlight near the middle of the screen
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const activeId = entry.target.getAttribute('id');
+                        
+                        navLinks.forEach(link => {
+                            const href = link.getAttribute('href');
+                            if (href === `#${activeId}`) {
+                                link.classList.add('active');
+                            } else {
+                                link.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => observer.observe(section));
+        });
+    </script>
+
+</body>
+</html>
