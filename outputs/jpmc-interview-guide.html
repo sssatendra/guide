@@ -587,6 +587,62 @@ function yieldToMain() {
         tip: '🎯 Interview Follow-up: In what order do console logs print? Promises print before setTimeout callbacks because Microtask execution cycles always complete first!'
       },
       {
+        id: 'async-evolution',
+        title: 'Asynchronous JS: Callbacks, Promises, & Async',
+        icon: '⏳',
+        def: 'Evolution of managing non-blocking asynchronous logic.',
+        content: 'Asynchronous JavaScript evolved from nested callback triggers (callback hell) to standardized Promises with chaining, and ultimately to clean `async/await` syntax. Under the hood, Babel compiles `async/await` functions into generators and yield states powered by promise wrapper loops.',
+        code: `// --- 1. Babel Generator Compilation of Async/Await ---
+// Original: async function getData() { return await fetch(); }
+function getDataCompiled() {
+  return spawn(function* () {
+    const res = yield fetch();
+    return res;
+  });
+}
+
+function spawn(genF) {
+  return new Promise((resolve, reject) => {
+    const gen = genF();
+    function step(nextF) {
+      let next;
+      try {
+        next = nextF();
+      } catch (e) {
+        return reject(e);
+      }
+      if (next.done) return resolve(next.value);
+      Promise.resolve(next.value).then(
+        v => step(() => gen.next(v)),
+        e => step(() => gen.throw(e))
+      );
+    }
+    step(() => gen.next());
+  });
+}`,
+        explanation: `<li><strong>Line 531-537 (Syntactic Sugar Translation):</strong> Babel compiles <code>async/await</code> into ECMAScript generators (<code>function*</code>) which pause and resume execution flow natively.</li>
+        <li><strong>Line 539-556 (Spawn Wrapper Loop):</strong> The compiler wraps generators in a <code>spawn</code> loop utility that returns a standard ES6 Promise, converting yielding states to modern async-await APIs.</li>
+        <li><strong>Line 549-553 (Recursive Yield Resolution):</strong> The inner <code>step</code> callback resolves each yielded value (represented by <code>gen.next()</code>) via a <code>Promise.resolve()</code> wrapper.</li>
+        <li><strong>Line 551 (Continuations Callback Mapping):</strong> Once a yielded promise resolves, the resolution is recursively fed back into the generator engine (<code>gen.next(v)</code>), resuming execution until <code>next.done</code> evaluates to true.</li>`,
+        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 1 (Execution Trace):</strong><br>
+          📥 <strong>Input Call:</strong> <code>getDataCompiled()</code> runs, yielding fetch query promise.<br>
+          📤 <strong>Result:</strong> Resolves fetch result and prints value recursively, matching standard async/await execution exactly.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 2 (Handling thrown errors):</strong><br>
+          📥 <strong>Input Call:</strong> Fetch returns 500 error in generator code.<br>
+          📤 <strong>Result:</strong> Intercepted by try-catch, calling <code>gen.throw(err)</code> and throwing error to standard reject block.
+        </div>
+        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
+          <strong>Example 3 (Multiple Awaits compilation):</strong><br>
+          📥 <strong>Input Call:</strong> Generator with 3 consecutive fetch yields.<br>
+          📤 <strong>Result:</strong> Spawn engine resolves all 3 promises sequentially, matching standard sequential awaits.
+        </div>`,
+        lang: 'JavaScript',
+        tip: '🎯 Core rule: async/await is syntactic sugar over standard Promises; it makes async control flow look synchronous without blocking the single thread.'
+      },
+      {
         id: 'retry-abort',
         title: 'Fetch Utilities: Resilient Retries & Abort',
         icon: '🔌',
@@ -936,62 +992,6 @@ element.style.backgroundColor = '#1d4ed8';`,
         </div>`,
         lang: 'JavaScript',
         tip: '💡 Performance Tip: Avoid querying layout geometry right after modifying inline styles to prevent forced synchronous layouts (layout thrashing)!'
-      },
-      {
-        id: 'async-evolution',
-        title: 'Asynchronous JS: Callbacks, Promises, & Async',
-        icon: '⏳',
-        def: 'Evolution of managing non-blocking asynchronous logic.',
-        content: 'Asynchronous JavaScript evolved from nested callback triggers (callback hell) to standardized Promises with chaining, and ultimately to clean `async/await` syntax. Under the hood, Babel compiles `async/await` functions into generators and yield states powered by promise wrapper loops.',
-        code: `// --- 1. Babel Generator Compilation of Async/Await ---
-// Original: async function getData() { return await fetch(); }
-function getDataCompiled() {
-  return spawn(function* () {
-    const res = yield fetch();
-    return res;
-  });
-}
-
-function spawn(genF) {
-  return new Promise((resolve, reject) => {
-    const gen = genF();
-    function step(nextF) {
-      let next;
-      try {
-        next = nextF();
-      } catch (e) {
-        return reject(e);
-      }
-      if (next.done) return resolve(next.value);
-      Promise.resolve(next.value).then(
-        v => step(() => gen.next(v)),
-        e => step(() => gen.throw(e))
-      );
-    }
-    step(() => gen.next());
-  });
-}`,
-        explanation: `<li><strong>Line 531-537 (Syntactic Sugar Translation):</strong> Babel compiles <code>async/await</code> into ECMAScript generators (<code>function*</code>) which pause and resume execution flow natively.</li>
-        <li><strong>Line 539-556 (Spawn Wrapper Loop):</strong> The compiler wraps generators in a <code>spawn</code> loop utility that returns a standard ES6 Promise, converting yielding states to modern async-await APIs.</li>
-        <li><strong>Line 549-553 (Recursive Yield Resolution):</strong> The inner <code>step</code> callback resolves each yielded value (represented by <code>gen.next()</code>) via a <code>Promise.resolve()</code> wrapper.</li>
-        <li><strong>Line 551 (Continuations Callback Mapping):</strong> Once a yielded promise resolves, the resolution is recursively fed back into the generator engine (<code>gen.next(v)</code>), resuming execution until <code>next.done</code> evaluates to true.</li>`,
-        ioExamples: `<div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
-          <strong>Example 1 (Execution Trace):</strong><br>
-          📥 <strong>Input Call:</strong> <code>getDataCompiled()</code> runs, yielding fetch query promise.<br>
-          📤 <strong>Result:</strong> Resolves fetch result and prints value recursively, matching standard async/await execution exactly.
-        </div>
-        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
-          <strong>Example 2 (Handling thrown errors):</strong><br>
-          📥 <strong>Input Call:</strong> Fetch returns 500 error in generator code.<br>
-          📤 <strong>Result:</strong> Intercepted by try-catch, calling <code>gen.throw(err)</code> and throwing error to standard reject block.
-        </div>
-        <div style="background:rgba(255,255,255,0.015);border:1px solid rgba(255,255,255,0.05);padding:.4rem .6rem;border-radius:6px;">
-          <strong>Example 3 (Multiple Awaits compilation):</strong><br>
-          📥 <strong>Input Call:</strong> Generator with 3 consecutive fetch yields.<br>
-          📤 <strong>Result:</strong> Spawn engine resolves all 3 promises sequentially, matching standard sequential awaits.
-        </div>`,
-        lang: 'JavaScript',
-        tip: '🎯 Core rule: async/await is syntactic sugar over standard Promises; it makes async control flow look synchronous without blocking the single thread.'
       },
       {
         id: 'json-unflatten',

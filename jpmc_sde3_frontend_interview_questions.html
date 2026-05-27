@@ -40,22 +40,22 @@
       padding: 0;
     }
 
-    body {
+    html, body {
       background: var(--bg);
       color: var(--text-main);
       font-family: var(--font-sans);
       overflow-x: hidden;
       line-height: 1.5;
+      width: 100%;
     }
 
     /* ── GRADIENT GLOW BACKGROUND ── */
     .bg-glow {
       position: fixed;
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100vw;
-      height: 100vh;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: radial-gradient(circle at 50% 0%, var(--accent-glow) 0%, transparent 60%);
       pointer-events: none;
       z-index: -1;
@@ -63,6 +63,7 @@
 
     /* ── CONTAINER ── */
     .container {
+      width: 100%;
       max-width: 1440px;
       margin: 0 auto;
       padding: 1.5rem 2rem;
@@ -140,10 +141,11 @@
     /* ── MAIN SPLIT LAYOUT ── */
     .layout-split {
       display: grid;
-      grid-template-columns: 340px 1fr;
+      grid-template-columns: 340px minmax(0, 1fr);
       gap: 1.75rem;
       align-items: start;
       margin-top: 0.5rem;
+      min-width: 0;
     }
 
     @media (max-width: 1024px) {
@@ -275,6 +277,7 @@
       flex-direction: column;
       gap: 1rem;
       min-height: 500px;
+      min-width: 0;
     }
 
     .section-title {
@@ -426,6 +429,16 @@
       border: 1px solid var(--border);
     }
 
+    pre {
+      max-width: 100% !important;
+      overflow-x: auto !important;
+    }
+
+    code {
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
     .q-answer pre {
       background: #020204;
       border: 1px solid var(--border);
@@ -436,6 +449,7 @@
       line-height: 1.55;
       overflow-x: auto;
       margin: 0.75rem 0;
+      max-width: 100%;
     }
 
     /* ── HACKERRANK DETAILS ── */
@@ -560,6 +574,8 @@
       max-width: 850px;
       max-height: 85vh;
       overflow-y: auto;
+      overflow-x: hidden;
+      min-width: 0;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 30px var(--accent-glow);
       display: flex;
       flex-direction: column;
@@ -726,6 +742,224 @@
       font-size: 0.75rem;
       margin-top: 4rem;
     }
+
+    /* ── CHIPS & CHIP WRAPPERS ── */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 5px 12px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+    .chip i {
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+    
+    .chip-after {
+      margin-right: 0.5rem;
+    }
+
+    /* ── EVALUATION GRID ── */
+    .row2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    /* ── PRACTICE MODAL BUTTONS ── */
+    .modal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+    .modal-btn-primary:hover {
+      box-shadow: 0 0 15px var(--accent);
+      transform: translateY(-1px);
+    }
+    .modal-btn-secondary {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    .modal-btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      border-color: var(--border-hover);
+    }
+
+    /* ── FLUID RESPONSIVENESS OVERRIDES ── */
+    @media (max-width: 1024px) {
+      .layout-split {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        max-width: 100%;
+        overflow: hidden;
+      }
+      .sidebar {
+        position: relative;
+        top: 0;
+        margin-bottom: 0.5rem;
+        max-width: 100%;
+        overflow: hidden;
+      }
+      .category-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+        scrollbar-width: none;
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        gap: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .category-list::-webkit-scrollbar {
+        display: none;
+      }
+      .category-item {
+        padding: 0.7rem 0.95rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem 0.85rem;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding-bottom: 1rem;
+        margin-bottom: 1.25rem;
+      }
+      .back-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 18px;
+      }
+      h1 {
+        font-size: 1.5rem;
+      }
+      .sidebar {
+        padding: 0.85rem;
+      }
+      .category-item {
+        padding: 0.55rem 0.75rem;
+        gap: 0.5rem;
+      }
+      .category-item-icon {
+        font-size: 1.1rem;
+      }
+      .category-item-title {
+        font-size: 0.82rem;
+      }
+      .category-item-sub {
+        font-size: 0.68rem;
+      }
+      .workspace {
+        min-height: auto;
+        gap: 0.75rem;
+      }
+      .q-card {
+        padding: 1rem;
+      }
+      .q-header {
+        gap: 8px;
+      }
+      .q-num {
+        min-width: 32px;
+        font-size: 0.65rem;
+        padding: 1px 6px;
+      }
+      .q-text {
+        font-size: 0.88rem;
+      }
+      .hr-card-header {
+        padding: 1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      .hr-card-body {
+        padding: 1rem;
+      }
+      .action-panel {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+      }
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 18px;
+      }
+      .row2 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .modal-container {
+        width: 95%;
+        max-width: 95%;
+        max-height: 90vh;
+        min-width: 0;
+        overflow-x: hidden;
+      }
+      .modal-header {
+        padding: 1rem;
+      }
+      .modal-body {
+        padding: 1rem;
+        gap: 1rem;
+      }
+      .code-textarea {
+        height: 180px;
+        font-size: 0.8rem;
+      }
+      .modal-footer {
+        padding: 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .modal-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 10px 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.35rem;
+      }
+      .q-badges {
+        gap: 4px;
+      }
+      .q-badge {
+        font-size: 0.65rem;
+        padding: 1px 6px;
+      }
+      .eval-card {
+        padding: 0.75rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -836,7 +1070,7 @@
             </div>
             <div class="eval-card">
               <div class="eval-title" id="evalTitle2">Optimal Solution</div>
-              <pre id="evalBody2" style="max-height:220px; overflow-y:auto; padding: 0.5rem; border:none; background:transparent; font-size:0.75rem;"></pre>
+              <pre id="evalBody2" style="max-height:220px; overflow:auto; max-width:100%; padding: 0.5rem; border:none; background:transparent; font-size:0.75rem;"></pre>
             </div>
           </div>
         </div>

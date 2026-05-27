@@ -1,0 +1,1377 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WCAG & Accessibility — Scratch to Expert</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2127;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e9eb;
+    --muted: #7a7f8a;
+    --accent: #4ade80;
+    --accent2: #60a5fa;
+    --accent3: #f59e0b;
+    --accent4: #f87171;
+    --accent5: #c084fc;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Fraunces', serif;
+    --body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  .main { flex: 1; max-width: 820px; padding: 3rem 3.5rem; overflow-x: hidden; }
+
+  /* Sidebar nav */
+  .sidebar-logo {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .sidebar-logo .tag { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 4px; }
+  .sidebar-logo h2 { font-family: var(--display); font-size: 18px; font-weight: 600; color: var(--text); }
+  .nav-section { padding: 0.25rem 0; }
+  .nav-section-title { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 0.75rem 1.5rem 0.25rem; }
+  .nav-link {
+    display: block;
+    padding: 0.4rem 1.5rem;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--accent); border-left-color: var(--accent); background: rgba(74,222,128,0.05); }
+
+  /* Progress bar */
+  .progress-bar { position: fixed; top: 0; left: 0; width: 0; height: 2px; background: var(--accent); z-index: 100; transition: width 0.1s; }
+
+  /* Content sections */
+  section { margin-bottom: 4rem; padding-top: 1rem; }
+  section:first-of-type { padding-top: 0; }
+
+  .section-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--accent); letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+  h1 { font-family: var(--display); font-size: 38px; font-weight: 600; line-height: 1.2; color: var(--text); margin-bottom: 1rem; }
+  h2 { font-family: var(--display); font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 1rem; margin-top: 0.5rem; }
+  h3 { font-family: var(--body); font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 0.5rem; margin-top: 1.5rem; }
+  p { color: #b0b4be; margin-bottom: 1rem; }
+  strong { color: var(--text); font-weight: 500; }
+
+  /* Hero intro */
+  .hero { margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+  .hero p { font-size: 17px; color: #8b9099; max-width: 600px; }
+
+  /* Callout cards */
+  .callout {
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    border-left: 3px solid;
+    font-size: 14px;
+  }
+  .callout-info { background: rgba(96,165,250,0.08); border-color: var(--accent2); color: #93c5fd; }
+  .callout-warn { background: rgba(245,158,11,0.08); border-color: var(--accent3); color: #fcd34d; }
+  .callout-tip { background: rgba(74,222,128,0.08); border-color: var(--accent); color: #86efac; }
+  .callout-danger { background: rgba(248,113,113,0.08); border-color: var(--accent4); color: #fca5a5; }
+  .callout strong { color: inherit; }
+
+  /* Code blocks */
+  pre {
+    background: #0a0b0d;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+    margin: 1rem 0 1.5rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  code { font-family: var(--mono); font-size: 13px; }
+  p code, li code {
+    background: var(--surface2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--accent2);
+    font-size: 12px;
+  }
+  .kw { color: #c084fc; }
+  .str { color: #86efac; }
+  .cm { color: #4b5563; font-style: italic; }
+  .attr { color: #60a5fa; }
+  .val { color: #fcd34d; }
+  .tag-c { color: #f87171; }
+
+  /* Level badges */
+  .level-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.5rem 0; }
+  .level-card {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .level-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .level-a::before { background: var(--accent4); }
+  .level-aa::before { background: var(--accent3); }
+  .level-aaa::before { background: var(--accent); }
+  .level-name { font-family: var(--mono); font-size: 20px; font-weight: 500; margin-bottom: 4px; }
+  .level-a .level-name { color: var(--accent4); }
+  .level-aa .level-name { color: var(--accent3); }
+  .level-aaa .level-name { color: var(--accent); }
+  .level-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* POUR principles */
+  .pour-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 1.5rem 0; }
+  .pour-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+  }
+  .pour-letter { font-family: var(--display); font-size: 32px; font-weight: 600; line-height: 1; margin-bottom: 6px; }
+  .pour-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .pour-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+  /* Checklist */
+  .checklist { list-style: none; margin: 1rem 0 1.5rem; }
+  .checklist li {
+    display: flex;
+    gap: 10px;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: #b0b4be;
+    align-items: flex-start;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-icon { font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+  .check-good { color: var(--accent); }
+  .check-bad { color: var(--accent4); }
+  .check-warn { color: var(--accent3); }
+
+  /* Contrast demo */
+  .contrast-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 1.25rem 0; }
+  .contrast-box {
+    border-radius: 8px;
+    padding: 1rem;
+    font-size: 14px;
+  }
+  .contrast-fail { background: #cccccc; color: #aaaaaa; border: 1px solid var(--border); }
+  .contrast-pass { background: #cccccc; color: #1a1a1a; }
+  .contrast-label { font-family: var(--mono); font-size: 11px; margin-bottom: 4px; }
+
+  /* ARIA table */
+  .table-wrap { overflow-x: auto; margin: 1rem 0 1.5rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--surface2); color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: #b0b4be; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code { color: var(--accent5); }
+
+  /* Interview prep box */
+  .interview-box {
+    background: linear-gradient(135deg, rgba(74,222,128,0.05), rgba(96,165,250,0.05));
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .interview-box h3 { color: var(--accent); font-size: 13px; font-family: var(--mono); letter-spacing: 0.08em; margin-bottom: 1rem; margin-top: 0; }
+  .interview-box p { font-size: 14px; color: #b0b4be; margin-bottom: 0.5rem; }
+  .interview-box p:last-child { margin-bottom: 0; }
+  .interview-box strong { color: var(--accent); }
+
+  /* Section divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 2rem 0;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .section-divider::before, .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Focus demo */
+  .focus-demo { display: flex; gap: 10px; flex-wrap: wrap; margin: 1rem 0; }
+  .demo-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--body);
+  }
+  .demo-bad { background: var(--surface2); border: 1px solid var(--border); color: var(--text); outline: none; }
+  .demo-bad:focus { outline: none; }
+  .demo-good { background: var(--surface2); border: 1px solid var(--border); color: var(--text); outline: none; }
+  .demo-good:focus { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* Skip link */
+  .skip-link-demo {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-size: 13px;
+    color: #b0b4be;
+    margin: 1rem 0;
+  }
+
+  /* Sticky Main Header */
+  .main-header {
+    position: sticky;
+    top: 0;
+    background: rgba(14, 15, 17, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 3.5rem;
+    margin: -3rem -3.5rem 3rem -3.5rem;
+    z-index: 90;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: var(--mono);
+    transition: color 0.2s, transform 0.2s;
+    font-weight: 500;
+  }
+
+  .back-btn:hover {
+    color: var(--accent);
+    transform: translateX(-3px);
+  }
+
+  .back-btn svg {
+    transition: transform 0.2s;
+  }
+
+  .back-btn:hover svg {
+    transform: translateX(-2px);
+  }
+
+  /* Mobile menu button */
+  .menu-toggle {
+    display: none;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 12px;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .menu-toggle:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+  }
+
+  /* Search box styling */
+  .search-wrapper {
+    position: relative;
+    max-width: 320px;
+    width: 100%;
+  }
+
+  .search-input-header {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 36px 8px 16px;
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+  }
+
+  .search-input-header:focus {
+    background: rgba(30, 33, 39, 0.6);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.15);
+  }
+
+  .search-icon-svg {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    width: 14px;
+    height: 14px;
+    transition: color 0.2s;
+  }
+
+  .search-input-header:focus ~ .search-icon-svg {
+    color: var(--accent);
+  }
+
+  .search-clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+  }
+
+  .search-clear-btn:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.08);
+  }
+
+  .search-highlight {
+    background: rgba(74, 222, 128, 0.25);
+    color: #fff;
+    border-bottom: 2px solid var(--accent);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  /* Mobile sidebar modal */
+  .mobile-nav-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(14, 15, 17, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .mobile-nav-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+
+  .mobile-sidebar {
+    position: fixed;
+    top: 0;
+    right: -280px;
+    width: 280px;
+    height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 2rem 0;
+    z-index: 1001;
+    overflow-y: auto;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+  }
+
+  .mobile-sidebar.active {
+    right: 0;
+  }
+
+  .mobile-sidebar-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .mobile-sidebar-close:hover {
+    color: var(--text);
+  }
+
+  /* Keyboard shortcut hint */
+  .kb-shortcut {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 9px;
+    font-family: var(--mono);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .search-input-header:focus ~ .kb-shortcut {
+    display: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main { padding: 2rem 1.5rem; }
+    .pour-grid, .level-grid, .contrast-grid { grid-template-columns: 1fr; }
+    
+    .main-header {
+      margin: -2rem -1.5rem 2rem -1.5rem;
+      padding: 1rem 1.5rem;
+    }
+    .menu-toggle {
+      display: inline-flex;
+    }
+    .search-wrapper {
+      max-width: 180px;
+    }
+    .kb-shortcut {
+      display: none;
+    }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  ul { padding-left: 1.25rem; margin-bottom: 1rem; }
+  li { color: #b0b4be; font-size: 14px; margin-bottom: 0.4rem; line-height: 1.6; }
+  ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<div class="layout">
+  <nav class="sidebar" aria-label="Table of contents">
+    <div class="sidebar-logo">
+      <div class="tag">// NOTES</div>
+      <h2>WCAG & A11y</h2>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">FUNDAMENTALS</div>
+      <a href="#what-is" class="nav-link active">What is accessibility?</a>
+      <a href="#wcag" class="nav-link">What is WCAG?</a>
+      <a href="#pour" class="nav-link">POUR principles</a>
+      <a href="#levels" class="nav-link">Conformance levels</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">CORE TOPICS</div>
+      <a href="#semantic-html" class="nav-link">Semantic HTML</a>
+      <a href="#keyboard" class="nav-link">Keyboard navigation</a>
+      <a href="#focus" class="nav-link">Focus management</a>
+      <a href="#contrast" class="nav-link">Color & contrast</a>
+      <a href="#images" class="nav-link">Images & alt text</a>
+      <a href="#forms" class="nav-link">Forms</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">ADVANCED</div>
+      <a href="#aria" class="nav-link">ARIA deep dive</a>
+      <a href="#screen-readers" class="nav-link">Screen readers</a>
+      <a href="#dynamic" class="nav-link">Dynamic content</a>
+      <a href="#react-a11y" class="nav-link">Accessibility in React</a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">INTERVIEW PREP</div>
+      <a href="#checklist" class="nav-link">Quick checklist</a>
+      <a href="#interview" class="nav-link">Interview Q&A</a>
+    </div>
+  </nav>
+
+  <main class="main" id="main-content">
+
+    <!-- STICKY HEADER -->
+    <header class="main-header" aria-label="Page controls">
+      <div class="header-left">
+        <a href="index.html" class="back-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Hub
+        </a>
+        <button class="menu-toggle" aria-expanded="false" aria-label="Open navigation menu">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+          Menu
+        </button>
+      </div>
+      <div class="search-wrapper">
+        <input type="text" class="search-input-header" placeholder="Search guide or Q&A..." aria-label="Search guide content">
+        <span class="kb-shortcut" aria-hidden="true">/</span>
+        <button class="search-clear-btn" aria-label="Clear search" type="button">&times;</button>
+        <svg class="search-icon-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero" id="what-is">
+      <div class="section-eyebrow">01 — WHAT IS ACCESSIBILITY</div>
+      <h1>Web Accessibility<br><em style="font-style:italic;color:#5a6070;">from zero to expert</em></h1>
+      <p>Accessibility (shortened as <strong>a11y</strong> — 11 letters between a and y) means building websites and apps that everyone can use — including people with visual, auditory, motor, or cognitive disabilities.</p>
+    </div>
+
+    <div class="callout callout-info">
+      <strong>Real numbers:</strong> ~15% of the world's population lives with some form of disability. In India alone, that's 26 crore+ people. Poor accessibility = excluding them from your product entirely.
+    </div>
+
+    <p>Disabilities that affect web usage include:</p>
+    <ul>
+      <li><strong>Visual</strong> — blindness, low vision, color blindness (use screen readers, magnifiers)</li>
+      <li><strong>Auditory</strong> — deafness, hard of hearing (need captions, transcripts)</li>
+      <li><strong>Motor</strong> — paralysis, tremors (can't use mouse, use keyboard or switch devices)</li>
+      <li><strong>Cognitive</strong> — dyslexia, ADHD, anxiety (need clear layout, no flashing content)</li>
+    </ul>
+
+    <div class="callout callout-tip">
+      <strong>Interview framing tip:</strong> Always say "accessibility benefits everyone, not just disabled users." Example: keyboard navigation helps power users. Captions help people in noisy environments. High contrast helps people in bright sunlight.
+    </div>
+
+    <!-- WCAG -->
+    <section id="wcag">
+      <div class="section-eyebrow">02 — WHAT IS WCAG</div>
+      <h2>Web Content Accessibility Guidelines</h2>
+
+      <p>WCAG (pronounced <em>wuh-kag</em>) is a set of guidelines published by the <strong>W3C</strong> (World Wide Web Consortium) that defines how to make web content accessible. Think of it as the rulebook.</p>
+
+      <ul>
+        <li><strong>WCAG 2.0</strong> — published 2008, became ISO standard</li>
+        <li><strong>WCAG 2.1</strong> — published 2018, added mobile & cognitive improvements (current standard)</li>
+        <li><strong>WCAG 2.2</strong> — published 2023, added more criteria especially for cognitive disabilities</li>
+        <li><strong>WCAG 3.0</strong> — in progress, completely redesigned scoring model</li>
+      </ul>
+
+      <div class="callout callout-warn">
+        <strong>JPMC context:</strong> Enterprise banks follow WCAG 2.1 AA as a minimum legal requirement in most countries. Some aim for AAA for specific high-risk flows like payments.
+      </div>
+    </section>
+
+    <!-- POUR -->
+    <section id="pour">
+      <div class="section-eyebrow">03 — POUR PRINCIPLES</div>
+      <h2>The 4 POUR principles</h2>
+      <p>Every WCAG guideline falls under one of these four core principles. Remember this acronym — interviewers love asking it.</p>
+
+      <div class="pour-grid">
+        <div class="pour-card">
+          <div class="pour-letter" style="color:#60a5fa;">P</div>
+          <div class="pour-title">Perceivable</div>
+          <div class="pour-desc">Information must be presentable to users in ways they can perceive. You can't hide content from all senses.<br><br>Examples: alt text for images, captions for video, don't use color alone to convey meaning.</div>
+        </div>
+        <div class="pour-card">
+          <div class="pour-letter" style="color:#4ade80;">O</div>
+          <div class="pour-title">Operable</div>
+          <div class="pour-desc">UI components must be operable by everyone. Users must be able to navigate and interact.<br><br>Examples: keyboard navigable, no seizure-inducing flashes, skip navigation links, enough time to read content.</div>
+        </div>
+        <div class="pour-card">
+          <div class="pour-letter" style="color:#f59e0b;">U</div>
+          <div class="pour-title">Understandable</div>
+          <div class="pour-desc">Content and UI must be understandable. Users must be able to understand info and how to operate the UI.<br><br>Examples: readable text, predictable navigation, form error suggestions.</div>
+        </div>
+        <div class="pour-card">
+          <div class="pour-letter" style="color:#c084fc;">R</div>
+          <div class="pour-title">Robust</div>
+          <div class="pour-desc">Content must be robust enough to work with current and future assistive technologies.<br><br>Examples: valid HTML, ARIA used correctly, no browser-specific hacks that break screen readers.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEVELS -->
+    <section id="levels">
+      <div class="section-eyebrow">04 — CONFORMANCE LEVELS</div>
+      <h2>A, AA, AAA — what do they mean?</h2>
+
+      <div class="level-grid">
+        <div class="level-card level-a">
+          <div class="level-name">A</div>
+          <div class="level-desc">Minimum level. Must pass. Failing means severe blockers for disabled users — like a page with no text alternatives for images at all.</div>
+        </div>
+        <div class="level-card level-aa">
+          <div class="level-name">AA</div>
+          <div class="level-desc">The legal standard in most countries. Required by ADA (USA), EAA (EU), and most enterprise procurement rules including banks. This is what you need to know.</div>
+        </div>
+        <div class="level-card level-aaa">
+          <div class="level-name">AAA</div>
+          <div class="level-desc">Highest standard. Very difficult to achieve across an entire site. Usually targeted for specific high-stakes flows (e.g. emergency info, payment screens).</div>
+        </div>
+      </div>
+
+      <div class="callout callout-tip">
+        <strong>What to say in interviews:</strong> "We target WCAG 2.1 AA as a baseline across all components in our design system, with spot AAA checks on critical user journeys like checkout or form submission."
+      </div>
+    </section>
+
+    <div class="section-divider">CORE IMPLEMENTATION</div>
+
+    <!-- SEMANTIC HTML -->
+    <section id="semantic-html">
+      <div class="section-eyebrow">05 — SEMANTIC HTML</div>
+      <h2>Semantic HTML — the foundation</h2>
+
+      <p>Semantic HTML is using the <em>right HTML element for the right job</em>. Screen readers and other assistive technologies read the HTML structure to understand your page. If everything is a <code>&lt;div&gt;</code>, they have no idea what's a button, what's navigation, what's a heading.</p>
+
+      <h3>Bad vs good — the most common mistake</h3>
+
+<pre><span class="cm">/* ❌ BAD — a div pretending to be a button */</span>
+<span class="tag-c">&lt;div</span> <span class="attr">onclick</span>=<span class="str">"doSomething()"</span> <span class="attr">class</span>=<span class="str">"btn"</span><span class="tag-c">&gt;</span>Submit<span class="tag-c">&lt;/div&gt;</span>
+<span class="cm">// Problems: not focusable by keyboard, no role announced,</span>
+<span class="cm">// screen reader says "Submit" with no context</span>
+
+<span class="cm">/* ✅ GOOD */</span>
+<span class="tag-c">&lt;button</span> <span class="attr">type</span>=<span class="str">"button"</span> <span class="attr">onclick</span>=<span class="str">"doSomething()"</span><span class="tag-c">&gt;</span>Submit<span class="tag-c">&lt;/button&gt;</span>
+<span class="cm">// Free: keyboard focusable, Enter/Space activates it,</span>
+<span class="cm">// screen reader announces "Submit, button"</span></pre>
+
+      <h3>Key semantic elements to know</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Element</th><th>Purpose</th><th>Screen reader announces</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;header&gt;</code></td><td>Page or section header</td><td>"banner" landmark</td></tr>
+            <tr><td><code>&lt;nav&gt;</code></td><td>Navigation links</td><td>"navigation" landmark</td></tr>
+            <tr><td><code>&lt;main&gt;</code></td><td>Primary page content</td><td>"main" landmark</td></tr>
+            <tr><td><code>&lt;footer&gt;</code></td><td>Page or section footer</td><td>"contentinfo" landmark</td></tr>
+            <tr><td><code>&lt;aside&gt;</code></td><td>Sidebar / related content</td><td>"complementary" landmark</td></tr>
+            <tr><td><code>&lt;button&gt;</code></td><td>Clickable action</td><td>"[text], button"</td></tr>
+            <tr><td><code>&lt;a href&gt;</code></td><td>Navigation link</td><td>"[text], link"</td></tr>
+            <tr><td><code>&lt;h1&gt;–&lt;h6&gt;</code></td><td>Headings hierarchy</td><td>"[text], heading level N"</td></tr>
+            <tr><td><code>&lt;ul&gt; / &lt;ol&gt;</code></td><td>Lists</td><td>"list, N items"</td></tr>
+            <tr><td><code>&lt;table&gt;</code></td><td>Tabular data only</td><td>reads row/col headers</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-danger">
+        <strong>Never use a table for layout.</strong> Screen readers will read it as data and confuse users completely. Tables are only for tabular data.
+      </div>
+
+      <h3>Heading hierarchy — the most broken thing on enterprise apps</h3>
+<pre><span class="cm">/* ❌ BAD — headings used for visual size, not structure */</span>
+<span class="tag-c">&lt;h1&gt;</span>Dashboard<span class="tag-c">&lt;/h1&gt;</span>
+<span class="tag-c">&lt;h3&gt;</span>Revenue<span class="tag-c">&lt;/h3&gt;</span>   <span class="cm">// jumped h2!</span>
+<span class="tag-c">&lt;h5&gt;</span>Chart<span class="tag-c">&lt;/h5&gt;</span>     <span class="cm">// jumped h4!</span>
+
+<span class="cm">/* ✅ GOOD — logical nested structure */</span>
+<span class="tag-c">&lt;h1&gt;</span>Dashboard<span class="tag-c">&lt;/h1&gt;</span>
+  <span class="tag-c">&lt;h2&gt;</span>Revenue<span class="tag-c">&lt;/h2&gt;</span>
+    <span class="tag-c">&lt;h3&gt;</span>Monthly Chart<span class="tag-c">&lt;/h3&gt;</span>
+    <span class="tag-c">&lt;h3&gt;</span>Yearly Chart<span class="tag-c">&lt;/h3&gt;</span>
+  <span class="tag-c">&lt;h2&gt;</span>Expenses<span class="tag-c">&lt;/h2&gt;</span></pre>
+    </section>
+
+    <!-- KEYBOARD NAV -->
+    <section id="keyboard">
+      <div class="section-eyebrow">06 — KEYBOARD NAVIGATION</div>
+      <h2>Keyboard navigation</h2>
+
+      <p>Many users cannot use a mouse — they navigate entirely by keyboard. Your entire UI must be usable with just a keyboard.</p>
+
+      <h3>Essential keyboard shortcuts to know</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Key</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><code>Tab</code></td><td>Move to next focusable element</td></tr>
+            <tr><td><code>Shift + Tab</code></td><td>Move to previous focusable element</td></tr>
+            <tr><td><code>Enter</code></td><td>Activate links and buttons</td></tr>
+            <tr><td><code>Space</code></td><td>Activate buttons, checkboxes</td></tr>
+            <tr><td><code>Arrow keys</code></td><td>Navigate within components (menus, radio groups, sliders)</td></tr>
+            <tr><td><code>Escape</code></td><td>Close modals, dropdowns, tooltips</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>What is naturally focusable?</h3>
+      <p>These elements get Tab focus automatically — no extra work:</p>
+      <ul>
+        <li><code>&lt;a href&gt;</code>, <code>&lt;button&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code></li>
+        <li>Elements with <code>tabindex="0"</code></li>
+      </ul>
+
+<pre><span class="cm">/* tabindex values */</span>
+tabindex=<span class="str">"0"</span>   <span class="cm">// add element to natural tab order</span>
+tabindex=<span class="str">"-1"</span>  <span class="cm">// focusable via JS (.focus()) but NOT in tab order — used for modals</span>
+tabindex=<span class="str">"5"</span>   <span class="cm">// ❌ AVOID — custom order is fragile and confusing</span></pre>
+
+      <div class="callout callout-info">
+        <strong>Skip navigation link</strong> — required for WCAG 2.4.1. A "Skip to main content" link that appears on first Tab press, letting keyboard users jump past the navbar directly to content.
+      </div>
+
+<pre><span class="cm">/* Skip link — first element in body */</span>
+<span class="tag-c">&lt;a</span> <span class="attr">href</span>=<span class="str">"#main-content"</span> <span class="attr">class</span>=<span class="str">"skip-link"</span><span class="tag-c">&gt;</span>
+  Skip to main content
+<span class="tag-c">&lt;/a&gt;</span>
+
+<span class="cm">/* CSS — visually hidden until focused */</span>
+<span class="kw">.skip-link</span> {
+  <span class="attr">position</span>: <span class="val">absolute</span>;
+  <span class="attr">top</span>: <span class="val">-40px</span>;
+  <span class="attr">left</span>: <span class="val">0</span>;
+  <span class="attr">background</span>: <span class="val">#000</span>;
+  <span class="attr">color</span>: <span class="val">#fff</span>;
+  <span class="attr">padding</span>: <span class="val">8px</span>;
+  <span class="attr">z-index</span>: <span class="val">100</span>;
+}
+<span class="kw">.skip-link:focus</span> {
+  <span class="attr">top</span>: <span class="val">0</span>; <span class="cm">/* slides into view on focus */</span>
+}</pre>
+    </section>
+
+    <!-- FOCUS -->
+    <section id="focus">
+      <div class="section-eyebrow">07 — FOCUS MANAGEMENT</div>
+      <h2>Focus management</h2>
+
+      <p>Focus indicator = the visible outline that shows which element is currently focused. <strong>Never remove it without replacing it</strong> with something better.</p>
+
+<pre><span class="cm">/* ❌ The most harmful CSS line in frontend history */</span>
+<span class="kw">*:focus</span> { <span class="attr">outline</span>: <span class="val">none</span>; }
+
+<span class="cm">/* ✅ Replace with custom visible indicator */</span>
+<span class="kw">*:focus-visible</span> {
+  <span class="attr">outline</span>: <span class="val">2px solid #4ade80</span>;
+  <span class="attr">outline-offset</span>: <span class="val">3px</span>;
+  <span class="attr">border-radius</span>: <span class="val">3px</span>;
+}
+<span class="cm">/* :focus-visible fires only on keyboard focus, not mouse click */</span></pre>
+
+      <div class="callout callout-tip">
+        <strong>:focus-visible</strong> is the modern fix — it shows the focus ring only when navigating by keyboard, not when clicking with mouse. Best of both worlds.
+      </div>
+
+      <h3>Modal / dialog focus trap</h3>
+      <p>When a modal opens, focus must be trapped inside it. Users shouldn't be able to Tab out to content behind the modal.</p>
+
+<pre><span class="cm">// Focus trap pattern for modals</span>
+<span class="kw">function</span> <span class="attr">trapFocus</span>(modalElement) {
+  <span class="kw">const</span> focusable = modalElement.querySelectorAll(
+    <span class="str">'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'</span>
+  );
+  <span class="kw">const</span> first = focusable[<span class="val">0</span>];
+  <span class="kw">const</span> last = focusable[focusable.length - <span class="val">1</span>];
+
+  modalElement.addEventListener(<span class="str">'keydown'</span>, (e) => {
+    <span class="kw">if</span> (e.key !== <span class="str">'Tab'</span>) <span class="kw">return</span>;
+    <span class="kw">if</span> (e.shiftKey) {
+      <span class="kw">if</span> (document.activeElement === first) {
+        last.focus(); e.preventDefault();
+      }
+    } <span class="kw">else</span> {
+      <span class="kw">if</span> (document.activeElement === last) {
+        first.focus(); e.preventDefault();
+      }
+    }
+  });
+  first.focus(); <span class="cm">// move focus into modal on open</span>
+}
+
+<span class="cm">// On close — return focus to the trigger element</span>
+<span class="kw">const</span> trigger = document.querySelector(<span class="str">'#open-modal-btn'</span>);
+<span class="cm">// when modal closes:</span>
+trigger.focus();</pre>
+    </section>
+
+    <!-- CONTRAST -->
+    <section id="contrast">
+      <div class="section-eyebrow">08 — COLOR & CONTRAST</div>
+      <h2>Color & contrast ratios</h2>
+
+      <p>WCAG defines minimum contrast ratios between text and its background. Contrast ratio is measured from 1:1 (same color) to 21:1 (black on white).</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Text type</th><th>AA minimum</th><th>AAA minimum</th></tr></thead>
+          <tbody>
+            <tr><td>Normal text (under 18pt)</td><td>4.5 : 1</td><td>7 : 1</td></tr>
+            <tr><td>Large text (18pt+ or 14pt bold)</td><td>3 : 1</td><td>4.5 : 1</td></tr>
+            <tr><td>UI components & icons</td><td>3 : 1</td><td>—</td></tr>
+            <tr><td>Decorative / logo text</td><td>No requirement</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="contrast-grid">
+        <div>
+          <div class="contrast-label" style="color:var(--accent4);font-family:var(--mono);font-size:11px;margin-bottom:4px;">❌ FAIL — ratio ~1.6:1</div>
+          <div class="contrast-box contrast-fail">This text is hard to read — light gray on light gray background</div>
+        </div>
+        <div>
+          <div class="contrast-label" style="color:var(--accent);font-family:var(--mono);font-size:11px;margin-bottom:4px;">✅ PASS — ratio ~8.5:1</div>
+          <div class="contrast-box contrast-pass">This text is easy to read — dark text on light gray background</div>
+        </div>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>Color alone rule (WCAG 1.4.1):</strong> Never use color as the ONLY way to convey information. Example: a red asterisk for required fields must also have a text label like "(required)". Color-blind users can't see the red.
+      </div>
+
+      <h3>Tools for checking contrast</h3>
+      <ul>
+        <li><strong>WebAIM Contrast Checker</strong> — webaim.org/resources/contrastchecker</li>
+        <li><strong>Chrome DevTools</strong> — inspect any element, click the color swatch</li>
+        <li><strong>Figma</strong> — plugins like "Contrast" or "Stark"</li>
+        <li><strong>axe DevTools</strong> — browser extension that auto-flags contrast issues</li>
+      </ul>
+    </section>
+
+    <!-- IMAGES -->
+    <section id="images">
+      <div class="section-eyebrow">09 — IMAGES & ALT TEXT</div>
+      <h2>Images & alt text</h2>
+
+<pre><span class="cm">/* 3 types of images — different alt text strategy */</span>
+
+<span class="cm">// 1. Informative image — describe what it shows</span>
+<span class="tag-c">&lt;img</span> <span class="attr">src</span>=<span class="str">"chart.png"</span> <span class="attr">alt</span>=<span class="str">"Bar chart showing revenue grew 40% in Q4 2024"</span> <span class="tag-c">/&gt;</span>
+
+<span class="cm">// 2. Decorative image — empty alt, screen reader skips it</span>
+<span class="tag-c">&lt;img</span> <span class="attr">src</span>=<span class="str">"decorative-wave.svg"</span> <span class="attr">alt</span>=<span class="str">""</span> <span class="attr">role</span>=<span class="str">"presentation"</span> <span class="tag-c">/&gt;</span>
+
+<span class="cm">// 3. Functional image (inside a link/button) — describe the action</span>
+<span class="tag-c">&lt;button&gt;</span>
+  <span class="tag-c">&lt;img</span> <span class="attr">src</span>=<span class="str">"search-icon.svg"</span> <span class="attr">alt</span>=<span class="str">"Search"</span> <span class="tag-c">/&gt;</span>
+<span class="tag-c">&lt;/button&gt;</span>
+
+<span class="cm">// For icon-only buttons — use aria-label instead</span>
+<span class="tag-c">&lt;button</span> <span class="attr">aria-label</span>=<span class="str">"Close dialog"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;svg</span> <span class="attr">aria-hidden</span>=<span class="str">"true"</span><span class="tag-c">&gt;</span>...<span class="tag-c">&lt;/svg&gt;</span>
+<span class="tag-c">&lt;/button&gt;</span></pre>
+
+      <div class="callout callout-danger">
+        Missing alt on meaningful images = WCAG 1.1.1 Level A failure. Automated scanners catch this instantly.
+      </div>
+    </section>
+
+    <!-- FORMS -->
+    <section id="forms">
+      <div class="section-eyebrow">10 — FORMS</div>
+      <h2>Accessible forms</h2>
+
+<pre><span class="cm">/* ❌ BAD — placeholder as label */</span>
+<span class="tag-c">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">placeholder</span>=<span class="str">"Enter your email"</span> <span class="tag-c">/&gt;</span>
+<span class="cm">// Placeholder disappears on typing — user forgets what field it was</span>
+<span class="cm">// Screen reader may or may not read placeholder as label</span>
+
+<span class="cm">/* ✅ GOOD — label associated with input */</span>
+<span class="tag-c">&lt;label</span> <span class="attr">for</span>=<span class="str">"email"</span><span class="tag-c">&gt;</span>Email address<span class="tag-c">&lt;/label&gt;</span>
+<span class="tag-c">&lt;input</span> <span class="attr">type</span>=<span class="str">"email"</span> <span class="attr">id</span>=<span class="str">"email"</span> <span class="attr">name</span>=<span class="str">"email"</span>
+       <span class="attr">aria-describedby</span>=<span class="str">"email-hint"</span>
+       <span class="attr">aria-required</span>=<span class="str">"true"</span> <span class="tag-c">/&gt;</span>
+<span class="tag-c">&lt;span</span> <span class="attr">id</span>=<span class="str">"email-hint"</span><span class="tag-c">&gt;</span>We'll never share your email<span class="tag-c">&lt;/span&gt;</span>
+
+<span class="cm">/* Error state */</span>
+<span class="tag-c">&lt;input</span> <span class="attr">aria-invalid</span>=<span class="str">"true"</span>
+       <span class="attr">aria-describedby</span>=<span class="str">"email-error"</span> <span class="tag-c">/&gt;</span>
+<span class="tag-c">&lt;span</span> <span class="attr">id</span>=<span class="str">"email-error"</span> <span class="attr">role</span>=<span class="str">"alert"</span><span class="tag-c">&gt;</span>
+  Please enter a valid email address
+<span class="tag-c">&lt;/span&gt;</span></pre>
+    </section>
+
+    <div class="section-divider">ADVANCED TOPICS</div>
+
+    <!-- ARIA -->
+    <section id="aria">
+      <div class="section-eyebrow">11 — ARIA DEEP DIVE</div>
+      <h2>ARIA — Accessible Rich Internet Applications</h2>
+
+      <p>ARIA is a set of HTML attributes that modify the accessibility tree — what screen readers see. The golden rule:</p>
+
+      <div class="callout callout-warn">
+        <strong>First rule of ARIA:</strong> Don't use ARIA if you can use native HTML instead. <code>&lt;button&gt;</code> is always better than <code>&lt;div role="button"&gt;</code>.
+      </div>
+
+      <h3>3 types of ARIA attributes</h3>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Attribute</th><th>Purpose</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td>Role</td><td><code>role</code></td><td>Overrides element type in accessibility tree</td><td><code>role="dialog"</code>, <code>role="alert"</code></td></tr>
+            <tr><td>Property</td><td><code>aria-*</code></td><td>Adds meaning/relationship</td><td><code>aria-label</code>, <code>aria-required</code></td></tr>
+            <tr><td>State</td><td><code>aria-*</code></td><td>Dynamic current state</td><td><code>aria-expanded</code>, <code>aria-checked</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Most important ARIA attributes for interviews</h3>
+
+<pre><span class="cm">/* aria-label — give a name when no visible text */</span>
+<span class="tag-c">&lt;button</span> <span class="attr">aria-label</span>=<span class="str">"Close dialog"</span><span class="tag-c">&gt;</span> × <span class="tag-c">&lt;/button&gt;</span>
+
+<span class="cm">/* aria-labelledby — point to another element as the label */</span>
+<span class="tag-c">&lt;div</span> <span class="attr">role</span>=<span class="str">"dialog"</span> <span class="attr">aria-labelledby</span>=<span class="str">"dialog-title"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;h2</span> <span class="attr">id</span>=<span class="str">"dialog-title"</span><span class="tag-c">&gt;</span>Confirm Delete<span class="tag-c">&lt;/h2&gt;</span>
+<span class="tag-c">&lt;/div&gt;</span>
+
+<span class="cm">/* aria-describedby — point to description text */</span>
+<span class="tag-c">&lt;button</span> <span class="attr">aria-describedby</span>=<span class="str">"submit-hint"</span><span class="tag-c">&gt;</span>Submit<span class="tag-c">&lt;/button&gt;</span>
+<span class="tag-c">&lt;span</span> <span class="attr">id</span>=<span class="str">"submit-hint"</span><span class="tag-c">&gt;</span>This will finalize your order<span class="tag-c">&lt;/span&gt;</span>
+
+<span class="cm">/* aria-expanded — for dropdowns, accordions */</span>
+<span class="tag-c">&lt;button</span> <span class="attr">aria-expanded</span>=<span class="str">"false"</span> <span class="attr">aria-controls</span>=<span class="str">"menu"</span><span class="tag-c">&gt;</span>Menu<span class="tag-c">&lt;/button&gt;</span>
+<span class="tag-c">&lt;ul</span> <span class="attr">id</span>=<span class="str">"menu"</span> <span class="attr">hidden</span><span class="tag-c">&gt;</span>...<span class="tag-c">&lt;/ul&gt;</span>
+
+<span class="cm">/* aria-live — announce dynamic content changes */</span>
+<span class="tag-c">&lt;div</span> <span class="attr">aria-live</span>=<span class="str">"polite"</span><span class="tag-c">&gt;</span>    <span class="cm">// waits for user to finish action</span>
+<span class="tag-c">&lt;div</span> <span class="attr">aria-live</span>=<span class="str">"assertive"</span><span class="tag-c">&gt;</span>  <span class="cm">// interrupts immediately (for errors)</span>
+
+<span class="cm">/* aria-hidden — hide decorative elements from screen readers */</span>
+<span class="tag-c">&lt;span</span> <span class="attr">aria-hidden</span>=<span class="str">"true"</span><span class="tag-c">&gt;</span>→<span class="tag-c">&lt;/span&gt;</span></pre>
+    </section>
+
+    <!-- SCREEN READERS -->
+    <section id="screen-readers">
+      <div class="section-eyebrow">12 — SCREEN READERS</div>
+      <h2>How screen readers work</h2>
+
+      <p>Screen readers convert the accessibility tree (not the visual DOM) into speech or braille output. The most common ones:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Screen reader</th><th>Platform</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td><strong>NVDA</strong></td><td>Windows (free)</td><td>Most used for testing; pairs with Firefox/Chrome</td></tr>
+            <tr><td><strong>JAWS</strong></td><td>Windows (paid)</td><td>Most common in enterprise/banking environments</td></tr>
+            <tr><td><strong>VoiceOver</strong></td><td>macOS / iOS</td><td>Built-in; cmd+F5 to enable on Mac</td></tr>
+            <tr><td><strong>TalkBack</strong></td><td>Android</td><td>Built-in; important for React Native apps</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout callout-tip">
+        <strong>Quick test:</strong> Enable VoiceOver (Mac: Cmd+F5) and try to complete a flow on your app using only keyboard + hearing the announcements. You'll immediately find the gaps.
+      </div>
+    </section>
+
+    <!-- DYNAMIC CONTENT -->
+    <section id="dynamic">
+      <div class="section-eyebrow">13 — DYNAMIC CONTENT</div>
+      <h2>Dynamic content & live regions</h2>
+
+      <p>When content changes without a page reload (SPA behavior, toast messages, loading states), screen readers don't know about it unless you tell them.</p>
+
+<pre><span class="cm">/* Toast / notification — use role="alert" for urgent messages */</span>
+<span class="tag-c">&lt;div</span> <span class="attr">role</span>=<span class="str">"alert"</span><span class="tag-c">&gt;</span>
+  Payment failed. Please check your card details.
+<span class="tag-c">&lt;/div&gt;</span>
+<span class="cm">// Automatically treated as aria-live="assertive"</span>
+
+<span class="cm">/* Status message — polite, non-urgent */</span>
+<span class="tag-c">&lt;div</span> <span class="attr">role</span>=<span class="str">"status"</span><span class="tag-c">&gt;</span>
+  Saved successfully
+<span class="tag-c">&lt;/div&gt;</span>
+<span class="cm">// Automatically treated as aria-live="polite"</span>
+
+<span class="cm">/* Loading state */</span>
+<span class="tag-c">&lt;button</span> <span class="attr">aria-busy</span>=<span class="str">"true"</span> <span class="attr">aria-label</span>=<span class="str">"Submitting form, please wait"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;span</span> <span class="attr">aria-hidden</span>=<span class="str">"true"</span><span class="tag-c">&gt;</span>Loading...<span class="tag-c">&lt;/span&gt;</span>
+<span class="tag-c">&lt;/button&gt;</span>
+
+<span class="cm">/* Page title updates in SPA — critical for screen reader users */</span>
+<span class="kw">// After route change, update document.title</span>
+document.title = <span class="str">"Order Confirmation — MyApp"</span>;</pre>
+    </section>
+
+    <!-- REACT A11Y -->
+    <section id="react-a11y">
+      <div class="section-eyebrow">14 — ACCESSIBILITY IN REACT</div>
+      <h2>Accessibility in React</h2>
+
+      <p>React uses <code>className</code> and <code>htmlFor</code> instead of <code>class</code> and <code>for</code>, but all ARIA attributes work exactly the same.</p>
+
+<pre><span class="cm">// JSX — note htmlFor instead of for</span>
+<span class="tag-c">&lt;label</span> <span class="attr">htmlFor</span>=<span class="str">"email"</span><span class="tag-c">&gt;</span>Email<span class="tag-c">&lt;/label&gt;</span>
+<span class="tag-c">&lt;input</span> <span class="attr">id</span>=<span class="str">"email"</span> <span class="attr">type</span>=<span class="str">"email"</span> <span class="tag-c">/&gt;</span>
+
+<span class="cm">// Accessible modal component with focus trap</span>
+<span class="kw">import</span> { useEffect, useRef } <span class="kw">from</span> <span class="str">'react'</span>;
+
+<span class="kw">function</span> <span class="attr">Modal</span>({ isOpen, onClose, title, children }) {
+  <span class="kw">const</span> modalRef = useRef(null);
+  <span class="kw">const</span> triggerRef = useRef(document.activeElement);
+
+  useEffect(() => {
+    <span class="kw">if</span> (isOpen) {
+      modalRef.current?.focus();
+    } <span class="kw">else</span> {
+      triggerRef.current?.focus(); <span class="cm">// return focus on close</span>
+    }
+  }, [isOpen]);
+
+  <span class="kw">if</span> (!isOpen) <span class="kw">return null</span>;
+
+  <span class="kw">return</span> (
+    <span class="tag-c">&lt;div</span>
+      <span class="attr">role</span>=<span class="str">"dialog"</span>
+      <span class="attr">aria-modal</span>=<span class="str">"true"</span>
+      <span class="attr">aria-labelledby</span>=<span class="str">"modal-title"</span>
+      <span class="attr">ref</span>={modalRef}
+      <span class="attr">tabIndex</span>={<span class="val">-1</span>}
+      <span class="attr">onKeyDown</span>={(e) => e.key === <span class="str">'Escape'</span> && onClose()}
+    <span class="tag-c">&gt;</span>
+      <span class="tag-c">&lt;h2</span> <span class="attr">id</span>=<span class="str">"modal-title"</span><span class="tag-c">&gt;</span>{title}<span class="tag-c">&lt;/h2&gt;</span>
+      {children}
+      <span class="tag-c">&lt;button</span> <span class="attr">onClick</span>={onClose}<span class="tag-c">&gt;</span>Close<span class="tag-c">&lt;/button&gt;</span>
+    <span class="tag-c">&lt;/div&gt;</span>
+  );
+}
+
+<span class="cm">// Route change announcement in React Router</span>
+<span class="kw">function</span> <span class="attr">RouteAnnouncer</span>() {
+  <span class="kw">const</span> location = useLocation();
+  useEffect(() => {
+    document.title = getPageTitle(location.pathname);
+  }, [location]);
+  <span class="kw">return null</span>;
+}</pre>
+
+      <h3>eslint-plugin-jsx-a11y</h3>
+      <p>Add this ESLint plugin to your project — it catches accessibility issues at code-writing time:</p>
+<pre>npm install --save-dev eslint-plugin-jsx-a11y
+
+<span class="cm">// .eslintrc</span>
+{
+  <span class="str">"plugins"</span>: [<span class="str">"jsx-a11y"</span>],
+  <span class="str">"extends"</span>: [<span class="str">"plugin:jsx-a11y/recommended"</span>]
+}</pre>
+    </section>
+
+    <div class="section-divider">INTERVIEW PREP</div>
+
+    <!-- CHECKLIST -->
+    <section id="checklist">
+      <div class="section-eyebrow">15 — QUICK CHECKLIST</div>
+      <h2>Pre-deployment accessibility checklist</h2>
+
+      <ul class="checklist">
+        <li><span class="check-icon check-good">✓</span> All images have meaningful alt text (or empty alt if decorative)</li>
+        <li><span class="check-icon check-good">✓</span> All form inputs have associated labels (via for/id or aria-label)</li>
+        <li><span class="check-icon check-good">✓</span> Color contrast ≥ 4.5:1 for normal text, ≥ 3:1 for large text</li>
+        <li><span class="check-icon check-good">✓</span> Page is fully navigable by keyboard (Tab, Enter, Space, Escape)</li>
+        <li><span class="check-icon check-good">✓</span> Focus indicator is visible — never outline: none without replacement</li>
+        <li><span class="check-icon check-good">✓</span> Modal/dialog traps focus and returns it on close</li>
+        <li><span class="check-icon check-good">✓</span> Dynamic content updates announced via aria-live or role="alert"</li>
+        <li><span class="check-icon check-good">✓</span> Heading hierarchy is logical (h1 → h2 → h3, no skipping)</li>
+        <li><span class="check-icon check-good">✓</span> Skip to main content link present at top of page</li>
+        <li><span class="check-icon check-good">✓</span> No information conveyed by color alone</li>
+        <li><span class="check-icon check-good">✓</span> Interactive elements use correct semantic HTML (button, not div)</li>
+        <li><span class="check-icon check-good">✓</span> Icon-only buttons have aria-label</li>
+        <li><span class="check-icon check-good">✓</span> Videos have captions, audio has transcripts</li>
+        <li><span class="check-icon check-warn">⚠</span> Run axe DevTools — fix all critical + serious issues</li>
+        <li><span class="check-icon check-warn">⚠</span> Test with keyboard-only — complete one full user journey</li>
+      </ul>
+    </section>
+
+    <!-- INTERVIEW Q&A -->
+    <section id="interview">
+      <div class="section-eyebrow">16 — INTERVIEW Q&A</div>
+      <h2>Interview Q&A — JPMC style</h2>
+
+      <div class="interview-box">
+        <h3>Q: What is WCAG and what level do you target?</h3>
+        <p><strong>Say:</strong> "WCAG stands for Web Content Accessibility Guidelines, published by the W3C. It's organized around 4 POUR principles — Perceivable, Operable, Understandable, Robust. I target WCAG 2.1 AA as the baseline for all production work — that's also the legal requirement under ADA and EAA. For critical flows like payments or error states, I consider AAA criteria like enhanced contrast."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: How do you handle accessibility in a React component library?</h3>
+        <p><strong>Say:</strong> "I make sure semantic HTML is the foundation — buttons are always button elements, links are always anchor tags. I use eslint-plugin-jsx-a11y to catch issues early. For dynamic components like modals, I implement focus management — trap focus inside the modal, return it to the trigger on close. For form components, I always associate labels with inputs via htmlFor/id. And I test with keyboard navigation and VoiceOver before shipping."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: How do you make a custom dropdown accessible?</h3>
+        <p><strong>Say:</strong> "A custom dropdown needs: the trigger button with <code>aria-expanded</code> reflecting open/closed state, <code>aria-haspopup="listbox"</code>, and <code>aria-controls</code> pointing to the list. The list gets <code>role="listbox"</code>, each item gets <code>role="option"</code> with <code>aria-selected</code>. Arrow keys move between options, Enter/Space select, Escape closes it. This follows the ARIA Authoring Practices Guide combobox pattern."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: What tools do you use for accessibility testing?</h3>
+        <p><strong>Say:</strong> "Three layers: automated, manual, and assistive tech testing. For automated I use axe-core (via axe DevTools browser extension or jest-axe in unit tests) — catches about 30-40% of issues. For manual I do keyboard-only walkthroughs and zoom to 200%. For assistive tech I test with VoiceOver on Mac. No tool catches everything — keyboard testing in particular surfaces issues automated tools miss."</p>
+      </div>
+
+      <div class="interview-box">
+        <h3>Q: Tell me about a time you improved accessibility in a real project.</h3>
+        <p><strong>Your angle with Superset:</strong> "In my Superset work, I customized chart components for business needs. From an accessibility perspective, charts are one of the hardest areas — they're inherently visual. I made sure each chart had a proper aria-label describing the data it showed, added a text summary table as an accessible alternative, and ensured the color palettes we used had sufficient contrast ratios. I also made the interactive filtering controls keyboard-accessible."</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = (window.scrollY / total) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  const sections = document.querySelectorAll('section, .hero');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === '#' + entry.target.id) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // --- Search and Mobile Menu Logic ---
+  const searchInput = document.querySelector('.search-input-header');
+  const searchClearBtn = document.querySelector('.search-clear-btn');
+  const shortcutHint = document.querySelector('.kb-shortcut');
+  const desktopSidebar = document.querySelector('.sidebar');
+  
+  // Store original HTML of each section to cleanly restore on query reset
+  const originalHTMLMap = new Map();
+  const searchTargets = document.querySelectorAll('section, .hero, .main > p, .main > ul, .main > .callout');
+  
+  searchTargets.forEach((el) => {
+    originalHTMLMap.set(el, el.innerHTML);
+  });
+
+  // Recursive highlight text nodes
+  function highlightText(element, regex) {
+    const nodes = [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+    let node;
+    while (node = walker.nextNode()) {
+      const parent = node.parentNode;
+      if (parent) {
+        const parentTag = parent.tagName.toUpperCase();
+        // Skip script, style, pre, and code nodes to avoid breaking scripts and code layouts
+        if (parentTag !== 'SCRIPT' && parentTag !== 'STYLE' && parentTag !== 'CODE' && parentTag !== 'PRE') {
+          nodes.push(node);
+        }
+      }
+    }
+    
+    for (let i = nodes.length - 1; i >= 0; i--) {
+      const textNode = nodes[i];
+      const match = textNode.nodeValue.match(regex);
+      if (match) {
+        const span = document.createElement('span');
+        span.innerHTML = textNode.nodeValue.replace(regex, '<mark class="search-highlight">$1</mark>');
+        textNode.parentNode.replaceChild(span, textNode);
+      }
+    }
+  }
+
+  // Handle Search Input
+  searchInput.addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase().trim();
+    
+    if (query.length > 0) {
+      searchClearBtn.style.display = 'flex';
+      if (shortcutHint) shortcutHint.style.display = 'none';
+      
+      const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      
+      searchTargets.forEach(el => {
+        // Reset element to original first
+        el.innerHTML = originalHTMLMap.get(el);
+        
+        const text = el.textContent.toLowerCase();
+        if (text.includes(query)) {
+          el.style.display = '';
+          highlightText(el, regex);
+        } else {
+          el.style.display = 'none';
+        }
+      });
+      
+      // Dim unmatched navigation sidebar links
+      navLinks.forEach(link => {
+        const targetId = link.getAttribute('href').substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          if (targetEl.style.display === 'none') {
+            link.style.opacity = '0.25';
+            link.style.pointerEvents = 'none';
+          } else {
+            link.style.opacity = '1';
+            link.style.pointerEvents = 'auto';
+          }
+        }
+      });
+    } else {
+      resetSearch();
+    }
+  });
+
+  function resetSearch() {
+    searchInput.value = '';
+    searchClearBtn.style.display = 'none';
+    if (shortcutHint) shortcutHint.style.display = 'flex';
+    
+    searchTargets.forEach(el => {
+      el.innerHTML = originalHTMLMap.get(el);
+      el.style.display = '';
+    });
+    
+    navLinks.forEach(link => {
+      link.style.opacity = '1';
+      link.style.pointerEvents = 'auto';
+    });
+  }
+
+  searchClearBtn.addEventListener('click', resetSearch);
+
+  // Focus search with '/' shortcut key
+  window.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // Mobile Menu Logic
+  const menuToggle = document.querySelector('.menu-toggle');
+  const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  const mobileSidebar = document.getElementById('mobileSidebar');
+
+  // Clone sidebar content dynamically
+  if (mobileSidebar && desktopSidebar) {
+    const desktopLogo = desktopSidebar.querySelector('.sidebar-logo')?.outerHTML || '';
+    const desktopLinks = Array.from(desktopSidebar.querySelectorAll('.nav-section')).map(sec => sec.outerHTML).join('');
+    
+    mobileSidebar.innerHTML = `
+      <button class="mobile-sidebar-close" aria-label="Close menu">&times;</button>
+      ${desktopLogo}
+      <div style="padding: 1rem 0;">
+        ${desktopLinks}
+      </div>
+    `;
+
+    // Connect mobile sidebar links events to close drawer
+    mobileSidebar.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', () => {
+        closeMobileMenu();
+      });
+    });
+
+    const closeBtn = mobileSidebar.querySelector('.mobile-sidebar-close');
+    closeBtn?.addEventListener('click', closeMobileMenu);
+  }
+
+  function openMobileMenu() {
+    mobileNavOverlay.style.display = 'block';
+    mobileNavOverlay.offsetHeight; // force reflow
+    mobileNavOverlay.classList.add('active');
+    mobileSidebar.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    menuToggle.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeMobileMenu() {
+    mobileNavOverlay.classList.remove('active');
+    mobileSidebar.classList.remove('active');
+    document.body.style.overflow = '';
+    menuToggle.setAttribute('aria-expanded', 'false');
+    setTimeout(() => {
+      if (!mobileNavOverlay.classList.contains('active')) {
+        mobileNavOverlay.style.display = 'none';
+      }
+    }, 300);
+  }
+
+  menuToggle?.addEventListener('click', openMobileMenu);
+  mobileNavOverlay?.addEventListener('click', closeMobileMenu);
+</script>
+
+<!-- MOBILE NAV OVERLAY & SIDEBAR -->
+<div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+<aside class="mobile-sidebar" id="mobileSidebar" aria-label="Mobile navigation"></aside>
+
+</body>
+</html>
