@@ -1,0 +1,2378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FastAPI Mastery Guide — From Scratch to Expert</title>
+  <meta name="description" content="Complete, premium FastAPI guide with sidebar navigation, search, interactive progress tracking, and expert patterns.">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #06060c;
+      --sidebar-bg: rgba(10, 10, 20, 0.7);
+      --card-bg: rgba(18, 18, 32, 0.35);
+      --border: rgba(255, 255, 255, 0.05);
+      --border-hover: rgba(0, 242, 254, 0.2);
+      --accent: #00f2fe;
+      --accent-secondary: #4facfe;
+      --text-main: #f3f4f6;
+      --text-dim: #9ca3af;
+      --code-bg: #0b0b12;
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.15);
+      --accent-glow: rgba(0, 242, 254, 0.1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      background: radial-gradient(circle at 50% 0%, #121024 0%, #06060c 60%);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBARS ── */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-hover);
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(6, 6, 12, 0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      height: 80px;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex: 1;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .menu-toggle:hover {
+      transform: scale(1.1);
+    }
+
+    .logo {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 40%, rgba(0, 242, 254, 0.8));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-box {
+      flex: 1;
+      max-width: 320px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 0.6rem 1.2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent);
+      background: rgba(0, 242, 254, 0.03);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.1);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-bar-container {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    .progress-track {
+      width: 100px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+      border-radius: 99px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .back-btn {
+      padding: 0.6rem 1.2rem;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 242, 254, 0.08);
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      background: var(--sidebar-bg);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0.75rem;
+      height: calc(100vh - 110px);
+      overflow-y: auto;
+      position: fixed;
+      left: 1.5rem;
+      top: 95px;
+      width: 300px;
+      z-index: 200;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .sidebar-item {
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.35rem;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.25s ease;
+      border: 1px solid transparent;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-item:hover {
+      background: rgba(255, 255, 255, 0.02);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .sidebar-item.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.1) 0%, rgba(79, 172, 254, 0.02) 100%);
+      color: var(--accent);
+      border-color: rgba(0, 242, 254, 0.2);
+      box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.05);
+      font-weight: 600;
+    }
+
+    .sidebar-item-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .sidebar-item-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-dim);
+      background: rgba(255,255,255,0.04);
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .sidebar-item.active .sidebar-item-num {
+      color: #06060c;
+      background: var(--accent);
+    }
+
+    .sidebar-item-title {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sidebar-check-icon {
+      color: var(--success);
+      font-size: 0.85rem;
+      display: none;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 5px var(--success));
+    }
+    .sidebar-item.completed .sidebar-check-icon {
+      display: inline-block;
+    }
+
+    /* ── MAIN CONTENT AREA ── */
+    .content-area {
+      margin-left: calc(300px + 3.5rem);
+      padding: 3rem 2rem 5rem;
+      max-width: 980px;
+      width: calc(100% - 300px - 5rem);
+      margin-top: 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      display: none;
+      animation: slideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-number {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      background: rgba(0, 242, 254, 0.08);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      margin-bottom: 1.25rem;
+    }
+
+    .section-title-wrap {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+
+    .section-title-wrap h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+
+    p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    p strong {
+      color: #fff;
+    }
+
+    h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      margin: 2.25rem 0 1rem;
+      color: #fff;
+    }
+
+    h3 { font-size: 1.45rem; border-left: 3px solid var(--accent); padding-left: 0.75rem; }
+    h4 { font-size: 1.15rem; }
+
+    /* ── CONTENT BLOCKS ── */
+    .info-box, .tip-box, .warning-box {
+      padding: 1.25rem 1.5rem;
+      border-radius: 12px;
+      margin: 1.75rem 0;
+      border-left: 4px solid;
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      border-top: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .info-box:hover, .tip-box:hover, .warning-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .info-box {
+      border-left-color: var(--accent);
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.03) 0%, rgba(18, 18, 32, 0.35) 100%);
+    }
+
+    .tip-box {
+      border-left-color: var(--success);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(18, 18, 32, 0.35) 100%);
+    }
+
+    .warning-box {
+      border-left-color: #f59e0b;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(18, 18, 32, 0.35) 100%);
+    }
+
+    .info-box strong, .tip-box strong, .warning-box strong {
+      color: #fff;
+      display: inline-block;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ── WHY CARDS GRID ── */
+    .use-cases {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin: 1.5rem 0;
+    }
+
+    .use-case-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .use-case-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      background: rgba(22, 25, 49, 0.5);
+      box-shadow: 0 10px 25px rgba(0, 242, 254, 0.05);
+    }
+
+    .use-case-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.25rem;
+      filter: drop-shadow(0 0 8px rgba(0, 242, 254, 0.2));
+    }
+
+    .use-case-card h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .use-case-card p {
+      font-size: 0.85rem;
+      margin: 0;
+    }
+
+    /* ── CODE SECTIONS ── */
+    .code-section {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin: 1.75rem 0;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .code-header {
+      background: rgba(255, 255, 255, 0.01);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .code-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .copy-btn:hover {
+      background: rgba(0, 242, 254, 0.06);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    pre {
+      padding: 1.5rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    code { color: #e5e7eb; }
+    .keyword { color: #f472b6; font-weight: 500; }
+    .string { color: #34d399; }
+    .comment { color: #6b7280; font-style: italic; }
+    .function { color: #60a5fa; }
+    .class-name { color: #fbbf24; }
+    .decorator { color: #a78bfa; }
+
+    /* ── EXPLANATION BOX ── */
+    .explanation {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.75rem 0;
+    }
+
+    .explanation-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .explanation p {
+      font-size: 0.88rem;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+    .explanation p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* ── LISTS & TABLES ── */
+    ul, ol {
+      margin: 1.5rem 0 1.5rem 2rem;
+    }
+
+    li {
+      margin-bottom: 0.65rem;
+      color: var(--text-dim);
+      font-size: 0.95rem;
+    }
+
+    li strong { color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.015);
+      padding: 1.1rem;
+      text-align: left;
+      font-weight: 700;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      border-bottom: 1.5px solid var(--border);
+    }
+
+    td {
+      padding: 1.1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* ── SECTION NAV BAR ── */
+    .section-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .nav-btn {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      user-select: none;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--border-hover);
+      background: rgba(0, 242, 254, 0.04);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn.mark-completed {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+    .nav-btn.mark-completed:hover {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: var(--success);
+      color: #fff;
+    }
+    .nav-btn.mark-completed.completed-state {
+      background: var(--success);
+      color: #06060c;
+      border-color: var(--success);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      background: rgba(6, 6, 12, 0.9);
+      width: 100%;
+      z-index: 10;
+      position: relative;
+    }
+    footer p {
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -320px;
+        top: 80px;
+        height: calc(100vh - 80px);
+        width: 300px;
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+        border-radius: 0 16px 16px 0;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .content-area {
+        margin-left: 0;
+        width: 100%;
+        padding: 2rem 1.25rem 4rem;
+      }
+
+      .logo {
+        font-size: 1.15rem;
+      }
+
+      .search-box {
+        display: none;
+      }
+
+      .progress-bar-container {
+        padding: 4px 8px;
+      }
+      .progress-track {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
+      <div class="logo">⚡ FastAPI Mastery</div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Search topics..." onkeyup="searchFilter()">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="progress-bar-container">
+        <span id="progressText">Completed 0/13</span>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressBar"></div>
+        </div>
+      </div>
+      <a href="../index.html" class="back-btn">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Index
+      </a>
+    </div>
+  </div>
+
+  <!-- SIDEBAR NAVIGATION -->
+  <div class="sidebar">
+    <div class="sidebar-item active" onclick="showSection(1)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">01</span>
+        <span class="sidebar-item-title">Fundamentals</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(2)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">02</span>
+        <span class="sidebar-item-title">Routing & Path</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(3)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">03</span>
+        <span class="sidebar-item-title">Request/Response</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(4)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">04</span>
+        <span class="sidebar-item-title">Validation</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(5)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">05</span>
+        <span class="sidebar-item-title">Dependencies</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(6)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">06</span>
+        <span class="sidebar-item-title">Security & Auth</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(7)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">07</span>
+        <span class="sidebar-item-title">Database Integration</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(8)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">08</span>
+        <span class="sidebar-item-title">Error Handling</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(9)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">09</span>
+        <span class="sidebar-item-title">Middleware</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(10)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">10</span>
+        <span class="sidebar-item-title">Testing</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(11)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">11</span>
+        <span class="sidebar-item-title">Deployment</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(12)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">12</span>
+        <span class="sidebar-item-title">Advanced Patterns</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+    <div class="sidebar-item" onclick="showSection(13)">
+      <div class="sidebar-item-left">
+        <span class="sidebar-item-num">13</span>
+        <span class="sidebar-item-title">Conclusion & Summary</span>
+      </div>
+      <span class="sidebar-check-icon">✓</span>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="content-area">
+<!-- SECTION 1: FUNDAMENTALS -->
+    <div class="section active" id="section-1">
+      <span class="section-number">01 • Fundamentals</span>
+      <h2>Getting Started with FastAPI</h2>
+
+      <p>FastAPI is a modern, high-performance Python web framework built on top of Starlette and Pydantic. It leverages async/await for concurrent request handling and automatic API documentation.</p>
+
+      <h3>First Application</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">main.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> uvicorn <span class="keyword">import</span> run
+
+app = FastAPI(title=<span class="string">"My API"</span>, version=<span class="string">"1.0.0"</span>)
+
+<span class="decorator">@app.get</span>(<span class="string">"/"</span>)
+<span class="keyword">async def</span> <span class="function">root</span>():
+    <span class="keyword">return</span> {<span class="string">"message"</span>: <span class="string">"Hello, FastAPI!"</span>}
+
+<span class="comment"># Run with: uvicorn main:app --reload</span></code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Code Breakdown:</div>
+        <p>• <strong>FastAPI()</strong> — Creates the main application instance for routing</p>
+        <p>• <strong>@app.get("/")</strong> — Decorator registers HTTP GET handler on root path</p>
+        <p>• <strong>async def</strong> — Enables concurrent request handling with asyncio</p>
+        <p>• <strong>uvicorn</strong> — ASGI server that runs your application</p>
+        <p>• <strong>--reload</strong> — Auto-restarts server on code changes (development only)</p>
+      </div>
+
+      <div class="info-box">
+        <strong>💡 Key Insight:</strong> FastAPI automatically generates interactive API docs at /docs (Swagger UI) and /redoc (ReDoc) based on type hints—no manual documentation needed!
+      </div>
+
+      <h3>Why FastAPI?</h3>
+      <div class="use-cases">
+        <div class="use-case-card">
+          <div class="use-case-icon">⚡</div>
+          <h4>High Performance</h4>
+          <p>Async/await support with automatic OpenAPI schema generation for blazing-fast throughput.</p>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">📝</div>
+          <h4>Auto Documentation</h4>
+          <p>Interactive Swagger UI and ReDoc generated automatically from type hints.</p>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">✅</div>
+          <h4>Data Validation</h4>
+          <p>Built-in Pydantic validation with automatic error messages and JSON Schema.</p>
+        </div>
+        <div class="use-case-card">
+          <div class="use-case-icon">🔒</div>
+          <h4>Security</h4>
+          <p>Multiple security schemes: OAuth2, API Keys, JWT with intuitive decorators.</p>
+        </div>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-1" onclick="toggleSectionCompletion(1)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 2: ... -->
+    <div class="section" id="section-2">
+      <span class="section-number">02 • Routing & Path Parameters</span>
+      <h2>HTTP Methods & Path Parameters</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">routing_advanced.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, HTTPException
+<span class="keyword">from</span> enum <span class="keyword">import</span> Enum
+
+app = FastAPI()
+
+<span class="class-name">class</span> ModelName(str, Enum):
+    alexnet = <span class="string">"alexnet"</span>
+    resnet = <span class="string">"resnet"</span>
+    lenet = <span class="string">"lenet"</span>
+
+<span class="comment"># Path parameter with type validation</span>
+<span class="decorator">@app.get</span>(<span class="string">"/items/{item_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_item</span>(item_id: int):
+    <span class="comment"># item_id automatically converted to int</span>
+    <span class="keyword">return</span> {<span class="string">"item_id"</span>: item_id}
+
+<span class="comment"># Enum validation</span>
+<span class="decorator">@app.get</span>(<span class="string">"/models/{model_name}"</span>)
+<span class="keyword">async def</span> <span class="function">get_model</span>(model_name: ModelName):
+    <span class="keyword">if</span> model_name == ModelName.alexnet:
+        <span class="keyword">return</span> {<span class="string">"model"</span>: <span class="string">"AlexNet CNN"</span>}
+    <span class="keyword">return</span> {<span class="string">"model"</span>: model_name}
+
+<span class="comment"># Multiple path parameters</span>
+<span class="decorator">@app.get</span>(<span class="string">"/users/{user_id}/items/{item_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_user_item</span>(user_id: int, item_id: str):
+    <span class="keyword">return</span> {<span class="string">"user_id"</span>: user_id, <span class="string">"item_id"</span>: item_id}
+
+<span class="comment"># All HTTP methods</span>
+<span class="decorator">@app.post</span>(<span class="string">"/items/"</span>)
+<span class="keyword">async def</span> <span class="function">create_item</span>(name: str):
+    <span class="keyword">return</span> {<span class="string">"created"</span>: name}
+
+<span class="decorator">@app.put</span>(<span class="string">"/items/{item_id}"</span>)
+<span class="keyword">async def</span> <span class="function">update_item</span>(item_id: int, name: str):
+    <span class="keyword">return</span> {<span class="string">"item_id"</span>: item_id, <span class="string">"updated"</span>: name}
+
+<span class="decorator">@app.delete</span>(<span class="string">"/items/{item_id}"</span>)
+<span class="keyword">async def</span> <span class="function">delete_item</span>(item_id: int):
+    <span class="keyword">return</span> {<span class="string">"deleted"</span>: item_id}</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Understanding Path Parameters:</div>
+        <p>• <strong>Type Hints</strong> — FastAPI validates and converts path parameters to specified types (int, str, float, UUID, date)</p>
+        <p>• <strong>Enum Validation</strong> — Restricts parameters to predefined values, automatically documented in API</p>
+        <p>• <strong>Order Matters</strong> — More specific routes (/items/me) should come before generic ones (/items/{id})</p>
+        <p>• <strong>Path Operators</strong> — GET, POST, PUT, PATCH, DELETE map directly to CRUD operations</p>
+      </div>
+
+      <div class="tip-box">
+        <strong>✅ Best Practice:</strong> Use path parameters for resource identification (/users/{id}) and query parameters for filtering or pagination (/items?skip=0&limit=10).
+      </div>
+
+      <h3>Real-World Use Case: E-Commerce Product API</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">ecommerce_routing.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> enum <span class="keyword">import</span> Enum
+
+<span class="class-name">class</span> Category(str, Enum):
+    electronics = <span class="string">"electronics"</span>
+    clothing = <span class="string">"clothing"</span>
+    books = <span class="string">"books"</span>
+
+<span class="decorator">@app.get</span>(<span class="string">"/categories/{category}/products/{product_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_product</span>(category: Category, product_id: int):
+    <span class="keyword">return</span> {
+        <span class="string">"category"</span>: category,
+        <span class="string">"product_id"</span>: product_id,
+        <span class="string">"data"</span>: <span class="string">"Product details..."</span>
+    }</code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-2" onclick="toggleSectionCompletion(2)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 3: ... -->
+    <div class="section" id="section-3">
+      <span class="section-number">03 • Request & Response Handling</span>
+      <h2>Query Parameters & Request Body</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">request_handling.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, Query
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+
+app = FastAPI()
+
+<span class="comment"># Query parameters with defaults</span>
+<span class="decorator">@app.get</span>(<span class="string">"/items/"</span>)
+<span class="keyword">async def</span> <span class="function">list_items</span>(
+    skip: int = <span class="number">0</span>,
+    limit: int = <span class="number">10</span>,
+    q: str = None
+):
+    <span class="keyword">return</span> {<span class="string">"skip"</span>: skip, <span class="string">"limit"</span>: limit, <span class="string">"search"</span>: q}
+
+<span class="comment"># Request body with Pydantic model</span>
+<span class="class-name">class</span> Item(BaseModel):
+    name: str
+    price: float
+    description: str = <span class="string">""</span>
+    tax: float = None
+
+<span class="decorator">@app.post</span>(<span class="string">"/items/"</span>)
+<span class="keyword">async def</span> <span class="function">create_item</span>(item: Item):
+    <span class="keyword">return</span> {<span class="string">"item"</span>: item, <span class="string">"total"</span>: item.price + (item.tax or <span class="number">0</span>)}
+
+<span class="comment"># Multiple body parameters</span>
+<span class="class-name">class</span> User(BaseModel):
+    name: str
+    email: str
+
+<span class="decorator">@app.post</span>(<span class="string">"/purchase/"</span>)
+<span class="keyword">async def</span> <span class="function">purchase</span>(user: User, item: Item):
+    <span class="keyword">return</span> {<span class="string">"user"</span>: user, <span class="string">"item"</span>: item}
+
+<span class="comment"># Query parameters with validation</span>
+<span class="decorator">@app.get</span>(<span class="string">"/search/"</span>)
+<span class="keyword">async def</span> <span class="function">search</span>(
+    q: str = Query(<span class="string">""</span>, min_length=<span class="number">1</span>, max_length=<span class="number">50</span>),
+    skip: int = Query(<span class="number">0</span>, ge=<span class="number">0</span>),
+    limit: int = Query(<span class="number">10</span>, le=<span class="number">100</span>)
+):
+    <span class="keyword">return</span> {<span class="string">"query"</span>: q, <span class="string">"skip"</span>: skip, <span class="string">"limit"</span>: limit}</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Request Handling Details:</div>
+        <p>• <strong>Query Parameters</strong> — Appended to URL (?skip=0&limit=10), optional by default</p>
+        <p>• <strong>Request Body</strong> — JSON payload sent in POST/PUT/PATCH, must be Pydantic model</p>
+        <p>• <strong>BaseModel</strong> — Pydantic class for data validation and serialization</p>
+        <p>• <strong>Query()</strong> — Adds metadata and validation constraints to query parameters</p>
+        <p>• <strong>Type Hints</strong> — Optional fields use None default, required fields have no default</p>
+      </div>
+
+      <h3>Response Models & Status Codes</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">response_models.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, status
+<span class="keyword">from</span> typing <span class="keyword">import</span> List
+
+<span class="class-name">class</span> Item(BaseModel):
+    id: int
+    name: str
+    price: float
+
+<span class="class-name">class</span> ItemResponse(BaseModel):
+    id: int
+    name: str
+    <span class="comment"># Note: price not included in response</span>
+
+<span class="decorator">@app.post</span>(<span class="string">"/items/"</span>, response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
+<span class="keyword">async def</span> <span class="function">create_item</span>(item: Item):
+    <span class="keyword">return</span> item
+
+<span class="decorator">@app.get</span>(<span class="string">"/items/"</span>, response_model=List[ItemResponse])
+<span class="keyword">async def</span> <span class="function">list_items</span>():
+    <span class="keyword">return</span> [{<span class="string">"id"</span>: <span class="number">1</span>, <span class="string">"name"</span>: <span class="string">"Item"</span>, <span class="string">"price"</span>: <span class="number">100</span>}]</code></pre>
+      </div>
+
+      <div class="tip-box">
+        <strong>✅ Pro Tip:</strong> Use response_model to define what data is returned to clients. Pydantic automatically filters sensitive fields like passwords or internal IDs.
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-3" onclick="toggleSectionCompletion(3)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 4: ... -->
+    <div class="section" id="section-4">
+      <span class="section-number">04 • Data Validation & Pydantic Models</span>
+      <h2>Advanced Validation Techniques</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">validation.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel, Field, validator, EmailStr
+<span class="keyword">from</span> typing <span class="keyword">import</span> Optional, List
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+
+<span class="class-name">class</span> User(BaseModel):
+    <span class="comment"># Field constraints</span>
+    username: str = Field(..., min_length=<span class="number">3</span>, max_length=<span class="number">50</span>)
+    email: EmailStr  <span class="comment"># Validates email format</span>
+    age: int = Field(..., ge=<span class="number">0</span>, le=<span class="number">150</span>)  <span class="comment"># ge=greater or equal, le=less or equal</span>
+    bio: Optional[str] = Field(None, max_length=<span class="number">500</span>)
+    tags: List[str] = Field(default_factory=list)
+    
+    <span class="comment"># Custom validation</span>
+    <span class="decorator">@validator</span>(<span class="string">'username'</span>)
+    <span class="keyword">def</span> <span class="function">username_alphanumeric</span>(cls, v):
+        <span class="keyword">if</span> <span class="keyword">not</span> v.isalnum():
+            <span class="keyword">raise</span> ValueError(<span class="string">'must be alphanumeric'</span>)
+        <span class="keyword">return</span> v
+    
+    <span class="comment"># Cross-field validation</span>
+    <span class="decorator">@validator</span>(<span class="string">'age'</span>)
+    <span class="keyword">def</span> <span class="function">validate_age</span>(cls, v, values):
+        <span class="keyword">if</span> v < <span class="number">18</span> <span class="keyword">and</span> <span class="string">'username'</span> <span class="keyword">in</span> values:
+            <span class="keyword">raise</span> ValueError(<span class="string">'Users under 18 cannot have accounts'</span>)
+        <span class="keyword">return</span> v
+
+    <span class="class-name">class</span> Config:
+        schema_extra = {
+            <span class="string">"example"</span>: {
+                <span class="string">"username"</span>: <span class="string">"johndoe"</span>,
+                <span class="string">"email"</span>: <span class="string">"john@example.com"</span>,
+                <span class="string">"age"</span>: <span class="number">25</span>,
+                <span class="string">"bio"</span>: <span class="string">"Python developer"</span>,
+                <span class="string">"tags"</span>: [<span class="string">"python"</span>, <span class="string">"fastapi"</span>]
+            }
+        }</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Validation Components:</div>
+        <p>• <strong>Field(...)</strong> — Marks field as required, adds constraints (min_length, max_length, ge, le)</p>
+        <p>• <strong>EmailStr</strong> — Pydantic type that validates email format (requires pydantic[email])</p>
+        <p>• <strong>@validator</strong> — Custom validation logic applied to individual or multiple fields</p>
+        <p>• <strong>Config.schema_extra</strong> — Adds example payloads to OpenAPI documentation</p>
+      </div>
+
+      <h3>Nested Models & Collections</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">nested_models.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> typing <span class="keyword">import</span> List, Dict, Optional
+
+<span class="class-name">class</span> Address(BaseModel):
+    street: str
+    city: str
+    country: str = <span class="string">"USA"</span>
+
+<span class="class-name">class</span> UserProfile(BaseModel):
+    name: str
+    addresses: List[Address]  <span class="comment"># Array of nested models</span>
+    metadata: Dict[str, str]  <span class="comment"># Key-value pairs</span>
+    
+<span class="decorator">@app.post</span>(<span class="string">"/users/"</span>)
+<span class="keyword">async def</span> <span class="function">create_user</span>(profile: UserProfile):
+    <span class="comment"># Nested validation happens automatically</span>
+    <span class="keyword">return</span> profile</code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-4" onclick="toggleSectionCompletion(4)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 5: ... -->
+    <div class="section" id="section-5">
+      <span class="section-number">05 • Dependency Injection</span>
+      <h2>Reusable Dependencies & DI Pattern</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">dependencies.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, Depends, Query
+
+app = FastAPI()
+
+<span class="comment"># Basic dependency</span>
+<span class="keyword">async def</span> <span class="function">common_parameters</span>(
+    skip: int = Query(<span class="number">0</span>, ge=<span class="number">0</span>),
+    limit: int = Query(<span class="number">10</span>, le=<span class="number">100</span>)
+):
+    <span class="keyword">return</span> {<span class="string">"skip"</span>: skip, <span class="string">"limit"</span>: limit}
+
+<span class="decorator">@app.get</span>(<span class="string">"/items/"</span>)
+<span class="keyword">async def</span> <span class="function">list_items</span>(commons: dict = Depends(common_parameters)):
+    <span class="keyword">return</span> {<span class="string">"items"</span>: [], <span class="string">"params"</span>: commons}
+
+<span class="comment"># Dependency on dependency</span>
+<span class="keyword">async def</span> <span class="function">get_current_user</span>():
+    <span class="keyword">return</span> {<span class="string">"user_id"</span>: <span class="number">1</span>, <span class="string">"username"</span>: <span class="string">"john"</span>}
+
+<span class="keyword">async def</span> <span class="function">get_user_permissions</span>(user = Depends(get_current_user)):
+    <span class="keyword">return</span> {<span class="string">"user"</span>: user, <span class="string">"permissions"</span>: [<span class="string">"read"</span>, <span class="string">"write"</span>]}
+
+<span class="decorator">@app.get</span>(<span class="string">"/protected/"</span>)
+<span class="keyword">async def</span> <span class="function">protected_route</span>(perms = Depends(get_user_permissions)):
+    <span class="keyword">return</span> perms
+
+<span class="comment"># Dependency class</span>
+<span class="class-name">class</span> Database:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.connection = <span class="string">"db_connection"</span>
+    
+    <span class="keyword">async def</span> <span class="function">get_user</span>(self, user_id: int):
+        <span class="keyword">return</span> {<span class="string">"id"</span>: user_id, <span class="string">"name"</span>: <span class="string">"User"</span>}
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/{user_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_user</span>(user_id: int, db: Database = Depends()):
+    <span class="keyword">return</span> <span class="keyword">await</span> db.get_user(user_id)</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Dependency Injection Key Concepts:</div>
+        <p>• <strong>Depends()</strong> — Declares dependency, FastAPI automatically resolves and injects</p>
+        <p>• <strong>Reusability</strong> — Define once, use in multiple routes</p>
+        <p>• <strong>Dependency Chain</strong> — Dependencies can depend on other dependencies</p>
+        <p>• <strong>Caching</strong> — Within single request, same dependency called only once (if not async generator)</p>
+        <p>• <strong>Classes as Dependencies</strong> — Instantiate and pass dependencies via class constructor</p>
+      </div>
+
+      <h3>Real-World Use Case: Database Connection Pooling</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">db_dependency.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker
+
+DATABASE_URL = <span class="string">"postgresql://user:password@localhost/dbname"</span>
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+<span class="keyword">def</span> <span class="function">get_db</span>():
+    db = SessionLocal()
+    <span class="keyword">try</span>:
+        <span class="keyword">yield</span> db
+    <span class="keyword">finally</span>:
+        db.close()
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/"</span>)
+<span class="keyword">async def</span> <span class="function">list_users</span>(db = Depends(get_db)):
+    <span class="comment"># db is automatically obtained and cleaned up</span>
+    <span class="keyword">return</span> db.query(User).all()</code></pre>
+      </div>
+
+      <div class="tip-box">
+        <strong>✅ Best Practice:</strong> Use yield in dependencies for setup/teardown. Cleanup code runs after response is sent to client.
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-5" onclick="toggleSectionCompletion(5)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 6: ... -->
+    <div class="section" id="section-6">
+      <span class="section-number">06 • Security & Authentication</span>
+      <h2>OAuth2, JWT, and Secure APIs</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">authentication.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, Depends, HTTPException, status
+<span class="keyword">from</span> fastapi.security <span class="keyword">import</span> OAuth2PasswordBearer, OAuth2PasswordRequestForm
+<span class="keyword">from</span> jose <span class="keyword">import</span> JWTError, jwt
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta
+<span class="keyword">from</span> passlib.context <span class="keyword">import</span> CryptContext
+
+app = FastAPI()
+
+<span class="comment"># Configuration</span>
+SECRET_KEY = <span class="string">"your-secret-key-change-this"</span>
+ALGORITHM = <span class="string">"HS256"</span>
+ACCESS_TOKEN_EXPIRE_MINUTES = <span class="number">30</span>
+
+pwd_context = CryptContext(schemes=[<span class="string">"bcrypt"</span>], deprecated=<span class="string">"auto"</span>)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=<span class="string">"token"</span>)
+
+<span class="class-name">class</span> User(BaseModel):
+    username: str
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    disabled: Optional[bool] = None
+
+<span class="class-name">class</span> UserInDB(User):
+    hashed_password: str
+
+<span class="comment"># Password hashing</span>
+<span class="keyword">def</span> <span class="function">hash_password</span>(password: str) -> str:
+    <span class="keyword">return</span> pwd_context.hash(password)
+
+<span class="keyword">def</span> <span class="function">verify_password</span>(plain_password: str, hashed_password: str) -> bool:
+    <span class="keyword">return</span> pwd_context.verify(plain_password, hashed_password)
+
+<span class="comment"># JWT token creation</span>
+<span class="keyword">def</span> <span class="function">create_access_token</span>(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    to_encode = data.copy()
+    <span class="keyword">if</span> expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    <span class="keyword">else</span>:
+        expire = datetime.utcnow() + timedelta(minutes=<span class="number">15</span>)
+    
+    to_encode.update({<span class="string">"exp"</span>: expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    <span class="keyword">return</span> encoded_jwt
+
+<span class="comment"># Token validation</span>
+<span class="keyword">async def</span> <span class="function">get_current_user</span>(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail=<span class="string">"Could not validate credentials"</span>,
+        headers={<span class="string">"WWW-Authenticate"</span>: <span class="string">"Bearer"</span>},
+    )
+    <span class="keyword">try</span>:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get(<span class="string">"sub"</span>)
+        <span class="keyword">if</span> username <span class="keyword">is</span> None:
+            <span class="keyword">raise</span> credentials_exception
+    <span class="keyword">except</span> JWTError:
+        <span class="keyword">raise</span> credentials_exception
+    
+    <span class="comment"># Fetch user from database</span>
+    user = get_user(<span class="string">"fake_users_db"</span>, username)
+    <span class="keyword">if</span> user <span class="keyword">is</span> None:
+        <span class="keyword">raise</span> credentials_exception
+    <span class="keyword">return</span> user
+
+<span class="decorator">@app.post</span>(<span class="string">"/token"</span>)
+<span class="keyword">async def</span> <span class="function">login</span>(form_data: OAuth2PasswordRequestForm = Depends()):
+    <span class="comment"># Validate username and password</span>
+    <span class="keyword">if</span> <span class="keyword">not</span> verify_password(form_data.password, <span class="string">"hashed_pass"</span>):
+        <span class="keyword">raise</span> HTTPException(status_code=<span class="number">401</span>, detail=<span class="string">"Invalid credentials"</span>)
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={<span class="string">"sub"</span>: form_data.username},
+        expires_delta=access_token_expires
+    )
+    <span class="keyword">return</span> {<span class="string">"access_token"</span>: access_token, <span class="string">"token_type"</span>: <span class="string">"bearer"</span>}
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/me"</span>)
+<span class="keyword">async def</span> <span class="function">read_users_me</span>(current_user: User = Depends(get_current_user)):
+    <span class="keyword">return</span> current_user</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Security Architecture:</div>
+        <p>• <strong>OAuth2PasswordBearer</strong> — Standard security scheme that extracts JWT from Authorization header</p>
+        <p>• <strong>Password Hashing</strong> — bcrypt never stores plain passwords, only hashes (bcrypt is slow by design)</p>
+        <p>• <strong>JWT Tokens</strong> — JSON Web Tokens contain encoded claims + expiration, validated on protected routes</p>
+        <p>• <strong>HTTPException(401)</strong> — Returns 401 Unauthorized when credentials invalid or missing</p>
+        <p>• <strong>Token Dependency</strong> — Automatically validates token on every protected route</p>
+      </div>
+
+      <h3>Role-Based Access Control (RBAC)</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">rbac.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="class-name">class</span> User(BaseModel):
+    username: str
+    email: str
+    role: str  <span class="comment"># "admin", "user", "moderator"</span>
+    disabled: bool = False
+
+<span class="keyword">async def</span> <span class="function">get_admin</span>(current_user: User = Depends(get_current_user)):
+    <span class="keyword">if</span> current_user.role != <span class="string">"admin"</span>:
+        <span class="keyword">raise</span> HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=<span class="string">"Not enough permissions"</span>
+        )
+    <span class="keyword">return</span> current_user
+
+<span class="decorator">@app.delete</span>(<span class="string">"/users/{user_id}"</span>)
+<span class="keyword">async def</span> <span class="function">delete_user</span>(user_id: int, admin_user = Depends(get_admin)):
+    <span class="keyword">return</span> {<span class="string">"deleted"</span>: user_id, <span class="string">"by"</span>: admin_user.username}</code></pre>
+      </div>
+
+      <div class="warning-box">
+        <strong>⚠️ Security Warning:</strong> Never hardcode secrets in code! Use environment variables or secret management services (AWS Secrets Manager, HashiCorp Vault).
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-6" onclick="toggleSectionCompletion(6)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 7: ... -->
+    <div class="section" id="section-7">
+      <span class="section-number">07 • Database Integration</span>
+      <h2>SQLAlchemy ORM with FastAPI</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">database.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> create_engine, Column, Integer, String
+<span class="keyword">from</span> sqlalchemy.ext.declarative <span class="keyword">import</span> declarative_base
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> sessionmaker
+
+DATABASE_URL = <span class="string">"sqlite:///./test.db"</span>
+
+engine = create_engine(DATABASE_URL, connect_args={<span class="string">"check_same_thread"</span>: False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+<span class="class-name">class</span> UserModel(Base):
+    __tablename__ = <span class="string">"users"</span>
+    id = Column(Integer, primary_key=True)
+    username = Column(String, unique=True)
+    email = Column(String, unique=True)
+
+<span class="comment"># Create tables</span>
+Base.metadata.create_all(bind=engine)</code></pre>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">crud.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> Session
+<span class="keyword">from</span> database <span class="keyword">import</span> UserModel, SessionLocal
+
+<span class="keyword">def</span> <span class="function">get_db</span>():
+    db = SessionLocal()
+    <span class="keyword">try</span>:
+        <span class="keyword">yield</span> db
+    <span class="keyword">finally</span>:
+        db.close()
+
+<span class="keyword">async def</span> <span class="function">create_user</span>(db: Session, username: str, email: str):
+    user = UserModel(username=username, email=email)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    <span class="keyword">return</span> user
+
+<span class="keyword">async def</span> <span class="function">get_user</span>(db: Session, user_id: int):
+    <span class="keyword">return</span> db.query(UserModel).filter(UserModel.id == user_id).first()
+
+<span class="keyword">async def</span> <span class="function">list_users</span>(db: Session, skip: int = <span class="number">0</span>, limit: int = <span class="number">10</span>):
+    <span class="keyword">return</span> db.query(UserModel).offset(skip).limit(limit).all()</code></pre>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">routes.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, Depends
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> Session
+<span class="keyword">from</span> crud <span class="keyword">import</span> create_user, get_user, list_users, get_db
+
+app = FastAPI()
+
+<span class="class-name">class</span> UserCreate(BaseModel):
+    username: str
+    email: str
+
+<span class="decorator">@app.post</span>(<span class="string">"/users/"</span>)
+<span class="keyword">async def</span> <span class="function">create_user_route</span>(user: UserCreate, db: Session = Depends(get_db)):
+    <span class="keyword">return</span> <span class="keyword">await</span> create_user(db, user.username, user.email)
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/{user_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_user_route</span>(user_id: int, db: Session = Depends(get_db)):
+    <span class="keyword">return</span> <span class="keyword">await</span> get_user(db, user_id)
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/"</span>)
+<span class="keyword">async def</span> <span class="function">list_users_route</span>(skip: int = <span class="number">0</span>, limit: int = <span class="number">10</span>, db: Session = Depends(get_db)):
+    <span class="keyword">return</span> <span class="keyword">await</span> list_users(db, skip, limit)</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Database Integration Pattern:</div>
+        <p>• <strong>SQLAlchemy ORM</strong> — Object-relational mapping translates Python classes to database tables</p>
+        <p>• <strong>get_db() Dependency</strong> — Yields session to route, ensures cleanup with try/finally</p>
+        <p>• <strong>CRUD Separation</strong> — Keep database queries in separate module for testability</p>
+        <p>• <strong>db.commit()</strong> — Persists changes to database (required for INSERT/UPDATE/DELETE)</p>
+        <p>• <strong>db.refresh()</strong> — Reloads object to get auto-generated IDs and defaults</p>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-7" onclick="toggleSectionCompletion(7)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 8: ... -->
+    <div class="section" id="section-8">
+      <span class="section-number">08 • Error Handling & Exception Management</span>
+      <h2>Custom Exceptions & Error Responses</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">exceptions.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, HTTPException, status
+<span class="keyword">from</span> fastapi.responses <span class="keyword">import</span> JSONResponse
+
+app = FastAPI()
+
+<span class="comment"># Custom exception class</span>
+<span class="class-name">class</span> ItemNotFound(Exception):
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, item_id: int):
+        self.item_id = item_id
+
+<span class="comment"># Register custom exception handler</span>
+<span class="decorator">@app.exception_handler</span>(ItemNotFound)
+<span class="keyword">async def</span> <span class="function">item_not_found_handler</span>(request, exc):
+    <span class="keyword">return</span> JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={
+            <span class="string">"error"</span>: <span class="string">"Item not found"</span>,
+            <span class="string">"item_id"</span>: exc.item_id
+        }
+    )
+
+<span class="decorator">@app.get</span>(<span class="string">"/items/{item_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_item</span>(item_id: int):
+    <span class="keyword">if</span> item_id == <span class="number">0</span>:
+        <span class="keyword">raise</span> ItemNotFound(item_id=item_id)
+    <span class="keyword">return</span> {<span class="string">"item_id"</span>: item_id}
+
+<span class="comment"># HTTPException for standard HTTP errors</span>
+<span class="decorator">@app.get</span>(<span class="string">"/users/{user_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_user</span>(user_id: int):
+    <span class="keyword">if</span> user_id < <span class="number">1</span>:
+        <span class="keyword">raise</span> HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=<span class="string">"User ID must be positive"</span>
+        )
+    <span class="keyword">return</span> {<span class="string">"user_id"</span>: user_id}
+
+<span class="comment"># Catch validation errors</span>
+<span class="keyword">from</span> fastapi.exceptions <span class="keyword">import</span> RequestValidationError
+
+<span class="decorator">@app.exception_handler</span>(RequestValidationError)
+<span class="keyword">async def</span> <span class="function">validation_exception_handler</span>(request, exc):
+    <span class="keyword">return</span> JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            <span class="string">"error"</span>: <span class="string">"Validation failed"</span>,
+            <span class="string">"details"</span>: exc.errors()
+        }
+    )</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Error Handling Strategy:</div>
+        <p>• <strong>HTTPException</strong> — FastAPI's built-in exception for standard HTTP errors</p>
+        <p>• <strong>@exception_handler</strong> — Registers custom handlers for specific exception types</p>
+        <p>• <strong>Status Codes</strong> — Use appropriate codes (400, 401, 403, 404, 500, etc.)</p>
+        <p>• <strong>ValidationError Handling</strong> — Intercept Pydantic validation errors and customize response</p>
+        <p>• <strong>JSON Responses</strong> — Always return structured error responses with consistent format</p>
+      </div>
+
+      <h3>Error Response Best Practices</h3>
+      <div class="info-box">
+        <strong>📌 Standard Error Format:</strong>
+        <pre><code>{
+  <span class="string">"error"</span>: <span class="string">"error_code"</span>,
+  <span class="string">"message"</span>: <span class="string">"Human-readable message"</span>,
+  <span class="string">"details"</span>: { <span class="comment">/* error details */</span> },
+  <span class="string">"timestamp"</span>: <span class="string">"2024-01-01T12:00:00Z"</span>
+}</code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-8" onclick="toggleSectionCompletion(8)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 9: ... -->
+    <div class="section" id="section-9">
+      <span class="section-number">09 • Middleware & Request/Response Lifecycle</span>
+      <h2>Processing Hooks & Custom Middleware</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">middleware.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> starlette.middleware.base <span class="keyword">import</span> BaseHTTPMiddleware
+<span class="keyword">from</span> starlette.requests <span class="keyword">import</span> Request
+<span class="keyword">import</span> time
+<span class="keyword">import</span> uuid
+
+app = FastAPI()
+
+<span class="comment"># Timing middleware</span>
+<span class="decorator">@app.middleware</span>(<span class="string">"http"</span>)
+<span class="keyword">async def</span> <span class="function">add_process_time_header</span>(request: Request, call_next):
+    start_time = time.time()
+    response = <span class="keyword">await</span> call_next(request)
+    process_time = time.time() - start_time
+    response.headers[<span class="string">"X-Process-Time"</span>] = str(process_time)
+    <span class="keyword">return</span> response
+
+<span class="comment"># Request tracking middleware</span>
+<span class="class-name">class</span> RequestTrackingMiddleware(BaseHTTPMiddleware):
+    <span class="keyword">async def</span> <span class="function">dispatch</span>(self, request: Request, call_next):
+        request_id = str(uuid.uuid4())
+        request.state.request_id = request_id
+        
+        response = <span class="keyword">await</span> call_next(request)
+        response.headers[<span class="string">"X-Request-ID"</span>] = request_id
+        <span class="keyword">return</span> response
+
+<span class="comment"># Add to application</span>
+app.add_middleware(RequestTrackingMiddleware)
+
+<span class="comment"># CORS middleware</span>
+<span class="keyword">from</span> fastapi.middleware.cors <span class="keyword">import</span> CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[<span class="string">"*"</span>],  <span class="comment"># Specify domains in production</span>
+    allow_credentials=True,
+    allow_methods=[<span class="string">"*"</span>],
+    allow_headers=[<span class="string">"*"</span>],
+)
+
+<span class="comment"># Startup and shutdown events</span>
+<span class="decorator">@app.on_event</span>(<span class="string">"startup"</span>)
+<span class="keyword">async def</span> <span class="function">startup_event</span>():
+    print(<span class="string">"Server starting..."</span>)
+    <span class="comment"># Initialize resources</span>
+
+<span class="decorator">@app.on_event</span>(<span class="string">"shutdown"</span>)
+<span class="keyword">async def</span> <span class="function">shutdown_event</span>():
+    print(<span class="string">"Server shutting down..."</span>)
+    <span class="comment"># Cleanup resources</span></code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Middleware & Lifecycle:</div>
+        <p>• <strong>@app.middleware("http")</strong> — Simple middleware for basic request/response processing</p>
+        <p>• <strong>BaseHTTPMiddleware</strong> — Class-based middleware for complex logic</p>
+        <p>• <strong>call_next(request)</strong> — Passes control to next middleware or route handler</p>
+        <p>• <strong>request.state</strong> — Attach data to request for access in routes</p>
+        <p>• <strong>Startup/Shutdown Events</strong> — Run code when server starts/stops</p>
+      </div>
+
+      <h3>Request Context & Async Context Manager</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">context.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> contextvars <span class="keyword">import</span> ContextVar
+
+<span class="comment"># Context variable for request tracking</span>
+request_id_var: ContextVar[str] = ContextVar(<span class="string">'request_id'</span>, default=None)
+
+<span class="decorator">@app.middleware</span>(<span class="string">"http"</span>)
+<span class="keyword">async def</span> <span class="function">set_request_context</span>(request: Request, call_next):
+    request_id = request.headers.get(<span class="string">"X-Request-ID"</span>, str(uuid.uuid4()))
+    request_id_var.set(request_id)
+    
+    response = <span class="keyword">await</span> call_next(request)
+    <span class="keyword">return</span> response
+
+<span class="comment"># Access context in any async function</span>
+<span class="decorator">@app.get</span>(<span class="string">"/items/"</span>)
+<span class="keyword">async def</span> <span class="function">get_items</span>():
+    request_id = request_id_var.get()
+    print(f<span class="string">"Request ID: {request_id}"</span>)
+    <span class="keyword">return</span> {<span class="string">"request_id"</span>: request_id}</code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-9" onclick="toggleSectionCompletion(9)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 10: ... -->
+    <div class="section" id="section-10">
+      <span class="section-number">10 • Testing FastAPI Applications</span>
+      <h2>Unit Tests & Integration Tests</h2>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">test_main.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi.testclient <span class="keyword">import</span> TestClient
+<span class="keyword">from</span> main <span class="keyword">import</span> app
+
+client = TestClient(app)
+
+<span class="keyword">def</span> <span class="function">test_read_root</span>():
+    response = client.get(<span class="string">"/"</span>)
+    <span class="keyword">assert</span> response.status_code == <span class="number">200</span>
+    <span class="keyword">assert</span> response.json() == {<span class="string">"message"</span>: <span class="string">"Hello"</span>}
+
+<span class="keyword">def</span> <span class="function">test_create_item</span>():
+    response = client.post(
+        <span class="string">"/items/"</span>,
+        json={<span class="string">"name"</span>: <span class="string">"Laptop"</span>, <span class="string">"price"</span>: <span class="number">999.99</span>}
+    )
+    <span class="keyword">assert</span> response.status_code == <span class="number">201</span>
+    data = response.json()
+    <span class="keyword">assert</span> data[<span class="string">"name"</span>] == <span class="string">"Laptop"</span>
+
+<span class="keyword">def</span> <span class="function">test_invalid_item</span>():
+    response = client.post(
+        <span class="string">"/items/"</span>,
+        json={<span class="string">"name"</span>: <span class="string">"Laptop"</span>}  <span class="comment"># Missing required price field</span>
+    )
+    <span class="keyword">assert</span> response.status_code == <span class="number">422</span>
+
+<span class="keyword">def</span> <span class="function">test_authentication</span>():
+    response = client.post(
+        <span class="string">"/token"</span>,
+        data={<span class="string">"username"</span>: <span class="string">"testuser"</span>, <span class="string">"password"</span>: <span class="string">"testpass"</span>}
+    )
+    <span class="keyword">assert</span> response.status_code == <span class="number">200</span>
+    token = response.json()[<span class="string">"access_token"</span>]
+    
+    <span class="comment"># Use token in protected route</span>
+    response = client.get(
+        <span class="string">"/users/me"</span>,
+        headers={<span class="string">"Authorization"</span>: f<span class="string">"Bearer {token}"</span>}
+    )
+    <span class="keyword">assert</span> response.status_code == <span class="number">200</span></code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Testing Strategy:</div>
+        <p>• <strong>TestClient</strong> — Simulates HTTP requests without running actual server</p>
+        <p>• <strong>Status Code Assertions</strong> — Verify correct HTTP response codes</p>
+        <p>• <strong>JSON Response Validation</strong> — Check response body structure and values</p>
+        <p>• <strong>Authorization Testing</strong> — Include tokens in headers for protected routes</p>
+        <p>• <strong>Error Cases</strong> — Test validation errors and edge cases</p>
+      </div>
+
+      <h3>Mocking Dependencies in Tests</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">test_with_mocks.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> unittest.mock <span class="keyword">import</span> MagicMock
+<span class="keyword">from</span> fastapi.testclient <span class="keyword">import</span> TestClient
+<span class="keyword">from</span> main <span class="keyword">import</span> app, get_db
+
+<span class="keyword">def</span> <span class="function">override_get_db</span>():
+    db = MagicMock()
+    <span class="keyword">yield</span> db
+
+app.dependency_overrides[get_db] = override_get_db
+client = TestClient(app)
+
+<span class="keyword">def</span> <span class="function">test_list_users</span>():
+    response = client.get(<span class="string">"/users/"</span>)
+    <span class="keyword">assert</span> response.status_code == <span class="number">200</span></code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-10" onclick="toggleSectionCompletion(10)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 11: ... -->
+    <div class="section" id="section-11">
+      <span class="section-number">11 • Production Deployment & Optimization</span>
+      <h2>Scaling & Deployment Strategies</h2>
+
+      <h3>Uvicorn Production Configuration</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">gunicorn_config.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="comment"># Run with: gunicorn main:app -c gunicorn_config.py</span>
+
+workers = <span class="number">4</span>  <span class="comment"># Number of worker processes</span>
+worker_class = <span class="string">"uvicorn.workers.UvicornWorker"</span>
+worker_connections = <span class="number">1000</span>
+max_requests = <span class="number">1000</span>
+max_requests_jitter = <span class="number">50</span>
+timeout = <span class="number">60</span>
+keepalive = <span class="number">5</span>
+
+<span class="comment"># Logging</span>
+accesslog = <span class="string">"/var/log/gunicorn_access.log"</span>
+errorlog = <span class="string">"/var/log/gunicorn_error.log"</span>
+loglevel = <span class="string">"info"</span></code></pre>
+      </div>
+
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">docker_deployment.sh</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="comment"># Dockerfile</span>
+FROM python:<span class="number">3</span>.<span class="number">11</span>-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [<span class="string">"gunicorn"</span>, <span class="string">"main:app"</span>, <span class="string">"-c"</span>, <span class="string">"gunicorn_config.py"</span>]</code></pre>
+      </div>
+
+      <div class="explanation">
+        <div class="explanation-title">Production Best Practices:</div>
+        <p>• <strong>Multiple Workers</strong> — Use 2-4 workers per CPU core for optimal throughput</p>
+        <p>• <strong>Gunicorn ASGI Worker</strong> — Manage multiple Uvicorn processes with proper signal handling</p>
+        <p>• <strong>Connection Pooling</strong> — Configure database connection limits</p>
+        <p>• <strong>Logging</strong> — Log all errors and access patterns for debugging</p>
+        <p>• <strong>Health Checks</strong> — Implement /health endpoint for load balancers</p>
+      </div>
+
+      <h3>Health Check & Metrics</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">production_health.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+<span class="keyword">from</span> prometheus_client <span class="keyword">import</span> Counter, Histogram
+<span class="keyword">import</span> time
+
+app = FastAPI()
+
+<span class="comment"># Prometheus metrics</span>
+request_count = Counter(<span class="string">"fastapi_requests_total"</span>, <span class="string">"Total requests"</span>, [<span class="string">"method"</span>, <span class="string">"endpoint"</span>])
+request_duration = Histogram(<span class="string">"fastapi_request_duration_seconds"</span>, <span class="string">"Request duration"</span>)
+
+<span class="decorator">@app.get</span>(<span class="string">"/health"</span>)
+<span class="keyword">async def</span> <span class="function">health_check</span>():
+    <span class="keyword">return</span> {<span class="string">"status"</span>: <span class="string">"healthy"</span>, <span class="string">"version"</span>: <span class="string">"1.0"</span>}
+
+<span class="decorator">@app.get</span>(<span class="string">"/metrics"</span>)
+<span class="keyword">async def</span> <span class="function">metrics</span>():
+    <span class="comment"># Export Prometheus metrics</span>
+    <span class="keyword">from</span> prometheus_client <span class="keyword">import</span> generate_latest
+    <span class="keyword">return</span> generate_latest()
+
+<span class="decorator">@app.middleware</span>(<span class="string">"http"</span>)
+<span class="keyword">async def</span> <span class="function">track_metrics</span>(request, call_next):
+    start = time.time()
+    response = <span class="keyword">await</span> call_next(request)
+    duration = time.time() - start
+    
+    request_count.labels(method=request.method, endpoint=request.url.path).inc()
+    request_duration.observe(duration)
+    
+    <span class="keyword">return</span> response</code></pre>
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-11" onclick="toggleSectionCompletion(11)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 12: ... -->
+    <div class="section" id="section-12">
+      <span class="section-number">12 • Advanced Patterns & Architecture</span>
+      <h2>Expert-Level Design Patterns</h2>
+
+      <h3>Repository Pattern for Data Access</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">repository.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> abc <span class="keyword">import</span> ABC, abstractmethod
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> Session
+
+<span class="class-name">class</span> BaseRepository(ABC):
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, db: Session):
+        self.db = db
+    
+    <span class="decorator">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="function">get_by_id</span>(self, id: int): <span class="keyword">pass</span>
+    
+    <span class="decorator">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="function">create</span>(self, obj): <span class="keyword">pass</span>
+
+<span class="class-name">class</span> UserRepository(BaseRepository):
+    <span class="keyword">async def</span> <span class="function">get_by_id</span>(self, user_id: int):
+        <span class="keyword">return</span> self.db.query(UserModel).filter(UserModel.id == user_id).first()
+    
+    <span class="keyword">async def</span> <span class="function">create</span>(self, username: str, email: str):
+        user = UserModel(username=username, email=email)
+        self.db.add(user)
+        self.db.commit()
+        <span class="keyword">return</span> user
+
+<span class="keyword">def</span> <span class="function">get_user_repository</span>(db: Session = Depends(get_db)):
+    <span class="keyword">return</span> UserRepository(db)
+
+<span class="decorator">@app.get</span>(<span class="string">"/users/{user_id}"</span>)
+<span class="keyword">async def</span> <span class="function">get_user</span>(
+    user_id: int,
+    repo: UserRepository = Depends(get_user_repository)
+):
+    <span class="keyword">return</span> <span class="keyword">await</span> repo.get_by_id(user_id)</code></pre>
+      </div>
+
+      <h3>Service Layer Pattern</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">services.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="class-name">class</span> UserService:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, repo: UserRepository):
+        self.repo = repo
+    
+    <span class="keyword">async def</span> <span class="function">register_user</span>(self, username: str, email: str, password: str):
+        <span class="comment"># Business logic: validation, password hashing, etc.</span>
+        hashed_password = hash_password(password)
+        user = <span class="keyword">await</span> self.repo.create(username, email)
+        <span class="keyword">return</span> user
+    
+    <span class="keyword">async def</span> <span class="function">authenticate</span>(self, username: str, password: str):
+        user = <span class="keyword">await</span> self.repo.get_by_username(username)
+        <span class="keyword">if</span> <span class="keyword">not</span> verify_password(password, user.hashed_password):
+            <span class="keyword">raise</span> ValueError(<span class="string">"Invalid credentials"</span>)
+        <span class="keyword">return</span> user
+
+<span class="keyword">def</span> <span class="function">get_user_service</span>(repo: UserRepository = Depends(get_user_repository)):
+    <span class="keyword">return</span> UserService(repo)
+
+<span class="decorator">@app.post</span>(<span class="string">"/register"</span>)
+<span class="keyword">async def</span> <span class="function">register</span>(
+    data: UserRegister,
+    service: UserService = Depends(get_user_service)
+):
+    <span class="keyword">return</span> <span class="keyword">await</span> service.register_user(data.username, data.email, data.password)</code></pre>
+      </div>
+
+      <h3>Background Tasks & Async Processing</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">background_tasks.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI, BackgroundTasks
+
+app = FastAPI()
+
+<span class="keyword">def</span> <span class="function">send_email</span>(email: str, subject: str = <span class="string">""</span>):
+    <span class="comment"># Simulate slow email sending</span>
+    time.sleep(<span class="number">5</span>)
+    print(f<span class="string">"Email sent to {email}: {subject}"</span>)
+
+<span class="keyword">def</span> <span class="function">write_notification</span>(email: str, message: str):
+    <span class="comment"># Simulate database write</span>
+    print(f<span class="string">"Notification for {email}: {message}"</span>)
+
+<span class="decorator">@app.post</span>(<span class="string">"/send-notification/"</span>)
+<span class="keyword">async def</span> <span class="function">send_notification</span>(
+    email: str,
+    background_tasks: BackgroundTasks
+):
+    background_tasks.add_task(send_email, email, subject=<span class="string">"Hello"</span>)
+    background_tasks.add_task(write_notification, email, message=<span class="string">"notification"</span>)
+    <span class="keyword">return</span> {<span class="string">"message"</span>: <span class="string">"Notification queued"</span>}
+
+<span class="comment"># For heavy async work, use Celery</span>
+<span class="keyword">from</span> celery <span class="keyword">import</span> Celery
+
+celery_app = Celery(<span class="string">"tasks"</span>, broker=<span class="string">"redis://localhost:6379"</span>)
+
+<span class="decorator">@celery_app.task</span>
+<span class="keyword">def</span> <span class="function">heavy_processing_task</span>(data: str):
+    <span class="comment"># Long-running task</span>
+    <span class="keyword">return</span> <span class="string">"Task completed"</span>
+
+<span class="decorator">@app.post</span>(<span class="string">"/async-task/"</span>)
+<span class="keyword">async def</span> <span class="function">queue_task</span>(data: str):
+    task = heavy_processing_task.delay(data)
+    <span class="keyword">return</span> {<span class="string">"task_id"</span>: task.id}</code></pre>
+      </div>
+
+      <h3>WebSocket Real-Time Communication</h3>
+      <div class="code-section">
+        <div class="code-header">
+          <span class="code-label">websocket.py</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> WebSocket
+
+<span class="decorator">@app.websocket</span>(<span class="string">"/ws/chat/{room_id}"</span>)
+<span class="keyword">async def</span> <span class="function">websocket_endpoint</span>(websocket: WebSocket, room_id: int):
+    <span class="keyword">await</span> websocket.accept()
+    <span class="keyword">try</span>:
+        <span class="keyword">while</span> <span class="keyword">True</span>:
+            data = <span class="keyword">await</span> websocket.receive_text()
+            <span class="keyword">await</span> websocket.send_text(f<span class="string">"Echo: {data}"</span>)
+    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+        <span class="keyword">await</span> websocket.close(code=<span class="number">1000</span>)</code></pre>
+      </div>
+
+      <div class="tip-box">
+        <strong>✅ Expert Pattern:</strong> Combine Repository (data access), Service (business logic), and Controller (route handlers) layers for maintainable, testable code at scale.
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-12" onclick="toggleSectionCompletion(12)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+<!-- SECTION 13: ... -->
+    <div class="section" id="section-13">
+      <h2>Final Thoughts & Resources</h2>
+      <p>You've now covered the complete FastAPI journey from fundamentals to production-grade expert patterns. Key takeaways:</p>
+
+      <ul>
+        <li><strong>Type Safety First</strong> — Leverage Python type hints for automatic validation and documentation</li>
+        <li><strong>Async/Await Throughout</strong> — Build concurrent applications with asyncio for high throughput</li>
+        <li><strong>Dependency Injection</strong> — Keep code modular and testable with proper DI patterns</li>
+        <li><strong>Security by Default</strong> — OAuth2, JWT, and HTTPS support built-in</li>
+        <li><strong>Database Best Practices</strong> — Use SQLAlchemy ORM with connection pooling</li>
+        <li><strong>Structured Logging</strong> — Implement centralized logging for production debugging</li>
+        <li><strong>Monitoring & Metrics</strong> — Track performance with Prometheus and health checks</li>
+        <li><strong>Layered Architecture</strong> — Separate concerns: routes → services → repositories</li>
+      </ul>
+
+      <div class="info-box">
+        <strong>📚 Next Steps:</strong> Explore FastAPI plugins like SQLModel (SQLAlchemy + Pydantic), FastAPI-Users (auth scaffolding), and Strawberry (GraphQL integration) for enterprise use cases.
+      </div>
+    
+      <!-- Section Navigation & Mark Completion -->
+      <div class="section-nav">
+        <button class="nav-btn prev-btn" onclick="navigateSection(-1)">
+          ← Previous
+        </button>
+        <button class="nav-btn mark-completed" id="completed-btn-13" onclick="toggleSectionCompletion(13)">
+          ✓ Mark Completed
+        </button>
+        <button class="nav-btn next-btn" onclick="navigateSection(1)">
+          Next →
+        </button>
+      </div>
+    </div>
+
+
+  </div>
+
+  <footer>
+    <p>FastAPI Mastery Guide © 2024 • Complete from Scratch to Expert</p>
+    <p>Built for professional Python developers building high-performance APIs</p>
+  </footer>
+
+  <script>
+    let currentSection = 1;
+    const totalSections = 13;
+    let completionState = {};
+
+    // Initialize progress tracking on load
+    window.addEventListener('DOMContentLoaded', () => {
+      // Load saved state
+      const savedState = localStorage.getItem('fastapi_mastery_progress');
+      if (savedState) {
+        try {
+          completionState = JSON.parse(savedState);
+        } catch (e) {
+          completionState = {};
+        }
+      }
+      
+      // Update UI matching completionState
+      updateProgressUI();
+      
+      // Setup initial navigation visibility
+      showSection(currentSection, false);
+    });
+
+    function showSection(num, autoScroll = true) {
+      if (num < 1 || num > totalSections) return;
+      currentSection = num;
+      
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(el => {
+        el.classList.remove('active');
+      });
+      
+      // Show selected section
+      const activeSec = document.getElementById(`section-${num}`);
+      if (activeSec) {
+        activeSec.classList.add('active');
+      }
+      
+      // Update sidebar active classes
+      const sidebarItems = document.querySelectorAll('.sidebar-item');
+      sidebarItems.forEach((item, idx) => {
+        if (idx === num - 1) {
+          item.classList.add('active');
+          if (autoScroll) {
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      // Update Prev/Next buttons visibility
+      const activeSectionEl = document.getElementById(`section-${num}`);
+      if (activeSectionEl) {
+        const prevBtn = activeSectionEl.querySelector('.prev-btn');
+        const nextBtn = activeSectionEl.querySelector('.next-btn');
+        if (prevBtn) prevBtn.style.visibility = (num === 1) ? 'hidden' : 'visible';
+        if (nextBtn) nextBtn.style.visibility = (num === totalSections) ? 'hidden' : 'visible';
+      }
+
+      // Close mobile menu
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) sidebar.classList.remove('open');
+      
+      // Scroll content to top
+      if (autoScroll) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function navigateSection(direction) {
+      showSection(currentSection + direction);
+    }
+
+    function toggleSectionCompletion(num) {
+      completionState[num] = !completionState[num];
+      
+      // Save state
+      localStorage.setItem('fastapi_mastery_progress', JSON.stringify(completionState));
+      
+      // Update UI elements
+      updateProgressUI();
+    }
+
+    function updateProgressUI() {
+      let completedCount = 0;
+      const sidebarItems = document.querySelectorAll('.sidebar-item');
+      
+      for (let i = 1; i <= totalSections; i++) {
+        const btn = document.getElementById(`completed-btn-${i}`);
+        const isCompleted = !!completionState[i];
+        
+        if (isCompleted) {
+          completedCount++;
+          // Update completed button state
+          if (btn) {
+            btn.classList.add('completed-state');
+            btn.innerHTML = '✓ Completed';
+          }
+          // Mark sidebar completed
+          if (sidebarItems[i-1]) {
+            sidebarItems[i-1].classList.add('completed');
+          }
+        } else {
+          if (btn) {
+            btn.classList.remove('completed-state');
+            btn.innerHTML = '✓ Mark Completed';
+          }
+          if (sidebarItems[i-1]) {
+            sidebarItems[i-1].classList.remove('completed');
+          }
+        }
+      }
+
+      // Update text and progress fill
+      const progressText = document.getElementById('progressText');
+      const progressBar = document.getElementById('progressBar');
+      
+      if (progressText) {
+        progressText.innerHTML = `Completed ${completedCount}/${totalSections}`;
+      }
+      if (progressBar) {
+        const percentage = Math.round((completedCount / totalSections) * 100);
+        progressBar.style.width = `${percentage}%`;
+      }
+    }
+
+    // Copy to Clipboard logic
+    function copyCode(button) {
+      const codeSection = button.closest('.code-section');
+      if (!codeSection) return;
+      
+      const codeElement = codeSection.querySelector('pre code');
+      if (!codeElement) return;
+
+      // Extract raw text (ignoring HTML tags)
+      const rawText = codeElement.textContent;
+      
+      navigator.clipboard.writeText(rawText).then(() => {
+        button.innerHTML = 'Copied!';
+        button.style.borderColor = 'var(--success)';
+        button.style.color = 'var(--success)';
+        
+        setTimeout(() => {
+          button.innerHTML = 'Copy';
+          button.style.borderColor = '';
+          button.style.color = '';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy code: ', err);
+      });
+    }
+
+    // Real-time local search and filtering
+    function searchFilter() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      
+      // If query is empty, remove all highlights and show current active section
+      if (query.length === 0) {
+        // Clear all highlighted marks
+        clearHighlights();
+        // Return to show the current active section
+        showSection(currentSection, false);
+        return;
+      }
+      
+      // Search active section content
+      const activeSectionEl = document.getElementById(`section-${currentSection}`);
+      if (!activeSectionEl) return;
+      
+      // Highlight matching text in the current section
+      highlightQueryText(activeSectionEl, query);
+    }
+
+    function clearHighlights() {
+      const highlights = document.querySelectorAll('mark.search-highlight');
+      highlights.forEach(highlight => {
+        const parent = highlight.parentNode;
+        parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+        parent.normalize(); // Merges adjacent text nodes
+      });
+    }
+
+    function highlightQueryText(element, query) {
+      clearHighlights();
+      if (!query) return;
+
+      const walkTextNodes = (node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          const lowerText = text.toLowerCase();
+          let index = lowerText.indexOf(query);
+          
+          if (index !== -1) {
+            const parent = node.parentNode;
+            
+            // Skip highlighting inside pre, code, buttons, or elements already highlighted
+            if (parent.tagName === 'PRE' || parent.tagName === 'CODE' || parent.tagName === 'BUTTON' || parent.tagName === 'SCRIPT' || parent.tagName === 'STYLE') {
+              return;
+            }
+            
+            const frag = document.createDocumentFragment();
+            let lastIdx = 0;
+            
+            while (index !== -1) {
+              // Add text before match
+              frag.appendChild(document.createTextNode(text.substring(lastIdx, index)));
+              
+              // Create highlight element
+              const mark = document.createElement('mark');
+              mark.className = 'search-highlight';
+              mark.style.backgroundColor = 'rgba(0, 242, 254, 0.3)';
+              mark.style.color = '#fff';
+              mark.style.borderRadius = '3px';
+              mark.style.padding = '0 2px';
+              mark.appendChild(document.createTextNode(text.substring(index, index + query.length)));
+              frag.appendChild(mark);
+              
+              lastIdx = index + query.length;
+              index = lowerText.indexOf(query, lastIdx);
+            }
+            
+            // Add remaining text
+            frag.appendChild(document.createTextNode(text.substring(lastIdx)));
+            parent.replaceChild(frag, node);
+          }
+        } else {
+          // Recurse child nodes
+          for (let i = 0; i < node.childNodes.length; i++) {
+            walkTextNodes(node.childNodes[i]);
+          }
+        }
+      };
+      
+      walkTextNodes(element);
+    }
+
+    function toggleMobileMenu() {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) sidebar.classList.toggle('open');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+      const sidebar = document.querySelector('.sidebar');
+      const toggle = document.querySelector('.menu-toggle');
+      
+      if (sidebar && toggle && !sidebar.contains(event.target) && !toggle.contains(event.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -107,7 +107,7 @@ body{background:var(--bg);color:var(--text-main);font-family:'Inter',sans-serif;
     <button class="mob-menu-btn" onclick="toggleSidebar()">☰</button>
     ⚛️ <span>React Master</span>
   </div>
-  <a href="index.html" class="back-hub">← Mastery Hub</a>
+  <a href="../index.html" class="back-hub">← Mastery Hub</a>
 </div>
 
 <div class="layout">
@@ -592,6 +592,291 @@ renderCount.current++; <span class="com">// Does not re-render</span>
 });`,
     output: "// Typing remains smooth while searchQuery renders in background",
     tip: "This relies entirely on the Fiber architecture's ability to yield execution back to the browser."
+  },
+
+  // ── 7. JAVASCRIPT POLYFILLS ──
+  {
+    id: 110,
+    title: "Promise Polyfill",
+    level: "advanced",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill implementation of Promise for understanding how promises work internally.",
+    expl: [
+      "Promises have three states: pending, fulfilled (resolved), rejected.",
+      "Once a promise transitions to fulfilled or rejected, it cannot change states.",
+      "Must support chaining with .then() and .catch().",
+      "Uses an internal callbacks queue to handle multiple handlers."
+    ],
+    code: `<span class="kw">function</span> <span class="fn">MyPromise</span>(executor) {
+  <span class="kw">this</span>.state = <span class="str">'pending'</span>;
+  <span class="kw">this</span>.value = <span class="kw">undefined</span>;
+  <span class="kw">this</span>.callbacks = [];
+
+  <span class="kw">const</span> <span class="fn">resolve</span> = (val) => {
+    <span class="kw">if</span> (<span class="kw">this</span>.state !== <span class="str">'pending'</span>) <span class="kw">return</span>;
+    <span class="kw">this</span>.state = <span class="str">'fulfilled'</span>;
+    <span class="kw">this</span>.value = val;
+    <span class="kw">this</span>.callbacks.<span class="fn">forEach</span>(cb => <span class="fn">cb</span>());
+  };
+
+  <span class="kw">const</span> <span class="fn">reject</span> = (reason) => {
+    <span class="kw">if</span> (<span class="kw">this</span>.state !== <span class="str">'pending'</span>) <span class="kw">return</span>;
+    <span class="kw">this</span>.state = <span class="str">'rejected'</span>;
+    <span class="kw">this</span>.value = reason;
+    <span class="kw">this</span>.callbacks.<span class="fn">forEach</span>(cb => <span class="fn">cb</span>());
+  };
+
+  <span class="kw">this</span>.<span class="fn">then</span> = (onResolve, onReject) => {
+    <span class="kw">return</span> <span class="kw">new</span> <span class="fn">MyPromise</span>((resolve, reject) => {
+      <span class="kw">const</span> <span class="fn">handle</span> = () => {
+        <span class="kw">if</span> (<span class="kw">this</span>.state === <span class="str">'fulfilled'</span>) {
+          <span class="kw">try</span> { resolve(onResolve ? onResolve(<span class="kw">this</span>.value) : <span class="kw">this</span>.value); }
+          <span class="kw">catch</span> (e) { reject(e); }
+        } <span class="kw">else</span> <span class="kw">if</span> (<span class="kw">this</span>.state === <span class="str">'rejected'</span>) {
+          <span class="kw">try</span> { resolve(onReject ? onReject(<span class="kw">this</span>.value) : <span class="kw">this</span>.value); }
+          <span class="kw">catch</span> (e) { reject(e); }
+        }
+      };
+      <span class="kw">this</span>.callbacks.<span class="fn">push</span>(handle);
+      <span class="kw">if</span> (<span class="kw">this</span>.state !== <span class="str">'pending'</span>) <span class="fn">handle</span>();
+    });
+  };
+
+  <span class="kw">try</span> {
+    <span class="fn">executor</span>(resolve, reject);
+  } <span class="kw">catch</span> (e) {
+    <span class="fn">reject</span>(e);
+  }
+}`,
+    output: "// MyPromise('pending') -> MyPromise('fulfilled')",
+    tip: "Real Promises use microtask queues, not macrotasks. Key difference: promises are checked before setTimeout."
+  },
+  {
+    id: 111,
+    title: "Promise.all Polyfill",
+    level: "advanced",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill for Promise.all that takes an array of promises and resolves when all complete.",
+    expl: [
+      "Returns an array of results in the same order as input promises.",
+      "If any promise rejects, the entire Promise.all rejects immediately.",
+      "Must handle non-promise values in the array (auto-wrap them)."
+    ],
+    code: `<span class="kw">Promise</span>.<span class="fn">myAll</span> = <span class="kw">function</span>(promises) {
+  <span class="kw">return</span> <span class="kw">new</span> <span class="fn">Promise</span>((resolve, reject) => {
+    <span class="kw">if</span> (promises.length === <span class="num">0</span>) <span class="fn">resolve</span>([]);
+    
+    <span class="kw">const</span> results = [];
+    <span class="kw">let</span> completed = <span class="num">0</span>;
+    
+    promises.<span class="fn">forEach</span>((p, i) => {
+      <span class="fn">Promise</span>.<span class="fn">resolve</span>(p).<span class="fn">then</span>(
+        val => {
+          results[i] = val;
+          <span class="kw">if</span> (++completed === promises.length) <span class="fn">resolve</span>(results);
+        },
+        err => <span class="fn">reject</span>(err)
+      );
+    });
+  });
+};
+
+<span class="com">// Usage:</span>
+<span class="fn">Promise</span>.<span class="fn">myAll</span>([<span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="num">1</span>), <span class="fn">Promise</span>.<span class="fn">resolve</span>(<span class="num">2</span>)]).<span class="fn">then</span>(results => <span class="fn">console</span>.<span class="fn">log</span>(results));`,
+    output: "// All promises must resolve for myAll to resolve",
+    tip: "Promise.all short-circuits on first rejection. Also note Promise.allSettled waits for all to settle regardless."
+  },
+  {
+    id: 112,
+    title: "Bind Polyfill",
+    level: "intermediate",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill for Function.prototype.bind that creates a new function with a fixed 'this' context.",
+    expl: [
+      "bind() does NOT execute the function immediately; it returns a new function.",
+      "The bound function can have preset arguments (partial application).",
+      "Even if called with a different 'this', the bound context wins.",
+      "Critical for event handlers and callbacks in React classes."
+    ],
+    code: `<span class="fn">Function</span>.prototype.<span class="fn">myBind</span> = <span class="kw">function</span>(context, ...args) {
+  <span class="kw">const</span> fn = <span class="kw">this</span>;
+  <span class="kw">return</span> <span class="kw">function</span>(...laterArgs) {
+    <span class="kw">return</span> fn.<span class="fn">apply</span>(context, [...args, ...laterArgs]);
+  };
+};
+
+<span class="kw">const</span> person = { name: <span class="str">'Alice'</span>, greet() { <span class="kw">return</span> <span class="str">'Hi '</span> + <span class="kw">this</span>.name; } };
+<span class="kw">const</span> sayHi = person.greet.<span class="fn">myBind</span>(person);`,
+    output: "// sayHi() returns 'Hi Alice' even if not called on person",
+    tip: "Arrow functions don't have their own 'this', so bind doesn't work on them. This is why => functions are preferred in React."
+  },
+  {
+    id: 113,
+    title: "Map Polyfill",
+    level: "intermediate",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill for Array.prototype.map that transforms each element using a callback.",
+    expl: [
+      "Creates a NEW array without mutating the original.",
+      "Callback receives (element, index, array).",
+      "Useful for JSX rendering: items.map(item => <Item key={item.id} />)."
+    ],
+    code: `<span class="fn">Array</span>.prototype.<span class="fn">myMap</span> = <span class="kw">function</span>(callback, thisArg) {
+  <span class="kw">const</span> result = [];
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="kw">this</span>.length; i++) {
+    result[i] = callback.<span class="fn">call</span>(thisArg, <span class="kw">this</span>[i], i, <span class="kw">this</span>);
+  }
+  <span class="kw">return</span> result;
+};
+
+<span class="kw">const</span> nums = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+<span class="kw">const</span> doubled = nums.<span class="fn">myMap</span>(x => x * <span class="num">2</span>);`,
+    output: "// doubled = [2, 4, 6]",
+    tip: "Always use map for rendering lists in React. It's pure and creates a new array."
+  },
+  {
+    id: 114,
+    title: "Filter Polyfill",
+    level: "intermediate",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill for Array.prototype.filter that returns a new array with elements matching a predicate.",
+    expl: [
+      "Only elements where callback returns true are included.",
+      "Does NOT mutate the original array.",
+      "Common in React: filtering state before rendering."
+    ],
+    code: `<span class="fn">Array</span>.prototype.<span class="fn">myFilter</span> = <span class="kw">function</span>(callback, thisArg) {
+  <span class="kw">const</span> result = [];
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="kw">this</span>.length; i++) {
+    <span class="kw">if</span> (callback.<span class="fn">call</span>(thisArg, <span class="kw">this</span>[i], i, <span class="kw">this</span>)) {
+      result.<span class="fn">push</span>(<span class="kw">this</span>[i]);
+    }
+  }
+  <span class="kw">return</span> result;
+};
+
+<span class="kw">const</span> evens = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>].<span class="fn">myFilter</span>(x => x % <span class="num">2</span> === <span class="num">0</span>);`,
+    output: "// evens = [2, 4]",
+    tip: "Avoid filter().map().filter() chains; use reduce or compose for better performance."
+  },
+  {
+    id: 115,
+    title: "Reduce Polyfill",
+    level: "intermediate",
+    category: "7. JavaScript Polyfills",
+    def: "A polyfill for Array.prototype.reduce that accumulates a value by applying a callback to each element.",
+    expl: [
+      "Callback receives (accumulator, currentValue, index, array).",
+      "Can have an optional initial value for the accumulator.",
+      "If no initial value, the first element becomes the accumulator.",
+      "Powerful for summarization, grouping, and complex transformations."
+    ],
+    code: `<span class="fn">Array</span>.prototype.<span class="fn">myReduce</span> = <span class="kw">function</span>(callback, initial) {
+  <span class="kw">if</span> (<span class="kw">this</span>.length === <span class="num">0</span> && initial === <span class="kw">undefined</span>) {
+    <span class="kw">throw</span> <span class="str">'Reduce empty array with no initial'</span>;
+  }
+  
+  <span class="kw">let</span> acc = initial;
+  <span class="kw">let</span> start = <span class="num">0</span>;
+  
+  <span class="kw">if</span> (initial === <span class="kw">undefined</span>) {
+    acc = <span class="kw">this</span>[<span class="num">0</span>];
+    start = <span class="num">1</span>;
+  }
+  
+  <span class="kw">for</span> (<span class="kw">let</span> i = start; i < <span class="kw">this</span>.length; i++) {
+    acc = callback(acc, <span class="kw">this</span>[i], i, <span class="kw">this</span>);
+  }
+  <span class="kw">return</span> acc;
+};
+
+<span class="kw">const</span> sum = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>].<span class="fn">myReduce</span>((a, b) => a + b, <span class="num">0</span>);
+<span class="kw">const</span> grouped = [<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="fn">myReduce</span>((acc, val) => ({...acc, [val]: val*<span class="num">2</span>}), {});`,
+    output: "// sum = 6",
+    tip: "Reduce is like the 'for loop' of functional programming. You can implement map/filter with reduce."
+  },
+  {
+    id: 116,
+    title: "Debounce Polyfill",
+    level: "advanced",
+    category: "7. JavaScript Polyfills",
+    def: "A utility that delays function execution until a certain time has passed without being called.",
+    expl: [
+      "Used for expensive operations triggered by frequent events (typing, resizing).",
+      "Each new call resets the timer.",
+      "Executes only AFTER the delay period with no new calls.",
+      "Common in search inputs, resize handlers."
+    ],
+    code: `<span class="kw">function</span> <span class="fn">debounce</span>(fn, delay) {
+  <span class="kw">let</span> timer;
+  <span class="kw">return</span> <span class="kw">function</span>(...args) {
+    <span class="fn">clearTimeout</span>(timer);
+    timer = <span class="fn">setTimeout</span>(() => fn.<span class="fn">apply</span>(<span class="kw">this</span>, args), delay);
+  };
+}
+
+<span class="kw">const</span> handleSearch = <span class="fn">debounce</span>((query) => {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Searching for '</span> + query);
+}, <span class="num">300</span>);`,
+    output: "// Only logs after 300ms of no calls",
+    tip: "In React, use debounce inside useCallback or with ref to avoid recreating the debounced function on every render."
+  },
+  {
+    id: 117,
+    title: "Throttle Polyfill",
+    level: "advanced",
+    category: "7. JavaScript Polyfills",
+    def: "A utility that ensures a function executes at most once per time interval.",
+    expl: [
+      "Useful for scroll, mousemove, and resize events (fire very frequently).",
+      "Unlike debounce, throttle fires at regular intervals.",
+      "First call executes immediately, then waits for the interval.",
+      "Can execute on leading/trailing edges or both."
+    ],
+    code: `<span class="kw">function</span> <span class="fn">throttle</span>(fn, interval) {
+  <span class="kw">let</span> lastCall = <span class="num">0</span>;
+  <span class="kw">return</span> <span class="kw">function</span>(...args) {
+    <span class="kw">const</span> now = <span class="fn">Date</span>.<span class="fn">now</span>();
+    <span class="kw">if</span> (now - lastCall >= interval) {
+      fn.<span class="fn">apply</span>(<span class="kw">this</span>, args);
+      lastCall = now;
+    }
+  };
+}
+
+<span class="kw">const</span> handleScroll = <span class="fn">throttle</span>(() => {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Scrolled'</span>);
+}, <span class="num">500</span>);`,
+    output: "// Logs at most every 500ms",
+    tip: "Debounce: waits for quiet. Throttle: executes at intervals. Use throttle for high-frequency events like scroll."
+  },
+  {
+    id: 118,
+    title: "Deep Clone Polyfill",
+    level: "advanced",
+    category: "7. JavaScript Polyfills",
+    def: "A utility to create a complete independent copy of an object or array, including nested structures.",
+    expl: [
+      "Shallow copy (spread operator) only copies the top level.",
+      "Deep clone recursively copies all nested objects and arrays.",
+      "Must handle circular references to avoid infinite loops.",
+      "Important for Redux/state management to ensure immutability."
+    ],
+    code: `<span class="kw">function</span> <span class="fn">deepClone</span>(obj, map = <span class="kw">new</span> <span class="fn">WeakMap</span>()) {
+  <span class="kw">if</span> (obj === <span class="kw">null</span> || <span class="kw">typeof</span> obj !== <span class="str">'object'</span>) <span class="kw">return</span> obj;
+  
+  <span class="kw">if</span> (map.<span class="fn">has</span>(obj)) <span class="kw">return</span> map.<span class="fn">get</span>(obj);
+  
+  <span class="kw">const</span> clone = <span class="fn">Array</span>.<span class="fn">isArray</span>(obj) ? [] : {};
+  map.<span class="fn">set</span>(obj, clone);
+  
+  <span class="kw">for</span> (<span class="kw">const</span> key <span class="op">in</span> obj) {
+    clone[key] = <span class="fn">deepClone</span>(obj[key], map);
+  }
+  <span class="kw">return</span> clone;
+}`,
+    output: "// Original and clone are completely independent",
+    tip: "For most React apps, using Immer library is better than manual deep cloning. It handles immutability automatically."
   }
 
 ];

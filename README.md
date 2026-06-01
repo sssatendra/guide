@@ -4,42 +4,42 @@ A curated collection of high-fidelity, senior-level engineering guides. Designed
 
 ## 📚 Comprehensive Learning Tracks
 
-### [JavaScript Core Mastery](javascript-mastery-guide.html)
+### [JavaScript Core Mastery](guide/javascript-mastery-guide.html)
 - **Level**: A to Z
 - **Focus**: Closures, Event Loop, Prototypes, Advanced Web APIs, ES6+.
 - **Modules**: 40
 
-### [Python Core Mastery](python-mastery-guide.html)
+### [Python Core Mastery](guide/python-mastery-guide.html)
 - **Level**: Fundamentals to Advanced
 - **Focus**: Syntax, Data Structures, Decorators, Generators, Memory Management.
 - **Modules**: 20
 
-### [Python Production Testing](python-testing-guide.html)
+### [Python Production Testing](guide/python-testing-guide.html)
 - **Level**: Expert
 - **Focus**: Pytest, Fixtures, Mocking, Async Testing, Coverage, Integration Strategies.
 - **Modules**: 20
 
-### [React & Next.js Mastery](react-nextjs-guide.html)
+### [React & Next.js Mastery](guide/react-nextjs-guide.html)
 - **Level**: Advanced
 - **Focus**: App Router, Server Components, SSR, State Management, Performance.
 - **Modules**: 35
 
-### [React Production Testing](react-testing-guide.html)
+### [React Production Testing](guide/react-testing-guide.html)
 - **Level**: Expert
 - **Focus**: Vitest, RTL, MSW, Behavior-Driven Testing, a11y.
 - **Modules**: 21
 
-### [System Design Architecture](system-design-45.html)
+### [System Design Architecture](guide/system-design-45.html)
 - **Level**: Senior+
 - **Focus**: Scalability, Availability, Consistency, Distributed Systems, Database Design.
 - **Modules**: 45
 
-### [System Design LLD & Concurrency](system-design-lld.html)
+### [System Design LLD & Concurrency](guide/system-design-lld.html)
 - **Level**: Senior+
 - **Focus**: Object-Oriented Design, Multithreading, Code Architectures, Low-Level Design.
 - **Modules**: 35
 
-### [GraphQL Full-Stack Mastery](graphql-mastery-guide.html)
+### [GraphQL Full-Stack Mastery](guide/graphql-mastery-guide.html)
 - **Level**: Full-Stack
 - **Focus**: Schema design, Apollo Server, Next.js integration, Production Security.
 - **Modules**: 31
@@ -50,23 +50,23 @@ A curated collection of high-fidelity, senior-level engineering guides. Designed
 
 *Master the hot seat with deeply technical answers and curated cheat sheets for senior roles.*
 
-### [JavaScript Interview Guide](javascript-interview-guide.html)
+### [JavaScript Interview Guide](interview-guide/javascript-interview-guide.html)
 - **Level**: Basic to Extreme
 - **Focus**: Hoisting, V8 Internal Optimizations, Custom Event Loop Implementations.
 
-### [Python Interview Guide](python-interview-guide.html)
+### [Python Interview Guide](interview-guide/python-interview-guide.html)
 - **Level**: Basic to Extreme
 - **Focus**: Decorators, Generators, the GIL, Memory Management Internals.
 
-### [React Interview Guide](react-interview-guide.html)
+### [React Interview Guide](interview-guide/react-interview-guide.html)
 - **Level**: Basic to Extreme
 - **Focus**: Reconciliation, Fiber, Concurrent Mode, React Server Components (RSC).
 
-### [Backend Interview Guide](backend-interview.html)
+### [Backend Interview Guide](interview-guide/backend-interview.html)
 - **Level**: Senior+
 - **Focus**: APIs, Database Internals, Scaling, Caching, and Real-World Reliability.
 
-### [Data Structures & Algorithms Guide](dsa-guide.html)
+### [Data Structures & Algorithms Guide](interview-guide/dsa-guide.html)
 - **Level**: All Levels
 - **Focus**: Top FAANG Questions, Pattern Recognition, Python & JavaScript Implementations.
 
